@@ -14,50 +14,47 @@
               <div class="bg-white dark:bg-gray-800 rounded-lg p-5">
                 <div class="flex items-center justify-between">
                     <!-- Step 1 -->
-                    <div class="flex-1 text-center">
+                    <a href="{{route('update-question-details',['id'=>request()->id])}}" class="flex-1 text-center">
                         <div class="relative flex flex-col items-center">
                             <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                                 1
                             </div>
                             <div class="text-primary mt-2">Question</div>
                         </div>
-                    </div>
+                    </a>
                     <!-- Divider -->
-                    <div class="w-[40px] h-[2px] bg-primary"></div>
+                    <div class="w-[40px] h-[2px] bg-gray-300"></div>
                     <!-- Step 2 -->
-                    <div class="flex-1 text-center">
+                    <a href="{{route('update-question-setting',['id'=>request()->id])}}" class="flex-1 text-center">
                         <div class="relative flex flex-col items-center">
-                            <div
-                                class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
                                 2
                             </div>
                             <div class="text-gray-400 mt-2">Settings</div>
                         </div>
-                    </div>
+                    </a>
                     <!-- Divider -->
                     <div class="w-[40px] h-[2px] bg-gray-300"></div>
                     <!-- Step 3 -->
-                    <div class="flex-1 text-center">
+                    <a href="{{route('update-question-solution',['id'=>request()->id])}}" class="flex-1 text-center">
                         <div class="relative flex flex-col items-center">
-                            <div
-                                class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500  flex items-center justify-center">
                                 3
                             </div>
                             <div class="text-gray-400 mt-2">Solution</div>
                         </div>
-                    </div>
+                    </a>
                     <!-- Divider -->
                     <div class="w-[40px] h-[2px] bg-gray-300"></div>
                     <!-- Step 4 -->
-                    <div class="flex-1 text-center">
+                    <a href="{{route('update-question-attachment',['id'=>request()->id])}}" class="flex-1 text-center">
                         <div class="relative flex flex-col items-center">
-                            <div
-                                class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
                                 4
                             </div>
                             <div class="text-gray-400 mt-2">Attachment</div>
                         </div>
-                    </div>
+                    </a>
                 </div>
               </div>
               <!-- End of Card -->
@@ -69,7 +66,7 @@
       
       <!-- MCQ Question Form -->
       <div class="p-[25px]">
-         <form action="{{route('save-emq-details')}}" method="POST" enctype="multipart/form-data">
+         <form action="{{route('update-emq-details',['id'=>$question->id])}}" method="POST" enctype="multipart/form-data">
             @csrf
             <!-- Common Skill Level -->
             <div class="mb-[30px]">
@@ -83,58 +80,110 @@
                 @endisset
                </select>
             </div>
-
+            @php $allQuestions = []; @endphp
+            @isset($question)
+                @php
+                    $allQuestions = json_decode($question->question,true);
+                @endphp
+            @endisset
             <div class="mb-[20px]">
                 <label for="question"
                     class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Question <span
                         class="text-red-500">*</span></label>
                 <textarea id="question" name="question[]" rows="2" required
                     class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary"
-                    placeholder="Enter the question. Wrap the word or phrase you want as a blank with ## (e.g., The capital of France is ##Paris##)."></textarea>
+                    placeholder="Enter the question. Wrap the word or phrase you want as a blank with ## (e.g., The capital of France is ##Paris##).">@if(isset($allQuestions[0])){{$allQuestions[0]}}@endif</textarea>
             </div>
 
             <!-- Common Options Container -->
+            @php $options = []; @endphp
             <div id="commonOptionsContainer" class="mb-[30px]">
-               <h3 class="mb-[10px] font-bold text-lg">Common MCQ Options</h3>
-               <div id="optionsContainer">
-                  <div class="optionItem mb-[20px]">
-                     <label for="option1" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 1 <span class="text-red-500">*</span></label>
-                     <textarea id="option1" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the first option"></textarea>
-                  </div>
+                <h3 class="mb-[10px] font-bold text-lg">Common MCQ Options</h3>
+            @if (isset($question) && isset($question->options))
+                    @php $options = json_decode($question->options,true); @endphp
+                    <div id="optionsContainer">  
+                        @foreach ($options as $key => $item)
+                            <div class="optionItem mb-[20px]">
+                                <label for="option{{$key+1}}" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option {{$key+1}} <span class="text-red-500">*</span></label>
+                                <textarea id="option1" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the option {{$key+1}}">{{$item}}</textarea>
+                                @if ($key > 1)
+                                    <button type="button" class="removeOption text-red-500 hover:text-red-700">Remove</button>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+            @else
+                <div id="optionsContainer">                  
+                    <div class="optionItem mb-[20px]">
+                        <label for="option1" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 1 <span class="text-red-500">*</span></label>
+                        <textarea id="option1" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the first option"></textarea>
+                    </div>
 
-                  <div class="optionItem mb-[20px]">
-                     <label for="option2" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 2 <span class="text-red-500">*</span></label>
-                     <textarea id="option2" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the second option"></textarea>
-                  </div>
-               </div>
-
-               <!-- Add More Options Button -->
-               <button type="button" id="addMoreOptions" class="px-[14px] text-sm text-white rounded-md bg-warning border-warning h-10 gap-[6px] transition-[0.3s]">Add More Options</button>
+                    <div class="optionItem mb-[20px]">
+                        <label for="option2" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 2 <span class="text-red-500">*</span></label>
+                        <textarea id="option2" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the second option"></textarea>
+                    </div>
+                </div>
+            @endif
+                <!-- Add More Options Button -->
+                <button type="button" id="addMoreOptions" class="px-[14px] text-sm text-white rounded-md bg-warning border-warning h-10 gap-[6px] transition-[0.3s]">Add More Options</button>
             </div>
 
             <!-- Questions Container -->
             <div id="questionsContainer">
                <!-- Single Question Block (Can be duplicated dynamically) -->
-               <div class="questionItem mb-[40px] border p-4 rounded-lg" id="question_1">
-                  <!-- Question Title -->
-                  <div class="mb-[20px]">
-                     <label for="questionTitle_1" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Question 1 <span class="text-red-500">*</span></label>
-                     <textarea id="questionTitle_1" name="question[]" rows="2" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the question..."></textarea>
-                  </div>
+               @if (isset($allQuestions) && isset($question->answer))
+                    @php 
+                        $answer = json_decode($question->answer,true);
+                        $totalOptions = count($options);
+                    @endphp
 
-                  <!-- Correct Answer for this question -->
-                  <div class="mb-[20px]">
-                     <label for="correctOption_1" class="answer_label block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Answer <span class="text-red-500">*</span></label>
-                     <select id="correctOption_1" name="answer[]" required class="question-select w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                        <option value="1">Option 1</option>
-                        <option value="2">Option 2</option>
-                     </select>
-                  </div>
+                    @foreach ($allQuestions as $key => $question)
+                        @if ($loop->index > 0)
+                            <div class="questionItem mb-[40px] border p-4 rounded-lg" id="question_{{$key}}">
+                                <!-- Question Title -->
+                                <div class="mb-[20px]">
+                                    <label for="questionTitle_{{$key}}" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Question {{$key}} <span class="text-red-500">*</span></label>
+                                    <textarea id="questionTitle_{{$key}}" name="question[]" rows="2" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the question...">{{$question}}</textarea>
+                                </div>
 
-                  <!-- Remove Question Button -->
-                  {{-- <button type="button" class="removeQuestion px-[14px] text-sm text-white rounded-md bg-danger border-danger h-10 gap-[6px] transition-[0.3s]">Remove Question</button> --}}
-               </div>
+                                <!-- Correct Answer for this question -->
+                                <div class="mb-[20px]">
+                                    <label for="correctOption_{{$key}}" class="answer_label block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Answer <span class="text-red-500">*</span></label>
+                                    <select id="correctOption_{{$key}}" name="answer[]" required class="question-select w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                                        @isset($totalOptions)
+                                            @for ($i = 1; $i <= $totalOptions; $i++)
+                                                <option value="{{$i}}" {{$answer[$key-1] == $i ? "selected" : ""}}>Option {{$i}}</option>
+                                            @endfor
+                                        @endisset
+                                    </select>
+                                </div>
+                                @if ($loop->index > 1)
+                                    <!-- Remove Question Button -->
+                                    <button type="button" class="removeQuestion px-[14px] text-sm text-white rounded-md bg-danger border-danger h-10 gap-[6px] transition-[0.3s]">Remove Question</button>
+                                @endif
+                            </div>
+                        @endif                        
+                    @endforeach
                <!-- End of Single Question Block -->
+               @else
+                    <div class="questionItem mb-[40px] border p-4 rounded-lg" id="question_1">
+                        <!-- Question Title -->
+                        <div class="mb-[20px]">
+                            <label for="questionTitle_1" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Question 1 <span class="text-red-500">*</span></label>
+                            <textarea id="questionTitle_1" name="question[]" rows="2" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the question..."></textarea>
+                        </div>
+        
+                        <!-- Correct Answer for this question -->
+                        <div class="mb-[20px]">
+                            <label for="correctOption_1" class="answer_label block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Answer <span class="text-red-500">*</span></label>
+                            <select id="correctOption_1" name="answer[]" required class="question-select w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                            </select>
+                        </div>
+                    </div>
+               @endif
             </div>
 
             <!-- Add More Questions Button -->
@@ -153,7 +202,6 @@
          </form>
       </div>
    </div>
-
 </section>
 
 @endsection

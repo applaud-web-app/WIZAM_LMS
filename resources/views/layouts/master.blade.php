@@ -739,7 +739,7 @@
 
             <div class="flex items-center ms-auto py-[15px] sm:gap-x-[25px] max-sm:gap-x-[15px] gap-y-[15px] relative">
 
-               <div class="relative">
+               {{-- <div class="relative">
                   <button type="button" class="transition-all theme-dropdown-trigger text-[20px] text-light dark:text-subtitle-dark [&.close>.uil-search]:hidden [&.close>.uil-multiply]:block">
                      <i class="uil uil-search "></i>
                      <i class="hidden uil uil-multiply "></i>
@@ -749,9 +749,9 @@
 
                <button type="button" class="flex xl:hidden items-center text-[22px] text-[#a0a0a0] dark:text-subtitle-dark min-h-[40px]" id="author-dropdown">
                   <i class="uil uil-ellipsis-v text-[18px]"></i>
-               </button>
+               </button> --}}
                <ul id="right-ellipsis-trigger" class="xl:flex hidden items-center justify-end flex-auto mb-0 list-none ps-0 sm:gap-x-[25px] max-sm:gap-x-[15px] gap-y-[15px] max-xl:absolute max-xl:z-[1000] max-xl:m-0 max-xl:rounded-lg max-xl:border-none max-xl:bg-white max-xl:bg-clip-padding max-xl:text-left max-xl:shadow-lg max-xl:dark:bg-neutral-700 max-xl:[&.active]:flex max-xl:end-0 max-xl:px-[20px] max-sm:px-[15px] max-xl:py-[10px] max-xl:top-[70px]">
-                  <li>
+                  {{-- <li>
 
                      <div class="relative" data-te-dropdown-ref>
                         <button id="message" data-te-dropdown-toggle-ref aria-expanded="false" type="button" class="flex items-center text-[22px] text-[#a0a0a0] dark:text-subtitle-dark relative min-h-[40px] group">
@@ -1169,14 +1169,14 @@
                         </div>
                      </div>
 
-                  </li>
+                  </li> --}}
                   <li>
 
                      <div class="relative" data-te-dropdown-ref>
                         <button type="button" id="author-dropdown" data-te-dropdown-toggle-ref aria-expanded="false" class="flex items-center me-1.5 text-body dark:text-subtitle-dark text-sm font-medium capitalize rounded-full md:me-0 group whitespace-nowrap">
                            <span class="sr-only">Open user menu</span>
                            <img class="min-w-[32px] w-8 h-8 rounded-full xl:me-2" src="{{asset('assets/images/avatars/thumbs.png')}}" alt="user photo">
-                           <span class="hidden xl:block">Shamim Ahmed</span>
+                           <span class="hidden xl:block">Admin</span>
                            <i class="uil uil-angle-down text-light dark:text-subtitle-dark text-[18px] hidden xl:block"></i>
                         </button>
 
@@ -1186,8 +1186,8 @@
                               <figure class="flex items-center text-sm rounded-[8px] bg-section dark:bg-box-dark-up py-[20px] px-[25px] mb-[12px] gap-[15px]">
                                  <img class="w-8 h-8 rounded-full bg-regular" src="{{asset('assets/images/avatars/thumbs.png')}}" alt="user">
                                  <figcaption>
-                                    <div class="text-dark dark:text-title-dark mb-0.5 text-sm">Shamim Ahmed</div>
-                                    <div class="mb-0 text-xs text-body dark:text-subtitle-dark">Software Engineer</div>
+                                    <div class="text-dark dark:text-title-dark mb-0.5 text-sm">Admin</div>
+                                    <div class="mb-0 text-xs text-body dark:text-subtitle-dark">Admin</div>
                                  </figcaption>
                               </figure>
                               <ul class="m-0 pb-[10px] overflow-x-hidden overflow-y-auto scrollbar bg-transparent max-h-[230px]">
@@ -1204,7 +1204,7 @@
                                     <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
                                        <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
                                           <i class="text-[16px] uil uil-setting"></i>
-                                          Settings
+                                          Site Settings
                                        </button>
                                     </div>
                                  </li>
@@ -1220,7 +1220,7 @@
                                     <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
                                        <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
                                           <i class="text-[16px] uil uil-users-alt"></i>
-                                          Activity
+                                          Payment
                                        </button>
                                     </div>
                                  </li>
@@ -1228,7 +1228,7 @@
                                     <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
                                        <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
                                           <i class="text-[16px] uil uil-bell"></i>
-                                          Help
+                                          Maintanace Mode
                                        </button>
                                     </div>
                                  </li>

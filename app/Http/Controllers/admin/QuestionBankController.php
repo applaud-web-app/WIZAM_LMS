@@ -31,11 +31,16 @@ class QuestionBankController extends Controller
                     $deleteUrl = encrypturl(route('delete-question'),$parms);
 
                     return '
-                        <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></a>
-                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                        <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
+                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
                 })
                 ->addColumn('question', function($row) {
-                    return $row->question;
+                    if($row->type == "EMQ"){
+                        $allQuestion = json_decode($row->question,true);
+                        return $allQuestion[0];
+                    }else{
+                        return $row->question;
+                    }
                 })
                 ->addColumn('type', function($row) {
                     return $row->type;
@@ -272,10 +277,50 @@ class QuestionBankController extends Controller
     // EXTENDED MUTIPLE QUESTION
     public function saveEmqDetails(Request $request){
         $request->validate([
-            
+            'skill' => 'required',
+            'question' => 'required',
+            'option' => 'required',
+            'answer' => 'required'
         ]);
+
+        try {
+            $question = Question::create([
+                'question' => json_encode($request->question),
+                'options' => json_encode($request->option),
+                'answer' => json_encode($request->answer),
+                'type' => "EMQ",
+                'skill_id' => $request->skill,
+                'status' => 1,
+            ]);
+            return redirect()->route('update-question-setting', ['id' => $question->id])->with('success', 'Details Added Successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
 
+    public function updateEmqDetails(Request $request, $id){
+        $request->validate([
+            'skill' => 'required',
+            'question' => 'required',
+            'option' => 'required',
+            'answer' => 'required'
+        ]);
+
+        try {
+            $question = Question::where('id',$id)->first();
+            if($question){
+                $question->question = json_encode($request->question);
+                $question->options = json_encode($request->option);
+                $question->answer = json_encode($request->answer);
+                $question->skill_id = $request->skill;
+                $question->save();
+                return redirect()->route('update-question-setting', ['id' => $question->id])->with('success', 'Details Updated Successfully');
+            }
+            return redirect()->back()->with('error', 'Something went wrong');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
+    }
 
     // END EXTENDED MUTIPLE QUESTION
 
@@ -494,6 +539,22 @@ class QuestionBankController extends Controller
             return view('questionBank.questionType.msa.setting',compact('skill','question','topic'));
         } 
         return redirect()->back()->with('error', 'Something went wrong!');
+    }
+
+    public function deleteQuestion(Request $request){
+        $request->validate([
+            'eq'=>'required'
+        ]);
+
+        $data = decrypturl($request->eq);
+        $compiId = $data['id'];
+        $user = Question::where('id',$compiId)->first();
+        if($user){
+            $user->status = 2; // Delete
+            $user->save();
+            return redirect()->back()->with('success','Question Removed Successfully');
+        }
+        return redirect()->back()->with('error','Something Went Wrong');
     }
 
     public function saveQuestionDetails(Request $request, $id){
