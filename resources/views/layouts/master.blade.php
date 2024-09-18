@@ -39,10 +39,10 @@
          <a href="index.html" class="block text-center">
             <div class="logo-full">
                <img class="ps-[27px] w-auto h-[64px] object-contain dark:hidden" src="{{asset('assets/images/logos/logo-dark.png')}}" alt="Logo">
-               <img class="ps-[27px] w-auto h-[64px] object-contain hidden dark:block" src="{{asset('assets/images/logos/logo-white.png')}}" alt="Logo">
+               <img class="ps-[27px] w-auto h-[64px] object-contain hidden dark:block" src="{{asset('assets/images/logos/logo-dark.png')}}" alt="Logo">
             </div>
             <div class="hidden logo-fold">
-               <img class="p-[27px] max-w-[80px]" src="{{asset('assets/images/logos/logo-fold.png')}}" alt="Logo">
+               <img class="p-[27px] max-w-[80px]" src="{{asset('assets/images/logos/logo-dark.png')}}" alt="Logo">
             </div>
          </a>
       </div>
