@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Route;
 // });
 
 // PUBLIC ROUTES
+Route::get('/', [LoginController::class, 'login'])->name('admin-login');
 Route::prefix('admin')->group(function(){
-    Route::get('/', [LoginController::class, 'login'])->name('admin-login');
     Route::get('login', [LoginController::class, 'login'])->name('admin-login');
     Route::post('verify-user', [LoginController::class, 'verifyUser'])->name('verify-user');
     Route::get('forgot-password', [LoginController::class, 'forgotPassword'])->name('forgot-password');
