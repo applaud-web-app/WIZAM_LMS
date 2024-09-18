@@ -13,13 +13,13 @@ use App\Http\Controllers\admin\QuestionBankController;
 use Illuminate\Support\Facades\Route;
 
 // FRONTEND 
-Route::get('/',function(){
-    $login = route('admin-login');
-    return "SITE HOME PAGE <a href='".$login."'>Login</a>";
-});
+// Route::get('/',function(){
+//     return "SITE HOME PAGE <a href='".$login."'>Login</a>";
+// });
 
 // PUBLIC ROUTES
 Route::prefix('admin')->group(function(){
+    Route::get('/', [LoginController::class, 'login'])->name('admin-login');
     Route::get('login', [LoginController::class, 'login'])->name('admin-login');
     Route::post('verify-user', [LoginController::class, 'verifyUser'])->name('verify-user');
     Route::get('forgot-password', [LoginController::class, 'forgotPassword'])->name('forgot-password');
@@ -136,6 +136,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         // FOR PAYMENT-DETAIL
         Route::get('/payment-settings', 'paymentSettings')->name('payment-settings');
 
+        // FOR HOME PAGE
         Route::get('/home-settings', 'homeSetting')->name('home-settings');
     });
 
