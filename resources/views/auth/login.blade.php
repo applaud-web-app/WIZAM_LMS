@@ -59,7 +59,7 @@
                      @csrf
                      <!-- Email Address input -->
                      <div class="mb-5">
-                        <label for="email" class="text-[14px] w-full leading-[1.4285714286] font-medium text-dark dark:text-gray-300 mb-[8px] capitalize inline-block">Email / Username <span class="text-danger">*</span></label>
+                        <label for="email" class="text-[14px] w-full leading-[1.4285714286] font-medium text-dark dark:text-gray-300 mb-[8px] capitalize inline-block">Email <span class="text-danger">*</span></label>
                         <input type="email" id="email" class="flex items-center shadow-none py-[10px] px-[20px] h-[48px] border-1 border-regular rounded-4 w-full text-[14px] font-normal leading-[1.5] placeholder:text-[#A0A0A0] focus:ring-primary focus:border-primary" placeholder="Username or example@example.com" autocomplete="off" value="" name="email" required>
                         @error('email')<span class="text-danger">{{ $message }}</span> @enderror
                      </div>
