@@ -103,8 +103,8 @@
             <div class="mb-[20px]">
                <label for="correct" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Correct Answer <span class="text-red-500">*</span></label>
                <select id="correct" name="answer" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                  <option value="option1">Option 1</option>
-                  <option value="option2">Option 2</option>
+                  <option value="1">Option 1</option>
+                  <option value="2">Option 2</option>
                </select>
             </div>
 

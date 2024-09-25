@@ -106,4 +106,29 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Email settings updated successfully.');
     }
 
+    // PAYMENT SETTING
+    public function paymentSettings(Request $request){
+        // 
+    }
+
+    // BILLING & TAX SETTING
+    public function billingTaxSetting(Request $request){
+        // 
+    }
+
+    // MAINTANACE SETTING
+    public function maintenanceSetting(Request $request){
+        // 
+    }
+
+    // TERM & CONDITION
+    public function termCondition(Request $request){
+        // 
+    }
+
+    // PRIVACY POLICY
+    public function privacyPolicy(Request $request){
+        // 
+    }
+
 }

@@ -626,7 +626,6 @@ class QuestionBankController extends Controller
 
     public function saveQuestionSolution(Request $request, $id)
     {
-        // dd($request->all());
         try {
             $type = null;
             $source = null;
@@ -652,7 +651,7 @@ class QuestionBankController extends Controller
                 ]
             );
 
-            return redirect()->route('update-question-attachment', ['id' => $solution->id])->with('success', 'Question Solution Updated Successfully');
+            return redirect()->route('update-question-attachment', ['id' => $id])->with('success', 'Question Solution Updated Successfully');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Something went wrong: '.$th->getMessage());
         }

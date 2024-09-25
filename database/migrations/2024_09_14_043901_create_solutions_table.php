@@ -20,12 +20,15 @@ return new class extends Migration
             $table->string('video_source')->nullable(); 
             $table->longText('hint')->nullable(); 
             $table->string('attachment_type')->nullable();
+            $table->string('attachment_video_type')->nullable();
             $table->string('attachment_source')->nullable();
             $table->timestamps();
+
+            // Define foreign key constraints
+            $table->foreign('question_id')->references('id')->on('questions'); // Reference to skills table
         });
 
-        // Define foreign key constraints
-        $table->foreign('question_id')->references('id')->on('questions'); // Reference to skills table
+        
     }
 
     /**

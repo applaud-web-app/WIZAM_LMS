@@ -13,7 +13,7 @@
                  <!-- Breadcrumb Section -->
                  <div class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-center items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
                     <!-- Title -->
-                    <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">home page</h4>
+                    <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">Dashboard</h4>
                     <!-- Breadcrumb Navigation -->
                     <div class="flex flex-wrap justify-center">
                        <nav>
@@ -37,9 +37,9 @@
               </div>
            </div>
            <div class="grid grid-cols-12 gap-[25px]">
-              <div class="col-span-12 2xl:col-span-6">
+              <div class="col-span-12 2xl:col-span-12">
                  <div class="grid grid-cols-12 gap-[25px]">
-                    <div class="col-span-12 xl:col-span-6 lg:col-span-3 sm:col-span-6">
+                    <div class="col-span-12 xl:col-span-4 lg:col-span-3 sm:col-span-6">
                        <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
                           <div class="flex justify-between">
                              <div class="bg-primary/10 flex h-[58px] items-center justify-center rounded-2xl text-primary w-[58px] order-2">
@@ -58,21 +58,12 @@
 
                                    </span>
                                 </h4>
-                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Products</span>
+                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Users</span>
                              </div>
-                          </div>
-                          <div class="mt-3">
-                             <span class="inline-flex items-center w-full py-[12px] bg-normalBG dark:bg-box-dark-up px-2.5 rounded-lg gap-x-[10px] gap-y-[5px] flex-wrap">
-
-                                <span class="flex font-medium gap-[2px] items-center text-sm text-success">
-                                   <i class="uil uil-arrow-up text-[18px]"></i> 25.36% </span>
-                                <span class="text-sm text-light dark:text-subtitle-dark">Since last month</span>
-
-                             </span>
                           </div>
                        </div>
                     </div>
-                    <div class="col-span-12 xl:col-span-6 lg:col-span-3 sm:col-span-6">
+                    <div class="col-span-12 xl:col-span-4 lg:col-span-3 sm:col-span-6">
                        <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
                           <div class="flex justify-between">
                              <div class="bg-info/10 flex h-[58px] items-center justify-center rounded-2xl text-info w-[58px] order-2">
@@ -85,59 +76,18 @@
                                    <span class="flex items-center countCategories" data-number="125">
 
 
+                                       <span>$</span>
                                       <span class="countNumber">125</span>
 
 
                                    </span>
                                 </h4>
-                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Orders</span>
+                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Revenue</span>
                              </div>
-                          </div>
-                          <div class="mt-3">
-                             <span class="inline-flex items-center w-full py-[12px] bg-normalBG dark:bg-box-dark-up px-2.5 rounded-lg gap-x-[10px] gap-y-[5px] flex-wrap">
-
-                                <span class="flex font-medium gap-[2px] items-center text-sm text-success">
-                                   <i class="uil uil-arrow-up text-[18px]"></i> 9.36% </span>
-                                <span class="text-sm text-light dark:text-subtitle-dark">Since last month</span>
-
-                             </span>
                           </div>
                        </div>
                     </div>
-                    <div class="col-span-12 xl:col-span-6 lg:col-span-3 sm:col-span-6">
-                       <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
-                          <div class="flex justify-between">
-                             <div class="bg-secondary/10 flex h-[58px] items-center justify-center rounded-2xl text-secondary w-[58px] order-2">
-                                <div class="flex items-center text-secondary text-[30px]">
-                                   <i class="uil uil-usd-circle"></i>
-                                </div>
-                             </div>
-                             <div>
-                                <h4 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
-                                   <span class="flex items-center countCategories" data-number="854">
-
-                                      <span>$</span>
-
-                                      <span class="countNumber">854</span>
-
-
-                                   </span>
-                                </h4>
-                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Sales</span>
-                             </div>
-                          </div>
-                          <div class="mt-3">
-                             <span class="inline-flex items-center w-full py-[12px] bg-normalBG dark:bg-box-dark-up px-2.5 rounded-lg gap-x-[10px] gap-y-[5px] flex-wrap">
-
-                                <span class="flex font-medium gap-[2px] items-center text-sm text-danger">
-                                   <i class="uil uil-arrow-down text-[18px]"></i> 5.36% </span>
-                                <span class="text-sm text-light dark:text-subtitle-dark">Since last month</span>
-
-                             </span>
-                          </div>
-                       </div>
-                    </div>
-                    <div class="col-span-12 xl:col-span-6 lg:col-span-3 sm:col-span-6">
+                    <div class="col-span-12 xl:col-span-4 lg:col-span-3 sm:col-span-6">
                        <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
                           <div class="flex justify-between">
                              <div class="bg-warning/10 flex h-[58px] items-center justify-center rounded-2xl text-warning w-[58px] order-2">
@@ -149,85 +99,68 @@
                                 <h4 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
                                    <span class="flex items-center countCategories" data-number="1211">
 
-
                                       <span class="countNumber">1211</span>
 
                                       <span>+</span>
 
                                    </span>
                                 </h4>
-                                <span class="font-normal text-body dark:text-subtitle-dark text-15">New Customers</span>
+                                <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Question</span>
                              </div>
                           </div>
-                          <div class="mt-3">
-                             <span class="inline-flex items-center w-full py-[12px] bg-normalBG dark:bg-box-dark-up px-2.5 rounded-lg gap-x-[10px] gap-y-[5px] flex-wrap">
-
-                                <span class="flex font-medium gap-[2px] items-center text-sm text-success">
-                                   <i class="uil uil-arrow-up text-[18px]"></i> 9.36% </span>
-                                <span class="text-sm text-light dark:text-subtitle-dark">Since last month</span>
-
-                             </span>
-                          </div>
                        </div>
                     </div>
+                    <div class="col-span-12 xl:col-span-4 lg:col-span-3 sm:col-span-6">
+                     <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
+                        <div class="flex justify-between">
+                           <div class="bg-secondary/10 flex h-[58px] items-center justify-center rounded-2xl text-secondary w-[58px] order-2">
+                              <div class="flex items-center text-secondary text-[30px]">
+                                 <i class="uil uil-usd-circle"></i>
+                              </div>
+                           </div>
+                           <div>
+                              <h4 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
+                                 <span class="flex items-center countCategories" data-number="854">
+
+                                   
+
+                                    <span class="countNumber">854</span>
+
+
+                                 </span>
+                              </h4>
+                              <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Quizzes</span>
+                           </div>
+                        </div>
+                     </div>
+                     </div>
+                     <div class="col-span-12 xl:col-span-4 lg:col-span-3 sm:col-span-6">
+                        <div class="p-[25px] bg-white dark:bg-box-dark rounded-10 relative text-[15px] text-body dark:text-subtitle-dark leading-6">
+                           <div class="flex justify-between">
+                              <div class="bg-warning/10 flex h-[58px] items-center justify-center rounded-2xl text-warning w-[58px] order-2">
+                                 <div class="flex items-center text-warning text-[30px]">
+                                    <i class="uil uil-users-alt"></i>
+                                 </div>
+                              </div>
+                              <div>
+                                 <h4 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
+                                    <span class="flex items-center countCategories" data-number="1211">
+
+
+                                       <span class="countNumber">1211</span>
+
+                                       <span>+</span>
+
+                                    </span>
+                                 </h4>
+                                 <span class="font-normal text-body dark:text-subtitle-dark text-15">Total Practice Sets</span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                  </div>
               </div>
-              <div class="col-span-12 2xl:col-span-6">
-
-                 <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
-                    <div class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto max-sm:mb-[15px]">
-                       <h2 class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                          Sales Report
-                       </h2>
-                       <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center " data-te-dropdown-ref>
-                          <button class="text-[18px] text-light dark:text-subtitle-dark" type="button" id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
-                             <i class="uil uil-ellipsis-h"></i>
-                          </button>
-                          <ul class="absolute z-[1000] ltr:float-left rtl:float-right m-0 hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100" aria-labelledby="salesReport" data-te-dropdown-menu-ref>
-                             <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up gap-[6px]" href="#" data-te-dropdown-item-ref>
-                                   <i class="uil uil-print"></i> printer </a>
-                             </li>
-                             <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up" href="#" data-te-dropdown-item-ref>
-                                   <i class="uil uil-book-alt"></i> pdf </a>
-                             </li>
-                             <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up" href="#" data-te-dropdown-item-ref>
-                                   <i class="uil uil-file-info-alt"></i> google sheet </a>
-                             </li>
-                             <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up" href="#" data-te-dropdown-item-ref>
-                                   <i class="uil uil-multiply"></i> Excel (XLSX) </a>
-                             </li>
-                             <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up" href="#" data-te-dropdown-item-ref>
-                                   <i class="uil uil-file"></i> CSV </a>
-                             </li>
-                          </ul>
-                       </div>
-                    </div>
-                    <div class="p-[25px] pt-0">
-                       <div class="flex items-center justify-center max-ssm:flex-col flex-wrap max-ssm:gap-y-[15px]">
-                          <div class="relative flex items-center mx-3">
-                             <span class="flex items-center text-sm ps-3 text-body dark:text-subtitle-dark before:absolute before:bg-primary before:w-2 before:h-2 before:rounded-full ltr:before:left-0 rtl:before:right-0 before:top-1/2 before:-translate-y-2/4">Orders</span>
-                             <span class="inline-block text-dark dark:text-title-dark me-1 ms-2.5 text-22 font-semibold">$8,550</span><span class="flex items-center text-sm font-medium text-success"><i class="uil uil-arrow-up text-[18px]"></i> 25%
-                             </span>
-                          </div>
-                          <div class="relative flex items-center mx-3">
-                             <span class="flex items-center text-sm ps-3 text-body dark:text-subtitle-dark before:absolute before:bg-info before:w-2 before:h-2 before:rounded-full ltr:before:left-0 rtl:before:right-0 before:top-1/2 before:-translate-y-2/4">Sales</span>
-                             <span class="inline-block text-dark dark:text-title-dark me-1 ms-2.5 text-22 font-semibold">$5,550</span><span class="flex items-center text-sm font-medium text-danger"><i class="uil uil-arrow-down text-[18px]"></i>15%
-                             </span>
-                          </div>
-                       </div>
-                       <div dir="ltr" class="salesReport">
-                       </div>
-                    </div>
-
-                 </div>
-
-              </div>
-              <div class="col-span-12 2xl:col-span-4">
+              {{-- <div class="col-span-12 2xl:col-span-4">
 
                  <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
                     <div class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto max-sm:mb-[15px]">
@@ -670,21 +603,21 @@
 
                  </div>
 
-              </div>
+              </div> --}}
               <div class="col-span-12 2xl:col-span-6">
 
                  <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
                     <div class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto max-sm:mb-[15px]">
                        <h2 class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark  capitalize">
-                          Top Selling Products
+                          New Users
                        </h2>
                        <ul class="py-[16px] max-ssm:py-[10px] flex items-center max-xs:flex-wrap max-xs:justify-center" role="tablist" data-te-nav-ref>
                           <li role="presentation">
                              <a data-te-toggle="pill" data-te-target="#tsp-today" data-te-nav-active role="tab" aria-controls="tsp-today" aria-selected="true" href="#tsp-today" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
-                                today
+                                Monthly
                              </a>
                           </li>
-                          <li role="presentation">
+                          {{-- <li role="presentation">
                              <a href="#tsp-week" data-te-toggle="pill" data-te-target="#tsp-week" role="tab" aria-controls="tsp-week" aria-selected="false" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
                                 Week
                              </a>
@@ -693,7 +626,7 @@
                              <a href="#tsp-month" data-te-toggle="pill" data-te-target="#tsp-month" role="tab" aria-controls="tsp-month" aria-selected="false" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
                                 Month
                              </a>
-                          </li>
+                          </li> --}}
                        </ul>
                     </div>
                     <div class="p-[25px] pt-0">
@@ -703,13 +636,13 @@
                                 <thead>
                                    <tr class="whitespace-nowrap">
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-start text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden rounded-s-[4px]">
-                                         PRODUCTS NAME</th>
+                                         USER NAME</th>
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden">
-                                         PRICE</th>
+                                         ROLE</th>
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden">
-                                         SOLD</th>
+                                         COUNTRY</th>
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-end text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden rounded-e-[4px]">
-                                         REVENUE</th>
+                                         STATUS</th>
                                    </tr>
                                 </thead>
                                 <tbody>
@@ -788,7 +721,7 @@
                                 </tbody>
                              </table>
                           </div>
-                          <div id="tsp-week" role="tabpanel" class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block">
+                          {{-- <div id="tsp-week" role="tabpanel" class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block">
                              <table class="min-w-full text-sm font-light text-left whitespace-nowrap">
                                 <thead>
                                    <tr class="whitespace-nowrap">
@@ -968,7 +901,7 @@
                                    </tr>
                                 </tbody>
                              </table>
-                          </div>
+                          </div> --}}
                        </div>
                     </div>
 
@@ -980,15 +913,15 @@
                  <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
                     <div class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto max-sm:mb-[15px]">
                        <h2 class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                          Browser States
+                          Recently Added Quizzes
                        </h2>
                        <ul class="py-[16px] max-ssm:py-[10px] flex items-center max-xs:flex-wrap max-xs:justify-center" role="tablist" data-te-nav-ref>
                           <li role="presentation">
                              <a data-te-toggle="pill" data-te-target="#bs-today" data-te-nav-active role="tab" aria-controls="bs-today" aria-selected="true" href="#bs-today" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
-                                today
+                                Monthly
                              </a>
                           </li>
-                          <li role="presentation">
+                          {{-- <li role="presentation">
                              <a href="#bs-week" data-te-toggle="pill" data-te-target="#bs-week" role="tab" aria-controls="bs-week" aria-selected="false" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
                                 Week
                              </a>
@@ -997,7 +930,7 @@
                              <a href="#bs-month" data-te-toggle="pill" data-te-target="#bs-month" role="tab" aria-controls="bs-month" aria-selected="false" class="inline-flex items-center h-8 px-3 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary text-light data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary data-[te-nav-active]:bg-primary/10 dark:data-[te-nav-active]:text-title-dark dark:data-[te-nav-active]:bg-box-dark-up">
                                 Month
                              </a>
-                          </li>
+                          </li> --}}
                        </ul>
                     </div>
                     <div class="p-[25px] pt-0">
@@ -1007,15 +940,11 @@
                                 <thead>
                                    <tr class="whitespace-nowrap">
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-start text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden rounded-s-[4px]">
-                                         BROWSERS</th>
+                                         TITLE</th>
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden">
-                                         SESSION</th>
+                                         TYPE</th>
                                       <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden">
-                                         BOUNCE RATE</th>
-                                      <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden">
-                                         CTE</th>
-                                      <th class="bg-regularBG dark:bg-box-dark-up px-4 py-2.5 text-end text-light dark:text-title-dark text-[12px] font-medium border-none before:hidden rounded-e-[4px]">
-                                         GOAL CONV. RATE</th>
+                                         Visibility</th>
                                    </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-box-dark">
@@ -1030,10 +959,6 @@
                                          92,345</td>
                                       <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
                                          5.5%</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         12025</td>
-                                      <td class="ps-4 pe-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent rounded-e-[4px]">
-                                         90%</td>
                                    </tr>
                                    <tr class="group">
                                       <td class="ps-0 pe-4 py-2.5 text-start last:text-end text-dark dark:text-title-dark group-hover:bg-transparent text-15 font-medium border-none before:hidden rounded-s-[4px]">
@@ -1046,10 +971,6 @@
                                          92,345</td>
                                       <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
                                          1.5%</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         12025</td>
-                                      <td class="ps-4 pe-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent rounded-e-[4px]">
-                                         90%</td>
                                    </tr>
                                    <tr class="group">
                                       <td class="ps-0 pe-4 py-2.5 text-start last:text-end text-dark dark:text-title-dark group-hover:bg-transparent text-15 font-medium border-none before:hidden rounded-s-[4px]">
@@ -1063,10 +984,6 @@
                                          92,345</td>
                                       <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
                                          5.5%</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         12025</td>
-                                      <td class="ps-4 pe-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent rounded-e-[4px]">
-                                         90%</td>
                                    </tr>
                                    <tr class="group">
                                       <td class="ps-0 pe-4 py-2.5 text-start last:text-end text-dark dark:text-title-dark group-hover:bg-transparent text-15 font-medium border-none before:hidden rounded-s-[4px]">
@@ -1075,10 +992,6 @@
                                                Chrome</span>
                                          </div>
                                       </td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         92,345</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         0.5%</td>
                                       <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
                                          12025</td>
                                       <td class="ps-4 pe-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent rounded-e-[4px]">
@@ -1092,10 +1005,6 @@
                                          </div>
                                       </td>
                                       <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         92,345</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
-                                         8.5%</td>
-                                      <td class="px-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent">
                                          12025</td>
                                       <td class="ps-4 pe-4 py-2.5 font-normal last:text-end capitalize text-[14px] text-dark dark:text-title-dark border-none group-hover:bg-transparent rounded-e-[4px]">
                                          90%</td>
@@ -1103,7 +1012,7 @@
                                 </tbody>
                              </table>
                           </div>
-                          <div id="bs-week" role="tabpanel" class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block">
+                          {{-- <div id="bs-week" role="tabpanel" class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block">
                              <table class="min-w-full text-sm font-light text-left whitespace-nowrap">
                                 <thead>
                                    <tr class="whitespace-nowrap">
@@ -1305,7 +1214,7 @@
                                    </tr>
                                 </tbody>
                              </table>
-                          </div>
+                          </div> --}}
                        </div>
                     </div>
 

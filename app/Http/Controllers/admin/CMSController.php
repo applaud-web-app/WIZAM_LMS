@@ -9,6 +9,7 @@ use App\Models\Faq;
 use App\Models\Blog;
 use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Pages;
 
 class CMSController extends Controller
 {
@@ -336,6 +337,160 @@ class CMSController extends Controller
             $user->status = 2; // Delete
             $user->save();
             return redirect()->back()->with('success','Blog Removed Successfully');
+        }
+        return redirect()->back()->with('error','Something Went Wrong');
+    }
+
+    // Dynmaic Pages
+    public function viewPages(Request $request){
+        if ($request->ajax()) {
+            $sections = Pages::whereIn('status',[0,1]);
+
+            return DataTables::of($sections)
+                ->addIndexColumn()
+                ->addColumn('action', function ($section) {
+                    $parms = "id=".$section->id;
+                    $editUrl = encrypturl(route('edit-page'),$parms);
+                    $deleteUrl = encrypturl(route('delete-page'),$parms);
+                    return '
+                        <a href="'.$editUrl.'" class="cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
+                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                })
+                ->addColumn('created_at', function($row) {
+                    return date('d/m/Y', strtotime($row->created_at));
+                })
+                ->addColumn('status', function($row) {
+                    // Determine the status color and text based on `is_active`
+                    $statusColor = $row->status == 1 ? 'success' : 'danger';
+                    $statusText = $row->status == 1 ? 'Active' : 'Inactive';
+                    // Create the status badge HTML
+                    return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                })
+                ->rawColumns(['status','action','created_at'])
+                ->make(true);
+        }
+        return view('manageCms.pages.view-pages');
+    }
+
+    public function addPage(){
+        return view('manageCms.pages.add-page');
+    }
+
+    public function storePage(Request $request){
+        // Validate the incoming request data
+        $request->validate([
+            'page_title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:255',
+            'meta_keywords' => 'nullable|string|max:255',
+            'status'=>'required'
+        ]);
+
+        // Create a new Page instance
+        $page = new Pages();
+        
+        // Set the properties
+        $page->title = $request->input('page_title');
+        
+        // Generate a unique slug
+        $slug = \Str::slug($request->input('page_title'));
+        $originalSlug = $slug; // Store the original slug for reference
+        $count = 1;
+
+        // Check for uniqueness
+        while (Pages::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count; // Append a number to the slug
+            $count++;
+        }
+
+        $page->slug = $slug; // Set the unique slug
+        $page->description = $request->input('description');
+        $page->meta_title = $request->input('meta_title');
+        $page->meta_description = $request->input('meta_description');
+        $page->meta_keywords = $request->input('meta_keywords');
+        $page->status = $request->input('status'); // Default to active status
+
+        // Save the Page to the database
+        $page->save();
+
+        // Redirect or return a response
+        return redirect()->route('view-pages')->with('success', 'Page created successfully.');
+    }
+
+    public function editPages(Request $request){
+        $request->validate([
+            'eq'=>'required'
+        ]);
+        $data = decrypturl($request->eq);
+        $blogId = $data['id'];
+        $page = Pages::where('id',$blogId)->first();
+        if($page){
+            return view('manageCms.pages.edit-page',compact('page'));
+        }
+        return redirect()->back()->with('error','Something Went Wrong');
+    }
+
+    public function updatePage(Request $request){
+        $request->validate([
+            'page_title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:255',
+            'meta_keywords' => 'nullable|string|max:255',
+            'status'=>'required',
+            'eq'=>'required'
+        ]);
+
+        $data = decrypturl($request->eq);
+        $pageId = $data['id'];
+        $page = Pages::find($pageId);
+        if (!$page) {
+            return redirect()->back()->with('error', 'Page not found.');
+        }
+        
+        
+        // Update the page details
+        $page->title = $request->input('page_title');
+        
+        // Generate a new slug and ensure it's unique
+        $slug = \Str::slug($request->input('page_title'));
+        $originalSlug = $slug; // Store the original slug for reference
+        $count = 1;
+
+        // Check for uniqueness and modify the slug if necessary
+        while (Pages::where('slug', $slug)->where('id', '!=', $pageId)->exists()) {
+            $slug = $originalSlug . '-' . $count; // Append a number to the slug
+            $count++;
+        }
+
+        $page->slug = $slug; // Set the unique slug
+        $page->description = $request->input('description');
+        $page->meta_title = $request->input('meta_title');
+        $page->meta_description = $request->input('meta_description');
+        $page->meta_keywords = $request->input('meta_keywords');
+        $page->status = $request->input('status'); // Ensure the status is being updated correctly
+
+        // Save the updated page to the database
+        $page->save();
+
+        // Redirect to the pages index with a success message
+        return redirect()->route('view-pages')->with('success', 'Page updated successfully.');
+
+    }
+
+    public function deletePage(Request $request){
+        $request->validate([
+            'eq'=>'required'
+        ]);
+
+        $data = decrypturl($request->eq);
+        $blogId = $data['id'];
+        $user = Pages::where('id',$blogId)->first();
+        if($user){
+            $user->status = 2; // Delete
+            $user->save();
+            return redirect()->back()->with('success','Page Removed Successfully');
         }
         return redirect()->back()->with('error','Something Went Wrong');
     }

@@ -10,6 +10,10 @@ use App\Http\Controllers\admin\ManageCategory;
 use App\Http\Controllers\admin\CMSController;
 use App\Http\Controllers\admin\SettingController;
 use App\Http\Controllers\admin\QuestionBankController;
+use App\Http\Controllers\admin\ManageLearning;
+use App\Http\Controllers\admin\ManageTest;
+use App\Http\Controllers\admin\FileManagerController;
+use App\Http\Controllers\admin\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // FRONTEND 
@@ -120,6 +124,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/add-blog-category', 'addBlogCategory')->name('add-blog-category');
         Route::post('/edit-blog-category', 'editBlogCategory')->name('edit-blog-category');
         Route::get('/delete-blog-category', 'deleteBlogCategory')->name('delete-blog-category');
+
+        // FOR PAGES
+        Route::get('/pages', 'viewPages')->name('view-pages');
+        Route::get('/add-page', 'addPage')->name('add-page');
+        Route::post('store-page','storePage')->name('store-page');
+        Route::get('/edit-page', 'editPages')->name('edit-page');
+        Route::post('/edit-page', 'updatePage')->name('update-page');
+        Route::get('/delete-page', 'deletePage')->name('delete-page');
     });
 
     // Setting Controller
@@ -135,6 +147,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
         // FOR PAYMENT-DETAIL
         Route::get('/payment-settings', 'paymentSettings')->name('payment-settings');
+
+        // FOR BILLING & TAX SETTING
+        Route::get('/billing-tax-setting', 'billingTaxSetting')->name('billing-tax-setting');
+    
+        // FOR MAINTANACE SETTING
+        Route::get('/maintenance-setting', 'maintenanceSetting')->name('maintenance-setting');
+
+        // FOR TERM & CONDITION
+        // Route::get('/term-condition', 'termCondition')->name('term-condition'); // removed
+
+        // FOR PRIVACY POLICY
+        // Route::get('/privacy-policy', 'privacyPolicy')->name('privacy-policy'); // removed
 
         // FOR HOME PAGE
         Route::get('/home-settings', 'homeSetting')->name('home-settings');
@@ -226,6 +250,133 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/edit-video', 'updateVideo')->name('update-video');
         Route::get('/delete-video', 'deleteVideo')->name('delete-video');
     });
+
+    // Manage Learning
+    Route::controller(ManageLearning::class)->group(function () {
+        // Practice Set
+        Route::get('/practice-sets', 'practiceSets')->name('view-practice-set');
+        Route::get('/delete-practice-set', 'deletePracticeSet')->name('delete-practice-sets');
+        Route::get('/create-practice-set', 'createPracticeSets')->name('create-practice-set');
+        Route::post('/save-practice-set', 'savePracticeSets')->name('save-practice-set');
+        Route::get('/practice-set/{id}/detail', 'practiceSetDetail')->name('practice-set-detail');
+        Route::post('/practice-set/{id}/detail', 'updatePracticeSetDetail')->name('update-practice-set-detail');
+        Route::get('/practice-set/{id}/setting', 'practiceSetSetting')->name('practice-set-setting');
+        Route::post('/practice-set/{id}/setting', 'updatePracticeSetSetting')->name('update-practice-set-setting');
+        Route::get('/practice-set/{id}/question', 'practiceSetQuestion')->name('practice-set-question');
+        Route::post('/filter-practice-set-question', 'filterPracticeSetQuestion')->name('filter-practice-set-question');
+        Route::post('/practice-set/{id}/question', 'updatePracticeSetQuestion')->name('update-practice-set-question');
+        Route::post('/fetch-practice-set-question', 'fetchPracticeSetQuestion')->name('fetch-practice-set-question');
+        Route::post('/remove-practice-set-question', 'removePracticeSetQuestion')->name('remove-practice-set-question');
+
+        // Lessons
+        Route::get('/configure-lessons', 'configureLessons')->name('configure-lessons');
+        Route::post('/save-configure-lessons', 'saveConfigureLessons')->name('save-configure-lessons');
+        Route::get('/practice/{category}/{skill}/lessons', 'practiceLessons')->name('practice-lessons');
+        Route::post('/filter-practice-lesson', 'filterPracticeLesson')->name('filter-practice-lesson');
+        Route::post('/practice/{category}/{skill}/lessons', 'updatePracticeLessons')->name('update-practice-lessons');
+        Route::post('/fetch-practice-lessons', 'fetchPracticeLessons')->name('fetch-practice-lessons');
+        Route::post('/remove-practice-lessons', 'removePracticeLessons')->name('remove-practice-lessons');
+
+        // Videos
+        Route::get('/configure-videos', 'configureVideos')->name('configure-videos');
+        Route::post('/save-configure-videos', 'saveConfigureVideos')->name('save-configure-videos');
+        Route::get('/practice/{category}/{skill}/videos', 'practiceVideos')->name('practice-videos');
+        Route::post('/filter-practice-videos', 'filterPracticeVideos')->name('filter-practice-videos');
+        Route::post('/practice/{category}/{skill}/videos', 'updatePracticeVideos')->name('update-practice-videos');
+        Route::post('/fetch-practice-videos', 'fetchPracticeVideos')->name('fetch-practice-videos');
+        Route::post('/remove-practice-videos', 'removePracticeVideos')->name('remove-practice-videos');
+    });
+
+    // Manage Test
+    Route::controller(ManageTest::class)->group(function () {
+
+        // Exam Type
+        Route::get('/exam-types', 'examTypes')->name('exam-types');
+        Route::post('/add-exam-types', 'addExamTypes')->name('add-exam-types');
+        Route::post('/edit-exam-types', 'editExamTypes')->name('edit-exam-types');
+        Route::get('/delete-exam-types', 'deleteExamTypes')->name('delete-exam-types');
+
+        // Quiz Type
+        Route::get('/quiz-types', 'quizTypes')->name('quiz-types');
+        Route::post('/add-quiz-types', 'addQuizTypes')->name('add-quiz-types');
+        Route::post('/edit-quiz-types', 'editQuizTypes')->name('edit-quiz-types');
+        Route::get('/delete-quiz-types', 'deleteQuizTypes')->name('delete-quiz-types');
+
+        // Quizzes
+        Route::get('/quizzes', 'viewQuizzes')->name('view-quizzes');
+        Route::get('/create-quizzes', 'createQuizzes')->name('create-quizzes');
+        Route::post('/save-quizzes', 'saveQuizzes')->name('save-quizzes');
+        Route::get('/delete-quizzes', 'deleteQuizzes')->name('delete-quizzes');
+
+        Route::get('/quizzes/{id}/detail', 'quizzesDetail')->name('quizzes-detail');
+        Route::post('/quizzes/{id}/detail', 'updateQuizzesDetail')->name('update-quizzes-detail');
+
+        Route::get('/quizzes/{id}/setting', 'quizzesSetting')->name('quizzes-setting');
+        Route::post('/quizzes/{id}/setting', 'updateQuizzesSetting')->name('update-quizzes-setting');
+        Route::get('/quizzes/{id}/question', 'quizzesQuestion')->name('quizzes-question');
+        Route::post('/filter-quizzes-question', 'filterQuizzesQuestion')->name('filter-quizzes-question');
+        Route::post('/quizzes/{id}/question', 'updateQuizzesQuestion')->name('update-quizzes-question');
+        Route::post('/fetch-quizzes-question', 'fetchQuizzesQuestion')->name('fetch-quizzes-question');
+        Route::post('/remove-quizzes-question', 'removeQuizzesQuestion')->name('remove-quizzes-question');
+
+        Route::get('/quizzes/{id}/schedules', 'quizzesSchedules')->name('quizzes-schedules');
+        Route::post('/quizzes/{id}/schedules', 'updateQuizzesSchedules')->name('update-quizzes-schedules');
+        Route::post('/quizzes/{id}/schedules-save', 'saveQuizzesSchedules')->name('save-quizzes-schedules');
+        Route::get('/quizzes/schedules-delete', 'deleteQuizzesSchedules')->name('delete-quizzes-schedules');
+
+        // Exams
+        Route::get('/exams', 'viewExam')->name('view-exams');
+        Route::get('/create-exams', 'createExams')->name('create-exams');
+        Route::post('/save-exams', 'saveExams')->name('save-exams');
+
+        Route::get('/exam/{id}/detail', 'examDetail')->name('exam-detail');
+        Route::post('/exam/{id}/detail', 'updateExamDetail')->name('update-exam-detail');
+
+        Route::get('/exam/{id}/setting', 'examSetting')->name('exam-setting');
+        Route::post('/exam/{id}/setting', 'updateExamSetting')->name('update-exam-setting');
+
+        Route::get('/exam/{id}/section', 'examSection')->name('exam-section');
+        Route::post('/exam/{id}/add-section', 'addExamSection')->name('add-exam-section');
+        Route::post('/exam/edit-section', 'editExamSection')->name('edit-exam-section');
+        Route::get('/exam/delete-section', 'deleteExamSection')->name('delete-exam-section');
+
+        Route::get('/exam/{id}/questions', 'examQuestions')->name('exam-questions');
+        Route::post('filter-exam-question', 'filterExamQuestion')->name('filter-exam-question'); 
+        Route::post('exam/{id}/questions', 'updateExamQuestion')->name('update-exam-question');
+        Route::post('fetch-exam-question', 'fetchExamQuestion')->name('fetch-exam-question'); 
+        Route::post('/remove-exam-question', 'removeExamQuestion')->name('remove-exam-question');
+
+        Route::get('/exam/{id}/schedules', 'examSchedules')->name('exam-schedules');
+        Route::post('/exam/{id}/schedules', 'updateExamSchedules')->name('update-exam-schedules');
+        Route::post('/exam/{id}/schedules-save', 'saveExamSchedules')->name('save-exam-schedules');
+        Route::get('/exam/schedules-delete', 'deleteExamSchedules')->name('delete-exam-schedules');
+
+    });
+
+    // Manage File Manager
+    Route::controller(FileManagerController::class)->group(function () {
+        // ALL FILES
+        Route::get('/file-manager', 'fileManager')->name('file-manager');
+        
+        // PARENT DIRECTORY
+        Route::post('/add-directory', 'addDirectory')->name('add-directory');
+        Route::post('/delete-directory', 'deleteDirectory')->name('delete-directory');
+        Route::post('/fetch-directory-data', 'fetchDirectoryData')->name('fetch-directory-data');
+        Route::post('/add-folder', 'addFolder')->name('add-folder');
+        Route::post('/save-directory-media', 'saveDirectoryMedia')->name('save-directory-media');
+
+
+        // FOR MEDIA UPLOAD/REMOVE
+        Route::post('/upload-media', 'uploadMedia')->name('upload-media');
+        Route::post('/remove-media', 'removeMedia')->name('remove-media');
+
+    });
+
+    // Manage Payment
+    Route::controller(PaymentController::class)->group(function () {
+        Route::get('/plans', 'viewPlans')->name('view-plans');
+    });
+
 });
 
 

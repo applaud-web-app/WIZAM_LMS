@@ -66,7 +66,7 @@
       
       <!-- True/False/Custom Question Form -->
       <div class="p-[25px]">
-         <form action="{{route('save-tof-details')}}" method="POST" enctype="multipart/form-data">
+         <form action="{{route('update-tof-details',['id'=>$question->id])}}" method="POST" enctype="multipart/form-data">
             @csrf
             <!-- Skill Level -->
             <div class="mb-[20px]">
