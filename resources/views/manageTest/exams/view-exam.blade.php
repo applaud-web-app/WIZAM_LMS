@@ -51,7 +51,6 @@
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Title</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Category</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Type</th>
-                     <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Sections</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Visibility</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Status</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Actions</th>

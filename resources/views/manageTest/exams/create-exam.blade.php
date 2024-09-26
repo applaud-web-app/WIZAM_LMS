@@ -90,6 +90,11 @@
                <input id="title" name="title" type="text" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter exam title" />
             </div>
 
+            <div class="mb-[20px]">
+                <label for="img_url" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Image Url </label>
+                <input type="url" id="img_url" name="img_url" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter Img url" />
+            </div>
+
             <!-- Duration Type -->
             <div class="mb-[20px]">
                <label for="duration_type" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration Type <span class="text-red-500">*</span></label>

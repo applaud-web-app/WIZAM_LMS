@@ -97,8 +97,8 @@
             <!-- Start Content -->
             <div class="2xl:flex-[0_0_79%] lg:flex-[0_0_74%] w-full">
                 <div class="bg-white dark:bg-box-dark rounded-[10px] p-[30px]" id="fileSystem">
-                    <div
-                        class="flex items-center justify-center max-sm:flex-col sm:justify-between gap-x-[30px] gap-y-[15px]">
+                    <h2><i class="uil uil-folder"></i> Directory</h2>
+                    <div class="mt-4 flex items-center justify-center max-sm:flex-col sm:justify-between gap-x-[30px] gap-y-[15px]">
                         <div class="sm:w-[211px] relative w-full">
                             <span
                                 class="start-5 absolute -translate-y-2/4 leading-[0] top-2/4 text-light dark:text-subtitle-dark text-[14px]">
@@ -113,228 +113,70 @@
                                 class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow">
                                 <i class="flex uil uil-upload"></i>
                             </a>
-                            <a href="file-manager-list.html" title="folder"
-                                class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow">
+                            <button  title="folder" class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" data-te-toggle="modal" data-te-target="#addFolder" data-te-ripple-init="" data-te-ripple-color="light">
                                 <i class="flex uil uil-folder"></i>
-                            </a>
-                            <button type="button" href="file-manager-list.html" title="delete"
-                                class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow"
-                                data-te-toggle="modal" data-te-target="#deletDirectory" data-te-ripple-init
-                                data-te-ripple-color="light">
-                                <i class="flex uil uil-trash"></i>
                             </button>
                         </div>
                     </div>
                     <!-- Start Inbox body -->
                     <div class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block"
                         id="tabs-inbox" role="tabpanel" aria-labelledby="tabs-inbox-tab" data-te-tab-active>
-                        <div
-                            class="text-[16px] leading-[1.25] font-medium text-dark dark:text-title-dark my-[20px] capitalize">
+                        <div class="text-[16px] leading-[1.25] font-medium text-dark dark:text-title-dark my-[20px] capitalize">
                             Folders</div>
                         <div class="grid grid-cols-12 sm:gap-[25px] max-sm:gap-y-[25px]">
                             <!-- Grid Items -->
-                            <div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-                                <div
-                                    class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-                                    <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('assets/images/file/pdf.png') }}"
-                                        alt="{title}}">
-                                    <h4
-                                        class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">
-                                        Product-guidelines.pdf</h4>
-                                    <div
-                                        class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-                                        <div class="flex items-center" data-te-dropdown-ref>
-                                            <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                                                id="fileManager-5" data-te-dropdown-toggle-ref aria-expanded="false">
-                                                <i class="uil uil-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-                                                aria-labelledby="fileManager-5" data-te-dropdown-menu-ref>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        download
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
-                                                </li>
-                                            </ul>
+                            @isset($directory)
+                                @foreach ($directory as $item)
+                                    @php
+                                        $url = route('fetch-directory-data');
+                                        $parms = 'id=' . $item->id;
+                                        $encryptUrl = encrypturl($url, $parms);
+                                    @endphp
+                                    <div class=" col-span-12 2xl:col-span-3 sm:col-span-6" >
+                                        <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
+                                            <img class="directory_files mb-[18px] w-[50px] h-[50px]" src="{{ asset('assets/images/file/folder.png') }}" data-url="{{$encryptUrl}}" data-name="{{$item->node_name}}" alt="{{$item->node_name}}">
+                                            <h4 class="cursor-pointer directory_files text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]" data-url="{{$encryptUrl}}" data-name="{{$item->node_name}}">{{$item->node_name}}</h4>
+                                            <div class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
+                                                <div class="flex items-center" data-te-dropdown-ref>
+                                                    <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
+                                                        id="fileManager-{{$item->id}}" data-te-dropdown-toggle-ref aria-expanded="false">
+                                                        <i class="uil uil-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
+                                                        aria-labelledby="fileManager-{{$item->id}}" data-te-dropdown-menu-ref>
+                                                        <li>
+                                                            <a href="#"
+                                                                class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                                <i
+                                                                    class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                                download
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#"
+                                                                class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                                <i
+                                                                    class="uil uil-eye text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                                View
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#"
+                                                                class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                                <i
+                                                                    class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                                delete
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                            </div>
-                            <div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-
-                                <div
-                                    class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-
-                                    <img class="mb-[18px] w-[50px] h-[50px]"
-                                        src="{{ asset('assets/images/file/psd.png') }}" alt="{title}}">
-
-                                    <h4
-                                        class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">
-                                        admin-wireframe.psd
-                                    </h4>
-                                    <div
-                                        class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-                                        <div class="flex items-center" data-te-dropdown-ref>
-                                            <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                                                id="fileManager-6" data-te-dropdown-toggle-ref aria-expanded="false">
-                                                <i class="uil uil-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-                                                aria-labelledby="fileManager-6" data-te-dropdown-menu-ref>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        download
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-
-                                <div
-                                    class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-
-                                    <img class="mb-[18px] w-[50px] h-[50px]"
-                                        src="{{ asset('assets/images/file/zip.png') }}" alt="{title}}">
-
-                                    <h4
-                                        class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">
-                                        Main-admin-design.zip
-                                    </h4>
-                                    <div
-                                        class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-                                        <div class="flex items-center" data-te-dropdown-ref>
-                                            <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                                                id="fileManager-7" data-te-dropdown-toggle-ref aria-expanded="false">
-                                                <i class="uil uil-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-                                                aria-labelledby="fileManager-7" data-te-dropdown-menu-ref>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        download
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-
-                                <div
-                                    class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-
-                                    <img class="mb-[18px] w-[50px] h-[50px]"
-                                        src="{{ asset('assets/images/file/pdf.png') }}" alt="{title}}">
-
-                                    <h4
-                                        class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">
-                                        Product-guidelines.pdf
-                                    </h4>
-                                    <div
-                                        class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-                                        <div class="flex items-center" data-te-dropdown-ref>
-                                            <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                                                id="fileManager-8" data-te-dropdown-toggle-ref aria-expanded="false">
-                                                <i class="uil uil-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-                                                aria-labelledby="fileManager-8" data-te-dropdown-menu-ref>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        download
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
+                                @endforeach
+                            @endisset
                         </div>
-                        <div
+                        {{-- <div
                             class="text-[16px] leading-[1.25] font-medium text-dark dark:text-title-dark my-[20px] capitalize">
                             Files</div>
                         <div class="grid grid-cols-12 sm:gap-[25px] max-sm:gap-y-[25px]">
@@ -736,7 +578,7 @@
                                 </div>
 
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[te-tab-active]:block"
                         id="tabs-prototypes" role="tabpanel" aria-labelledby="tabs-prototypes-tab">

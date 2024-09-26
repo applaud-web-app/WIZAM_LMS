@@ -44,67 +44,88 @@
          <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
             <div class="p-[25px]">
                <h5 class="text-[18px] text-dark dark:text-title-dark font-semibold mb-[15px]">Billing Information</h5>
-               <form action="#">
+               <form action="{{route('save-billing')}}" method="POST" autocomplete="off">
+                    @csrf
                   <div class="mb-[15px]">
                       <label for="vendorName" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                           Vendor Name <span class="text-red-500">*</span>
                       </label>
-                      <input type="text" id="vendorName" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Vendor Name" required>
+                      <input type="text" id="vendorName" name="vendor_name" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Vendor Name" value="@isset($billingTaxSetting->vendor_name){{$billingTaxSetting->vendor_name}}@endisset" required>
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="address" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Address <span class="text-red-500">*</span>
+                          Address 
                       </label>
-                      <input type="text" id="address" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Address" required>
-                  </div>
-                  
-                  <div class="mb-[15px]">
-                      <label for="city" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          City <span class="text-red-500">*</span>
-                      </label>
-                      <input type="text" id="city" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your City" required>
-                  </div>
-                  
-                  <div class="mb-[15px]">
-                      <label for="state" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          State <span class="text-red-500">*</span>
-                      </label>
-                      <input type="text" id="state" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your State" required>
+                      <input type="text" id="address" name="address" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" value="@isset($billingTaxSetting->address){{$billingTaxSetting->address}}@endisset" placeholder="Your Address">
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="country" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Country <span class="text-red-500">*</span>
+                          Country 
                       </label>
-                      <input type="text" id="country" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Country" required>
+                        <select id="country" name="country"  class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary">
+                            @isset($country)
+                                <option >Select Country</option>
+                                @foreach ($country as $item)
+                                    <option value="{{$item->id}}" @isset($billingTaxSetting->country_id){{$billingTaxSetting->country_id == $item->id ? 'selected' : ''}}@endisset>{{$item->name}}</option>
+                                @endforeach
+                            @endisset
+                        </select>
                   </div>
+                    
+                    <div class="mb-[15px]">
+                      <label for="state" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                          State
+                      </label>
+                       <select id="state" name="state" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary">
+                           <option >Select State</option>
+                            @if($state)
+                                @foreach ($state as $item)
+                                    <option value="{{$item->id}}" @isset($billingTaxSetting->state_id){{$billingTaxSetting->state_id == $item->id ? 'selected' : ''}}@endisset>{{$item->name}}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                  
+                  <div class="mb-[15px]">
+                      <label for="city" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                          City 
+                        </label>
+                       <select id="city" name="city" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary">
+                           <option >Select City</option>
+                             @isset($city)
+                                @foreach ($city as $item)
+                                    <option value="{{$item->id}}" @isset($billingTaxSetting->city_id){{$billingTaxSetting->city_id == $item->id ? 'selected' : ''}}@endisset>{{$item->name}}</option>
+                                @endforeach
+                            @endisset
+                        </select>
+                    </div>
                   
                   <div class="mb-[15px]">
                       <label for="zip" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Zip <span class="text-red-500">*</span>
+                          Zip 
                       </label>
-                      <input type="text" id="zip" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Zip" required>
+                      <input type="text" id="zip" name="zip" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" value="@isset($billingTaxSetting->zip){{$billingTaxSetting->zip}}@endisset" placeholder="Your Zip">
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="phoneNumber" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Phone Number <span class="text-red-500">*</span>
+                          Phone Number 
                       </label>
-                      <input type="text" id="phoneNumber" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Phone Number" required>
+                      <input type="text" id="phoneNumber" name="phone_number" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Phone Number" value="@isset($billingTaxSetting->phone_number){{$billingTaxSetting->phone_number}}@endisset">
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="vatNumber" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          VAT Number <span class="text-red-500">*</span>
+                          VAT Number 
                       </label>
-                      <input type="text" id="vatNumber" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your VAT Number" required>
+                      <input type="text" id="vatNumber" name="vat_number" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" value="@isset($billingTaxSetting->vat_number){{$billingTaxSetting->vat_number}}@endisset" placeholder="Your VAT Number">
                   </div>
                   
                   <div class="mb-[15px]">
-                    
                      <div class="mb-[0.125rem] block min-h-[1.5rem]">
-                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" type="checkbox" id="enableInvoicing">
+                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" value="1" type="checkbox" id="enableInvoicing" name="enable_invoicing" @isset($billingTaxSetting->enable_invoicing){{$billingTaxSetting->enable_invoicing == 1 ? "checked" : ""}}@endisset>
                          <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="enableInvoicing">
                              Enable Invoicing
                          </label>
@@ -113,9 +134,9 @@
                   
                   <div class="mb-[15px]">
                       <label for="invoicePrefix" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Invoice Prefix
+                          Invoice Prefix <span class="text-danger">*</span>
                       </label>
-                      <input type="text" id="invoicePrefix" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Invoice Prefix">
+                      <input type="text" required id="invoicePrefix" name="invoice_prefix" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Invoice Prefix" value="@isset($billingTaxSetting->invoice_prefix){{$billingTaxSetting->invoice_prefix}}@endisset">
                   </div>
 
                   <div class="mb-[15px]">
@@ -132,11 +153,11 @@
          <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
             <div class="p-[25px]">
                <h5 class="text-[18px] text-dark dark:text-title-dark font-semibold mb-[15px]">Tax Information</h5>
-               <form action="#">
+               <form action="{{route('save-tax')}}" method="POST" autocomplete="off">
+                    @csrf
                   <div class="mb-[15px]">
-                    
                      <div class="mb-[0.125rem] block min-h-[1.5rem]">
-                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" type="checkbox" id="enableTax">
+                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" type="checkbox" id="enableTax" value="1" name="enable_tax">
                          <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="enableTax">
                              Enable Tax
                          </label>
@@ -148,37 +169,37 @@
                       <label for="taxName" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                           Tax Name <span class="text-red-500">*</span>
                       </label>
-                      <input type="text" id="taxName" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Tax Name" required>
+                      <input type="text" id="taxName" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" name="tax_name" placeholder="Your Tax Name" required>
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="taxAmountType" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                           Tax Amount Type <span class="text-red-500">*</span>
                       </label>
-                      <select id="taxAmountType" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary">
-                          <option value="percentage">Percentage</option>
+                      <select id="taxAmountType" name="tax_amount_type" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" required>
+                          <option value="percentage" selected>Percentage</option>
                           <option value="fixed">Fixed Amount</option>
                       </select>
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="taxAmount" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Tax Amount <span class="text-red-500">*</span>
+                          Tax Amount 
                       </label>
-                      <input type="number" id="taxAmount" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Tax Amount" required>
+                      <input type="number" id="taxAmount" name="tax_amount" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Tax Amount" >
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="taxType" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Tax Type <span class="text-red-500">*</span>
+                          Tax Type 
                       </label>
-                      <input type="text" id="taxType" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Tax Type" required>
+                      <input type="text" id="taxType" name="tax_type" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Tax Type" >
                   </div>
                   
                   <div class="mb-[15px]">
                     
                      <div class="mb-[0.125rem] block min-h-[1.5rem]">
-                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" type="checkbox" id="enableAdditionalTax">
+                         <input class="relative ltr:float-left rtl:float-right me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-1 border-solid border-normal outline-none before:pointer-events-none before:absolute before:h-[10px] before:w-[0.5px] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:mt-0 checked:after:ms-[5px] checked:after:block checked:after:h-[10px] checked:after:w-[5px] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] dark:border-white/10 dark:checked:border-primary dark:checked:bg-primary after:top-[2px]" type="checkbox" id="enableAdditionalTax" value="1" name="enable_additional_tax">
                          <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="enableAdditionalTax">
                              Enable Additional Tax
                          </label>
@@ -187,33 +208,33 @@
                  
                   <div class="mb-[15px]">
                       <label for="additionalTaxName" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Additional Tax Name <span class="text-red-500">*</span>
+                          Additional Tax Name
                       </label>
-                      <input type="text" id="additionalTaxName" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Name" required>
+                      <input type="text" id="additionalTaxName" name="additional_tax_name" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Name" >
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="additionalTaxAmountType" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Additional Tax Amount Type <span class="text-red-500">*</span>
+                          Additional Tax Amount Type 
                       </label>
-                      <select id="additionalTaxAmountType" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary">
-                          <option value="percentage">Percentage</option>
+                      <select id="additionalTaxAmountType" name="additional_tax_amount_type" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" required>
+                          <option value="percentage" selected>Percentage</option>
                           <option value="fixed">Fixed Amount</option>
                       </select>
                   </div>
                   
                   <div class="mb-[15px]">
-                      <label for="additionalTaxAmount" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Additional Tax Amount <span class="text-red-500">*</span>
+                      <label for="additionalTaxAmount"  class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                          Additional Tax Amount 
                       </label>
-                      <input type="number" id="additionalTaxAmount" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Amount" required>
+                      <input type="number" id="additionalTaxAmount" name="additional_tax_amount" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Amount" >
                   </div>
                   
                   <div class="mb-[15px]">
                       <label for="additionalTaxType" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                          Additional Tax Type <span class="text-red-500">*</span>
+                          Additional Tax Type 
                       </label>
-                      <input type="text" id="additionalTaxType" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Type" required>
+                      <input type="text" id="additionalTaxType" name="additional_tax_type" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Additional Tax Type" >
                   </div>
                   <div class="mb-[15px]">
                      <button type="submit" class=" bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
@@ -227,3 +248,56 @@
 </section>
 
 @endsection
+@push('scripts')
+<script>
+    
+$(document).ready(function () {
+    // Fetch states based on the selected country
+    $('#country').on('change', function () {
+        const countryId = $(this).val();
+        if (countryId) {
+            $.ajax({
+                url: '{{ route("get-states") }}', // Define your route for fetching states
+                type: 'GET',
+                data: { country_id: countryId },
+                success: function (response) {
+                    $('#state').empty().append('<option selected disabled>Select State</option>');
+                    if (response.states.length > 0) {
+                        $.each(response.states, function (key, state) {
+                            $('#state').append('<option value="' + state.id + '">' + state.name + '</option>');
+                        });
+                    }
+                },
+                error: function () {
+                    alert('Failed to fetch states. Please try again.');
+                }
+            });
+        }
+    });
+
+    // Fetch cities based on the selected state
+    $('#state').on('change', function () {
+        const stateId = $(this).val();
+        if (stateId) {
+            $.ajax({
+                url: '{{ route("get-cities") }}', // Define your route for fetching cities
+                type: 'GET',
+                data: { state_id: stateId },
+                success: function (response) {
+                    $('#city').empty().append('<option selected disabled>Select City</option>');
+                    if (response.cities.length > 0) {
+                        $.each(response.cities, function (key, city) {
+                            $('#city').append('<option value="' + city.id + '">' + city.name + '</option>');
+                        });
+                    }
+                },
+                error: function () {
+                    alert('Failed to fetch cities. Please try again.');
+                }
+            });
+        }
+    });
+});
+
+</script>
+@endpush

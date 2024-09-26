@@ -10,6 +10,7 @@ use App\Models\Blog;
 use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pages;
+use Illuminate\Support\Str; 
 
 class CMSController extends Controller
 {
@@ -247,15 +248,27 @@ class CMSController extends Controller
             
             // Generate a unique filename with the current timestamp
             $imageName = 'blog_' . time() . '.' . $image->getClientOriginalExtension();
-    
+
             // Move the image to the 'public/blogs' directory
             $image->move(public_path('blogs'), $imageName);
-    
+
             // Store the image path in the database (relative to the public directory)
             $imagePath = $imageName;
         }
 
         $userId = Auth::id();
+
+        // Generate a slug from the blog title
+        $slug = Str::slug($request->input('blogTitle'));
+
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (Blog::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
         // Save the blog data to the database
         Blog::create([
             'title' => $request->input('blogTitle'),
@@ -264,6 +277,7 @@ class CMSController extends Controller
             'short_description' => $request->input('shortDescription'),
             'content' => $request->input('blogContent'), // Save summernote content
             'image' => $imagePath, // Save the image path if exists
+            'slug' => $slug, // Save the unique slug
         ]);
 
         // Redirect to a page with a success message
@@ -290,15 +304,15 @@ class CMSController extends Controller
             'shortDescription' => 'required|string|max:500',
             'blogContent' => 'required|string',
             'blogImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
-            'eq'=>'required'
+            'eq' => 'required',
         ]);
-
+    
         $userId = Auth::id();
         $data = decrypturl($request->eq);
         $blogId = $data['id'];
-
-        $blog = Blog::where('id',$blogId)->first();
-
+    
+        $blog = Blog::findOrFail($blogId); // Use findOrFail to handle the case where the blog does not exist
+    
         // Handle the image upload
         $imagePath = $blog->image;
         if ($request->hasFile('blogImage')) {
@@ -313,16 +327,35 @@ class CMSController extends Controller
             // Store the image path in the database (relative to the public directory)
             $imagePath = $imageName;
         }
-
+    
+        // Update blog data
         $blog->title = $request->input('blogTitle');
         $blog->category_id = $request->input('blogCategory');
         $blog->short_description = $request->input('shortDescription');
         $blog->content = $request->input('blogContent');
         $blog->image = $imagePath;
+    
+        // Generate a new slug from the blog title
+        $slug = Str::slug($request->input('blogTitle'));
+    
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+    
+        // Check if the slug already exists in other blogs (excluding the current blog)
+        while (Blog::where('slug', $slug)->where('id', '!=', $blogId)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+    
+        // Update the slug
+        $blog->slug = $slug;
+    
+        // Save the updated blog data
         $blog->save();
-
+    
         // Redirect to a page with a success message
-        return redirect()->route('view-blog')->with('success', 'Blog Updated successfully!');
+        return redirect()->route('view-blog')->with('success', 'Blog updated successfully!');
     }
 
     public function deleteBlog(Request $request){

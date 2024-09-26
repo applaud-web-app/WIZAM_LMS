@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
             $table->string('title'); 
-            $table->string('image')->nullable(); 
+            $table->string('slug'); 
+            $table->string('img_url')->nullable(); 
             $table->string('duration_type');
             $table->string('exam_duration')->nullable();
             $table->unsignedBigInteger('subcategory_id'); // Foreign key to the skills table

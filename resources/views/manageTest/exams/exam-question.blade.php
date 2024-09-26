@@ -14,47 +14,47 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-5">
                     <div class="flex items-center justify-between">
                         <!-- Step 1 (Completed) -->
-                        <div class="flex-1 text-center">
+                        <a href="{{route('exam-detail',['id'=>$exam->id])}}" class="flex-1 text-center">
                             <div class="relative flex flex-col items-center">
                                 <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                                     1
                                 </div>
                                 <div class="text-primary mt-2">Details</div>
                             </div>
-                        </div>
+                        </a>
                         <!-- Divider -->
                         <div class="w-[40px] h-[2px] bg-primary"></div>
                         <!-- Step 2 (Completed) -->
-                        <div class="flex-1 text-center">
+                        <a href="{{route('exam-setting',['id'=>$exam->id])}}" class="flex-1 text-center">
                             <div class="relative flex flex-col items-center">
                                 <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                                     2
                                 </div>
                                 <div class="text-primary mt-2">Settings</div>
                             </div>
-                        </div>
+                        </a>
                         <!-- Divider -->
                         <div class="w-[40px] h-[2px] bg-primary"></div>
                         <!-- Step 3 (Completed) -->
-                        <div class="flex-1 text-center">
+                        <a href="{{route('exam-section',['id'=>$exam->id])}}" class="flex-1 text-center">
                             <div class="relative flex flex-col items-center">
                                 <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                                     3
                                 </div>
                                 <div class="text-primary mt-2">Sections</div>
                             </div>
-                        </div>
+                        </a>
                         <!-- Divider -->
                         <div class="w-[40px] h-[2px] bg-primary"></div>
                         <!-- Step 4 (Active) -->
-                        <div class="flex-1 text-center">
+                        <a href="{{route('exam-questions',['id'=>$exam->id])}}" class="flex-1 text-center">
                             <div class="relative flex flex-col items-center">
                                 <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                                     4
                                 </div>
                                 <div class="text-primary mt-2">Questions</div>
                             </div>
-                        </div>
+                        </a>
                         <!-- Divider -->
                         <div class="w-[40px] h-[2px] bg-gray-300"></div>
                         <!-- Step 5 (Pending) -->

@@ -22,6 +22,7 @@ use App\Models\ExamSection;
 use App\Models\ExamQuestion;
 use App\Models\ExamSchedule;
 use App\Models\UserGroup;
+use Illuminate\Support\Str;
 
 class ManageTest extends Controller
 {
@@ -649,7 +650,7 @@ class ManageTest extends Controller
                 ->addIndexColumn()
                 ->addColumn('action', function ($section) {
                     $parms = "id=".$section->id;
-                    $editUrl = route('quizzes-detail',['id'=>$section->id]);
+                    $editUrl = route('exam-detail',['id'=>$section->id]);
                     $deleteUrl = encrypturl(route('delete-quiz-types'),$parms);
                     return '
                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
@@ -693,8 +694,9 @@ class ManageTest extends Controller
         return view('manageTest.exams.create-exam',compact('examType','category'));
     }
 
-
-    public function saveExams(Request $request){
+    public function saveExams(Request $request)
+    {
+        // Update validation rules to include 'img_url'
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'duration_type' => 'required|in:exam_wise,ques_wise',
@@ -707,10 +709,21 @@ class ManageTest extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
+            'img_url' => 'nullable|url', // Validate the image URL
         ]);
 
+        // Generate a slug from the exam title
+        $slug = Str::slug($validatedData['title']);
 
-        // Create Exam
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (Exam::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        // Create Exam with image URL
         $exam = Exam::create([
             'title' => $validatedData['title'],
             'duration_type' => $validatedData['duration_type'],
@@ -724,11 +737,14 @@ class ManageTest extends Controller
             'is_public' => $validatedData['visibility'], 
             'favourite' => $validatedData['favorite'],
             'status' => 0, // DRAFT
+            'slug' => $slug, // Add the slug to the database
+            'img_url' => $validatedData['img_url'], // Save the image URL
         ]);
 
         // Redirect with success message
-        return redirect()->route('exam-setting',['id'=>$exam->id])->with('success', 'Exam created successfully.');
+        return redirect()->route('exam-setting', ['id' => $exam->id])->with('success', 'Exam created successfully.');
     }
+
     
     public function examDetail($id){
         $exam = Exam::where('id',$id)->first();
@@ -740,7 +756,8 @@ class ManageTest extends Controller
         return redirect()->back()->with('error','Something Went Wrong');
     }
 
-    public function updateExamDetail(Request $request, $id){
+    public function updateExamDetail(Request $request, $id)
+    {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'duration_type' => 'required|in:exam_wise,ques_wise',
@@ -753,11 +770,13 @@ class ManageTest extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
-            'status'=>'required'
+            'status' => 'required',
+            'img_url' => 'nullable|url', 
         ]);
 
-        $exam = Exam::where('id',$id)->first();
-        if($exam){
+        // Find the exam by ID
+        $exam = Exam::find($id); // Using find() is more concise
+        if ($exam) {
             $exam->title = $validatedData['title'];
             $exam->duration_type = $validatedData['duration_type'];
             $exam->exam_duration = $validatedData['exam_duration'] ?? null; // Add duration if provided
@@ -765,16 +784,34 @@ class ManageTest extends Controller
             $exam->exam_type_id = $validatedData['exam_type'];
             $exam->description = $validatedData['description']; 
             $exam->is_free = $validatedData['is_free']; 
-            $exam->price = $validatedData['is_free'] == 1 ? null : $validatedData['price']; // Set price conditionally
+            $exam->price = $validatedData['is_free'] ? null : $validatedData['price']; // Set price conditionally
             $exam->download_report = $validatedData['download_report']; 
             $exam->is_public = $validatedData['visibility']; 
             $exam->favourite = $validatedData['favorite'];
             $exam->status = $validatedData['status']; // DRAFT
+            $exam->img_url = $validatedData['img_url']; 
+            // Generate a new slug from the title
+            $slug = Str::slug($validatedData['title']);
+
+            // Ensure the slug is unique
+            $originalSlug = $slug;
+            $count = 1;
+            while (Exam::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = $originalSlug . '-' . $count;
+                $count++;
+            }
+
+            // Update the slug in the exam
+            $exam->slug = $slug;
+
+            // Save the updated exam data
             $exam->save();
+
             // Redirect with success message
-            return redirect()->route('exam-setting',['id'=>$exam->id])->with('success', 'Exam Updated successfully.');
+            return redirect()->route('exam-setting', ['id' => $exam->id])->with('success', 'Exam updated successfully.');
         }
-        return redirect()->back()->with('error','Something Went Wrong');
+
+        return redirect()->back()->with('error', 'Something went wrong');
     }
 
     public function examSetting($id){
@@ -811,67 +848,67 @@ class ManageTest extends Controller
         return redirect()->back()->with('error','Something Went Wrong');
     }
 
-    public function examSection(Request $request, $id){
-        $examSetting = Exam::where('id',$id)->first();
-        if($examSetting){
+    public function examSection(Request $request, $id)
+    {
+        // Fetch the exam settings
+        $examSetting = Exam::find($id);
+        
+        if ($examSetting) {
             if ($request->ajax()) {
-                $sections = ExamSection::with('section')->where('exam_id',$id)->whereIn('status',[0,1]);
+                // Retrieve sections along with their associated questions and questions details
+                $sections = ExamSection::with(['questions.question']) // Eager load questions and related question details
+                    ->where('exam_id', $id)
+                    ->whereIn('status', [0, 1])
+                    ->get();
+    
                 return DataTables::of($sections)
                     ->addIndexColumn()
                     ->addColumn('action', function ($section) {
-                        $parms = "id=".$section->id;
-                        $editUrl = encrypturl(route('edit-exam-section'),$parms);
-                        $deleteUrl = encrypturl(route('delete-exam-section'),$parms);
+                        $parms = "id=" . $section->id;
+                        $editUrl = encrypturl(route('edit-exam-section'), $parms);
+                        $deleteUrl = encrypturl(route('delete-exam-section'), $parms);
+    
                         return '
-                            <button type="button" data-url="'.$editUrl.'" data-section_category="'.$section->section_id.'" data-section_name="'.$section->display_name.'" data-display_order="'.$section->section_order.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>
-                            <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                            <button type="button" data-url="' . $editUrl . '" data-section_category="' . $section->section_id . '" data-section_name="' . $section->display_name . '" data-display_order="' . $section->section_order . '" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                            <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
                     })
                     ->addColumn('display_name', function($row) {
                         return ucfirst($row->display_name);
                     })
                     ->addColumn('section', function($row) {
-                        if (isset($row->section)) {
-                            return $row->section->name;
-                        } else {
-                            return 'N/A';  
-                        }
+                        return isset($row->section) ? $row->section->name : 'N/A';
                     })
                     ->addColumn('total_questions', function($row) {
-                        if (isset($row->section)) {
-                            return $row->section->name;
-                        } else {
-                            return 'N/A';  
-                        }
+                        return isset($row->questions) ? $row->questions->count() : 'N/A';
                     })
                     ->addColumn('total_duration', function($row) {
-                        if (isset($row->section)) {
-                            return $row->section->name;
-                        } else {
-                            return 'N/A';  
-                        }
+                        return $row->questions->sum(function($question) {
+                            return $question->question ? $question->question->watch_time : 0; // Get watch_time from the related question
+                        });
                     })
                     ->addColumn('total_marks', function($row) {
-                        if (isset($row->section)) {
-                            return $row->section->name;
-                        } else {
-                            return 'N/A';  
-                        }
+                        return $row->questions->sum(function($question) {
+                            return $question->question ? $question->question->default_marks : 0; // Get default_marks from the related question
+                        });
                     })
                     ->addColumn('status', function($row) {
-                        // Determine the status color and text based on `is_active`
                         $statusColor = $row->status == 1 ? 'success' : 'danger';
                         $statusText = $row->status == 1 ? 'Active' : 'Inactive';
-                        // Create the status badge HTML
-                        return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+    
+                        return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
-                    ->rawColumns(['status','total_marks','total_duration','total_questions','section','action','display_name'])
+                    ->rawColumns(['status', 'total_marks', 'total_duration', 'total_questions', 'section', 'action', 'display_name'])
                     ->make(true);
             }
-            $section = Sections::whereIn('status',[1,0])->get();
-            return view('manageTest.exams.exam-section',compact('examSetting','section'));
+    
+            // Retrieve sections for the view
+            $section = Sections::whereIn('status', [1, 0])->get();
+            return view('manageTest.exams.exam-section', compact('examSetting', 'section'));
         }
-        return redirect()->back()->with('error','Something Went Wrong');
+    
+        return redirect()->back()->with('error', 'Something Went Wrong');
     }
+    
 
     public function addExamSection(Request $request, $id){
         // Validate the incoming request data
@@ -935,7 +972,7 @@ class ManageTest extends Controller
 
     public function examQuestions($id){
         $exam = Exam::where('id',$id)->first();
-        $examSection = ExamSection::where('exam_id',$id)->get();
+        $examSection = ExamSection::where('exam_id',$id)->whereIn('status',[1,0])->get();
         if($exam && count($examSection)){
             $topic = Topic::where('status',1)->get();
             $skill = Skill::where('status',1)->get();
@@ -1072,7 +1109,7 @@ class ManageTest extends Controller
         $exam = Exam::where('id', $id)->where('status', 1)->first(); 
         if ($exam) {
             if ($request->ajax()) {
-                $sections = ExamSchedule::whereIn('status', [0, 1]); // Change to ExamSchedule model
+                $sections = ExamSchedule::whereIn('status', [0, 1])->where('exam_id',$id); // Change to ExamSchedule model
                 return DataTables::of($sections)
                     ->addIndexColumn()
                     ->addColumn('action', function ($section) {

@@ -20,4 +20,12 @@ class ExamSection extends Model
     public function section(){
         return $this->hasOne(Sections::class,'id','section_id');
     }
+
+    public function questions()
+    {
+        return $this->hasMany(ExamQuestion::class, 'section_id', 'id');
+    }
+    
+
+
 }

@@ -8,7 +8,13 @@ export default {
     "./node_modules/tw-elements/js/**/*.js"
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#10B981',
+      },
+    },
   },
-  plugins: [require("tw-elements/plugin.cjs")]
+  plugins: [
+    require("tw-elements/plugin.cjs"),
+  ]
 }

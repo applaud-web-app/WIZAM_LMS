@@ -150,9 +150,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
         // FOR BILLING & TAX SETTING
         Route::get('/billing-tax-setting', 'billingTaxSetting')->name('billing-tax-setting');
+        Route::post('/save-billing', 'saveBillingData')->name('save-billing');
+        Route::post('/save-tax', 'saveTaxData')->name('save-tax');
+        Route::get('/get-states', 'getStates')->name('get-states');
+        Route::get('/get-cities', 'getCities')->name('get-cities');
     
         // FOR MAINTANACE SETTING
         Route::get('/maintenance-setting', 'maintenanceSetting')->name('maintenance-setting');
+        Route::post('/save-maintenance-setting', 'saveMaintenanceSetting')->name('save-maintenance-setting');
 
         // FOR TERM & CONDITION
         // Route::get('/term-condition', 'termCondition')->name('term-condition'); // removed

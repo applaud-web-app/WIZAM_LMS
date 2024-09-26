@@ -12,6 +12,8 @@ class Exam extends Model
     // Specify which attributes can be mass-assigned
     protected $fillable = [
         'title',
+        'slug',
+        'img_url',
         'duration_type',
         'subcategory_id',
         'exam_type_id',

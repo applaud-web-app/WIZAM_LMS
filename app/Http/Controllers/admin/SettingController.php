@@ -5,6 +5,11 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GeneralSetting;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
+use App\Models\BillingSetting;
+
 
 class SettingController extends Controller
 {
@@ -113,12 +118,104 @@ class SettingController extends Controller
 
     // BILLING & TAX SETTING
     public function billingTaxSetting(Request $request){
-        // 
+        $country = Country::get();
+        $state = null;
+        $city = null;
+        $billingTaxSetting = BillingSetting::first();
+        if(isset($billingTaxSetting->state_id)){
+            $state = State::where('country_id', $billingTaxSetting->country_id)->get();
+            $city = City::where('state_id', $billingTaxSetting->state_id)->get();
+        }
+        return view('setting.billing-setting',compact('country','city','state','billingTaxSetting'));
+    }
+
+    public function getStates(Request $request)
+    {
+        $countryId = $request->input('country_id');
+        $states = State::where('country_id', $countryId)->get();
+        
+        return response()->json(['states' => $states]);
+    }
+
+    public function getCities(Request $request)
+    {
+        $stateId = $request->input('state_id');
+        $cities = City::where('state_id', $stateId)->get();
+
+        return response()->json(['cities' => $cities]);
+    }
+
+    public function saveBillingData(Request $request){
+        // Validate the form data
+        $validatedData = $request->validate([
+            'vendor_name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'country' => 'nullable|integer',
+            'state' => 'nullable|integer',
+            'city' => 'nullable|integer',
+            'zip' => 'nullable|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
+            'vat_number' => 'nullable|string|max:50',
+            'enable_invoicing' => 'sometimes|boolean',
+            'invoice_prefix' => 'required|string|max:50',
+        ]);
+
+        $billing = BillingSetting::first();
+        if($billing){
+            $billing->vendor_name = $validatedData['vendor_name'];
+            $billing->address = $validatedData['address'] ?? null;
+            $billing->country_id = $validatedData['country'] ?? null;
+            $billing->state_id = $validatedData['state'] ?? null;
+            $billing->city_id = $validatedData['city'] ?? null;
+            $billing->zip = $validatedData['zip'] ?? null;
+            $billing->phone_number = $validatedData['phone_number'] ?? null;
+            $billing->vat_number = $validatedData['vat_number'] ?? null;
+            $billing->enable_invoicing = $request->has('enable_invoicing') ? 1 : 0;
+            $billing->invoice_prefix = $validatedData['invoice_prefix'];
+            $billing->save();
+            return redirect()->back()->with('success', 'Billing information saved successfully!');
+        }
+
+        // Save the validated data to the Billing model
+        $billing = new BillingSetting();
+        $billing->vendor_name = $validatedData['vendor_name'];
+        $billing->address = $validatedData['address'] ?? null;
+        $billing->country_id = $validatedData['country'] ?? null;
+        $billing->state_id = $validatedData['state'] ?? null;
+        $billing->city_id = $validatedData['city'] ?? null;
+        $billing->zip = $validatedData['zip'] ?? null;
+        $billing->phone_number = $validatedData['phone_number'] ?? null;
+        $billing->vat_number = $validatedData['vat_number'] ?? null;
+        $billing->enable_invoicing = $request->has('enable_invoicing') ? 1 : 0;
+        $billing->invoice_prefix = $validatedData['invoice_prefix'];
+
+        $billing->save();
+
+        return redirect()->back()->with('success', 'Billing information saved successfully!');
+    }
+    
+    public function saveTaxData(Request $request){
+
     }
 
     // MAINTANACE SETTING
-    public function maintenanceSetting(Request $request){
-        // 
+    public function maintenanceSetting(){
+        $generalSetting = GeneralSetting::first();
+        return view('setting.maintenance',compact('generalSetting'));
+    }
+
+    public function saveMaintenanceSetting(Request $request){
+        try {
+            $request->validate([
+                'maintenance_mode'=>'required|in:0,1'
+            ]);
+            $generalSetting = GeneralSetting::first();
+            $generalSetting->maintenance_mode = $request->maintenance_mode;
+            $generalSetting->save();
+            return redirect()->back()->with('success','Maintenance Mode Updated Successfully!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error',$th->getMessage());
+        }
     }
 
     // TERM & CONDITION
