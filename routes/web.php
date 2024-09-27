@@ -141,12 +141,22 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/general-settings', 'generalSettings')->name('general-settings');
         Route::post('/update-settings', 'updateGeneralSetting')->name('update-settings');
 
+        // FOR PROFILE SETTING
+        Route::get('/profile', 'profile')->name('profile');
+        Route::post('/update-profile', 'updateProfile')->name('update-profile');
+
+
         // FOR EMAIL-SETTING
         Route::get('/email-settings', 'emailSettings')->name('email-settings');
         Route::post('/update-email-settings', 'updateEmailSettings')->name('update-email-settings');
 
         // FOR PAYMENT-DETAIL
         Route::get('/payment-settings', 'paymentSettings')->name('payment-settings');
+        Route::post('/update-payment-setting', 'updatePaymentSetting')->name('update-payment-setting');
+        Route::post('/paypal-detail', 'paypalDetail')->name('paypal-detail');
+        Route::post('/stripe-detail', 'stripeDetail')->name('stripe-detail');
+        Route::post('/razorpay-detail', 'razorpayDetail')->name('razorpay-detail');
+        Route::post('/bank-detail', 'bankDetail')->name('bank-detail');
 
         // FOR BILLING & TAX SETTING
         Route::get('/billing-tax-setting', 'billingTaxSetting')->name('billing-tax-setting');
@@ -333,6 +343,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/exams', 'viewExam')->name('view-exams');
         Route::get('/create-exams', 'createExams')->name('create-exams');
         Route::post('/save-exams', 'saveExams')->name('save-exams');
+        Route::get('/delete-exam', 'deleteExam')->name('delete-exam');
 
         Route::get('/exam/{id}/detail', 'examDetail')->name('exam-detail');
         Route::post('/exam/{id}/detail', 'updateExamDetail')->name('update-exam-detail');
@@ -380,6 +391,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Manage Payment
     Route::controller(PaymentController::class)->group(function () {
         Route::get('/plans', 'viewPlans')->name('view-plans');
+        Route::get('/create-plan', 'createPlan')->name('create-plan');
+        Route::post('/save-plan', 'savePlan')->name('save-plan');
+
+        Route::get('/edit-plan', 'editPlan')->name('edit-plan');
+        Route::post('/edit-plan', 'updatePlan')->name('update-plan');
+
+        Route::get('/delete-plan', 'deletePlan')->name('delete-plan');
     });
 
 });

@@ -136,6 +136,21 @@
                   </div>
                 </div>
 
+                <!-- Status (Updated Radio Design) -->
+                <div class="mb-[20px]">
+                    <label class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Status <span class="text-red-500">*</span></label>
+                    <div class="flex flex-wrap items-center gap-[15px]">
+                        <div class="inline-block min-h-[1.5rem]">
+                        <input class="relative ltr:float-left rtl:float-right  me-1 mt-0.5 h-[18px] w-[18px] appearance-none rounded-full border-1 border-solid border-normal before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer" type="radio" id="status" name="status" value="1" required {{$quiz->status == 1 ? "checked" : ""}}>
+                        <label for="status" class="inline-block pl-[0.15rem] hover:cursor-pointer">Yes</label>
+                        </div>
+                        <div class="inline-block min-h-[1.5rem]">
+                        <input class="relative ltr:float-left rtl:float-right  me-1 mt-0.5 h-[18px] w-[18px] appearance-none rounded-full border-1 border-solid border-normal before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer" type="radio" id="status" name="status" value="0" {{$quiz->status == 0 ? "checked" : ""}}>
+                        <label for="status" class="inline-block pl-[0.15rem] hover:cursor-pointer">No</label>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Buttons -->
                 <div class="flex gap-x-[10px]">
                     <!-- Submit Button with Unicons Icon -->

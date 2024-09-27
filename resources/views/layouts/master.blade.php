@@ -1154,12 +1154,12 @@
                            <div class="min-w-[310px] max-sm:min-w-full pt-4 px-[15px] py-[12px] bg-white dark:bg-box-dark shadow-[0_2px_8px_rgba(0,0,0,.15)] dark:shadow-[0_5px_30px_rgba(1,4,19,.60)] rounded-4">
                               <figure class="flex items-center text-sm rounded-[8px] bg-section dark:bg-box-dark-up py-[20px] px-[25px] mb-[12px] gap-[15px]">
                                  <img class="w-8 h-8 rounded-full bg-regular" src="{{asset('assets/images/avatars/thumbs.png')}}" alt="user">
-                                 <figcaption>
+                                 <a href="{{route('profile')}}">
                                     <div class="text-dark dark:text-title-dark mb-0.5 text-sm">Admin</div>
                                     <div class="mb-0 text-xs text-body dark:text-subtitle-dark">Admin</div>
-                                 </figcaption>
+                                 </a>
                               </figure>
-                              <ul class="m-0 pb-[10px] overflow-x-hidden overflow-y-auto scrollbar bg-transparent max-h-[230px]">
+                              {{-- <ul class="m-0 pb-[10px] overflow-x-hidden overflow-y-auto scrollbar bg-transparent max-h-[230px]">
                                  <li class="w-full">
                                     <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
                                        <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
@@ -1168,40 +1168,8 @@
                                        </button>
                                     </div>
                                  </li>
-                                 <li class="w-full">
-                                    <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
-                                       <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
-                                          <i class="text-[16px] uil uil-users-alt"></i>
-                                          Payment
-                                       </button>
-                                    </div>
-                                 </li>
-                                 <li class="w-full">
-                                    <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
-                                       <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
-                                          <i class="text-[16px] uil uil-key-skeleton"></i>
-                                          Billing
-                                       </button>
-                                    </div>
-                                 </li>
-                                 <li class="w-full">
-                                    <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
-                                       <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
-                                          <i class="text-[16px] uil uil-bell"></i>
-                                          Maintanace Mode
-                                       </button>
-                                    </div>
-                                 </li>
-                                 <li class="w-full">
-                                    <div class="p-0 dark:hover:text-white hover:bg-primary/10 dark:hover:bg-box-dark-up rounded-4">
-                                       <button class="inline-flex items-center text-light dark:text-subtitle-dark hover:text-primary hover:ps-6 w-full px-2.5 py-3 text-sm transition-[0.3s] gap-[10px]">
-                                          <i class="text-[16px] uil uil-setting"></i>
-                                          Site Settings
-                                       </button>
-                                    </div>
-                                 </li>
-                              </ul>
-                              <a class="flex items-center justify-center text-sm font-medium bg-normalBG dark:bg-box-dark-up h-[50px] text-light hover:text-primary dark:hover:text-subtitle-dark dark:text-title-dark mx-[-15px] mb-[-15px] rounded-b-6 gap-[6px]" href="log-in.html">
+                              </ul> --}}
+                              <a href="{{route('admin-logout')}}" class="flex items-center justify-center text-sm font-medium bg-normalBG dark:bg-box-dark-up h-[50px] text-light hover:text-primary dark:hover:text-subtitle-dark dark:text-title-dark mx-[-15px] mb-[-15px] rounded-b-6 gap-[6px]" href="log-in.html">
                                  <i class="uil uil-sign-out-alt"></i> Sign Out</a>
                            </div>
                         </div>

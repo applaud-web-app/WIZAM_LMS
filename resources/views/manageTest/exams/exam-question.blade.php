@@ -145,7 +145,7 @@
                 <label class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Difficulty Level</label>
                 <div class="flex flex-wrap gap-[10px]">
                     <div class="mb-[0.125rem]">
-                        <input type="checkbox" name="difficultyLevel[]" value="veryEasy" id="difficultyLevel1" class="rounded-[0.25rem] border-1 border-normal checked:bg-primary hover:cursor-pointer">
+                        <input type="checkbox" name="difficultyLevel[]" value="very_easy" id="difficultyLevel1" class="rounded-[0.25rem] border-1 border-normal checked:bg-primary hover:cursor-pointer">
                         <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="difficultyLevel1">Very Easy</label>
                     </div>
                     <div class="mb-[0.125rem]">
@@ -161,7 +161,7 @@
                         <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="difficultyLevel4">Hard</label>
                     </div>
                     <div class="mb-[0.125rem]">
-                        <input type="checkbox" name="difficultyLevel[]" value="veryHard" id="difficultyLevel5" class="rounded-[0.25rem] border-1 border-normal checked:bg-primary hover:cursor-pointer">
+                        <input type="checkbox" name="difficultyLevel[]" value="very_hard" id="difficultyLevel5" class="rounded-[0.25rem] border-1 border-normal checked:bg-primary hover:cursor-pointer">
                         <label class="inline-block ps-[0.15rem] hover:cursor-pointer" for="difficultyLevel5">Very Hard</label>
                     </div>
                 </div>

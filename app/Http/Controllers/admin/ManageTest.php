@@ -280,7 +280,7 @@ class ManageTest extends Controller
             'description' => $request->description, 
             'is_free'=> $request->isFee, 
             'is_public'=>$request->visibility, 
-            'status' => 1
+            'status' => 0
         ]);
 
         // Redirect with success message
@@ -651,7 +651,7 @@ class ManageTest extends Controller
                 ->addColumn('action', function ($section) {
                     $parms = "id=".$section->id;
                     $editUrl = route('exam-detail',['id'=>$section->id]);
-                    $deleteUrl = encrypturl(route('delete-quiz-types'),$parms);
+                    $deleteUrl = encrypturl(route('delete-exam'),$parms);
                     return '
                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
                         <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
@@ -1245,6 +1245,24 @@ class ManageTest extends Controller
             $schedule->status = 2; // Mark as deleted
             $schedule->save();
             return redirect()->back()->with('success', 'Exam Schedule Removed Successfully');
+        }
+        
+        return redirect()->back()->with('error', 'Something Went Wrong');
+    }
+
+    public function deleteExam(Request $request){
+        $request->validate([
+            'eq' => 'required'
+        ]);
+    
+        $data = decrypturl($request->eq);
+        $scheduleId = $data['id'];
+        $schedule = Exam::find($scheduleId);
+        
+        if ($schedule) {
+            $schedule->status = 2; // Mark as deleted
+            $schedule->save();
+            return redirect()->back()->with('success', 'Exam Removed Successfully');
         }
         
         return redirect()->back()->with('error', 'Something Went Wrong');

@@ -27,6 +27,10 @@ return new class extends Migration
             $table->string('from_name')->nullable();
             $table->tinyInteger('maintenance_mode')->nullable()->default(0);
             $table->tinyInteger('debug_mode')->nullable()->default(0);
+            $table->string('default_payment')->nullable();
+            $table->string('currency')->nullable();
+            $table->string('currency_symbol')->nullable();
+            $table->string('symbol_position')->nullable();
             $table->timestamps();
         });
     }

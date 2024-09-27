@@ -34,173 +34,108 @@
       </div>
    </div>
 
-   <div class="grid grid-cols-12 gap-[25px]">
-      <div class="col-span-12 2xl:col-span-3 sm:col-span-6 lg:col-span-4">
-
-         <!-- BEGIN: free price-->
-         <div class="bg-white dark:bg-box-dark p-7 shadow-pricing dark:shadow-none rounded-10"><span class="dark:text-title-dark bg-dark/10 capitalize dark:bg-box-dark-up dark:border-white/10 font-medium h-8 inline-block mb-8 px-6 py-1.5 rounded-2xl text-13 text-dark">Free Forever</span>
-
-            <h1 class="relative bottom-1.5 mb-0 text-dark dark:text-title-dark text-4xl font-semibold capitalize flex items-center">
-
-               free
-
-            </h1>
-
-
-            <span class="font-medium text-body dark:text-subtitle-dark text-13">For Individuals</span>
-            <div class="mt-6 mb-4 min-h-[210px]">
-
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]">
-                  <span class="anticon text-success text-[14px] anticon-check">
-                     <i class="uil uil-check"></i></span>
-                  <span class="text-15">100MB File
-                     Space</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]">
-                  <span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span>
-                  <span class="text-15">2 Active
-                     Projects</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]">
-                  <span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span>
-                  <span class="text-15">Limited
-                     Boards</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]">
-                  <span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span>
-                  <span class="text-15">Basic Project
-                     Management</span>
-               </div>
-
-            </div>
-            <button class=" bg-dark border-dark capitalize  dark:text-title-dark duration-200 font-semibold h-11 hover:bg-dark-hbr px-7 rounded-md text-sm text-white">
-               <span>current plan</span>
-            </button>
-         </div>
-         <!-- END: free price- -->
-
+   <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
+      <div class="px-[25px] py-3 text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex max-sm:h-auto border-b border-regular dark:border-box-dark-up">
+         <h1 class="mb-0 inline-flex items-center py-1 overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
+            Plans</h1>
+            <a href="{{route('create-plan')}}" type="button" class="flex items-center px-[14px] text-sm text-white rounded-md bg-primary border-primary h-10 gap-[6px] transition-[0.3s]" >
+               <i class="uil uil-plus"></i>
+               <span class="m-0">Create Plan</span>
+            </a>
       </div>
-      <div class="col-span-12 2xl:col-span-3 sm:col-span-6 lg:col-span-4">
-
-         <!-- BEGIN: free price-->
-         <div class="bg-white dark:bg-box-dark p-7 shadow-pricing dark:shadow-none rounded-10"><span class="dark:text-title-dark bg-primary/10 capitalize dark:bg-box-dark-up dark:border-white/10 font-medium h-8 inline-block mb-8 px-6 py-1.5 rounded-2xl text-13 text-primary">Business</span>
-
-            <h1 class="relative bottom-1.5 mb-0 text-dark dark:text-title-dark text-4xl font-semibold capitalize flex items-center">
-
-               <sup class="relative text-base font-semibold text-gray-400 -top-3">$</sup>
-               19
-               <sub class="relative bottom-0 ms-2.5 text-light dark:text-subtitle-dark text-13 font-normal capitalize">per
-                  month</sub>
-
-            </h1>
-
-
-            <span class="font-medium text-body dark:text-subtitle-dark text-13">For 2 Users</span>
-            <div class="mt-6 mb-4 min-h-[210px]">
-
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">50GB File
-                     Space</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">90 Projects</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Limited
-                     Boards</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Basic Project
-                     Management</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Custom Post
-                     Types</span></div>
-
-            </div>
-            <button class=" bg-primary border-primary capitalize  dark:text-title-dark duration-200 font-semibold h-11 hover:bg-primary-hbr px-7 rounded-md text-sm text-white">
-               <span>get started</span>
-            </button>
+      <div class="p-[25px] pt-[15px]">
+         <div>
+            <table id="category-table" class="min-w-full leading-normal table-auto display">
+               <thead>
+                  <tr>
+                     <th>#</th>
+                     <th>Name</th>
+                     <th>Category</th>
+                     <th>Price</th>
+                     <th>Status</th>
+                     <th>Action</th>
+                  </tr>
+               </thead>
+               <tbody>
+               </tbody>
+            </table>
          </div>
-         <!-- END: free price- -->
-
       </div>
-      <div class="col-span-12 2xl:col-span-3 sm:col-span-6 lg:col-span-4">
-
-         <!-- BEGIN: free price-->
-         <div class="bg-white dark:bg-box-dark p-7 shadow-pricing dark:shadow-none rounded-10"><span class="dark:text-title-dark bg-secondary/10 capitalize dark:bg-box-dark-up dark:border-white/10 font-medium h-8 inline-block mb-8 px-6 py-1.5 rounded-2xl text-13 text-secondary">Basic Plan</span>
-
-            <h1 class="relative bottom-1.5 mb-0 text-dark dark:text-title-dark text-4xl font-semibold capitalize flex items-center">
-
-               <sup class="relative text-base font-semibold text-gray-400 -top-3">$</sup>
-               39
-               <sub class="relative bottom-0 ms-2.5 text-light dark:text-subtitle-dark text-13 font-normal capitalize">per
-                  month</sub>
-
-            </h1>
-
-
-            <span class="font-medium text-body dark:text-subtitle-dark text-13">For 10 Users</span>
-            <div class="mt-6 mb-4 min-h-[210px]">
-
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">300GB File Space
-                  </span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">300 Active
-                     Projects</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Limited Boards
-                     Boards</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Basic Project
-                     Management</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Custom Post
-                     Types</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Subtasks
-                     Types</span></div>
-
-            </div>
-            <button class=" bg-secondary border-secondary capitalize  dark:text-title-dark duration-200 font-semibold h-11 hover:bg-secondary-hbr px-7 rounded-md text-sm text-white">
-               <span>get started</span>
-            </button>
-         </div>
-         <!-- END: free price- -->
-
-      </div>
-      <div class="col-span-12 2xl:col-span-3 sm:col-span-6 lg:col-span-4">
-
-         <!-- BEGIN: free price-->
-         <div class="bg-white dark:bg-box-dark p-7 shadow-pricing dark:shadow-none rounded-10"><span class="dark:text-title-dark bg-success/10 capitalize dark:bg-box-dark-up dark:border-white/10 font-medium h-8 inline-block mb-8 px-6 py-1.5 rounded-2xl text-13 text-success">Enterprise</span>
-
-            <h1 class="relative bottom-1.5 mb-0 text-dark dark:text-title-dark text-4xl font-semibold capitalize flex items-center">
-
-               <sup class="relative text-base font-semibold text-gray-400 -top-3">$</sup>
-               79
-               <sub class="relative bottom-0 ms-2.5 text-light dark:text-subtitle-dark text-13 font-normal capitalize">per
-                  month</sub>
-
-            </h1>
-
-
-            <span class="font-medium text-body dark:text-subtitle-dark text-13">For 50 Users</span>
-            <div class="mt-6 mb-4 min-h-[210px]">
-
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Unlimited File Space
-                  </span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Unlimited Projects</span>
-               </div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Limited Boards
-                     Boards</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Basic Project
-                     Management</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Custom Post
-                     Types</span></div>
-               <div class="flex items-center mb-3 text-body dark:text-subtitle-dark gap-[15px]"><span class="anticon text-success text-[14px] anticon-check"><i class="uil uil-check"></i></span><span class="text-15">Subtasks
-                     Types</span></div>
-
-            </div>
-            <button class=" bg-success border-success capitalize  dark:text-title-dark duration-200 font-semibold h-11 hover:bg-success-hbr px-7 rounded-md text-sm text-white">
-               <span>get started</span>
-            </button>
-         </div>
-         <!-- END: free price- -->
-
-      </div>
-
    </div>
-
-
 </section>
 
 
+<button type="button" class="hidden inline-block rounded bg-primary px-[20px] py-[8px] text-[14px] font-semibold  capitalize leading-normal text-white  transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light">
+   Open Modal
+</button>
+
+ <!-- Delete Modal -->
+<div data-te-modal-init class="fixed left-0 top-0 z-[1055] hidden h-full w-full overflow-y-auto overflow-x-hidden outline-none" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div data-te-modal-dialog-ref class="pointer-events-none relative w-auto translate-y-[-50px] opacity-0 transition-all duration-300 ease-in-out min-[576px]:mx-auto min-[576px]:mt-7 min-[576px]:max-w-[500px]">
+      <div class="min-[576px]:shadow-[0_0.5rem_1rem_rgba(#000, 0.15)] pointer-events-auto relative flex w-full flex-col rounded-md border-none bg-white bg-clip-padding text-current shadow-lg outline-none dark:bg-neutral-600">
+         <div class="flex items-center justify-between flex-shrink-0 p-4 border-b border-opacity-100 rounded-t-md border-regular dark:border-box-dark-up">
+            <!--Modal title-->
+            <h5 class="text-xl font-medium leading-normal text-neutral-800 dark:text-neutral-200" id="exampleModalLabel">
+               Do you Want to delete these items?
+            </h5>
+            <!--Close button-->
+            <button type="button" class="box-content border-none rounded-none hover:no-underline hover:opacity-75 focus:opacity-100 focus:shadow-none focus:outline-none" data-te-modal-dismiss aria-label="Close">
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-dark dark:text-title-dark">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+               </svg>
+            </button>
+         </div>
+         <!--Modal body-->
+         <div class="relative flex-auto p-4" data-te-modal-body-ref>
+            <p class="mb-3 text-breadcrumbs dark:text-subtitle-dark">This action cannot be undone. Click "Confirm" to proceed or "Cancel" to abort.</p>
+         </div>
+         <!--Modal footer-->
+         <div class="flex flex-wrap items-center justify-end flex-shrink-0 gap-2 p-4 border-t-2 border-b border-opacity-100 rounded-b-md border-regular dark:border-box-dark-up">
+           <button type="button" class="ml-1 inline-block rounded bg-section px-6 pb-2 pt-2.5 text-14 font-medium capitalize leading-normal text-dark  transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" data-te-modal-dismiss data-te-ripple-init data-te-ripple-color="light">
+              Cancel
+           </button>
+            <button type="button" class="ml-1 inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-14 font-medium capitalize leading-normal text-white  transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" data-te-ripple-init data-te-ripple-color="light" data-url="" id="confirmDelete">
+               Confirm
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
 @endsection
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // DataTables initialization
+            $('#category-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('view-plans') }}",
+                columns: [
+                    {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                    { data: 'name', name: 'name' },
+                    { data: 'category', name: 'category' },
+                    { data: 'price', name: 'price' },
+                    { data: 'status', name: 'status' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
+                ]
+            });
+        });
+    </script>
+    <script>
+      $(document).ready(function(){
+           // When delete item is clicked, store the URL in the confirm button
+           $(document).on('click', '.deleteItem', function(){
+               const delUrl = $(this).data('url');
+               console.log(delUrl);
+               $('#confirmDelete').data('url', delUrl); // Use data method to set the URL
+           });
+   
+           // When confirm delete is clicked, redirect to the URL
+           $(document).on('click', '#confirmDelete', function(){
+               const delUrl = $(this).data('url'); // Use data method to get the URL
+               window.location.href = delUrl;
+           });
+
+       });
+    </script>
+@endpush
