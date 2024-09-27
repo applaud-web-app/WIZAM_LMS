@@ -56,7 +56,8 @@ class AuthController extends Controller
 
             // Create the authentication token
             $token = $user->createToken('auth_token')->plainTextToken;
-            $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None');
+            // $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None'); //LIVE
+            $cookie = cookie('jwt', $token, 60 * 24, '/', null, false, true, false, 'Lax');
             // 1 DAY, HttpOnly, Secure,null, null, true, true
 
             DB::commit();
@@ -165,7 +166,8 @@ class AuthController extends Controller
 
                 // CREATE TOKEN
                 $token = $user->createToken('auth_token')->plainTextToken;
-                $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None');
+                // $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None'); //LIVE
+                $cookie = cookie('jwt', $token, 60 * 24, '/', null, false, true, false, 'Lax');
                 // 1 DAY, HttpOnly, Secure, null, null, true, true
 
                 return response()->json([
