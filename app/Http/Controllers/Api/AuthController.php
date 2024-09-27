@@ -56,7 +56,7 @@ class AuthController extends Controller
 
             // Create the authentication token
             $token = $user->createToken('auth_token')->plainTextToken;
-            $cookie = cookie('jwt', $token, 60 * 24,null, null, true, true); // 1 DAY, HttpOnly, Secure
+            $cookie = cookie('jwt', $token, 60 * 24); // 1 DAY, HttpOnly, Secure,null, null, true, true
 
             DB::commit();
             // Return success response
@@ -105,7 +105,7 @@ class AuthController extends Controller
                 
                 // CREATE TOKEN
                 $token = $user->createToken('auth_token')->plainTextToken;
-                $cookie = cookie('jwt',$token,60*24,null, null, true, true); // 1 DAY, HttpOnly, Secure
+                $cookie = cookie('jwt',$token,60*24); // 1 DAY, HttpOnly, Secure ,null, null, true, true
 
                 return response()->json([
                     'status'=> true,
@@ -187,4 +187,27 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+
+    // Fetch authenticated user's profile data
+    public function profile(Request $request)
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user is authenticated
+        if ($user) {
+            return response()->json([
+                'status' => true,
+                'user' => $user,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+    }
+
+
 }

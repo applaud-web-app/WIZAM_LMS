@@ -31,3 +31,7 @@ Route::get('page/{slug}', [CmsController::class, 'pageDetail']);
 
 // CONTACT US
 Route::post('contact-us', [CmsController::class, 'contactUs']);
+
+
+// Authorized Routes
+Route::middleware('auth:sanctum')->get('/profile', [UserController::class, 'profile']);
