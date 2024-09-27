@@ -56,75 +56,16 @@ class AuthController extends Controller
 
             // Create the authentication token
             $token = $user->createToken('auth_token')->plainTextToken;
-            // $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None'); //LIVE
-            $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None');
-            // 1 DAY, HttpOnly, Secure,null, null, true, true
 
             DB::commit();
             // Return success response
-            return response()->json(['status'=> true,'message' => 'User Registered Successfully!'], 201)->withCookie($cookie);
+            return response()->json(['status'=> true,'message' => 'User Registered Successfully!','token'=>$token], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             // Return error response
             return response()->json(['status'=> false, 'message' => 'Registration Failed: ' . $th->getMessage()], 400);
         }
     }
-
-    // public function login(Request $request){
-    //     $validateUser = Validator::make($request->all(), [
-    //         'email' => 'required|string|email|max:255',
-    //         'password' => 'required|string|max:255',
-    //     ]);
-
-    //     // Check if validation fails
-    //     if ($validateUser->fails()) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Validation Error',
-    //             'errors' => $validateUser->errors()->all()
-    //         ], 401);
-    //     }
-
-    //     try {
-    //         if (Auth::attempt($request->only('email', 'password'))) { // make sure user status is to be 1
-    //             $user = Auth::user();
-
-    //             // Check if the user's status is active (assuming 1 means active)
-    //             if ($user->status !== 1) {
-    //                 return response()->json([
-    //                     'status' => false,
-    //                     'message' => 'Your account is inactive. Please contact support.'
-    //                 ], 403);
-    //             }
-
-    //             // Check if the user has the 'student' role
-    //             if (!$user->hasRole('student')) {
-    //                 return response()->json([
-    //                     'status' => false,
-    //                     'message' => 'You do not have the required permission to access this resource.'
-    //                 ], 403);
-    //             }
-                
-    //             // CREATE TOKEN
-    //             $token = $user->createToken('auth_token')->plainTextToken;
-    //             $cookie = cookie('jwt',$token,60*24); // 1 DAY, HttpOnly, Secure ,null, null, true, true
-
-    //             return response()->json([
-    //                 'status'=> true,
-    //                 'message'=>'Logged In Successfully'
-    //             ],200)->withCookie($cookie);
-
-    //         }else{
-    //             return response()->json([
-    //                 'status'=> false,
-    //                 'message'=>'Invalid Login Details'
-    //             ],401);
-    //         }
-    //     } catch (\Throwable $th) {
-    //         // Return error response
-    //         return response()->json(['status'=> false, 'message' => 'Login failed: ' . $th->getMessage()], 400);
-    //     }
-    // }
 
     public function login(Request $request)
     {
@@ -166,15 +107,13 @@ class AuthController extends Controller
 
                 // CREATE TOKEN
                 $token = $user->createToken('auth_token')->plainTextToken;
-                // $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None'); //LIVE
-                $cookie = cookie('jwt', $token, 60 * 24, '/', null, true, true, false, 'None');
-                // 1 DAY, HttpOnly, Secure, null, null, true, true
 
                 return response()->json([
                     'status' => true,
                     'message' => 'Logged In Successfully',
                     'user' => $user, // Optionally return user details
-                ], 200)->withCookie($cookie);
+                    'token'=> $token
+                ], 200);
             } else {
                 return response()->json([
                     'status' => false,
