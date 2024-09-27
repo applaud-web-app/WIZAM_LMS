@@ -16,7 +16,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         // Validate the request data
-        $validateUser = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed', // password_confirmation
@@ -25,26 +25,26 @@ class AuthController extends Controller
         ]);
 
         // Check if validation fails
-        if ($validateUser->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Validation Error',
-                'errors' => $validateUser->errors()->all()
+                'errors' => $validator->errors()->all()
             ], 401);
         }
 
         DB::beginTransaction();
         try {
-            $country = Country::where('name',$validateUser['country'])->first();
+            $country = Country::where('name', $request->country)->first();
             $country_id = $country ? $country->id : null;
 
             // Create the user
             $user = User::create([
-                'name' => $validateUser['name'],
+                'name' => $request->name,
                 'country' => $country_id,
-                'phone_number' => $validateUser['phone_number'] ?? null,
-                'email' => $validateUser['email'],
-                'password' => Hash::make($validateUser['password']),
+                'phone_number' => $request->phone_number ?? null,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
                 'status' => 1,
             ]);
 
@@ -183,10 +183,10 @@ class AuthController extends Controller
         //     return response()->json(['status'=> false, 'message' => 'Logout failed: ' . $th->getMessage()], 400);
         // }
 
-        try {
+          try {
             $request->user()->currentAccessToken()->delete();
             $cookie = cookie('jwt', null, -1); // Clear the JWT cookie
-    
+
             return response()->json([
                 'status' => true,
                 'message' => 'Logged out successfully'
