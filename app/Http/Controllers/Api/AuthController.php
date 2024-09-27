@@ -56,7 +56,7 @@ class AuthController extends Controller
 
             // Create the authentication token
             $token = $user->createToken('auth_token')->plainTextToken;
-            $cookie = cookie('jwt', $token, 60 * 24); // 1 DAY
+            $cookie = cookie('jwt', $token, 60 * 24,null, null, true, true); // 1 DAY, HttpOnly, Secure
 
             DB::commit();
             // Return success response
@@ -105,7 +105,7 @@ class AuthController extends Controller
                 
                 // CREATE TOKEN
                 $token = $user->createToken('auth_token')->plainTextToken;
-                $cookie = cookie('jwt',$token,60*24); // 1 DAY
+                $cookie = cookie('jwt',$token,60*24,null, null, true, true); // 1 DAY, HttpOnly, Secure
 
                 return response()->json([
                     'status'=> true,
@@ -172,18 +172,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // try {
-        //     $user = $request->user();
-        //     $user->token()->delete();
-        //     return response()->json([
-        //         'status'=>true,
-        //         'message' => 'User logged out successfully!'
-        //     ],200);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['status'=> false, 'message' => 'Logout failed: ' . $th->getMessage()], 400);
-        // }
-
-          try {
+        try {
             $request->user()->currentAccessToken()->delete();
             $cookie = cookie('jwt', null, -1); // Clear the JWT cookie
 
