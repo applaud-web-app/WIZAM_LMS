@@ -231,13 +231,15 @@ class UserController extends Controller
                     return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                 })
                 ->addColumn('role', function($row) {
-                    return ucFirst($row->roles->first()->name) ?? 'No Role';
+                    return isset($row->roles) && $row->roles->isNotEmpty() 
+                    ? ucfirst($row->roles->first()->name) 
+                    : 'No Role';                
                 })
                 ->addColumn('dob', function($row) {
                     return date('d/m/Y', strtotime($row->dob));
                 })
                 ->addColumn('country', function($row) {
-                    return $row->countries->name;
+                    return isset($row->countries) ? $row->countries->name : 'No Country';
                 })
                 ->addColumn('action', function($row) {
                     $parms = "id=".$row->id;
