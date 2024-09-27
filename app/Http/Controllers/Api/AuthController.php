@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         DB::beginTransaction();
         try {
-            $country = Country::where('name', $request->country)->first();
+            $country = Country::where('shortname', $request->country)->first();
             $country_id = $country ? $country->id : null;
 
             // Create the user
