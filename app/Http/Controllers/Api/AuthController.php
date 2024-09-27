@@ -68,7 +68,65 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request){
+    // public function login(Request $request){
+    //     $validateUser = Validator::make($request->all(), [
+    //         'email' => 'required|string|email|max:255',
+    //         'password' => 'required|string|max:255',
+    //     ]);
+
+    //     // Check if validation fails
+    //     if ($validateUser->fails()) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Validation Error',
+    //             'errors' => $validateUser->errors()->all()
+    //         ], 401);
+    //     }
+
+    //     try {
+    //         if (Auth::attempt($request->only('email', 'password'))) { // make sure user status is to be 1
+    //             $user = Auth::user();
+
+    //             // Check if the user's status is active (assuming 1 means active)
+    //             if ($user->status !== 1) {
+    //                 return response()->json([
+    //                     'status' => false,
+    //                     'message' => 'Your account is inactive. Please contact support.'
+    //                 ], 403);
+    //             }
+
+    //             // Check if the user has the 'student' role
+    //             if (!$user->hasRole('student')) {
+    //                 return response()->json([
+    //                     'status' => false,
+    //                     'message' => 'You do not have the required permission to access this resource.'
+    //                 ], 403);
+    //             }
+                
+    //             // CREATE TOKEN
+    //             $token = $user->createToken('auth_token')->plainTextToken;
+    //             $cookie = cookie('jwt',$token,60*24); // 1 DAY, HttpOnly, Secure ,null, null, true, true
+
+    //             return response()->json([
+    //                 'status'=> true,
+    //                 'message'=>'Logged In Successfully'
+    //             ],200)->withCookie($cookie);
+
+    //         }else{
+    //             return response()->json([
+    //                 'status'=> false,
+    //                 'message'=>'Invalid Login Details'
+    //             ],401);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         // Return error response
+    //         return response()->json(['status'=> false, 'message' => 'Login failed: ' . $th->getMessage()], 400);
+    //     }
+    // }
+
+    public function login(Request $request)
+    {
+        // Validate the request
         $validateUser = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|max:255',
@@ -79,19 +137,20 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Validation Error',
-                'errors' => $validateUser->errors()->all()
-            ], 401);
+                'errors' => $validateUser->errors()->all(),
+            ], 422); // Change status code to 422 for validation errors
         }
 
         try {
-            if (Auth::attempt($request->only('email', 'password'))) { // make sure user status is to be 1
+            // Attempt to log the user in
+            if (Auth::attempt($request->only('email', 'password'))) {
                 $user = Auth::user();
 
                 // Check if the user's status is active (assuming 1 means active)
                 if ($user->status !== 1) {
                     return response()->json([
                         'status' => false,
-                        'message' => 'Your account is inactive. Please contact support.'
+                        'message' => 'Your account is inactive. Please contact support.',
                     ], 403);
                 }
 
@@ -99,28 +158,31 @@ class AuthController extends Controller
                 if (!$user->hasRole('student')) {
                     return response()->json([
                         'status' => false,
-                        'message' => 'You do not have the required permission to access this resource.'
+                        'message' => 'You do not have the required permission to access this resource.',
                     ], 403);
                 }
-                
+
                 // CREATE TOKEN
                 $token = $user->createToken('auth_token')->plainTextToken;
-                $cookie = cookie('jwt',$token,60*24); // 1 DAY, HttpOnly, Secure ,null, null, true, true
+                $cookie = cookie('jwt', $token, 60 * 24); // 1 DAY, HttpOnly, Secure, null, null, true, true
 
                 return response()->json([
-                    'status'=> true,
-                    'message'=>'Logged In Successfully'
-                ],200)->withCookie($cookie);
-
-            }else{
+                    'status' => true,
+                    'message' => 'Logged In Successfully',
+                    'user' => $user, // Optionally return user details
+                ], 200)->withCookie($cookie);
+            } else {
                 return response()->json([
-                    'status'=> false,
-                    'message'=>'Invalid Login Details'
-                ],401);
+                    'status' => false,
+                    'message' => 'Invalid Login Details',
+                ], 401);
             }
         } catch (\Throwable $th) {
             // Return error response
-            return response()->json(['status'=> false, 'message' => 'Login failed: ' . $th->getMessage()], 400);
+            return response()->json([
+                'status' => false,
+                'message' => 'Login failed: ' . $th->getMessage(),
+            ], 500); // Changed to 500 for general server errors
         }
     }
 
