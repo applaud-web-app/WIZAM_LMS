@@ -79,6 +79,24 @@ class CmsController extends Controller
         }
     }
 
+    public function resourceData(){
+        try {
+            $resourceData = HomeCms::select('title','button_text','button_link')->where('status',1)->where('type','resource')->first();
+            return response()->json(['status'=> true,'data' => $resourceData], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function getStarted(){
+        try {
+            $getStarted = HomeCms::select('title','description','button_text','button_link')->where('status',1)->where('type','started')->first();
+            return response()->json(['status'=> true,'data' => $getStarted], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
     // HOME PAGE SECTION ENDS
 
     public function siteSetting(){

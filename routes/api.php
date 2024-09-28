@@ -17,6 +17,9 @@ Route::get('popular-exam-data', [CmsController::class, 'popularExamData']);
 Route::get('help-data', [CmsController::class, 'helpData']);
 Route::get('whyus-data', [CmsController::class, 'whyusData']);
 Route::get('faq-data', [CmsController::class, 'faqData']);
+Route::get('faq-data', [CmsController::class, 'faqData']);
+Route::get('resource-data', [CmsController::class, 'resourceData']);
+Route::get('get-started', [CmsController::class, 'getStarted']);
 
 
 

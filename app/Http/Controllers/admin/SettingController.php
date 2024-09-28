@@ -437,8 +437,75 @@ class SettingController extends Controller
         $help = HomeCms::where('type', 'help')->first();
         $whyus = HomeCms::where('type', 'whyus')->first();
         $faq = HomeCms::where('type', 'faq')->first();
-        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq'));
+        $resource = HomeCms::where('type', 'resource')->first();
+        $getStarted = HomeCms::where('type', 'started')->first();
+        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq','resource','getStarted'));
     }
+
+    public function updateGetstarted(Request $request){
+        // Validate the request input
+        $request->validate([
+            'title' => 'required|max:255',
+            'description' => 'required|max:255',
+            'button_text' => 'required',
+            'button_link' => 'required',
+        ]);
+
+        // Find the existing started entry or create a new one
+        $started = HomeCms::where('type', 'started')->first();
+
+        // If no existing started is found, create a new one
+        if (!$started) {
+            $started = new HomeCms();
+            $started->type = 'started'; // Set the type if necessary
+        }
+
+        // Update the started record
+        $started->title = $request->input('title');
+        $started->description = $request->input('description');
+
+        // Update button text and link, convert to JSON
+        $started->button_text = $request->input('button_text');
+        $started->button_link = $request->input('button_link');
+
+        // Save the started record
+        $started->save();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Get started saved successfully!');
+    }
+
+    public function updateResource(Request $request){
+        // Validate the request input
+        $request->validate([
+            'title' => 'required|max:300',
+            'button_text' => 'required',
+            'button_link' => 'required',
+        ]);
+
+        // Find the existing resource entry or create a new one
+        $resource = HomeCms::where('type', 'resource')->first();
+
+        // If no existing resource is found, create a new one
+        if (!$resource) {
+            $resource = new HomeCms();
+            $resource->type = 'resource'; // Set the type if necessary
+        }
+
+        // Update the resource record
+        $resource->title = $request->input('title');
+
+        // Update button text and link, convert to JSON
+        $resource->button_text = $request->input('button_text');
+        $resource->button_link = $request->input('button_link');
+
+        // Save the resource record
+        $resource->save();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Resource saved successfully!');
+    }
+
 
     public function updateFaq(Request $request){
         // Validate the request input
@@ -468,7 +535,7 @@ class SettingController extends Controller
         $faq->save();
 
         // Redirect back with a success message
-        return redirect()->back()->with('success', 'Faq saved successfully!');
+        return redirect()->back()->with('success', 'FAQ saved successfully!');
     }
 
     public function updateWhyus(Request $request) {

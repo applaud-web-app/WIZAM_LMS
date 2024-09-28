@@ -435,6 +435,135 @@
                 </div>
             </div>
         </div>
+
+
+        {{-- Resource --}}
+        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+            <div class="col-span-12 md:col-span-12">
+                <div
+                    class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
+                    <div class="p-[25px]">
+                        <form action="{{ route('update-resource') }}" method="POST" autocomplete="off"
+                            enctype="multipart/form-data" id="addSetting">
+                            @csrf
+                            <h1 class="mb-4 text-xl"><b>Resource Section</b></h1>
+                            <div class="mb-[15px]">
+                                <label for="title"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Title <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="text" id="title" name="title"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        placeholder="Your Site Name" value="{{ old('title', $resource->title ?? '') }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <label for="button_text"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Button Text <span class="text-danger">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1 md:flex-row">
+                                    <input type="text" name="button_text" id="button_text"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        value="{{ old('button_text', $resource->button_text ?? '') }}"
+                                        placeholder="Your Button Text" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <label for="button_link"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Button Link <span class="text-danger">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1 md:flex-row">
+                                    <input type="text" name="button_link" id="button_link"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        value="{{ old('button_link',$resource->button_link ?? '') }}"
+                                        placeholder="Your Button Link" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <button type="submit"
+                                    class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- GET STARTED --}}
+        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+            <div class="col-span-12 md:col-span-12">
+                <div
+                    class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
+                    <div class="p-[25px]">
+                        <form action="{{ route('update-get-started') }}" method="POST" autocomplete="off"
+                            enctype="multipart/form-data" id="addSetting">
+                            @csrf
+                            <h1 class="mb-4 text-xl"><b>Get Started Section</b></h1>
+                            <div class="mb-[15px]">
+                                <label for="title"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Title <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="text" id="title" name="title"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        placeholder="Your Site Name" value="{{ old('title', $getStarted->title ?? '') }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <label for="description"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Description <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="text" id="description" name="description"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        placeholder="Your Site Name" value="{{ old('description', $getStarted->description ?? '') }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <label for="button_text"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Button Text <span class="text-danger">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1 md:flex-row">
+                                    <input type="text" name="button_text" id="button_text"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        value="{{ old('button_text', $getStarted->button_text ?? '') }}"
+                                        placeholder="Your Button Text" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <label for="button_link"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Button Link <span class="text-danger">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1 md:flex-row">
+                                    <input type="text" name="button_link" id="button_link"
+                                        class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary"
+                                        value="{{ old('button_link',$getStarted->button_link ?? '') }}"
+                                        placeholder="Your Button Link" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <button type="submit"
+                                    class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
 @endsection

@@ -182,6 +182,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-help', 'updateHelp')->name('update-help');
         Route::post('/update-whyus', 'updateWhyus')->name('update-whyus');
         Route::post('/update-faq', 'updateFaq')->name('update-faq');
+        Route::post('/update-resource', 'updateResource')->name('update-resource');
+        Route::post('/update-get-started', 'updateGetstarted')->name('update-get-started');
+
     });
 
     // Question Bank
