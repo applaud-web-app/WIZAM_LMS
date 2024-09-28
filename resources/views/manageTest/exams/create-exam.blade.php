@@ -91,8 +91,8 @@
             </div>
 
             <div class="mb-[20px]">
-                <label for="img_url" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Image Url </label>
-                <input type="url" id="img_url" name="img_url" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter Img url" />
+                <label for="image" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Upload Image <span class="text-red-500">*</span></label>
+                <input type="file" id="image" name="image" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white"  />
             </div>
 
             <!-- Duration Type -->

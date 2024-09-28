@@ -709,8 +709,24 @@ class ManageTest extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
-            'img_url' => 'nullable|url', // Validate the image URL
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate the image URL
         ]);
+
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            
+            // Store the image directly in the public folder
+            $image->move(public_path('exams'), $imageName); 
+            
+            // Construct the full URL to the uploaded image
+            $imageUrl = env('APP_URL') . '/exams/' . $imageName; 
+        } else {
+            return redirect()->back()->withErrors(['image' => 'Image upload failed.']);
+        }
+
 
         // Generate a slug from the exam title
         $slug = Str::slug($validatedData['title']);
@@ -738,7 +754,7 @@ class ManageTest extends Controller
             'favourite' => $validatedData['favorite'],
             'status' => 0, // DRAFT
             'slug' => $slug, // Add the slug to the database
-            'img_url' => $validatedData['img_url'], // Save the image URL
+            'img_url' => $imageUrl, // Save the complete image path
         ]);
 
         // Redirect with success message
@@ -771,7 +787,7 @@ class ManageTest extends Controller
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
             'status' => 'required',
-            'img_url' => 'nullable|url', 
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Find the exam by ID
@@ -789,7 +805,20 @@ class ManageTest extends Controller
             $exam->is_public = $validatedData['visibility']; 
             $exam->favourite = $validatedData['favorite'];
             $exam->status = $validatedData['status']; // DRAFT
-            $exam->img_url = $validatedData['img_url']; 
+            
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                // Store the image directly in the public folder
+                $image->move(public_path('exams'), $imageName); // Store in 'public/exams'
+                // Construct the full URL to the uploaded image
+                $exam->img_url = env('APP_URL') . '/exams/' . $imageName; // Save the new image URL
+            } else {
+                // Keep the existing image URL if no new image is uploaded
+                $exam->img_url = $exam->img_url; 
+            }
+            
             // Generate a new slug from the title
             $slug = Str::slug($validatedData['title']);
 
