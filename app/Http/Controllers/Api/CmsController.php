@@ -102,7 +102,10 @@ class CmsController extends Controller
             if (!$blog) {
                 return response()->json(['status' => false, 'error' => 'Blog not found'], 404);
             }
-            return response()->json(['status' => true, 'data' => $blog], 200);
+
+            $relatedBlogs = Blog::with('category:id,name','user:id,name')->select('id','category_id','user_id','title', 'content', 'short_description', 'image', 'slug', 'created_at','content')->where(['category_id'=>$blog->category_id,'status'=>1])->get();
+
+            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
