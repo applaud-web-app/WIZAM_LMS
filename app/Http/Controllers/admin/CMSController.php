@@ -243,6 +243,7 @@ class CMSController extends Controller
 
         // Handle the image upload
         $imagePath = "default.png";
+        $baseUrl = env('APP_URL');
         if ($request->hasFile('blogImage')) {
             $image = $request->file('blogImage');
             
@@ -276,7 +277,7 @@ class CMSController extends Controller
             'category_id' => $request->input('blogCategory'),
             'short_description' => $request->input('shortDescription'),
             'content' => $request->input('blogContent'), // Save summernote content
-            'image' => $imagePath, // Save the image path if exists
+            'image' => $baseUrl."/blogs/".$imagePath, // Save the image path if exists
             'slug' => $slug, // Save the unique slug
         ]);
 
