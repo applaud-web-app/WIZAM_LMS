@@ -11,14 +11,12 @@ use App\Models\City;
 use App\Models\BillingSetting;
 use App\Models\PaymentMode;
 use App\Models\User;
+use App\Models\HomeCms;
 use Auth;
 use Hash;
 
 class SettingController extends Controller
 {
-    public function homeSetting(){
-        return view('setting.homepage-setting');
-    }
 
     public function generalSettings(){
         $generalSetting = GeneralSetting::first();
@@ -431,6 +429,197 @@ class SettingController extends Controller
         $user->save();
     
         return redirect()->back()->with('success', 'Profile updated successfully!');
+    }
+    
+    public function homeSetting(){
+        $banners = HomeCms::where('type', 'banner')->get();
+        $exam = HomeCms::where('type', 'exam')->first();
+        $help = HomeCms::where('type', 'help')->first();
+        $whyus = HomeCms::where('type', 'whyus')->first();
+        $faq = HomeCms::where('type', 'faq')->first();
+        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq'));
+    }
+
+    public function updateFaq(Request $request){
+        // Validate the request input
+        $request->validate([
+            'title' => 'required|max:300',
+            'button_text' => 'required',
+            'button_link' => 'required',
+        ]);
+
+        // Find the existing faq entry or create a new one
+        $faq = HomeCms::where('type', 'faq')->first();
+
+        // If no existing faq is found, create a new one
+        if (!$faq) {
+            $faq = new HomeCms();
+            $faq->type = 'faq'; // Set the type if necessary
+        }
+
+        // Update the faq record
+        $faq->title = $request->input('title');
+
+        // Update button text and link, convert to JSON
+        $faq->button_text = $request->input('button_text');
+        $faq->button_link = $request->input('button_link');
+
+        // Save the faq record
+        $faq->save();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Faq saved successfully!');
+    }
+
+    public function updateWhyus(Request $request) {
+        $request->validate([
+            'title' => 'required|max:300',
+            'points' => 'required|array',
+        ]);
+    
+        // Find the existing whyus entry or create a new one
+        $whyus = HomeCms::where('type', 'whyus')->first();
+    
+        // If no existing whyus is found, create a new one
+        if (!$whyus) {
+            $whyus = new HomeCms();
+            $whyus->type = 'whyus'; // Set the type if necessary
+        }
+    
+        // Update the whyus record
+        $whyus->title = $request->input('title');
+        $whyus->extra = json_encode($request->input('points'));
+        $whyus->save();
+    
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Why Us saved successfully!');
+    }
+
+    public function updateHelp(Request $request){
+        // Validate the request input
+        $request->validate([
+            'title' => 'required|max:255',
+            'card_title' => 'required|array',
+            'card_description' => 'required|array',
+        ]);
+
+        // Find the existing help entry
+        $help = HomeCms::where('type', 'help')->first();
+
+        // If no existing help is found, create a new one
+        if (!$help) {
+            $help = new HomeCms();
+            $help->type = 'help'; // Set the type if necessary
+        }
+
+        // Update the help record
+        $help->title = $request->input('title');
+
+        // Prepare data for card titles and descriptions
+        $cards = [];
+        foreach ($request->input('card_title') as $key => $title) {
+            $cards[] = [
+                'title' => $title,
+                'description' => $request->input('card_description')[$key],
+            ];
+        }
+
+        // Store the data in JSON format
+        $help->extra = json_encode($cards);
+        $help->save();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Help saved successfully!');
+    }
+
+    public function updateExam(Request $request)
+    {
+        // Validate the request input
+        $request->validate([
+            'title' => 'required|max:300',
+            'button_text' => 'required',
+            'button_link' => 'required',
+        ]);
+    
+        // Find the existing exam entry or create a new one
+        $exam = HomeCms::where('type', 'exam')->first();
+    
+        // If no existing exam is found, create a new one
+        if (!$exam) {
+            $exam = new HomeCms();
+            $exam->type = 'exam'; // Set the type if necessary
+        }
+    
+        // Update the exam record
+        $exam->title = $request->input('title');
+    
+        // Update button text and link, convert to JSON
+        $exam->button_text = $request->input('button_text');
+        $exam->button_link = $request->input('button_link');
+    
+        // Save the exam record
+        $exam->save();
+    
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Exam saved successfully!');
+    }
+
+    public function updateBanner(Request $request)
+    {
+        // Get the existing banners from the database
+        $existingBanners = HomeCms::where('type', 'banner')->pluck('id')->toArray();
+
+        // Loop through the incoming titles to save or update each banner
+        foreach ($request->title as $index => $title) {
+            // Get the ID for the current slider (if it exists)
+            $bannerId = $request->banner_id[$index] ?? null;
+
+            // Save or update the banner
+            $banner = HomeCms::updateOrCreate(
+                ['id' => $bannerId], // Use existing ID to update
+                [
+                    'title' => $title,
+                    'description' => $request->short_description[$index],
+                    'button_text' => $request->button_text[$index],
+                    'button_link' => $request->button_link[$index],
+                    'type' => 'banner',
+                    'status' => 1, // Default status, you can adjust as needed
+                ]
+            );
+
+            // Handle image upload
+            if ($request->hasFile("banner_img.$index")) {
+
+                $image = $request->file("banner_img.$index");
+    
+                // Generate a unique filename with the current timestamp
+                $imageName = 'banner_' . time() . '_' . $index . '.' . $image->getClientOriginalExtension();
+    
+                // Move the image to the 'public/banners' directory
+                $image->move(public_path('banners'), $imageName);
+    
+                // Store the image path in the database (relative to the public directory)
+                $imagePath = $imageName;
+    
+                // Save the complete URL in the database
+                $completeImageUrl = env('APP_URL') . '/banners/' . $imagePath; // Create URL based on public path
+                
+                // Save the image URL to the banner
+                $banner->image = $completeImageUrl;
+                $banner->save();
+            }
+        }
+
+        // Now, check which banners to delete
+        $submittedBannerIds = array_filter($request->banner_id); // Get only non-null IDs from the request
+        $bannersToDelete = array_diff($existingBanners, $submittedBannerIds); // Identify IDs that are not in the request
+
+        // Delete banners that were not submitted in the request
+        if (!empty($bannersToDelete)) {
+            HomeCms::whereIn('id', $bannersToDelete)->delete();
+        }
+
+        return redirect()->back()->with('success', 'Banners updated successfully!');
     }
 
 }

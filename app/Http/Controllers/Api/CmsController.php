@@ -12,6 +12,7 @@ use App\Models\Pages;
 use App\Models\Exam;
 use App\Models\GeneralSetting;
 use App\Models\Enquiry;
+use App\Models\HomeCms;
 
 class CmsController extends Controller
 {
@@ -19,8 +20,60 @@ class CmsController extends Controller
     // HOME PAGE SECTIONS
     public function banners(){
         try {
-            $siteSetting = GeneralSetting::select('site_logo','favicon','site_name','tag_line','description')->first();
-            return response()->json(['status'=> true,'data' => $siteSetting], 201);
+            $banner = HomeCms::select('title','description','image','button_text','button_link')->where('status',1)->where('type','banner')->get();
+            return response()->json(['status'=> true,'data' => $banner], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function popularExamData(){
+        try {
+            $examData = HomeCms::select('title','button_text','button_link')->where('status',1)->where('type','exam')->first();
+            return response()->json(['status'=> true,'data' => $examData], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function helpData() {
+        try {
+            $helpData = HomeCms::select('title', 'extra')->where('status', 1)->where('type', 'help')->first();
+    
+            if (!$helpData) {
+                return response()->json(['status' => false, 'error' => 'No data found.'], 404);
+            }
+    
+            $data['title'] = $helpData->title;
+            $data['data'] = isset($helpData->extra) ? json_decode($helpData->extra, true) : null;
+    
+            return response()->json(['status' => true, 'data' => $data], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function whyusData() {
+        try {
+            $whyus = HomeCms::select('title', 'extra')->where('status', 1)->where('type', 'whyus')->first();
+    
+            if (!$whyus) {
+                return response()->json(['status' => false, 'error' => 'No data found.'], 404);
+            }
+    
+            $data['title'] = $whyus->title;
+            $data['data'] = isset($whyus->extra) ? json_decode($whyus->extra, true) : null;
+    
+            return response()->json(['status' => true, 'data' => $data], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function faqData(){
+        try {
+            $faqData = HomeCms::select('title','button_text','button_link')->where('status',1)->where('type','faq')->first();
+            return response()->json(['status'=> true,'data' => $faqData], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }

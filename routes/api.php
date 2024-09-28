@@ -13,6 +13,10 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 
 // CMS API (FRONTEND)
 Route::get('banners', [CmsController::class, 'banners']);
+Route::get('popular-exam-data', [CmsController::class, 'popularExamData']);
+Route::get('help-data', [CmsController::class, 'helpData']);
+Route::get('whyus-data', [CmsController::class, 'whyusData']);
+Route::get('faq-data', [CmsController::class, 'faqData']);
 
 
 
