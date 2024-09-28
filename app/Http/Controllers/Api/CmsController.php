@@ -103,7 +103,7 @@ class CmsController extends Controller
                 return response()->json(['status' => false, 'error' => 'Blog not found'], 404);
             }
 
-            $relatedBlogs = Blog::with('category:id,name','user:id,name')->select('id','category_id','user_id','title', 'content', 'short_description', 'image', 'slug', 'created_at','content')->where(['category_id'=>$blog->category_id,'status'=>1])->get();
+            $relatedBlogs = Blog::with('category:id,name','user:id,name')->select('title','category_id','short_description','image','slug','created_at')->where(['category_id'=>$blog->category_id,'status'=>1])->get();
 
             return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs], 200);
         } catch (\Throwable $th) {
