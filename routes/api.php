@@ -12,13 +12,17 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 
 
 // CMS API (FRONTEND)
+Route::get('banners', [CmsController::class, 'banners']);
+
+
+
 Route::get('site-setting', [CmsController::class, 'siteSetting']);
 
 Route::get('faq', [CmsController::class, 'faq']);
 Route::get('course', [CmsController::class, 'course']);
 Route::get('popular-exams', [CmsController::class, 'popularExams']);
 Route::get('exam/{slug}', [CmsController::class, 'examDetail']);
-Route::get('latest-resources', [CmsController::class, 'latest-resources']);
+Route::get('latest-resources', [CmsController::class, 'latestResources']);
 Route::get('/resource/{slug}', [CmsController::class, 'resourceDetail']);
 
 // FOR PAGES

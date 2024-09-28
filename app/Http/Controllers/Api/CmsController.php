@@ -16,6 +16,18 @@ use App\Models\Enquiry;
 class CmsController extends Controller
 {
 
+    // HOME PAGE SECTIONS
+    public function banners(){
+        try {
+            $siteSetting = GeneralSetting::select('site_logo','favicon','site_name','tag_line','description')->first();
+            return response()->json(['status'=> true,'data' => $siteSetting], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // HOME PAGE SECTION ENDS
+
     public function siteSetting(){
         try {
             $siteSetting = GeneralSetting::select('site_logo','favicon','site_name','tag_line','description')->first();
