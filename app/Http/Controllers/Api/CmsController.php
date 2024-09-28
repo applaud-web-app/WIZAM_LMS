@@ -45,7 +45,7 @@ class CmsController extends Controller
 
     public function popularExams(){
         try {
-            $popularExams = Exam::select('image','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->take(3)->get();
+            $popularExams = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->take(3)->get();
             // WHERE IS_FREE IS 0 THEN SHOW PRICE
             return response()->json(['status'=> true,'data' => $popularExams], 201);
         } catch (\Throwable $th) {
@@ -55,7 +55,7 @@ class CmsController extends Controller
 
     public function exams(){
         try {
-            $exam = Exam::select('image','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->get();
+            $exam = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->get();
             return response()->json(['status'=> true,'data' => $exam], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
@@ -64,7 +64,7 @@ class CmsController extends Controller
 
     public function examDetail($slug){
         try {
-            $exam = Exam::select('image','title','description','price','is_free','slug')->where(['slug'=>$slug,'status'=>1])->first();
+            $exam = Exam::select('img_url','title','description','price','is_free','slug')->where(['slug'=>$slug,'status'=>1])->first();
 
             // Check if the exam exists
             if (!$exam) {
