@@ -202,7 +202,7 @@ class CMSController extends Controller
                     return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                 })
                 ->addColumn('images', function($row) {
-                    return "<img src='".asset('blogs/'.$row->image)."' class='img-fluid' height='200px' />";
+                    return "<img src='".$row->image."' class='img-fluid' height='200px' />";
                 })
                 ->addColumn('author', function($row) {
                     if(isset($row->user)){
