@@ -87,7 +87,7 @@ class CmsController extends Controller
 
     public function resources(){
         try {
-            $resources = Blog::with('category:id,name')->select('title','short_description','image','slug','created_at')->where('status',1)->latest()->get();
+            $resources = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status',1)->latest()->get();
             return response()->json(['status'=> true,'data' => $resources], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
