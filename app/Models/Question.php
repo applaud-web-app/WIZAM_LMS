@@ -30,4 +30,9 @@ class Question extends Model
         return $this->hasOne(Topic::class, 'id', 'topic_id');
     }
 
+    public function exams()
+    {
+        return $this->belongsToMany(Exam::class, 'exam_questions');
+    }
+
 }

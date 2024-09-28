@@ -50,4 +50,9 @@ class Exam extends Model
         return $this->belongsTo(SubCategory::class, 'subcategory_id', 'id');
     }
 
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'exam_questions');
+    }
+
 }

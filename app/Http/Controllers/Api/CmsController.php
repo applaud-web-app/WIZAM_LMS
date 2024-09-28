@@ -55,8 +55,25 @@ class CmsController extends Controller
 
     public function exams(){
         try {
-            $exam = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->get();
-            return response()->json(['status'=> true,'data' => $exam], 201);
+            $exams = Exam::select(
+                'exams.img_url', 
+                'exams.title', 
+                'exams.description', 
+                'exams.price', 
+                'exams.is_free', 
+                'exams.slug', 
+                'exams.exam_duration'
+            )
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+            ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
+            ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
+            ->where(['exams.favourite' => 1, 'exams.status' => 1])
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration')
+            ->orderBy('exams.created_at', 'desc') // Order by exam created_at
+            ->get();
+        
+            return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
