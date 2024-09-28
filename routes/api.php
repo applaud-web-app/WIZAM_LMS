@@ -19,7 +19,7 @@ Route::get('course', [CmsController::class, 'course']);
 Route::get('popular-exams', [CmsController::class, 'popularExams']);
 Route::get('exam/{slug}', [CmsController::class, 'examDetail']);
 Route::get('latest-resources', [CmsController::class, 'latest-resources']);
-Route::get('/resource/{slug}', [BlogController::class, 'resourceDetail']);
+Route::get('/resource/{slug}', [CmsController::class, 'resourceDetail']);
 
 // FOR PAGES
 Route::get('exams', [CmsController::class, 'exams']);

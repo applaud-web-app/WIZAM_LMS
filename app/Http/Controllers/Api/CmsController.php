@@ -97,7 +97,7 @@ class CmsController extends Controller
     public function resourceDetail($slug){
         try {
             // Fetch the blog with its category and any other necessary relationships
-            $blog = Blog::with('category:id,name','user:id,name')->select('id', 'title', 'content', 'short_description', 'image', 'slug', 'created_at','content')->where(['slug'=>$slug,'status'=>1])->first();
+            $blog = Blog::with('category:id,name','user:id,name')->select('id','category_id','user_id','title', 'content', 'short_description', 'image', 'slug', 'created_at','content')->where(['slug'=>$slug,'status'=>1])->first();
             // Check if the blog exists
             if (!$blog) {
                 return response()->json(['status' => false, 'error' => 'Blog not found'], 404);
