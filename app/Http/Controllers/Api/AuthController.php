@@ -204,37 +204,66 @@ class AuthController extends Controller
         try {
             // Validate the incoming request
             $request->validate([
-                'email' => 'required|email|exists:users,email', // Ensure email exists in users table
+                'email' => 'required|email', // Ensure the email format is correct
             ]);
     
             // Find the user by email
-            $user = User::where('email', $request->email)->where('status',1)->first();
+            $user = User::where('email', $request->email)->first();
+    
+            // Check if user exists
+            if (!$user) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'The email you entered does not match any account. Please try again with a registered email.'
+                ], 404);
+            }
+    
+            // Check if the user is active
+            if ($user->status != 1) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Your account is currently inactive. Please contact site support for assistance.'
+                ], 403); // Changed to 403 for better HTTP status code
+            }
     
             // Check if the user has the 'student' role
             if ($user && $user->hasRole('student')) {
                 // Send reset password link
                 $token = Password::createToken($user);
-
+    
                 // Create the reset URL using the frontend environment variable
                 $resetUrl = env('FRONTEND_URL') . "/reset-password?token=" . urlencode($token) . "&email=" . urlencode($request->email);
-
+    
+                // Send the reset email
                 Mail::to($user->email)->send(new ForgotPassword($resetUrl));
-                return response()->json(['status' => true, 'message' => 'Password reset link sent successfully.'], 200);
+    
+                return response()->json([
+                    'status' => true, 
+                    'message' => 'A password reset link has been sent to your email address. Please check your inbox (or spam folder) to proceed.'
+                ], 200);
             } else {
-                return response()->json(['status' => false, 'message' => 'Unauthorize User.'], 404);
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'You do not have the necessary permissions to perform this action. Please contact support if you believe this is an error.'
+                ], 403); // Changed to 403 for unauthorized action
             }
         } catch (ValidationException $e) {
             // Return custom validation error response
             return response()->json([
                 'status' => false,
-                'message' => 'Validation Error',
+                'message' => 'There was an issue with your submission. Please check the errors below and try again.',
                 'errors' => $e->validator->errors(),
             ], 422);
-        } catch (\Throwable $th) {
-            // Handle other errors and return a response
-            return response()->json(['status' => false, 'error' => 'An error occurred: ' . $th->getMessage()], 500);
+        } catch (\Exception $e) {
+            // Handle other exceptions and return a response
+            return response()->json([
+                'status' => false, 
+                'message' => 'An unexpected error occurred while processing your request. Please try again later or contact support if the issue persists.',
+                'error' => $e->getMessage(), // Optionally include the actual error message for debugging purposes
+            ], 500);
         }
     }
+    
 
     public function resetPassword(Request $request)
     {
