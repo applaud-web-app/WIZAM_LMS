@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Country;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -190,6 +193,45 @@ class AuthController extends Controller
                 'status' => false,
                 'message' => 'Logout failed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+
+    public function forgotPassword(Request $request)
+    {
+        try {
+            // Validate the incoming request
+            $request->validate([
+                'email' => 'required|email|exists:users,email', // Ensure email exists in users table
+            ]);
+    
+            // Find the user by email
+            $user = User::where('email', $request->email)->where('status',1)->first();
+    
+            // Check if the user has the 'student' role
+            if ($user && $user->hasRole('student')) {
+                // Send reset password link
+                $token = Password::createToken($user); // Create a reset password token
+                // Send the email using Laravel's Mail facade
+                Mail::send('emails.reset_password', ['token' => $token, 'email' => $request->email], function($message) use ($user) {
+                    $message->to($user->email);
+                    $message->subject(env('APP_NAME').': Reset Your Password');
+                });
+    
+                return response()->json(['status' => true, 'message' => 'Password reset link sent successfully.'], 200);
+            } else {
+                return response()->json(['status' => false, 'message' => 'User not found or not a student.'], 404);
+            }
+        } catch (ValidationException $e) {
+            // Return custom validation error response
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Error',
+                'errors' => $e->validator->errors(),
+            ], 422);
+        } catch (\Throwable $th) {
+            // Handle other errors and return a response
+            return response()->json(['status' => false, 'error' => 'An error occurred: ' . $th->getMessage()], 500);
         }
     }
 

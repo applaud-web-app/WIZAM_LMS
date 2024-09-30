@@ -188,6 +188,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-resource', 'updateResource')->name('update-resource');
         Route::post('/update-get-started', 'updateGetstarted')->name('update-get-started');
 
+        // ABOUT PAGE
+        Route::get('/about-settings', 'aboutSetting')->name('about-settings');
+        Route::post('/update-mission', 'updateMission')->name('update-mission');
+        Route::post('/update-vision', 'updateVision')->name('update-vision');
+        Route::post('/update-values', 'updateValues')->name('update-values');
+        Route::post('/update-strategy', 'updateStrategy')->name('update-strategy');
+        Route::post('/update-operate', 'updateOperate')->name('update-operate');
+        Route::post('/update-best-data', 'updateBestData')->name('update-best-data');
+
     });
 
     // Question Bank

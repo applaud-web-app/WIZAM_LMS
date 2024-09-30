@@ -9,7 +9,8 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-
+// Add the Forgot Password route
+Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 
 // CMS API (FRONTEND)
 Route::get('banners', [CmsController::class, 'banners']);
@@ -45,6 +46,11 @@ Route::get('page/{slug}', [CmsController::class, 'pageDetail']);
 
 // CONTACT US
 Route::post('contact-us', [CmsController::class, 'contactUs']);
+
+
+// ABOUT PAGE 
+Route::get('about', [CmsController::class, 'about']);
+
 
 
 // Authorized Routes

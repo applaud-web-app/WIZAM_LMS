@@ -791,4 +791,145 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Banners updated successfully!');
     }
 
+    // ABOUT PAGE
+    public function aboutSetting(){
+        $mission = HomeCms::where('type', 'mission')->first();
+        $vision = HomeCms::where('type', 'vision')->first();
+        $values = HomeCms::where('type', 'values')->first();
+        $strategy = HomeCms::where('type', 'strategy')->first();
+        $operate = HomeCms::where('type', 'operate')->first();
+        $bestData = HomeCms::where('type', 'bestData')->first();
+        return view('setting.aboutpage-setting',compact('mission','vision','values','strategy','operate','bestData'));
+    }
+
+    // Update Mission Section
+    public function updateMission(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'image' => 'nullable|image|max:2048', // Maximum image size 2MB
+            'description' => 'required|string|max:1000',
+        ]);
+
+        // Find the existing mission entry or create a new one
+        $mission = HomeCms::where('type', 'mission')->first() ?: new HomeCms(['type' => 'mission']);
+
+        // Update fields
+        $mission->title = $request->input('title');
+        $mission->description = $request->input('description');
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            // Generate a unique filename with the current timestamp
+            $imageName = 'image_' . time() . '.' . $image->getClientOriginalExtension();
+            // Move the image to the 'public/setting' directory
+            $image->move(public_path('setting'), $imageName);
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
+            $mission->image = $imagePath;
+        }
+
+        $mission->save();
+
+        return redirect()->back()->with('success', 'Mission saved successfully!');
+    }
+
+    // Update Vision Section
+    public function updateVision(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'description' => 'required|string|max:1000',
+        ]);
+
+        $vision = HomeCms::where('type', 'vision')->first() ?: new HomeCms(['type' => 'vision']);
+        $vision->title = $request->input('title');
+        $vision->description = $request->input('description');
+        $vision->save();
+
+        return redirect()->back()->with('success', 'Vision saved successfully!');
+    }
+
+    // Update Values Section
+    public function updateValues(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'image' => 'nullable|image|max:2048', // Maximum image size 2MB
+            'description' => 'required|string|max:1000',
+        ]);
+
+        $values = HomeCms::where('type', 'values')->first() ?: new HomeCms(['type' => 'values']);
+        $values->title = $request->input('title');
+        $values->description = $request->input('description');
+
+       if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            // Generate a unique filename with the current timestamp
+            $imageName = 'image_' . time() . '.' . $image->getClientOriginalExtension();
+            // Move the image to the 'public/setting' directory
+            $image->move(public_path('setting'), $imageName);
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
+            $values->image = $imagePath;
+        }
+
+        $values->save();
+
+        return redirect()->back()->with('success', 'Values saved successfully!');
+    }
+
+    // Update Strategy Section
+    public function updateStrategy(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'description' => 'required|string|max:1000',
+        ]);
+
+        $strategy = HomeCms::where('type', 'strategy')->first() ?: new HomeCms(['type' => 'strategy']);
+        $strategy->title = $request->input('title');
+        $strategy->description = $request->input('description');
+        $strategy->save();
+
+        return redirect()->back()->with('success', 'Strategy saved successfully!');
+    }
+
+    // Update How We Operate Section
+    public function updateOperate(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'description' => 'required|string|max:2000',
+        ]);
+
+        $howWeOperate = HomeCms::where('type', 'operate')->first() ?: new HomeCms(['type' => 'operate']);
+        $howWeOperate->title = $request->input('title');
+        $howWeOperate->description = $request->input('description');
+        $howWeOperate->save();
+
+        return redirect()->back()->with('success', 'How We Operate saved successfully!');
+    }
+
+    // Update Best Data Section
+    public function updateBestData(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:300',
+            'description' => 'required|string|max:1000',
+        ]);
+
+        // Find the existing best data entry or create a new one
+        $bestData = HomeCms::where('type', 'bestData')->first() ?: new HomeCms(['type' => 'bestData']);
+
+        // Update fields
+        $bestData->title = $request->input('title');
+        $bestData->description = $request->input('description');
+        $bestData->save();
+
+        return redirect()->back()->with('success', 'Best Data saved successfully!');
+    }
+
+
+
 }

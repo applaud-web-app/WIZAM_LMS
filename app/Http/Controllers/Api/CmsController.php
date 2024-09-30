@@ -17,6 +17,25 @@ use App\Models\HomeCms;
 
 class CmsController extends Controller
 {
+    // ABOUT PAGE CONTENT
+    public function about(){
+        try {
+            // Fetch data for each section using a single query to minimize database calls
+            $dataTypes = ['mission', 'vision', 'values', 'strategy', 'operate', 'bestData'];
+            $data = [];
+    
+            foreach ($dataTypes as $type) {
+                // Fetch each section by type and store it in the data array
+                $data[$type] = HomeCms::select('title','description','image')->where('type', $type)->first();
+            }
+    
+            // Return a successful response with the fetched data
+            return response()->json(['status' => true, 'data' => $data], 200); // Use 200 for a successful response
+        } catch (\Throwable $th) {
+            // Return a JSON response with error details if an exception occurs
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
 
     // HOME PAGE SECTIONS
     public function banners(){
