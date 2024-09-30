@@ -51,7 +51,7 @@
    <!-- File Import Section -->
    <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
       <div class="p-[25px]">
-         <form id="import-form" action="{{ route('import-users-post') }}" method="POST" enctype="multipart/form-data">
+         <form id="import-form" action="{{ route('import-users') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="flex items-center justify-center w-full">
                <label id="file-label" for="import-file" class="flex flex-col items-center justify-center w-full sm:min-h-[280px] bg-white dark:bg-box-dark mb-[30px] mx-auto p-2.5 rounded-[10px] border-2 border-dashed border-[#c6d0dc] dark:border-box-dark-up hover:border-primary dark:hover:border-primary cursor-pointer transition-all duration-300 ease-linear">
@@ -65,7 +65,7 @@
                   <input id="import-file" type="file" name="file" class="hidden" accept=".csv">
                </label>
             </div>
-            <button id="import-button" type="submit" class="text-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition duration-300 ease-in-out" disabled>
+            <button id="import-button" type="submit" class="text-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition duration-300 ease-in-out" >
                Import
             </button>
          </form>

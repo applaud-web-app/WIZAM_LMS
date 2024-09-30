@@ -458,21 +458,12 @@ class UserController extends Controller
 
     public function importUser(Request $request)
     {
-        // Validate file upload
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,csv',
+            'file' => 'required|mimes:xlsx,xls',
         ]);
 
-        try {
-            // Import data
-            Excel::import(new UsersImport, $request->file('file'));
+        Excel::import(new UsersImport, $request->file('file'));
 
-            // Redirect with success message
-            return redirect()->route('users')->with('success', 'Users imported successfully.');
-
-        } catch (\Throwable $th) {
-            // Redirect with error message
-            return redirect()->route('import-users')->with('error', 'An error occurred while importing users.')->with('exception', $th->getMessage());
-        }
+        return back()->with('success', 'Users imported successfully.');
     }
 }

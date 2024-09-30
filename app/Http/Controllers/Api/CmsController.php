@@ -12,6 +12,7 @@ use App\Models\Pages;
 use App\Models\Exam;
 use App\Models\GeneralSetting;
 use App\Models\Enquiry;
+use App\Models\Plan;
 use App\Models\HomeCms;
 
 class CmsController extends Controller
@@ -98,10 +99,9 @@ class CmsController extends Controller
     }
 
     // HOME PAGE SECTION ENDS
-
     public function siteSetting(){
         try {
-            $siteSetting = GeneralSetting::select('site_logo','favicon','site_name','tag_line','description')->first();
+            $siteSetting = GeneralSetting::select('site_logo', 'light_site_logo','favicon', 'site_name', 'tag_line', 'description','maintenance_mode', 'debug_mode', 'default_payment', 'currency', 'currency_symbol', 'symbol_position', 'copyright', 'address', 'number', 'email', 'facebook', 'instagram', 'linkedin', 'youtube', 'twitter')->first();
             return response()->json(['status'=> true,'data' => $siteSetting], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
@@ -123,6 +123,17 @@ class CmsController extends Controller
             return response()->json(['status'=> true,'data' => $course], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function coursePackage($id)
+    {
+        try {
+            // Assuming you have a CoursePackage model representing the table structure
+            $coursePackage = Plan::where('category_id', $id)->where('status', 1)->select('id','name','price_type','duration','price','discount','feature_access','features','popular')->get();
+            return response()->json(['status' => true, 'data' => $coursePackage], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
 

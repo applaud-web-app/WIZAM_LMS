@@ -26,7 +26,10 @@ Route::get('get-started', [CmsController::class, 'getStarted']);
 Route::get('site-setting', [CmsController::class, 'siteSetting']);
 
 Route::get('faq', [CmsController::class, 'faq']);
+
 Route::get('course', [CmsController::class, 'course']);
+Route::get('course-pack/{id}', [CmsController::class, 'coursePackage']);
+
 Route::get('popular-exams', [CmsController::class, 'popularExams']);
 Route::get('exam/{slug}', [CmsController::class, 'examDetail']);
 Route::get('latest-resources', [CmsController::class, 'latestResources']);

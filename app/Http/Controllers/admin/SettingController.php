@@ -12,11 +12,22 @@ use App\Models\BillingSetting;
 use App\Models\PaymentMode;
 use App\Models\User;
 use App\Models\HomeCms;
+use App\Models\Question;
+use App\Models\Quizze;
+use App\Models\PracticeSet;
 use Auth;
 use Hash;
 
 class SettingController extends Controller
 {
+
+    public function dashboard(){
+        $user = User::whereIn('status',[1,0])->count();
+        $question = Question::whereIn('status',[1,0])->count();
+        $quiz = Quizze::whereIn('status',[1,0])->count();
+        $praticeSet = PracticeSet::whereIn('status',[1,0])->count();
+        return view('dashboard',compact('user','question','quiz','praticeSet'));
+    }
 
     public function generalSettings(){
         $generalSetting = GeneralSetting::first();
@@ -24,14 +35,15 @@ class SettingController extends Controller
     }
 
     public function updateGeneralSetting(Request $request){
-        // dd($request->all());
         // Validate the form input
         $request->validate([
             'site_name' => 'required|string|max:255',
             'tag_line' => 'required|string|max:255',
+            'copyright'=> 'required|string|max:255',
             'seo_description' => 'required|string|max:1000',
             'site_favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'light_site_logo'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Check if there is an existing GeneralSetting
@@ -45,29 +57,75 @@ class SettingController extends Controller
         // Update the settings values
         $generalSetting->site_name = $request->input('site_name');
         $generalSetting->tag_line = $request->input('tag_line');
+        $generalSetting->copyright = $request->input('copyright');
         $generalSetting->description = $request->input('seo_description');
+
+        // if ($request->hasFile('site_logo')) {
+        //     $image = $request->file('site_logo');
+        //     // Generate a unique filename with the current timestamp
+        //     $imageName = 'logo_' . time() . '.' . $image->getClientOriginalExtension();
+        //     // Move the image to the 'public/blogs' directory
+        //     $image->move(public_path('setting'), $imageName);
+        //     // Store the image path in the database (relative to the public directory)
+        //     $imagePath = $imageName;
+        //     $generalSetting->site_logo = $imagePath;
+        // }
+
+        // if ($request->hasFile('light_site_logo')) {
+        //     $image = $request->file('light_site_logo');
+        //     // Generate a unique filename with the current timestamp
+        //     $imageName = 'logo_' . time() . '.' . $image->getClientOriginalExtension();
+        //     // Move the image to the 'public/blogs' directory
+        //     $image->move(public_path('setting'), $imageName);
+        //     // Store the image path in the database (relative to the public directory)
+        //     $imagePath = $imageName;
+        //     $generalSetting->light_site_logo = $imagePath;
+        // }
+
+        // if ($request->hasFile('site_favicon')) {
+        //     $image = $request->file('site_favicon');
+        //     // Generate a unique filename with the current timestamp
+        //     $imageName = 'favicon_' . time() . '.' . $image->getClientOriginalExtension();
+        //     // Move the image to the 'public/blogs' directory
+        //     $image->move(public_path('setting'), $imageName);
+        //     // Store the image path in the database (relative to the public directory)
+        //     $imagePath = $imageName;
+        //     $generalSetting->favicon = $imagePath;
+        // }
 
         if ($request->hasFile('site_logo')) {
             $image = $request->file('site_logo');
             // Generate a unique filename with the current timestamp
             $imageName = 'logo_' . time() . '.' . $image->getClientOriginalExtension();
-            // Move the image to the 'public/blogs' directory
+            // Move the image to the 'public/setting' directory
             $image->move(public_path('setting'), $imageName);
-            // Store the image path in the database (relative to the public directory)
-            $imagePath = $imageName;
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
             $generalSetting->site_logo = $imagePath;
         }
-
+        
+        if ($request->hasFile('light_site_logo')) {
+            $image = $request->file('light_site_logo');
+            // Generate a unique filename with the current timestamp
+            $imageName = 'light_logo_' . time() . '.' . $image->getClientOriginalExtension();
+            // Move the image to the 'public/setting' directory
+            $image->move(public_path('setting'), $imageName);
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
+            $generalSetting->light_site_logo = $imagePath;
+        }
+        
         if ($request->hasFile('site_favicon')) {
             $image = $request->file('site_favicon');
             // Generate a unique filename with the current timestamp
             $imageName = 'favicon_' . time() . '.' . $image->getClientOriginalExtension();
-            // Move the image to the 'public/blogs' directory
+            // Move the image to the 'public/setting' directory
             $image->move(public_path('setting'), $imageName);
-            // Store the image path in the database (relative to the public directory)
-            $imagePath = $imageName;
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
             $generalSetting->favicon = $imagePath;
         }
+        
 
         // Save the record (Insert if new, Update if existing)
         $generalSetting->save();
@@ -75,6 +133,50 @@ class SettingController extends Controller
         // Redirect with success message
         return redirect()->route('general-settings')->with('success', 'Settings updated successfully.');
 
+    }
+
+    public function updateContactInfo(Request $request){
+        // Validate the form input
+        $request->validate([
+            'address' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:255',
+            'email'=> 'required|string|max:255',
+            'facebook' => 'nullable|url|max:255',
+            'instagram' => 'nullable|url|max:255',
+            'linkedin' => 'nullable|url|max:255',
+            'youtube' => 'nullable|url|max:255',
+            'twitter' => 'nullable|url|max:255',
+        ]);
+
+        try {
+            // Check if there is an existing GeneralSetting
+            $generalSetting = GeneralSetting::first();
+
+            // If no record exists, prompt the user to create one first
+            if (!$generalSetting) {
+                return redirect()->route('general-settings')->with('error', 'Please add General Setting Data first.');
+            }
+
+
+            // Update the settings values
+            $generalSetting->address = $request->input('address');
+            $generalSetting->number = $request->input('phone_number');
+            $generalSetting->email = $request->input('email');
+            $generalSetting->facebook = $request->input('facebook');
+            $generalSetting->instagram = $request->input('instagram');
+            $generalSetting->linkedin = $request->input('linkedin');
+            $generalSetting->youtube = $request->input('youtube');
+            $generalSetting->twitter = $request->input('twitter');
+
+            // Save the record (Insert if new, Update if existing)
+            $generalSetting->save();
+
+            // Redirect with success message
+            return redirect()->route('general-settings')->with('success', 'Contact information updated successfully.');
+        } catch (\Exception $e) {
+            // Handle any exceptions that may occur
+            return redirect()->route('general-settings')->with('error', 'An error occurred while updating contact information. Please try again.');
+        }
     }
 
     public function emailSettings(){

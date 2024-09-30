@@ -56,12 +56,12 @@
                         <div>
                             <h4
                                 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
-                                <span class="flex items-center countCategories" data-number="100">
+                                <span class="flex items-center countCategories" data-number="{{$user < 10 ? "0".$user : $user}}">
 
 
-                                    <span class="countNumber">100</span>
+                                    <span class="countNumber">{{$user < 10 ? "0".$user : $user}}</span>
 
-                                    <span>+</span>
+                                    <span></span>
 
                                 </span>
                             </h4>
@@ -83,11 +83,11 @@
                         <div>
                             <h4
                                 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
-                                <span class="flex items-center countCategories" data-number="1211">
+                                <span class="flex items-center countCategories" data-number="{{$question < 10 ? "0".$question : $question}}">
 
-                                    <span class="countNumber">1211</span>
+                                    <span class="countNumber">{{$question < 10 ? "0".$question : $question}}</span>
 
-                                    <span>+</span>
+                                    <span></span>
 
                                 </span>
                             </h4>
@@ -110,11 +110,11 @@
                         <div>
                             <h4
                                 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
-                                <span class="flex items-center countCategories" data-number="854">
+                                <span class="flex items-center countCategories" data-number="{{$quiz < 10 ? "0".$quiz : $quiz}}">
 
 
 
-                                    <span class="countNumber">854</span>
+                                    <span class="countNumber">{{$quiz < 10 ? "0".$quiz : $quiz}}</span>
 
 
                                 </span>
@@ -137,10 +137,10 @@
                         <div>
                             <h4
                                 class="mb-0 text-3xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-dark dark:text-title-dark">
-                                <span class="flex items-center countCategories" data-number="1211">
+                                <span class="flex items-center countCategories" data-number="{{$praticeSet < 10 ? "0".$praticeSet : $praticeSet}}">
 
 
-                                    <span class="countNumber">1211</span>
+                                    <span class="countNumber">{{$praticeSet < 10 ? "0".$praticeSet : $praticeSet}}</span>
 
                                     <span></span>
 

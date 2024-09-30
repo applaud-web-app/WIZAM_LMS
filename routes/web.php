@@ -35,7 +35,6 @@ Route::prefix('admin')->group(function(){
 
 // Authorized Routes
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('admin-dashboard');
 
     // Manage Users
     Route::controller(UserController::class)->group(function () {
@@ -55,7 +54,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
         // FOR USER IMPORT
         Route::get('/import-users', 'showImportForm')->name('import-users');
-        Route::post('/import-users', 'importUser')->name('import-users-post');
+        Route::post('/import-users', 'importUser')->name('import-users');
     });
 
     // Manage Subject
@@ -137,9 +136,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Setting Controller
     Route::controller(SettingController::class)->group(function () {
 
+        // DASHBOARD
+        Route::get('dashboard', 'dashboard')->name('admin-dashboard');
+
         // FOR SETTING
         Route::get('/general-settings', 'generalSettings')->name('general-settings');
         Route::post('/update-settings', 'updateGeneralSetting')->name('update-settings');
+        Route::post('/update-contact-info', 'updateContactInfo')->name('update-contact-info');
 
         // FOR PROFILE SETTING
         Route::get('/profile', 'profile')->name('profile');
@@ -381,13 +384,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::controller(FileManagerController::class)->group(function () {
         // ALL FILES
         Route::get('/file-manager', 'fileManager')->name('file-manager');
-        
-        // PARENT DIRECTORY
-        Route::post('/add-directory', 'addDirectory')->name('add-directory');
-        Route::post('/delete-directory', 'deleteDirectory')->name('delete-directory');
-        Route::post('/fetch-directory-data', 'fetchDirectoryData')->name('fetch-directory-data');
+
         Route::post('/add-folder', 'addFolder')->name('add-folder');
         Route::post('/save-directory-media', 'saveDirectoryMedia')->name('save-directory-media');
+        Route::post('/delete-directory', 'deleteDirectory')->name('delete-directory');
+
+        Route::get('/fetch-directory', 'fetchDirectoryData')->name('fetch-directory-data');
+
+
+
+        // PARENT DIRECTORY
+        Route::post('/add-directory', 'addDirectory')->name('add-directory');
+        // Route::post('/fetch-directory-data', 'fetchDirectoryData')->name('fetch-directory-data');
 
 
         // FOR MEDIA UPLOAD/REMOVE
