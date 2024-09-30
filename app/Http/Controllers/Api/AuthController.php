@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
+use App\Mail\ForgotPassword;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -211,16 +213,15 @@ class AuthController extends Controller
             // Check if the user has the 'student' role
             if ($user && $user->hasRole('student')) {
                 // Send reset password link
-                $token = Password::createToken($user); // Create a reset password token
-                // Send the email using Laravel's Mail facade
-                Mail::send('emails.reset_password', ['token' => $token, 'email' => $request->email], function($message) use ($user) {
-                    $message->to($user->email);
-                    $message->subject(env('APP_NAME').': Reset Your Password');
-                });
-    
+                $token = Password::createToken($user);
+
+                // Create the reset URL using the frontend environment variable
+                $resetUrl = env('FRONTEND_URL') . "/reset-password?token=" . urlencode($token) . "&email=" . urlencode($request->email);
+
+                Mail::to($user->email)->send(new ForgotPassword($resetUrl));
                 return response()->json(['status' => true, 'message' => 'Password reset link sent successfully.'], 200);
             } else {
-                return response()->json(['status' => false, 'message' => 'User not found or not a student.'], 404);
+                return response()->json(['status' => false, 'message' => 'Unauthorize User.'], 404);
             }
         } catch (ValidationException $e) {
             // Return custom validation error response
@@ -235,6 +236,40 @@ class AuthController extends Controller
         }
     }
 
+    public function resetPassword(Request $request)
+    {
+        try {
+            // Validate the incoming request
+            $request->validate([
+                'email' => 'required|email',
+                'token' => 'required',
+                'password' => 'required|confirmed|min:8', // Ensure password is confirmed and has a minimum length
+            ]);
+    
+            // Attempt to reset the password
+            $response = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    // Hash the password using Hash::make() and save the user
+                    $user->password = Hash::make($password);
+                    $user->save();
+                }
+            );
+    
+            // Check if the password reset was successful
+            if ($response == Password::PASSWORD_RESET) {
+                return response()->json(['status' => true, 'message' => 'Your password has been reset successfully.'], 200);
+            }
+            return response()->json(['status' => false, 'message' => 'The password reset link is invalid or has expired. Please request a new link.'], 400);
+            
+        } catch (ValidationException $e) {
+            // Handle validation errors
+            return response()->json(['status' => false, 'errors' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            // Handle any other exceptions
+            return response()->json(['status' => false, 'message' => 'An unexpected error occurred : '.$e->getMessage().' Please try again later.'], 500);
+        }
+    }
 
     // Fetch authenticated user's profile data
     public function profile(Request $request)

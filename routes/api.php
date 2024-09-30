@@ -11,6 +11,7 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 
 // Add the Forgot Password route
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
 // CMS API (FRONTEND)
 Route::get('banners', [CmsController::class, 'banners']);
