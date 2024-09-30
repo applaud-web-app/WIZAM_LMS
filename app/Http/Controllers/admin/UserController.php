@@ -225,8 +225,8 @@ class UserController extends Controller
                 ->addIndexColumn()
                 ->addColumn('status', function($row) {
                     // Determine the status color and text based on `is_active`
-                    $statusColor = $row->is_active == 0 ? 'success' : 'danger';
-                    $statusText = $row->is_active == 0 ? 'Active' : 'Inactive';
+                    $statusColor = $row->status == 1 ? 'success' : 'danger';
+                    $statusText = $row->status == 1 ? 'Active' : 'Inactive';
                     // Create the status badge HTML
                     return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                 })
