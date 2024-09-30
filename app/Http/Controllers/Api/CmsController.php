@@ -210,7 +210,7 @@ class CmsController extends Controller
             ->where(['exams.favourite' => 1, 'exams.status' => 1])
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration')
             ->orderBy('exams.created_at', 'desc') // Order by exam created_at
-            ->where(['slug'=>$slug,'status'=>1])->first();
+            ->where(['exams.slug'=>$slug,'exams.status'=>1])->first();
 
             // Check if the exam exists
             if (!$exam) {
