@@ -180,23 +180,42 @@ class AuthController extends Controller
     // }
 
 
+    // public function logout(Request $request)
+    // {
+    //     try {
+    //         $request->user()->currentAccessToken()->delete();
+    //         $cookie = cookie('jwt', null, -1); // Clear the JWT cookie
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Logged out successfully'
+    //         ], 200)->withCookie($cookie);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Logout failed: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function logout(Request $request)
     {
         try {
+            // Revoke the user's current token
             $request->user()->currentAccessToken()->delete();
-            $cookie = cookie('jwt', null, -1); // Clear the JWT cookie
-
+    
             return response()->json([
                 'status' => true,
-                'message' => 'Logged out successfully'
-            ], 200)->withCookie($cookie);
+                'message' => 'Logged out successfully.',
+            ], 200); // Optional: include a 200 status code
         } catch (\Exception $e) {
+            // Return an error response if something goes wrong
             return response()->json([
                 'status' => false,
-                'message' => 'Logout failed: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Logout failed: ' . $e->getMessage(),
+            ], 500); // Change to 500 for general server errors
         }
-    }
+    }    
 
 
     public function forgotPassword(Request $request)
