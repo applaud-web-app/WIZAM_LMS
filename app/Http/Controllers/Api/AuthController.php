@@ -239,7 +239,7 @@ class AuthController extends Controller
     
                 return response()->json([
                     'status' => true, 
-                    'message' => 'A password reset link has been sent to your email address. Please check your inbox (or spam folder) to proceed.'
+                    'message' => 'A password reset link has been sent to your email address. Please check your inbox.'
                 ], 200);
             } else {
                 return response()->json([
