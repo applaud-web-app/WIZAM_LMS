@@ -201,21 +201,28 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            // Revoke the user's current token
-            $request->user()->currentAccessToken()->delete();
-    
-            return response()->json([
-                'status' => true,
-                'message' => 'Logged out successfully.',
-            ], 200); // Optional: include a 200 status code
+            // Check if the user is authenticated
+            if ($request->user()) {
+                // Revoke the user's current access token
+                $request->user()->currentAccessToken()->delete();
+                
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Logged out successfully',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User is not authenticated',
+                ], 401); // Unauthorized
+            }
         } catch (\Exception $e) {
-            // Return an error response if something goes wrong
             return response()->json([
                 'status' => false,
                 'message' => 'Logout failed: ' . $e->getMessage(),
-            ], 500); // Change to 500 for general server errors
+            ], 500); // Internal Server Error
         }
-    }    
+    }
 
 
     public function forgotPassword(Request $request)
