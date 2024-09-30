@@ -244,7 +244,7 @@ class AuthController extends Controller
             } else {
                 return response()->json([
                     'status' => false, 
-                    'message' => 'You do not have the necessary permissions to perform this action. Please contact support if you believe this is an error.'
+                    'message' => 'You do not have the necessary permissions to perform this action. Please contact site support.'
                 ], 403); // Changed to 403 for unauthorized action
             }
         } catch (ValidationException $e) {
