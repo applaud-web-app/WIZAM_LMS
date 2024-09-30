@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\CmsController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('logout', [AuthController::class, 'logout']);
 
 // Add the Forgot Password route
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
