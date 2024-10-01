@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\VerifyLoggedInUser;
+use App\Http\Middleware\EnsureTokenIsValid;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,8 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'auth' => \App\Http\Middleware\VerifyLoggedInUser::class,
+        $middleware->web(append: [
+            VerifyLoggedInUser::class,
+        ]);
+        
+        $middleware->api(prepend: [
+            EnsureTokenIsValid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
