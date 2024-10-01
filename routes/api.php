@@ -57,7 +57,7 @@ Route::get('about', [CmsController::class, 'about']);
 Route::get('pricing',[CmsController::class, 'pricing']);
 
 // Authorized Routes
-Route::middleware('auth:sanctum')->get('/profile', [AuthController::class, 'profile']);
+Route::middleware('checkAuthToken:sanctum')->get('/profile', [AuthController::class, 'profile']);
 
 
 

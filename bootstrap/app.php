@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'auth' => \App\Http\Middleware\VerifyLoggedInUser::class,
-            'ensureToken' => \App\Http\Middleware\EnsureTokenIsValid::class,
+            'checkAuthToken' => \App\Http\Middleware\CheckAuthToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

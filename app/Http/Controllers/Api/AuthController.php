@@ -133,7 +133,7 @@ class AuthController extends Controller
             ], 500); // Changed to 500 for general server errors
         }
     }
-    
+
     public function logout(Request $request)
     {
         try {
@@ -274,12 +274,13 @@ class AuthController extends Controller
                 'status' => true,
                 'user' => $user,
             ], 200);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not authenticated',
-            ], 401);
         }
+
+        // Return an unauthorized response if user is not authenticated
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+        ], 401);
     }
 
 
