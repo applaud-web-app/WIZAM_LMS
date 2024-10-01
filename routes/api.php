@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
+use App\Http\Controllers\Api\StudentController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -52,7 +53,15 @@ Route::post('contact-us', [CmsController::class, 'contactUs']);
 // ABOUT PAGE 
 Route::get('about', [CmsController::class, 'about']);
 
-
+// PRICING PAGE
+Route::get('pricing',[CmsController::class, 'pricing']);
 
 // Authorized Routes
 Route::middleware('auth:sanctum')->get('/profile', [UserController::class, 'profile']);
+
+
+
+// AUTHENTICATED API
+Route::middleware(['auth:sanctum'])->controller(StudentController::class)->group(function () {
+    Route::get('syllabus', 'syllabus');
+});

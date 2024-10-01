@@ -183,13 +183,20 @@
 
                         <div class="col-span-12 sm:col-span-12 md:col-span-12 hidden" id="RestrictedFeatures">
                             <label for="features" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Features <span class="text-red-500">*</span></label>
-                            <select id="features" name="features" class="select2 w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                                <option selected disabled>Select Features</option>
-                                <option value="practice">Practice Sets</option>
-                                <option value="quizzes">Quizzes</option>
-                                <option value="lessons">Lessons</option>
-                                <option value="exams">Exams</option>
-                            </select>
+                            <div class="flex flex-col flex-1">
+                                <select id="features" name="features[]" 
+                                    data-te-select-init 
+                                    data-te-class-select-input="py-[11px] px-[20px] text-[14px] w-full capitalize [&~span]:top-[18px] [&~span]:w-[12px] [&~span]:h-[15px] [&~span]:text-body dark:[&~span]:text-white text-dark dark:text-subtitle-dark border-regular dark:border-box-dark-up border-1 rounded-6 dark:bg-box-dark-up focus:border-primary outline-none ltr:[&~span]:right-[0.75rem] rtl:[&~span]:left-[0.75rem] rtl:[&~span]:right-auto" 
+                                    data-te-class-notch-leading="!border-0 !shadow-none group-data-[te-input-focused]:shadow-none group-data-[te-input-focused]:border-none" 
+                                    data-te-class-notch-middle="!border-0 !shadow-none !outline-none" 
+                                    data-te-class-notch-trailing="!border-0 !shadow-none !outline-none" 
+                                    data-te-select-placeholder="Select Features" multiple>
+                                    <option value="practice">Practice Sets</option>
+                                    <option value="quizzes">Quizzes</option>
+                                    <option value="lessons">Lessons</option>
+                                    <option value="exams">Exams</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Short Description -->

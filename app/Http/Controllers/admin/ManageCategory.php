@@ -6,8 +6,13 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Sections;
 use App\Models\SubCategory;
 use App\Models\Tags;
+use App\Models\Exam;
+use App\Models\PracticeSet;
+use App\Models\Plan;
+use App\Models\Quizze;
 
 class ManageCategory extends Controller
 {
@@ -86,10 +91,16 @@ class ManageCategory extends Controller
         ]);
 
         $data = decrypturl($request->eq);
-        $skillId = $data['id'];
-        $user = Category::where('id',$skillId)->first();
+        $categoryId = $data['id'];
+        $user = Category::where('id',$categoryId)->first();
         if($user){
-            $user->status = 2; // Delete
+
+            // CHECK IF CATEGORY IS LINK TO SUB CATEGORY 
+            $subcategory = SubCategory::where('status',1)->where('category_id',$categoryId)->count();
+            if($subcategory){
+                return redirect()->back()->with('error','Unable to delete category as it is associated with '.$subcategory.' sub categories. Remove all associations and try again!');
+            }
+            $user->status = 2;
             $user->save();
             return redirect()->back()->with('success','Category Removed Successfully');
         }
@@ -109,7 +120,7 @@ class ManageCategory extends Controller
                     $deleteUrl = encrypturl(route('delete-sub-category'),$parms);
 
                     return '
-                        <button type="button" data-url="'.$editUrl.'" data-name="'.$section->name.'" data-description="'.$section->description.'" data-status="'.$section->status.'" data-type="'.$section->type.'" data-category="'.$section->category_id.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                        <button type="button" data-url="'.$editUrl.'" data-name="'.$section->name.'" data-description="'.$section->description.'" data-status="'.$section->status.'" data-type="'.$section->type.'" data-category="'.$section->category_id.'" data-sections="' . htmlspecialchars($section->sections, ENT_QUOTES)  . '"   class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>
                         <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
                 })
                 ->addColumn('parent_category', function($row) {
@@ -131,8 +142,9 @@ class ManageCategory extends Controller
                 ->rawColumns(['status','created_at','action','parent_category'])
                 ->make(true);
         }
-        $category = Category::select('name','id')->whereIn('status',[0,1])->get();
-        return view('manageCategory.subCategory.view-sub-category',compact('category'));
+        $category = Category::select('name','id')->where('status',1)->get();
+        $section = Sections::where('status',1)->get();
+        return view('manageCategory.subCategory.view-sub-category',compact('category','section'));
     }
 
     public function addsubCategory(Request $request)
@@ -143,22 +155,34 @@ class ManageCategory extends Controller
             'parent_category' => 'required|integer',
             'subcategory_type' => 'required|string',
             'subcategory_description' => 'nullable|string|max:1000',
-            'subcategory_status' => 'required|in:1,0',  // Ensure it's either '1' or '0'
+            'subcategory_status' => 'required|in:1,0',
+            'map_section' => 'required|array'
         ]);
-
-        // Create the subcategory
-        SubCategory::create([
-            'name' => $request->subcategory_name,
-            'category_id' => $request->parent_category,  // Use '=' instead of '->'
-            'type' => $request->subcategory_type,        // Use '=' instead of '->'
-            'description' => $request->subcategory_description, // Nullable field
-            'status' => $request->subcategory_status,
-        ]);
-
-        // Redirect with success message
-        return redirect()->route('view-sub-category')->with('success', 'Sub-Category created successfully.');
+    
+        // Exclude the first element from the map_section array
+        $map = array_slice($request->map_section, 1);
+    
+        // Convert $map to JSON
+        $sections = json_encode($map);
+    
+        // Attempt to create the subcategory
+        try {
+            SubCategory::create([
+                'name' => $request->subcategory_name,
+                'category_id' => $request->parent_category,
+                'type' => $request->subcategory_type,
+                'description' => $request->subcategory_description,
+                'sections' => $sections, // Store JSON encoded data
+                'status' => $request->subcategory_status,
+            ]);
+    
+            // Redirect with success message
+            return redirect()->route('view-sub-category')->with('success', 'Sub-Category created successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to create sub-category: ' . $e->getMessage()]);
+        }
     }
-
+    
 
     public function editsubCategory(Request $request){
         $request->validate([
@@ -167,7 +191,19 @@ class ManageCategory extends Controller
             'subcategory_type' => 'required|string',
             'subcategory_description' => 'nullable|string|max:1000',
             'subcategory_status' => 'required|in:1,0',  // Ensure it's either '1' or '0'
+            'map_section' => 'required|array'
         ]);
+
+        // Process the map_section array to exclude the first element
+        $map = [];
+        foreach ($request->map_section as $key => $value) {
+            if ($key > 0) {
+                $map[] = $value;
+            }
+        }
+
+        // Convert $map to JSON or handle it according to your database column type
+        $sections = json_encode($map);
 
         $data = decrypturl($request->eq);
         $categoryId = $data['id'];
@@ -178,27 +214,65 @@ class ManageCategory extends Controller
             $user->type = $request->subcategory_type; 
             $user->description = $request->subcategory_description; 
             $user->status = $request->subcategory_status;
+            $user->sections = $sections;
             $user->save();
             return redirect()->back()->with('success','Sub-Category Update Successfully');
         }
         return redirect()->back()->with('error','Something Went Wrong');
     }
 
-    public function deletesubCategory(Request $request){
+    public function deletesubCategory(Request $request) {
+        // Validate the request data
         $request->validate([
-            'eq'=>'required'
+            'eq' => 'required'
         ]);
-
+    
+        // Decrypt the URL parameter
         $data = decrypturl($request->eq);
-        $skillId = $data['id'];
-        $user = SubCategory::where('id',$skillId)->first();
-        if($user){
-            $user->status = 2; // Delete
-            $user->save();
-            return redirect()->back()->with('success','Sub-Category Removed Successfully');
+        $categoryId = $data['id'];
+        
+        // Find the subcategory by ID
+        $subCategory = SubCategory::find($categoryId);
+        
+        if ($subCategory) {
+            // Check associations with exams, quizzes, practice sets, and plans
+            $examCount = Exam::where('status',1)->where('subcategory_id', $categoryId)->count();
+            $quizCount = Quizze::where('status',1)->where('subcategory_id', $categoryId)->count();
+            $practiceSetsCount = PracticeSet::where('status',1)->where('subCategory_id', $categoryId)->count();
+            $planCount = Plan::where('status',1)->where('category_id', $categoryId)->count();
+    
+            // Prepare an array to collect error messages if any associations exist
+            $errors = [];
+            
+            if ($examCount > 0) {
+                $errors[] = "$examCount exam";
+            }
+            if ($quizCount > 0) {
+                $errors[] = "$quizCount quiz";
+            }
+            if ($practiceSetsCount > 0) {
+                $errors[] = "$practiceSetsCount practice set";
+            }
+            if ($planCount > 0) {
+                $errors[] = "$planCount plan";
+            }
+    
+            // If there are associations, prevent deletion and return an error
+            if (!empty($errors)) {
+                $errorMessage = "Unable to delete subcategory as it is associated with: " . implode(', ', $errors) . ". Remove all associations and try again!";
+                return redirect()->back()->with('error', $errorMessage);
+            }
+    
+            // Mark the subcategory as deleted (soft delete)
+            $subCategory->status = 2; // Assuming 2 indicates deletion
+            $subCategory->save();
+    
+            return redirect()->back()->with('success', 'Sub-Category Removed Successfully');
         }
-        return redirect()->back()->with('error','Something Went Wrong');
+    
+        return redirect()->back()->with('error', 'Something Went Wrong');
     }
+    
 
     // FOR TAGS
     public function viewTags(Request $request){

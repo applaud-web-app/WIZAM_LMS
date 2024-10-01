@@ -171,13 +171,19 @@ class CMSController extends Controller
         $blogCategoryId = $data['id'];
         $user = BlogCategory::where('id',$blogCategoryId)->first();
         if($user){
-            $user->status = 2; // Delete
+
+            // CHECK IF CATEGORY IS LINK TO SUB CATEGORY 
+            $blog = Blog::where('status',1)->where('category_id',$blogCategoryId)->count();
+            if($blog){
+                return redirect()->back()->with('error','Unable to delete blog category as it is associated with '.$blog.' blog. Remove all associations and try again!');
+            }
+            
+            $user->status = 2;
             $user->save();
             return redirect()->back()->with('success','Blog Category Removed Successfully');
         }
         return redirect()->back()->with('error','Something Went Wrong');
     }
-
 
     // FOR BLOG
     public function viewBlog(Request $request){

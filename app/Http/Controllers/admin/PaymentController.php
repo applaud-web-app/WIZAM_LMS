@@ -61,7 +61,7 @@ class PaymentController extends Controller
          'order' => 'nullable|integer',
          'feature_access' => 'required|boolean',
          // 'features' => 'array', 
-         'features.*' => 'string',
+         'features.*' => 'nullable|string',
          'popular' => 'required|string|in:1,0',
          'status' => 'required|string|in:1,0',
       ]);
@@ -75,18 +75,18 @@ class PaymentController extends Controller
 
       // Create a new instance of your model and fill it with the validated data
       $data = new Plan;
-      $data->category_id = $validatedData['category'];
-      $data->name = $validatedData['plan_name'];
-      $data->price_type = $validatedData['price_type'];  // MONTHLY // FIXED
-      $data->duration = $validatedData['discount_percentage'];
-      $data->price = $validatedData['price'];
-      $data->discount = $validatedData['discount'];
-      $data->description = $validatedData['description'];
-      $data->sort_order = $validatedData['order'];
-      $data->feature_access = $validatedData['feature_access'];
-      $data->features = json_encode($validatedData['features']);
-      $data->popular = $validatedData['popular']; 
-      $data->status = $validatedData['status'];
+      $data->category_id = $validatedData['category'] ?? null;
+      $data->name = $validatedData['plan_name'] ?? null;
+      $data->price_type = $validatedData['price_type'] ?? null;  // MONTHLY // FIXED
+      $data->duration = $validatedData['discount_percentage'] ?? null;
+      $data->price = $validatedData['price'] ?? null;
+      $data->discount = $validatedData['discount'] ?? null;
+      $data->description = $validatedData['description'] ?? null;
+      $data->sort_order = $validatedData['order'] ?? null;
+      $data->feature_access = $validatedData['feature_access'] ?? null;
+      $data->features = $validatedData['features'] ?? null;
+      $data->popular = $validatedData['popular'] ?? null; 
+      $data->status = $validatedData['status'] ?? null;
       $data->save();
 
       // Return a success response
@@ -120,7 +120,7 @@ class PaymentController extends Controller
          'order' => 'nullable|integer',
          'feature_access' => 'required|boolean',
          // 'features' => 'array', 
-         'features.*' => 'string',
+         'features.*' => 'nullable|string',
          'popular' => 'required|string|in:1,0',
          'status' => 'required|string|in:1,0',
          'eq'=>'required'

@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use App\Models\Sections;
 use App\Models\Skill;
 use App\Models\Topic;
+use App\Models\ExamSection;
+use App\Models\Lesson;
+use App\Models\Question;
+use App\Models\PracticeSet;
+use App\Models\Video;
 
 class ManageSubject extends Controller
 {
@@ -97,6 +102,26 @@ class ManageSubject extends Controller
         $sectionId = $data['id'];
         $user = Sections::where('id',$sectionId)->first();
         if($user){
+
+            // Check associations with exams, quizzes, practice sets, and plans
+            $skillCount = Skill::where('status',1)->where('section_id', $sectionId)->count();
+            $examCount = ExamSection::where('status',1)->where('section_id', $sectionId)->count();
+
+            // Prepare an array to collect error messages if any associations exist
+            $errors = [];
+            if ($examCount > 0) {
+                $errors[] = "$examCount exam";
+            }
+            if ($skillCount > 0) {
+                $errors[] = "$skillCount skill";
+            }
+
+            // If there are associations, prevent deletion and return an error
+            if (!empty($errors)) {
+                $errorMessage = "Unable to delete section as it is associated with: " . implode(', ', $errors) . ". Remove all associations and try again!";
+                return redirect()->back()->with('error', $errorMessage);
+            }
+
             $user->status = 2; // Delete
             $user->save();
             return redirect()->back()->with('success','Section Removed Successfully');
@@ -199,6 +224,39 @@ class ManageSubject extends Controller
         $skillId = $data['id'];
         $user = Skill::where('id',$skillId)->first();
         if($user){
+            // Check associations with exams, quizzes, practice sets, and plans
+            $topicCount = Topic::where('status',1)->where('skill_id', $skillId)->count();
+            $questionCount = Question::where('status',1)->where('skill_id', $skillId)->count();
+            $practiceSetsCount = PracticeSet::where('status',1)->where('skill_id', $skillId)->count();
+            $lessonCount = Lesson::where('status',1)->where('skill_id', $skillId)->count();
+            $videoCount = Video::where('status',1)->where('skill_id', $skillId)->count();
+
+            // Prepare an array to collect error messages if any associations exist
+            $errors = [];
+            
+            if ($topicCount > 0) {
+                $errors[] = "$topicCount topic";
+            }
+            if ($questionCount > 0) {
+                $errors[] = "$questionCount question";
+            }
+            if ($practiceSetsCount > 0) {
+                $errors[] = "$practiceSetsCount practice set";
+            }
+            if ($lessonCount > 0) {
+                $errors[] = "$lessonCount lesson";
+            }
+            if ($videoCount > 0) {
+                $errors[] = "$videoCount Video";
+            }
+    
+            // If there are associations, prevent deletion and return an error
+            if (!empty($errors)) {
+                $errorMessage = "Unable to delete skill as it is associated with: " . implode(', ', $errors) . ". Remove all associations and try again!";
+                return redirect()->back()->with('error', $errorMessage);
+            }
+
+
             $user->status = 2; // Delete
             $user->save();
             return redirect()->back()->with('success','Skill Removed Successfully');

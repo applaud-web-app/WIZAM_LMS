@@ -134,15 +134,6 @@
                             <label for="groups" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                                 User Groups
                             </label>
-                            {{-- <div class="flex flex-col flex-1">
-                                <select id="groups" name="groups[]" data-te-select-init data-te-class-select-input="py-[11px] px-[20px] text-[14px] w-full capitalize [&~span]:top-[18px] [&~span]:w-[12px] [&~span]:h-[15px] [&~span]:text-body dark:[&~span]:text-white text-dark dark:text-subtitle-dark border-regular dark:border-box-dark-up border-1 rounded-6 dark:bg-box-dark-up focus:border-primary outline-none ltr:[&~span]:right-[0.75rem] rtl:[&~span]:left-[0.75rem] rtl:[&~span]:right-auto" data-te-class-notch-leading="!border-0 !shadow-none group-data-[te-input-focused]:shadow-none group-data-[te-input-focused]:border-none" data-te-class-notch-middle="!border-0 !shadow-none !outline-none" data-te-class-notch-trailing="!border-0 !shadow-none !outline-none" data-te-select-placeholder="Select Groups" multiple>
-                                    @isset($userGroups)
-                                        @foreach ($userGroups as $item)
-                                            <option value="{{$item->id}}">{{$item->name}}</option>
-                                        @endforeach
-                                    @endisset
-                                </select>
-                            </div> --}}
                             <div class="flex flex-col flex-1">
                                 <select id="groups" name="groups[]" 
                                     data-te-select-init 
@@ -158,7 +149,6 @@
                                     @endisset
                                 </select>
                             </div>
-                            
                         </div>
                         <!-- Password -->
                         <div class="col-span-12 md:col-span-6">

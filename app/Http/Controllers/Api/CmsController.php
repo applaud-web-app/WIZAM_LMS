@@ -331,4 +331,9 @@ class CmsController extends Controller
         }
     }
 
+
+    public function pricing(){
+        
+    }
+
 }
