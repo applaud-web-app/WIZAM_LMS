@@ -134,31 +134,31 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
-    {
-        try {
-            // Check if the user is authenticated
-            if ($request->user()) {
-                // Revoke the user's current access token
-                $request->user()->currentAccessToken()->delete();
+    // public function logout(Request $request)
+    // {
+    //     try {
+    //         // Check if the user is authenticated
+    //         if ($request->user()) {
+    //             // Revoke the user's current access token
+    //             $request->user()->currentAccessToken()->delete();
                 
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Logged out successfully',
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User is not authenticated',
-                ], 401); // Unauthorized
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Logout failed: ' . $e->getMessage(),
-            ], 500); // Internal Server Error
-        }
-    }
+    //             return response()->json([
+    //                 'status' => true,
+    //                 'message' => 'Logged out successfully',
+    //             ]);
+    //         } else {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'User is not authenticated',
+    //             ], 401); // Unauthorized
+    //         }
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Logout failed: ' . $e->getMessage(),
+    //         ], 500); // Internal Server Error
+    //     }
+    // }
 
 
     public function forgotPassword(Request $request)
@@ -272,6 +272,29 @@ class AuthController extends Controller
             return response()->json([
                 'status' => true,
                 'user' => $user,
+            ], 200);
+        }
+
+        // Return an unauthorized response if user is not authenticated
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+        ], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        // Retrieve the authenticated user from the request attributes
+        $user = $request->attributes->get('authenticatedUser');
+
+        // Check if the user is authenticated
+        if ($user) {
+            // Revoke the token
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Logged out successfully',
             ], 200);
         }
 

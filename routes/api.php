@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\StudentController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 // Add the Forgot Password route
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
@@ -58,6 +57,7 @@ Route::get('pricing',[CmsController::class, 'pricing']);
 
 
 // API Route
+Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);
 Route::middleware(['checkAuthToken'])->get('/profile', [AuthController::class, 'profile']);
 
 
