@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->get('/profile', [UserController::class, 'prof
 
 
 // AUTHENTICATED API
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('ensureToken:sanctum')->group(function () {
     Route::get('/syllabus', [StudentController::class, 'syllabus']);
     Route::get('/profile', [UserController::class, 'profile']);
 });
