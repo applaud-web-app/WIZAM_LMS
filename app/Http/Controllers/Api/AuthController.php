@@ -133,71 +133,7 @@ class AuthController extends Controller
             ], 500); // Changed to 500 for general server errors
         }
     }
-
     
-
-    // public function login(Request $request)
-    // {
-
-    //     $validateUser = Validator::make($request->all(), [
-    //         'email' => 'required|string|email',
-    //         'password' => 'required|string',
-    //     ]);
-
-    //      // Check if validation fails
-    //      if ($validateUser->fails()) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Validation Error',
-    //             'errors' => $validateUser->errors()->all()
-    //         ], 401);
-    //     }
-
-
-    //     try {
-    //         if (Auth::attempt($request->only('email', 'password'))) {
-    //             $user = Auth::user();
-    //             $token = $user->createToken('auth_token')->plainTextToken; 
-
-    //             return response()->json([
-    //                 'status'=> true,
-    //                 'message'=>'Logged In Successfully',
-    //                 'token' => $token,
-    //                 'user' => $user
-    //             ],200);
-
-    //         }else{
-    //             return response()->json([
-    //                 'status'=> false,
-    //                 'message'=>'Invalid Login Details'
-    //             ],401);
-    //         }
-    //     } catch (\Throwable $th) {
-    //        // Return error response
-    //        return response()->json(['status'=> false, 'message' => 'Login failed: ' . $th->getMessage()], 400);
-    //     }
-        
-    // }
-
-
-    // public function logout(Request $request)
-    // {
-    //     try {
-    //         $request->user()->currentAccessToken()->delete();
-    //         $cookie = cookie('jwt', null, -1); // Clear the JWT cookie
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Logged out successfully'
-    //         ], 200)->withCookie($cookie);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Logout failed: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function logout(Request $request)
     {
         try {

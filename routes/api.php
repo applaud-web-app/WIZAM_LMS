@@ -62,6 +62,8 @@ Route::middleware('auth:sanctum')->get('/profile', [UserController::class, 'prof
 
 
 // AUTHENTICATED API
-Route::middleware(['auth:sanctum'])->controller(StudentController::class)->group(function () {
-    Route::get('syllabus', 'syllabus');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/syllabus', [StudentController::class, 'syllabus']);
+    // Add other authenticated routes here
 });
+
