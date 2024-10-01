@@ -16,4 +16,24 @@ class StudentController extends Controller
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
     }
+
+    public function profile(Request $request)
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user is authenticated
+        if ($user) {
+            return response()->json([
+                'status' => true,
+                'user' => $user,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+    }
+
 }
