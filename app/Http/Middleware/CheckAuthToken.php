@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -17,13 +16,22 @@ class CheckAuthToken
      */
     public function handle(Request $request, Closure $next)
     {
-        // Check if the user is authenticated
-        if (!Auth::check()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized',
-            ], 401);
+        // Get the token from the Authorization header
+        $token = $request->bearerToken();
+
+        if (!$token) {
+            return response()->json(['status' => false, 'message' => 'Token not provided'], 401);
         }
+
+        // Validate the token and get the authenticated user
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        // Attach the authenticated user to the request
+        $request->attributes->set('authenticatedUser', $user);
 
         return $next($request);
     }

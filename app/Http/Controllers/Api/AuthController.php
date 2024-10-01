@@ -262,11 +262,10 @@ class AuthController extends Controller
         }
     }
 
-    // Fetch authenticated user's profile data
     public function profile(Request $request)
     {
-        // Get the authenticated user
-        $user = Auth::user();
+        // Retrieve the authenticated user from the request attributes
+        $user = $request->attributes->get('authenticatedUser');
 
         // Check if the user is authenticated
         if ($user) {
@@ -282,6 +281,8 @@ class AuthController extends Controller
             'message' => 'User not authenticated',
         ], 401);
     }
+
+
 
 
 }
