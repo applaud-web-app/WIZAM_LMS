@@ -57,16 +57,18 @@ Route::get('pricing',[CmsController::class, 'pricing']);
 
 
 // API Route
-Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);
-Route::middleware(['checkAuthToken'])->get('/profile', [AuthController::class, 'profile']);
+// Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);
+// Route::middleware(['checkAuthToken'])->get('/profile', [AuthController::class, 'profile']);
 
 
 // AUTHENTICATED API
-// Route::middleware('ensureToken:sanctum')->group(function () {
-//     Route::get('/syllabus', [StudentController::class, 'syllabus']);
-//     Route::get('/profile', [UserController::class, 'profile']);
-// });
+Route::middleware('checkAuthToken')->group(function () {
+    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
 
-// Route::middleware('checkAuthToken')->get('/profile', [UserController::class, 'profile']);
+    // STUDENT
+    Route::get('/syllabus', [StudentController::class, 'syllabus']);
+});
+
 
 
