@@ -63,7 +63,7 @@ Route::get('pricing',[CmsController::class, 'pricing']);
 
 // AUTHENTICATED API
 Route::middleware('checkAuthToken')->group(function () {
-    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
 
     // STUDENT
