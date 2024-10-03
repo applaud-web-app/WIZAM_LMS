@@ -10,7 +10,7 @@ class StudentController extends Controller
 {
     public function syllabus(){
         try {
-            $data = SubCategory::where('status', 1)->whereJsonLength('sections', '>', 0)->get();
+            $data = SubCategory::select('id','name','description')->where('status', 1)->whereJsonLength('sections', '>', 0)->get();
             return response()->json(['status'=> true,'data' => $data], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
