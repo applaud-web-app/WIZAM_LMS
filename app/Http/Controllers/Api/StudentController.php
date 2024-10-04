@@ -35,67 +35,6 @@ class StudentController extends Controller
         }
     }
 
-    // public function allExams(Request $request)
-    // {
-    //     try {
-    //         // Fetch exam type by slug and status
-    //         $examType = ExamType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-
-    //         if ($examType) {
-    //             // Fetch exam data grouped by type.slug
-    //             $examData = Exam::select(
-    //                     'exam_types.slug', // Fetch type slug
-    //                     'exams.slug', // Fetch exam title
-    //                     'exams.title', // Fetch exam title
-    //                     DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-    //                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-    //                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //                 )
-    //                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
-    //                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-    //                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-    //                 ->where('exams.exam_type_id', $examType->id) // Filter by the provided exam type
-    //                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
-    //                 ->where('exams.status', 1) // Filter by exam status
-    //                 ->groupBy('exam_types.slug', 'exams.id', 'exams.title') // Group by type and exam details
-    //                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-    //                 ->get();
-
-    //             // Initialize array to store formatted exam data
-    //             $formattedExamData = [];
-
-    //             foreach ($examData as $exam) {
-    //                 // Format the total time using the new method
-    //                 $formattedTime = $this->formatTime($exam->total_time); // Use the total_time from questions
-
-    //                 // Group exams by slug (exam type)
-    //                 if (!isset($formattedExamData[$exam->slug])) {
-    //                     $formattedExamData[$exam->slug] = [];
-    //                 }
-
-    //                 // Add exam details to the corresponding type slug
-    //                 $formattedExamData[$exam->slug][] = [
-    //                     'title' => $exam->title,
-    //                     'slug' => $exam->slug,
-    //                     'questions' => $exam->total_questions ?? 0,
-    //                     'time' => $formattedTime, // Use the formatted time
-    //                     'marks' => $exam->total_marks ?? 0,
-    //                 ];
-    //             }
-
-    //             // Return the formatted data as JSON
-    //             return response()->json(['status' => true, 'data' => $formattedExamData], 200);
-    //         }
-
-    //         // Return error if exam type not found
-    //         return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
-            
-    //     } catch (\Throwable $th) {
-    //         // Return error response with exception message
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-
     public function allExams(Request $request)
     {
         try {
@@ -160,7 +99,6 @@ class StudentController extends Controller
         }
     }
 
-
     private function formatTime($totalTime)
     {
         // Convert total seconds into hours, minutes, and seconds
@@ -183,22 +121,16 @@ class StudentController extends Controller
         return trim($timeString); // Trim any extra spaces
     }
 
-    public function examDetail(Request $request) {
+    public function examDetail(Request $request)
+    {
         try {
             // Validate incoming request data
             $request->validate([
-                'category' => 'required',
+                'category' => 'required|integer',
                 'slug' => 'required|string'
             ]);
-    
-            // Fetch the exam type based on the provided slug
-            $examType = ExamType::where('slug', $request->slug)->first();
-    
-            if (!$examType) {
-                return response()->json(['status' => false, 'message' => 'Exam type not found'], 404);
-            }
-    
-            // Fetch exam details based on the category and exam type
+
+            // Fetch exam details based on the category and slug
             $examData = Exam::select(
                 'exam_types.slug as exam_type_slug', 
                 'exams.title',
@@ -208,31 +140,45 @@ class StudentController extends Controller
                 'exam_types.name as exam_type_name',
                 DB::raw('COUNT(questions.id) as total_questions'),
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), 
-                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') 
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') 
+            ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'sub_categories.id') 
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
-            ->where('exams.exam_type_id', $examType->id) 
             ->where('exams.subcategory_id', $request->category) 
             ->where('exams.slug', $request->slug) 
             ->where('exams.status', 1)
             ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 'sub_categories.name', 'exam_types.name') 
             ->havingRaw('COUNT(questions.id) > 0')
             ->first();
-    
-            // Check if the exam data exists
+            
+            // Check if exam data is available
             if (!$examData) {
                 return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
             }
-    
-            // Return the exam data as a JSON response
-            return response()->json(['status' => true, 'data' => $examData], 200);
+
+            // Format response to match the structure needed by frontend
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'title' => $examData->title,
+                    'examType' => $examData->exam_type_name,
+                    'syllabus' => $examData->sub_category_name,
+                    'totalQuestions' => $examData->total_questions,
+                    'duration' => $this->formatTime($examData->total_time),  // Call formatTime from within the class
+                    'marks' => $examData->total_marks,
+                    'description' => $examData->description,
+                    'instructions' => 'Please follow the exam instructions carefully.',
+                ]
+            ], 200);
         } catch (\Throwable $th) {
             Log::error($th->getMessage()); // Log the error for debugging
             return response()->json(['status' => false, 'error' => 'Internal Server Error'], 500);
         }
     }
+
+    
 
 
     // QUIZ DATA
