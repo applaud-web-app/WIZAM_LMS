@@ -74,6 +74,7 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/exam-type', [StudentController::class, 'examType']);
     Route::get('/exams', [StudentController::class, 'exams']);
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
+    Route::get('/quiz', [StudentController::class, 'quiz']);
 });
 
 
