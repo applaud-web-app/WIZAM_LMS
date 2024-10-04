@@ -175,8 +175,6 @@ class StudentController extends Controller
         }
     }
 
-    
-
 
     // QUIZ DATA
     public function quizType(){
@@ -196,6 +194,7 @@ class StudentController extends Controller
             if ($quizType) {
                 // Fetch quiz data grouped by type.slug
                 $quizData = Quizze::select(
+                        'quizzes.slug',
                         'quiz_types.slug', // Fetch type slug
                         'quizzes.title', // Fetch quiz title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
@@ -208,7 +207,7 @@ class StudentController extends Controller
                     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
                     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('quizzes.status', 1) // Filter by quiz status
-                    ->groupBy('quiz_types.slug', 'quizzes.id', 'quizzes.title') // Group by type and quiz details
+                    ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title') // Group by type and quiz details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                     ->get();
 
@@ -227,6 +226,7 @@ class StudentController extends Controller
                     // Add quiz details to the corresponding type slug
                     $formattedQuizData[$quiz->slug][] = [
                         'title' => $quiz->title,
+                        'slug' => $quiz->slug,
                         'questions' => $quiz->total_questions ?? 0,
                         'time' => $formattedTime, // Use the formatted time
                         'marks' => $quiz->total_marks ?? 0,
@@ -245,6 +245,123 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
+    // public function quizDetail(Request $request, $slug)
+    // {
+    //     try {
+    //         // Validate incoming request data
+    //         $request->validate([
+    //             'category' => 'required|integer',
+    //         ]);
+
+    //         // Fetch quiz details based on the category and slug
+    //         $quizData = Quiz::select(
+    //             'quiz_types.slug as exam_type_slug', 
+    //             'quizzes.title',
+    //             'quizzes.description',
+    //             'quizzes.pass_percentage',
+    //             'sub_categories.name as sub_category_name',
+    //             'quiz_types.name as exam_type_name',
+    //             DB::raw('COUNT(questions.id) as total_questions'),
+    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), 
+    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+    //         )
+    //         ->leftJoin('quiz_types', 'quizzes.exam_type_id', '=', 'quiz_types.id') 
+    //         ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id') 
+    //         ->leftJoin('exam_questions', 'quizzes.id', '=', 'exam_questions.exam_id') 
+    //         ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
+    //         ->where('quizzes.subcategory_id', $request->category) 
+    //         ->where('quizzes.slug', $slug) 
+    //         ->where('quizzes.status', 1)
+    //         ->groupBy('quiz_types.slug', 'quizzes.id', 'quizzes.title', 'quizzes.description', 'quizzes.pass_percentage', 'sub_categories.name', 'quiz_types.name') 
+    //         ->havingRaw('COUNT(questions.id) > 0')
+    //         ->first();
+            
+    //         // Check if exam data is available
+    //         if (!$quizData) {
+    //             return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
+    //         }
+
+    //         // Format response to match the structure needed by frontend
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => [
+    //                 'title' => $quizData->title,
+    //                 'examType' => $quizData->exam_type_name,
+    //                 'syllabus' => $quizData->sub_category_name,
+    //                 'totalQuestions' => $quizData->total_questions,
+    //                 'duration' => $this->formatTime($quizData->total_time),  // Call formatTime from within the class
+    //                 'marks' => $quizData->total_marks,
+    //                 'description' => $quizData->description
+    //             ]
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status' => false, 'error' => 'Internal Server Error : '.$th->getMessage()], 500);
+    //     }
+    // }
+
+    public function quizDetail(Request $request, $slug)
+    {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer',
+            ]);
+
+            // Fetch quiz details based on the category and slug
+            $quizData = Quiz::select(
+                'quiz_types.slug as exam_type_slug',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name as sub_category_name',
+                'quiz_types.name as exam_type_name',
+                DB::raw('COUNT(questions.id) as total_questions'),
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+            )
+            ->leftJoin('quiz_types', 'quizzes.exam_type_id', '=', 'quiz_types.id')
+            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+            ->leftJoin('exam_questions', 'quizzes.id', '=', 'exam_questions.exam_id')
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+            ->where('quizzes.subcategory_id', $request->category)
+            ->where('quizzes.slug', $slug)
+            ->where('quizzes.status', 1)
+            ->groupBy(
+                'quiz_types.slug',
+                'quizzes.id',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name',
+                'quiz_types.name'
+            )
+            ->havingRaw('COUNT(questions.id) > 0')
+            ->first();
+
+            // Check if exam data is available
+            if (!$quizData) {
+                return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
+            }
+
+            // Format response to match the structure needed by frontend
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'title' => $quizData->title,
+                    'quizType' => $quizData->exam_type_name,
+                    'syllabus' => $quizData->sub_category_name,
+                    'totalQuestions' => $quizData->total_questions,
+                    'duration' => $this->formatTime($quizData->total_time), // Call formatTime from within the class
+                    'marks' => $quizData->total_marks,
+                    'description' => $quizData->description,
+                ],
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+        }
+    }
+
     
 
     
