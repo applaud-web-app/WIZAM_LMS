@@ -173,7 +173,7 @@ class StudentController extends Controller
                 ]
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'error' => 'Internal Server Error'], 500);
+            return response()->json(['status' => false, 'error' => 'Internal Server Error : '.$th->getMessage()], 500);
         }
     }
 
