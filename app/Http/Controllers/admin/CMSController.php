@@ -11,6 +11,7 @@ use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pages;
 use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\DB;
 
 class CMSController extends Controller
 {
