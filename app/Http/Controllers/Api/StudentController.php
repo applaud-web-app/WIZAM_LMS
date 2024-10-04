@@ -320,7 +320,7 @@ class StudentController extends Controller
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
-            ->leftJoin('quiz_types', 'quizzes.exam_type_id', '=', 'quiz_types.id')
+            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
             ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('exam_questions', 'quizzes.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
