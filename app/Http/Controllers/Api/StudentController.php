@@ -323,7 +323,6 @@ class StudentController extends Controller
             $practiceSets = PracticeSet::select(
                     'practice_sets.title',
                     'practice_sets.subCategory_id',
-                    'practice_sets.duration',
                     DB::raw('COUNT(practice_set_questions.id) as total_questions'), // Count total questions
                     DB::raw('SUM(CAST(practice_set_questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks
                     DB::raw('SUM(COALESCE(practice_set_questions.watch_time, 0)) as total_time') // Sum total watch time
