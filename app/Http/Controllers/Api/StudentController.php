@@ -358,6 +358,7 @@ class StudentController extends Controller
             // Fetch practice set details based on the category and slug
             $practiceSetData = PracticeSet::select(
                     'practice_sets.title',
+                    'practice_sets.slug',
                     'practice_sets.description',
                     'sub_categories.name as sub_category_name',
                     DB::raw('COUNT(questions.id) as total_questions'),
@@ -374,7 +375,8 @@ class StudentController extends Controller
                     'practice_sets.id',
                     'practice_sets.title',
                     'practice_sets.description',
-                    'sub_categories.name'
+                    'sub_categories.name',
+                    'practice_sets.slug'
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->first();
