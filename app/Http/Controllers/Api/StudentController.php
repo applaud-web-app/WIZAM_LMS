@@ -318,7 +318,7 @@ class StudentController extends Controller
             $request->validate([
                 'category' => 'required|integer',
             ]);
-    
+
             // Fetch practice sets and their related data
             $practiceSets = PracticeSet::select(
                     'practice_sets.title',
@@ -333,21 +333,22 @@ class StudentController extends Controller
                 ->where('practice_sets.status', 1)
                 ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.subCategory_id') // Group by practice set details
                 ->get();
-    
+
             // Check if practice sets are found
             if ($practiceSets->isEmpty()) {
                 return response()->json(['status' => false, 'message' => 'No practice sets found for this category.'], 404);
             }
-    
+
             return response()->json(['status' => true, 'data' => $practiceSets], 200);
             
         } catch (\Throwable $th) {
             // Log the error for debugging (optional)
             \Log::error('Error fetching practice sets: ' . $th->getMessage());
-    
+
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+
     
     
 
