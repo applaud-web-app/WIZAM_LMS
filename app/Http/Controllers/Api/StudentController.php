@@ -45,6 +45,7 @@ class StudentController extends Controller
                 // Fetch exam data grouped by type.slug
                 $examData = Exam::select(
                         'exam_types.slug', // Fetch type slug
+                        'exams.slug', // Fetch exam title
                         'exams.title', // Fetch exam title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
@@ -75,6 +76,7 @@ class StudentController extends Controller
                     // Add exam details to the corresponding type slug
                     $formattedExamData[$exam->slug][] = [
                         'title' => $exam->title,
+                        'slug' => $exam->slug,
                         'questions' => $exam->total_questions ?? 0,
                         'time' => $formattedTime, // Use the formatted time
                         'marks' => $exam->total_marks ?? 0,
