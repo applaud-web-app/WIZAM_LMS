@@ -13,6 +13,7 @@ class PracticeSet extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'subCategory_id',
         'skill_id',
         'description',

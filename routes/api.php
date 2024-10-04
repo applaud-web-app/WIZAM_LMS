@@ -69,15 +69,23 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
     Route::post('/logout-all', [AuthController::class, 'logoutFromAllLoginDevices']);
 
-    // STUDENT
+    // ------ STUDENT ------- //
+    # SYLLABUS
     Route::get('/syllabus', [StudentController::class, 'syllabus']);
+
+    # EXAM
     Route::get('/exam-type', [StudentController::class, 'examType']);
     Route::get('/all-exams', [StudentController::class, 'allExams']);
     Route::get('/exam-detail/{slug}', [StudentController::class, 'examDetail']);
+
+    # QUIZ
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
     Route::get('/all-quiz', [StudentController::class, 'allQuiz']);
     Route::get('/quiz-detail/{slug}', [StudentController::class, 'quizDetail']);
+
+    # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);
+    Route::get('/practice-set-detail/{slug}', [StudentController::class, 'practiceSetDetail']);
 });
 
 

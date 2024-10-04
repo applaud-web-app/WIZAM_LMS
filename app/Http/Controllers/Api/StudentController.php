@@ -346,6 +346,60 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+
+    public function practiceSetDetail(Request $request, $slug)
+    {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer',
+            ]);
+    
+            // Fetch practice set details based on the category and slug
+            $practiceSetData = PracticeSet::select(
+                    'practice_sets.title',
+                    'practice_sets.description',
+                    'sub_categories.name as sub_category_name',
+                    DB::raw('COUNT(questions.id) as total_questions'),
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                )
+                ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id') // Join with practice_set_questions
+                ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
+                ->leftJoin('sub_categories', 'practice_sets.subCategory_id', '=', 'sub_categories.id') // Join with sub_categories to get category name
+                ->where('practice_sets.subCategory_id', $request->category)
+                ->where('practice_sets.slug', $slug) // Assuming you have a slug column in the practice_sets table
+                ->where('practice_sets.status', 1)
+                ->groupBy(
+                    'practice_sets.id',
+                    'practice_sets.title',
+                    'practice_sets.description',
+                    'sub_categories.name'
+                )
+                ->havingRaw('COUNT(questions.id) > 0')
+                ->first();
+    
+            // Check if practice set data is available
+            if (!$practiceSetData) {
+                return response()->json(['status' => false, 'message' => 'Practice set not found'], 404);
+            }
+    
+            // Format response to match the structure needed by frontend
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'title' => $practiceSetData->title,
+                    'syllabus' => $practiceSetData->sub_category_name,
+                    'totalQuestions' => $practiceSetData->total_questions,
+                    'duration' => $this->formatTime($practiceSetData->total_time), // Call formatTime from within the class
+                    'marks' => $practiceSetData->total_marks,
+                    'description' => $practiceSetData->description,
+                ],
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+        }
+    }
     
 
     

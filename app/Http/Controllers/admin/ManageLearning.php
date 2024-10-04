@@ -82,9 +82,21 @@ class ManageLearning extends Controller
             'isFee'=>'required|string|in:1,0'
         ]);
         
+
+        $slug = Str::slug($request->input('testTitle'));
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (PracticeSet::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+
         // Create section
         $praticeSet = PracticeSet::create([
             'title' => $request->testTitle,
+            'slug' => $slug,
             'subCategory_id' => $request->subCategory,
             'skill_id' => $request->skill,
             'description' => $request->description, 
@@ -119,6 +131,15 @@ class ManageLearning extends Controller
         
         $praticeSet = PracticeSet::where('id',$id)->first();
         if($praticeSet){
+
+            $slug = Str::slug($request->input('testTitle'));
+            $originalSlug = $slug;
+            $count = 1;
+            while (PracticeSet::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = $originalSlug . '-' . $count;
+                $count++;
+            }
+            $praticeSet->slug = $slug;
             $praticeSet->title = $request->testTitle;
             $praticeSet->subCategory_id = $request->subCategory;
             $praticeSet->skill_id = $request->skill;
