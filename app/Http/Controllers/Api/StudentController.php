@@ -116,7 +116,7 @@ class StudentController extends Controller
             if ($examType) {
                 // Fetch exam data grouped by type.slug
                 $examData = Exam::select(
-                        'types.slug', // Fetch type slug
+                        'exam_types.slug', // Fetch type slug
                         'exams.title', // Fetch exam title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
