@@ -167,8 +167,7 @@ class StudentController extends Controller
                     'totalQuestions' => $examData->total_questions,
                     'duration' => $this->formatTime($examData->total_time),  // Call formatTime from within the class
                     'marks' => $examData->total_marks,
-                    'description' => $examData->description,
-                    'instructions' => 'Please follow the exam instructions carefully.',
+                    'description' => $examData->description
                 ]
             ], 200);
         } catch (\Throwable $th) {
