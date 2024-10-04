@@ -140,7 +140,7 @@ class StudentController extends Controller
                         DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
                     )
                     ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
-                    ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.exam_id') // Join with quiz_questions
+                    ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
                     ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
                     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
                     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
