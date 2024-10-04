@@ -219,7 +219,7 @@ class StudentController extends Controller
         try {
             // Fetch exam type by slug and status
             $examType = ExamType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-
+    
             if ($examType) {
                 // Fetch exam data grouped by type.slug
                 $examData = Exam::select(
@@ -236,17 +236,18 @@ class StudentController extends Controller
                     ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('exams.status', 1) // Filter by exam status
                     ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.exam_duration') // Group by type and exam details
+                    ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                     ->get();
-
+    
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
-
+    
                 foreach ($examData as $exam) {
                     // Group exams by slug (exam type)
                     if (!isset($formattedExamData[$exam->slug])) {
                         $formattedExamData[$exam->slug] = [];
                     }
-
+    
                     // Add exam details to the corresponding type slug
                     $formattedExamData[$exam->slug][] = [
                         'title' => $exam->title,
@@ -255,11 +256,11 @@ class StudentController extends Controller
                         'marks' => $exam->total_marks ?? 0,
                     ];
                 }
-
+    
                 // Return the formatted data as JSON
-                return response()->json(['status' => true, 'data' => $formattedExamData], 201);
+                return response()->json(['status' => true, 'data' => $formattedExamData], 200);
             }
-
+    
             // Return error if exam type not found
             return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
             
@@ -268,5 +269,5 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-
+    
 }
