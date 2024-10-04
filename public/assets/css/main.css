@@ -16,6 +16,10 @@
     }
 }
 
+.error{
+    color: #ff0000;
+}
+
 .apexcharts-canvas {
     position: relative;
     user-select: none
