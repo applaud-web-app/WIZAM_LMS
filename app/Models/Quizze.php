@@ -11,6 +11,7 @@ class Quizze extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'subcategory_id',
         'quiz_type_id',
         'description',

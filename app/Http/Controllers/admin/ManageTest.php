@@ -309,9 +309,19 @@ class ManageTest extends Controller
             'visibility' => 'required|in:0,1',   // visibility should be either 0 or 1
         ]);
 
+        $slug = Str::slug($request->input('testTitle'));
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (Quizze::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
         // Create Quizz
         $quiz = Quizze::create([
             'title' => $request->testTitle,
+            'slug' => $slug,
             'subcategory_id' => $request->subCategory,
             'quiz_type_id' => $request->quiz_type,
             'description' => $request->description, 
@@ -333,8 +343,18 @@ class ManageTest extends Controller
             'visibility' => 'required|in:0,1',   // visibility should be either 0 or 1
         ]);
 
-        // Create Quizz
+        // Update Quizz
         $quiz = Quizze::where('id',$id)->first();
+
+        $slug = Str::slug($request->input('testTitle'));
+        $originalSlug = $slug;
+        $count = 1;
+        while (Quizze::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        $quiz->slug = $slug;
         $quiz->title = $request->testTitle;
         $quiz->subcategory_id = $request->subCategory;
         $quiz->quiz_type_id = $request->quiz_type;

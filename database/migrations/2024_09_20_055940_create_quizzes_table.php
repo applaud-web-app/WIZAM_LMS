@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('quizzes', function (Blueprint $table) {
             $table->id();
             $table->string('title'); 
+            $table->string('slug'); 
             $table->unsignedBigInteger('subcategory_id'); // Foreign key to the skills table
             $table->unsignedBigInteger('quiz_type_id')->nullable(); // Foreign key to the skills table
             $table->longText('description')->nullable(); 
