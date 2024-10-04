@@ -227,7 +227,7 @@ class StudentController extends Controller
                         'exams.title', // Fetch exam title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-                        'exams.exam_duration as total_time' // Total exam duration for each exam
+                        DB::raw('SUM(COALESCE(questions.time_per_question, 0)) as total_time') // Sum time for each question
                     )
                     ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
                     ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
@@ -235,7 +235,7 @@ class StudentController extends Controller
                     ->where('exams.exam_type_id', $examType->id) // Filter by the provided exam type
                     ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('exams.status', 1) // Filter by exam status
-                    ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.exam_duration') // Group by type and exam details
+                    ->groupBy('exam_types.slug', 'exams.id', 'exams.title') // Group by type and exam details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                     ->get();
 
@@ -243,13 +243,13 @@ class StudentController extends Controller
                 $formattedExamData = [];
 
                 foreach ($examData as $exam) {
+                    // Format the total time using the new method
+                    $formattedTime = $this->formatTime($exam->total_time); // Use the total_time from questions
+
                     // Group exams by slug (exam type)
                     if (!isset($formattedExamData[$exam->slug])) {
                         $formattedExamData[$exam->slug] = [];
                     }
-
-                    // Format the total time using the new method
-                    $formattedTime = $this->formatTime($exam->total_time);
 
                     // Add exam details to the corresponding type slug
                     $formattedExamData[$exam->slug][] = [
@@ -273,28 +273,26 @@ class StudentController extends Controller
         }
     }
 
-    // Function to format the total time in seconds into a string of hours, minutes, and seconds
-    private function formatTime($totalTimeInSeconds)
+    private function formatTime($totalTime)
     {
-        $hours = floor($totalTimeInSeconds / 3600);
-        $minutes = floor(($totalTimeInSeconds % 3600) / 60);
-        $seconds = $totalTimeInSeconds % 60;
+        // Convert total seconds into hours, minutes, and seconds
+        $hours = floor($totalTime / 3600);
+        $minutes = floor(($totalTime % 3600) / 60);
+        $seconds = $totalTime % 60;
 
+        // Format the time string accordingly
         $timeString = '';
-
         if ($hours > 0) {
             $timeString .= $hours . ' hrs ';
         }
-        
         if ($minutes > 0) {
             $timeString .= $minutes . ' mins ';
         }
-        
         if ($seconds > 0) {
             $timeString .= $seconds . ' secs';
         }
 
-        return trim($timeString); // Remove any trailing spaces
+        return trim($timeString); // Trim any extra spaces
     }
     
 }
