@@ -121,13 +121,12 @@ class StudentController extends Controller
         return trim($timeString); // Trim any extra spaces
     }
 
-    public function examDetail(Request $request)
+    public function examDetail(Request $request,$slug)
     {
         try {
             // Validate incoming request data
             $request->validate([
                 'category' => 'required|integer',
-                'slug' => 'required|string'
             ]);
 
             // Fetch exam details based on the category and slug
@@ -147,7 +146,7 @@ class StudentController extends Controller
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
             ->where('exams.subcategory_id', $request->category) 
-            ->where('exams.slug', $request->slug) 
+            ->where('exams.slug', $slug) 
             ->where('exams.status', 1)
             ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 'sub_categories.name', 'exam_types.name') 
             ->havingRaw('COUNT(questions.id) > 0')
