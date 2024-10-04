@@ -227,7 +227,7 @@ class StudentController extends Controller
                         'exams.title', // Fetch exam title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-                        DB::raw('SUM(COALESCE(questions.time_per_question, 0)) as total_time') // Sum time for each question
+                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
                     )
                     ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
                     ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
@@ -273,6 +273,12 @@ class StudentController extends Controller
         }
     }
 
+    /**
+     * Format total time into a human-readable format.
+     *
+     * @param int $totalTime
+     * @return string
+     */
     private function formatTime($totalTime)
     {
         // Convert total seconds into hours, minutes, and seconds
@@ -294,5 +300,6 @@ class StudentController extends Controller
 
         return trim($timeString); // Trim any extra spaces
     }
+
     
 }
