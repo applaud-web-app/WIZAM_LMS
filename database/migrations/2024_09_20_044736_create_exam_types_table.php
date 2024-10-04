@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('exam_types', function (Blueprint $table) {
             $table->id();
             $table->string('name'); 
+            $table->string('slug'); 
             $table->string('color')->nullable(); 
             $table->string('img_url')->nullable(); 
             $table->longText('description')->nullable(); 

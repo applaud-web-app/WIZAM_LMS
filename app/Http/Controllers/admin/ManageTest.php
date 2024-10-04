@@ -66,9 +66,19 @@ class ManageTest extends Controller
             'status' => 'required|string|in:1,0',
         ]);
 
+        $slug = Str::slug($request->input('name'));
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (ExamType::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
         // Create section
         ExamType::create([
             'name' => $request->name,
+            'slug' => $slug,
             'color' => $request->color,
             'img_url' => $request->img_url,
             'description' => $request->description, 
@@ -90,6 +100,15 @@ class ManageTest extends Controller
         $skillId = $data['id'];
         $user = ExamType::where('id',$skillId)->first();
         if($user){
+
+            $slug = Str::slug($request->input('name'));
+            $originalSlug = $slug;
+            $count = 1;
+            while (ExamType::where('slug', $slug)->where('id', '!=', $skillId)->exists()) {
+                $slug = $originalSlug . '-' . $count;
+                $count++;
+            }
+            $user->slug = $slug;
             $user->name = $request->name;
             $user->color = $request->color;
             $user->img_url = $request->img_url;

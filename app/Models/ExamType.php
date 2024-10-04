@@ -11,6 +11,7 @@ class ExamType extends Model
     
     protected $fillable = [
         'name',
+        'slug',
         'color',
         'img_url',
         'description',
