@@ -15,28 +15,6 @@ use Illuminate\Support\Facades\Session;
 
 class StudentController extends Controller
 {
-
-    public function profile(Request $request)
-    {
-        // Get the authenticated user
-        $user = Auth::user();
-
-        // Check if the user is authenticated
-        if ($user) {
-            return response()->json([
-                'status' => true,
-                'user' => $user,
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not authenticated',
-            ], 401);
-        }
-    }
-    
-
-
     public function syllabus(){
         try {
             $data = SubCategory::select('id','name','description')->where('status', 1)->whereJsonLength('sections', '>', 0)->get();

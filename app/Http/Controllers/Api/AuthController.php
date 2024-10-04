@@ -261,6 +261,34 @@ class AuthController extends Controller
         }
     }
 
+    // USER LOGOUT
+    public function logout(Request $request)
+    {
+        // Retrieve the authenticated user from the request attributes
+        $user = $request->attributes->get('authenticatedUser');
+
+        // Check if the user is authenticated
+        if ($user) {
+            // Revoke the token
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Logged out successfully',
+            ], 200);
+        }
+
+        // Return an unauthorized response if user is not authenticated
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+        ], 401);
+    }
+
+
+
+    // USER PROFILE
+
     public function profile(Request $request)
     {
         // Retrieve the authenticated user from the request attributes
@@ -281,19 +309,20 @@ class AuthController extends Controller
         ], 401);
     }
 
-   
 
+    // UPDATE PROFILE
     public function updateProfile(Request $request)
     {
         try {
             // Get the authenticated user
-            $user = Auth::user();
+            $user = $request->attributes->get('authenticatedUser');
 
             // Check if the user is authenticated
             if (!$user) {
                 return response()->json([
                     'status' => false,
                     'message' => 'User not authenticated',
+                    'user'=>$user
                 ], 401);
             }
 
@@ -355,11 +384,12 @@ class AuthController extends Controller
         }
     }
 
+    // USER PASWWORD UPDATE
     public function updatePassword(Request $request)
     {
         try {
             // Get the authenticated user
-            $user = Auth::user();
+            $user = $request->attributes->get('authenticatedUser');
     
             // Check if the user is authenticated
             if (!$user) {
@@ -407,11 +437,12 @@ class AuthController extends Controller
         }
     }
 
+    // USER LOGOUT ALL DEVICE
     public function logoutFromAllLoginDevices(Request $request)
     {
         try {
             // Get the authenticated user
-            $user = Auth::user();
+            $user = $request->attributes->get('authenticatedUser');
     
             // Check if the user is authenticated
             if (!$user) {
@@ -438,31 +469,6 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
-    public function logout(Request $request)
-    {
-        // Retrieve the authenticated user from the request attributes
-        $user = $request->attributes->get('authenticatedUser');
-
-        // Check if the user is authenticated
-        if ($user) {
-            // Revoke the token
-            $user->currentAccessToken()->delete();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Logged out successfully',
-            ], 200);
-        }
-
-        // Return an unauthorized response if user is not authenticated
-        return response()->json([
-            'status' => false,
-            'message' => 'User not authenticated',
-        ], 401);
-    }
-
-
 
 
 }
