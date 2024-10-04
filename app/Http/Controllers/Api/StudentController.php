@@ -44,22 +44,22 @@ class StudentController extends Controller
             if ($examType) {
                 // Fetch exam data grouped by type.slug
                 $examData = Exam::select(
-                        'exam_types.slug', // Fetch type slug
-                        'exams.slug', // Fetch exam title
-                        'exams.title', // Fetch exam title
-                        DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-                        DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-                    )
-                    ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
-                    ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-                    ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-                    ->where('exams.exam_type_id', $examType->id) // Filter by the provided exam type
-                    ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
-                    ->where('exams.status', 1) // Filter by exam status
-                    ->groupBy('exam_types.slug', 'exams.id', 'exams.title') // Group by type and exam details
-                    ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-                    ->get();
+                    'exam_types.slug', // Fetch type slug
+                    'exams.slug', // Fetch exam slug
+                    'exams.title', // Fetch exam title
+                    DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
+                )
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+                ->where('exams.exam_type_id', $examType->id) // Filter by the provided exam type
+                ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
+                ->where('exams.status', 1) // Filter by exam status
+                ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title') // Include exams.slug in GROUP BY
+                ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
+                ->get();
 
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
