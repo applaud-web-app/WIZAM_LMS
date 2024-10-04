@@ -18,6 +18,7 @@ use App\Models\PracticeLesson;
 use App\Models\Lesson;
 use App\Models\Video;
 use App\Models\PracticeVideo;
+use Illuminate\Support\Str;
 
 class ManageLearning extends Controller
 {
