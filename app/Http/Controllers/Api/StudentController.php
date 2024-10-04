@@ -173,7 +173,6 @@ class StudentController extends Controller
                 ]
             ], 200);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage()); // Log the error for debugging
             return response()->json(['status' => false, 'error' => 'Internal Server Error'], 500);
         }
     }
