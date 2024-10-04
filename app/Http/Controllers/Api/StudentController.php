@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\Quizze;
+use App\Models\QuizType;
 
 class StudentController extends Controller
 {
@@ -92,12 +94,6 @@ class StudentController extends Controller
         }
     }
 
-    /**
-     * Format total time into a human-readable format.
-     *
-     * @param int $totalTime
-     * @return string
-     */
     private function formatTime($totalTime)
     {
         // Convert total seconds into hours, minutes, and seconds
@@ -119,6 +115,16 @@ class StudentController extends Controller
 
         return trim($timeString); // Trim any extra spaces
     }
+
+    public function quizType(){
+        try {
+            $type = QuizType::select('name','slug')->where('status', 1)->get();
+            return response()->json(['status'=> true,'data' => $type], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+    
 
     
 }
