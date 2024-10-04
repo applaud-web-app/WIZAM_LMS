@@ -122,13 +122,13 @@ class StudentController extends Controller
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
                         'exams.exam_duration as total_time' // Total exam duration for each exam
                     )
-                    ->leftJoin('types', 'exams.exam_type_id', '=', 'types.id') // Join with the types table
+                    ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with the exam_types table
                     ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
                     ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
                     ->where('exams.exam_type_id', $examType->id) // Filter by the provided exam type
                     ->where('exams.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('exams.status', 1) // Filter by exam status
-                    ->groupBy('types.slug', 'exams.id', 'exams.title', 'exams.exam_duration') // Group by type and exam details
+                    ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.exam_duration') // Group by type and exam details
                     ->get();
 
                 // Initialize array to store formatted exam data
