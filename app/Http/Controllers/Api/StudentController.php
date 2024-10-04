@@ -219,7 +219,7 @@ class StudentController extends Controller
         try {
             // Fetch exam type by slug and status
             $examType = ExamType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-    
+
             if ($examType) {
                 // Fetch exam data grouped by type.slug
                 $examData = Exam::select(
@@ -238,29 +238,32 @@ class StudentController extends Controller
                     ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.exam_duration') // Group by type and exam details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                     ->get();
-    
+
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
-    
+
                 foreach ($examData as $exam) {
                     // Group exams by slug (exam type)
                     if (!isset($formattedExamData[$exam->slug])) {
                         $formattedExamData[$exam->slug] = [];
                     }
-    
+
+                    // Format the total time using the new method
+                    $formattedTime = $this->formatTime($exam->total_time);
+
                     // Add exam details to the corresponding type slug
                     $formattedExamData[$exam->slug][] = [
                         'title' => $exam->title,
                         'questions' => $exam->total_questions ?? 0,
-                        'time' => $exam->total_time ?? 0 . ' hrs', // Append 'hrs' to time
+                        'time' => $formattedTime, // Use the formatted time
                         'marks' => $exam->total_marks ?? 0,
                     ];
                 }
-    
+
                 // Return the formatted data as JSON
                 return response()->json(['status' => true, 'data' => $formattedExamData], 200);
             }
-    
+
             // Return error if exam type not found
             return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
             
@@ -268,6 +271,30 @@ class StudentController extends Controller
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
+    }
+
+    // Function to format the total time in seconds into a string of hours, minutes, and seconds
+    private function formatTime($totalTimeInSeconds)
+    {
+        $hours = floor($totalTimeInSeconds / 3600);
+        $minutes = floor(($totalTimeInSeconds % 3600) / 60);
+        $seconds = $totalTimeInSeconds % 60;
+
+        $timeString = '';
+
+        if ($hours > 0) {
+            $timeString .= $hours . ' hrs ';
+        }
+        
+        if ($minutes > 0) {
+            $timeString .= $minutes . ' mins ';
+        }
+        
+        if ($seconds > 0) {
+            $timeString .= $seconds . ' secs';
+        }
+
+        return trim($timeString); // Remove any trailing spaces
     }
     
 }
