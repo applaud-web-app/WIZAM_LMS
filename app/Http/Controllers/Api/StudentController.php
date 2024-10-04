@@ -116,6 +116,59 @@ class StudentController extends Controller
         return trim($timeString); // Trim any extra spaces
     }
 
+    public function examDetail(Request $request) {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required',
+                'slug' => 'required|string'
+            ]);
+    
+            // Fetch the exam type based on the provided slug
+            $examType = ExamType::where('slug', $request->slug)->first();
+    
+            if (!$examType) {
+                return response()->json(['status' => false, 'message' => 'Exam type not found'], 404);
+            }
+    
+            // Fetch exam details based on the category and exam type
+            $examData = Exam::select(
+                'exam_types.slug as exam_type_slug', 
+                'exams.title',
+                'exams.description',
+                'exams.pass_percentage',
+                'sub_categories.name as sub_category_name',
+                'exam_types.name as exam_type_name',
+                DB::raw('COUNT(questions.id) as total_questions'),
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), 
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') 
+            )
+            ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') 
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
+            ->where('exams.exam_type_id', $examType->id) 
+            ->where('exams.subcategory_id', $request->category) 
+            ->where('exams.slug', $request->slug) 
+            ->where('exams.status', 1)
+            ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 'sub_categories.name', 'exam_types.name') 
+            ->havingRaw('COUNT(questions.id) > 0')
+            ->first();
+    
+            // Check if the exam data exists
+            if (!$examData) {
+                return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
+            }
+    
+            // Return the exam data as a JSON response
+            return response()->json(['status' => true, 'data' => $examData], 200);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage()); // Log the error for debugging
+            return response()->json(['status' => false, 'error' => 'Internal Server Error'], 500);
+        }
+    }
+
+
+    // QUIZ DATA
     public function quizType(){
         try {
             $type = QuizType::select('name','slug')->where('status', 1)->get();

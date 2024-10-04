@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use App\Mail\ForgotPassword;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
