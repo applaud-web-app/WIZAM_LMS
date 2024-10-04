@@ -37,7 +37,7 @@
         <div class="col-span-12 md:col-span-12">
             <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
                 <div class="p-[25px]">
-                    <form action="{{url()->full()}}" method="POST" class="ssm:grid ssm:grid-cols-12 max-ssm:flex-col max-ssm:flex gap-[15px]" id="editUser">
+                    <form action="{{url()->full()}}" method="POST" class="ssm:grid ssm:grid-cols-12 max-ssm:flex-col max-ssm:flex gap-[15px]" enctype="multipart/form-data" id="editUser">
                         @csrf
                         <!-- Title -->
                         <div class="col-span-12 md:col-span-6">
@@ -63,6 +63,18 @@
                             <div class="flex flex-col flex-1">
                                 <input type="text" id="full_name" value="{{$user->name}}" name="full_name" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Full Name" required>
                             </div>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="image" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                Profile Image 
+                            </label>
+                            <div class="flex flex-col flex-1">
+                                <input type="file" id="image" name="image" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white" required>
+                            </div>
+                            @isset($user->image)
+                                <img src="{{$user->image}}" alt="" class="w-[100px] h-[100px]">
+                            @endisset
                         </div>
 
                         <!-- Date of Birth -->

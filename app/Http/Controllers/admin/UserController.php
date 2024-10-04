@@ -308,7 +308,7 @@ class UserController extends Controller
             // Create the user
             $user = User::create([
                 'title' => $request->title ?? null, // Use null coalescing to handle optional 'title'
-                'name' => $imageUrl,
+                'image' => $imageUrl,
                 'name' => $request->full_name,
                 'dob' => $request->dob,
                 'country' => $request->nationality,
