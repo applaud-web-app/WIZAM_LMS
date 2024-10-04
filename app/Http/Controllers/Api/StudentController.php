@@ -194,7 +194,7 @@ class StudentController extends Controller
             if ($quizType) {
                 // Fetch quiz data grouped by type.slug
                 $quizData = Quizze::select(
-                        'quizzes.slug',
+                        'quizzes.slug as quizSlug',
                         'quiz_types.slug', // Fetch type slug
                         'quizzes.title', // Fetch quiz title
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
@@ -226,7 +226,7 @@ class StudentController extends Controller
                     // Add quiz details to the corresponding type slug
                     $formattedQuizData[$quiz->slug][] = [
                         'title' => $quiz->title,
-                        'slug' => $quiz->slug,
+                        'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
                         'time' => $formattedTime, // Use the formatted time
                         'marks' => $quiz->total_marks ?? 0,
