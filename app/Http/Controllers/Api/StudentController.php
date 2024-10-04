@@ -35,7 +35,7 @@ class StudentController extends Controller
         }
     }
 
-    public function exams(Request $request)
+    public function allExams(Request $request)
     {
         try {
             // Fetch exam type by slug and status
@@ -178,7 +178,7 @@ class StudentController extends Controller
         }
     }
 
-    public function quiz(Request $request){
+    public function allQuiz(Request $request){
         try {
             // Fetch quiz type by slug and status
             $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();

@@ -72,10 +72,10 @@ Route::middleware('checkAuthToken')->group(function () {
     // STUDENT
     Route::get('/syllabus', [StudentController::class, 'syllabus']);
     Route::get('/exam-type', [StudentController::class, 'examType']);
-    Route::get('/exams', [StudentController::class, 'exams']);
+    Route::get('/all-exams', [StudentController::class, 'allExams']);
     Route::get('/exam-detail/{slug}', [StudentController::class, 'examDetail']);
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
-    Route::get('/quiz', [StudentController::class, 'quiz']);
+    Route::get('/all-quiz', [StudentController::class, 'allQuiz']);
 });
 
 
