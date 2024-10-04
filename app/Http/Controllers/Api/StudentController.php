@@ -309,7 +309,7 @@ class StudentController extends Controller
             ]);
 
             // Fetch quiz details based on the category and slug
-            $quizData = Quiz::select(
+            $quizData = Quizze::select(
                 'quiz_types.slug as exam_type_slug',
                 'quizzes.title',
                 'quizzes.description',
