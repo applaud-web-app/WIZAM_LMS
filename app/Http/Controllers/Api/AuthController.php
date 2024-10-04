@@ -281,22 +281,162 @@ class AuthController extends Controller
         ], 401);
     }
 
-    public function updateProfile(Request $request){
-        // Retrieve the authenticated user from the request attributes
-        $user = $request->attributes->get('authenticatedUser');
-        // Check if the user is authenticated
-        if ($user) {
+   
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+            // Validate the request data
+            $request->validate([
+                'title' => 'nullable|string|max:255',
+                'full_name' => 'required|string|max:255',
+                'phone_number' => 'required|string|max:15',
+                'email' => 'required|email',
+                'dob' => 'required|date',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            ]);
+
+            // VERIFY NEW EMAIL IS UNIQUE OR NOT
+            $emailVerify = User::where('email', $request->input('email'))->where('id',$user->id)->first();
+            if ($emailVerify) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Email already exists',
+                ], 409);
+            }
+
+            // Update user profile fields
+            $user->title = $request->input('title', $user->title);
+            $user->name = $request->input('full_name', $user->full_name);
+            $user->phone_number = $request->input('phone_number', $user->phone_number);
+            $user->email = $request->input('email', $user->email);
+            $user->dob = $request->input('dob', $user->dob);
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Store the image directly in the public folder
+                $image->move(public_path('users'), $imageName); 
+                
+                // Construct the full URL to the uploaded image
+                $user->image = env('APP_URL') . '/users/' . $imageName; 
+            }
+
+            // Save the changes to the database
+            if ($user->save()) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Profile updated successfully'
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Profile update failed',
+            ], 500);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+    
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+    
+            // Validate the request data
+            $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed', // Ensure it has a confirmation field
+            ]);
+    
+            // Check if the current password is correct
+            if (!Hash::check($request->input('current_password'), $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Current password is incorrect',
+                ], 403); 
+            }
+    
+            // Update the user's password
+            $user->password = Hash::make($request->input('new_password'));
+    
+            // Save the changes to the database
+            if ($user->save()) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Password updated successfully',
+                ], 200);
+            }
+    
+            return response()->json([
+                'status' => false,
+                'message' => 'Password update failed',
+            ], 500);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function logoutFromAllLoginDevices(Request $request)
+    {
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+    
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+    
+            // Revoke all tokens for the user
+            $user->tokens()->delete(); 
+    
+            // Optionally, you can flush the session if using sessions as well
+            Session::flush(); // This will log out the user from the current session
+    
             return response()->json([
                 'status' => true,
-                'user' => $user,
+                'message' => 'Logged out from all devices successfully.',
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Return an unauthorized response if user is not authenticated
-        return response()->json([
-            'status' => false,
-            'message' => 'User not authenticated',
-        ], 401);
     }
 
     public function logout(Request $request)
