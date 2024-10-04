@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\Quizze;
 use App\Models\QuizType;
+use App\Models\PracticeSet;
 
 class StudentController extends Controller
 {
