@@ -282,15 +282,33 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             // 'email_verified' => 'required|string|in:yes,no',
             'status' => 'required|string|in:1,0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
     
         // Begin transaction
         \DB::beginTransaction();
     
         try {
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Store the image directly in the public folder
+                $image->move(public_path('users'), $imageName); 
+                
+                // Construct the full URL to the uploaded image
+                $imageUrl = env('APP_URL') . '/users/' . $imageName; 
+            } else {
+                $imageUrl = env('APP_URL') . '/users/' . "default.png";
+            }
+
+
             // Create the user
             $user = User::create([
                 'title' => $request->title ?? null, // Use null coalescing to handle optional 'title'
+                'name' => $imageUrl,
                 'name' => $request->full_name,
                 'dob' => $request->dob,
                 'country' => $request->nationality,
@@ -364,7 +382,8 @@ class UserController extends Controller
             // 'email_verified' => 'required|string|in:yes,no',
             'status' => 'required|string|in:1,0',
             'password' => 'nullable|string|min:6|confirmed', // Validate password and confirmation
-            'eq' => 'required'
+            'eq' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         // Begin transaction
@@ -383,9 +402,24 @@ class UserController extends Controller
             // Fetch the user
             $user = User::findOrFail($userId);
 
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Store the image directly in the public folder
+                $image->move(public_path('users'), $imageName); 
+                
+                // Construct the full URL to the uploaded image
+                $imageUrl = env('APP_URL') . '/users/' . $imageName; 
+            } else {
+                $imageUrl = $user->image;
+            }
+
             // Update user details
             $user->update([
                 'title' => $request->title ?? null,
+                'image' => $imageUrl,
                 'name' => $request->full_name,
                 'dob' => $request->dob,
                 'country' => $request->nationality,
@@ -450,7 +484,6 @@ class UserController extends Controller
     }
     
     // For Import User
-
     public function showImportForm(){
         return view('manageUsers.importUsers.import');
     }

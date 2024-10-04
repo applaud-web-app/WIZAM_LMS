@@ -282,6 +282,24 @@ class AuthController extends Controller
         ], 401);
     }
 
+    public function updateProfile(Request $request){
+        // Retrieve the authenticated user from the request attributes
+        $user = $request->attributes->get('authenticatedUser');
+        // Check if the user is authenticated
+        if ($user) {
+            return response()->json([
+                'status' => true,
+                'user' => $user,
+            ], 200);
+        }
+
+        // Return an unauthorized response if user is not authenticated
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+        ], 401);
+    }
+
     public function logout(Request $request)
     {
         // Retrieve the authenticated user from the request attributes
