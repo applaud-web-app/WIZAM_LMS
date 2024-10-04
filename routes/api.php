@@ -86,6 +86,9 @@ Route::middleware('checkAuthToken')->group(function () {
     # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);
     Route::get('/practice-set-detail/{slug}', [StudentController::class, 'practiceSetDetail']);
+
+    # Video
+    Route::get('/all-video',[StudentController::class, 'allVideo']);
 });
 
 

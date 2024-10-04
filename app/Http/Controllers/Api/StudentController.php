@@ -401,6 +401,10 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+
+    public function allVideo(){
+        
+    }
     
 
     
