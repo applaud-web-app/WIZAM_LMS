@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubCategory;
+use App\Models\ExamType;
+use App\Models\User;
+use App\Models\Exam;
 
 class StudentController extends Controller
 {
