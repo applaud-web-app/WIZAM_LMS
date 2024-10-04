@@ -332,7 +332,7 @@ class StudentController extends Controller
                 ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
-                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.subCategory_id') // Group by practice set details
+                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug','practice_sets.subCategory_id') // Group by practice set details
                 ->havingRaw('COUNT(questions.id) > 0') // Filter to include only practice sets with questions
                 ->get();
     
