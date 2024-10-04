@@ -125,7 +125,7 @@ class StudentController extends Controller
         }
     }
 
-    public function quizs(Request $request){
+    public function quiz(Request $request){
         try {
             // Fetch quiz type by slug and status
             $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
