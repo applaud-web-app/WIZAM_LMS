@@ -66,6 +66,8 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::post('/update-password', [AuthController::class, 'updatePassword']);
+    Route::post('/logout-all', [AuthController::class, 'logoutFromAllLoginDevices']);
 
     // STUDENT
     Route::get('/syllabus', [StudentController::class, 'syllabus']);
