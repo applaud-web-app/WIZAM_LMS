@@ -8,6 +8,7 @@ use App\Models\SubCategory;
 use App\Models\ExamType;
 use App\Models\User;
 use App\Models\Exam;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
