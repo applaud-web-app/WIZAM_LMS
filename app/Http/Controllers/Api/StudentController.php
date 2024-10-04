@@ -60,19 +60,17 @@ class StudentController extends Controller
             ]);
 
             // VERIFY NEW EMAIL IS UNIQUE OR NOT
-            if ($request->has('email') && $request->input('email') !== $user->email) {
-                $emailVerify = User::where('email', $request->input('email'))->first();
-                if ($emailVerify) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Email already exists',
-                    ], 409); // Conflict status code
-                }
+            $emailVerify = User::where('email', $request->input('email'))->where('id',$user->id)->first();
+            if ($emailVerify) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Email already exists',
+                ], 409);
             }
 
             // Update user profile fields
             $user->title = $request->input('title', $user->title);
-            $user->full_name = $request->input('full_name', $user->full_name);
+            $user->name = $request->input('full_name', $user->full_name);
             $user->phone_number = $request->input('phone_number', $user->phone_number);
             $user->email = $request->input('email', $user->email);
             $user->dob = $request->input('dob', $user->dob);
@@ -93,8 +91,7 @@ class StudentController extends Controller
             if ($user->save()) {
                 return response()->json([
                     'status' => true,
-                    'message' => 'Profile updated successfully',
-                    'user' => $user,
+                    'message' => 'Profile updated successfully'
                 ], 200);
             }
 
