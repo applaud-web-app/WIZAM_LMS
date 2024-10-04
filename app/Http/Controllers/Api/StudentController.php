@@ -323,14 +323,15 @@ class StudentController extends Controller
             $practiceSets = PracticeSet::select(
                     'practice_sets.title',
                     'practice_sets.subCategory_id',
-                    DB::raw('COUNT(practice_set_questions.id) as total_questions'), // Count total questions
-                    DB::raw('SUM(CAST(practice_set_questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks
-                    DB::raw('SUM(COALESCE(practice_set_questions.watch_time, 0)) as total_time') // Sum total watch time
+                    DB::raw('COUNT(questions.id) as total_questions'), // Count total questions from the questions table
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks from the questions table
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time from the questions table
                 )
                 ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id') // Join with practice_set_questions
+                ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
-                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.subCategory_id', 'practice_sets.duration') // Group by practice set details
+                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.subCategory_id') // Group by practice set details
                 ->get();
 
             // Check if practice sets are found
