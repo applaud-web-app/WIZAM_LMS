@@ -315,6 +315,43 @@ class StudentController extends Controller
 
 
     // PRACTICE SET
+    // public function practiceSet(Request $request)
+    // {
+    //     try {
+    //         // Validate incoming request data
+    //         $request->validate([
+    //             'category' => 'required|integer',
+    //         ]);
+    
+    //         // Fetch practice sets and their related data
+    //         $practiceSets = PracticeSet::select(
+    //                 'practice_sets.title',
+    //                 'practice_sets.slug',
+    //                 'practice_sets.subCategory_id',
+    //                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions from the questions table
+    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks from the questions table
+    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time from the questions table
+    //             )
+    //             ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id') // Join with practice_set_questions
+    //             ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
+    //             ->where('practice_sets.subCategory_id', $request->category)
+    //             ->where('practice_sets.status', 1)
+    //             ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug','practice_sets.subCategory_id') // Group by practice set details
+    //             ->havingRaw('COUNT(questions.id) > 0') // Filter to include only practice sets with questions
+    //             ->get();
+    
+    //         // Check if practice sets are found
+    //         if ($practiceSets->isEmpty()) {
+    //             return response()->json(['status' => false, 'message' => 'No practice sets found for this category.'], 404);
+    //         }
+    
+    //         return response()->json(['status' => true, 'data' => $practiceSets], 200);
+            
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+    //     }
+    // }
+
     public function practiceSet(Request $request)
     {
         try {
@@ -322,35 +359,56 @@ class StudentController extends Controller
             $request->validate([
                 'category' => 'required|integer',
             ]);
-    
-            // Fetch practice sets and their related data
+
+            // Fetch practice sets and their related data, including skill name
             $practiceSets = PracticeSet::select(
                     'practice_sets.title',
                     'practice_sets.slug',
                     'practice_sets.subCategory_id',
-                    DB::raw('COUNT(questions.id) as total_questions'), // Count total questions from the questions table
-                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks from the questions table
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time from the questions table
+                    'skills.name as skill_name', // Select skill name
+                    DB::raw('COUNT(questions.id) as total_questions'), // Count total questions
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time
                 )
                 ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id') // Join with practice_set_questions
-                ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
+                ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions
+                ->leftJoin('skills', 'practice_sets.skill_id', '=', 'skills.id') // Join with skills to get skill name
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
-                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug','practice_sets.subCategory_id') // Group by practice set details
-                ->havingRaw('COUNT(questions.id) > 0') // Filter to include only practice sets with questions
+                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug', 'practice_sets.subCategory_id', 'skills.name') // Group by practice set and skill name
+                ->havingRaw('COUNT(questions.id) > 0') // Only include practice sets with questions
                 ->get();
-    
+
             // Check if practice sets are found
             if ($practiceSets->isEmpty()) {
                 return response()->json(['status' => false, 'message' => 'No practice sets found for this category.'], 404);
             }
-    
-            return response()->json(['status' => true, 'data' => $practiceSets], 200);
-            
+
+            // Group practice sets by skill name
+            $groupedData = [];
+            foreach ($practiceSets as $practiceSet) {
+                $skillName = $practiceSet->skill_name ?? 'Unknown Skill'; // Handle null skill names
+                if (!isset($groupedData[$skillName])) {
+                    $groupedData[$skillName] = [];
+                }
+                
+                // Add the practice set data to the corresponding skill name group
+                $groupedData[$skillName][] = [
+                    'practice_title'   => $practiceSet->title,
+                    'practice_question'=> $practiceSet->total_questions, // Use data from query result
+                    'practice_time'    => $practiceSet->total_time,      // Use data from query result
+                    'practice_marks'   => $practiceSet->total_marks,     // Use data from query result
+                    'practice_slug'    => $practiceSet->slug,
+                ];
+            }
+
+            return response()->json(['status' => true, 'data' => $groupedData], 200);
+
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+
 
     public function practiceSetDetail(Request $request, $slug)
     {
