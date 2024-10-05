@@ -315,43 +315,6 @@ class StudentController extends Controller
 
 
     // PRACTICE SET
-    // public function practiceSet(Request $request)
-    // {
-    //     try {
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-    
-    //         // Fetch practice sets and their related data
-    //         $practiceSets = PracticeSet::select(
-    //                 'practice_sets.title',
-    //                 'practice_sets.slug',
-    //                 'practice_sets.subCategory_id',
-    //                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions from the questions table
-    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks from the questions table
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time from the questions table
-    //             )
-    //             ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id') // Join with practice_set_questions
-    //             ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id') // Join with questions to get actual question data
-    //             ->where('practice_sets.subCategory_id', $request->category)
-    //             ->where('practice_sets.status', 1)
-    //             ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug','practice_sets.subCategory_id') // Group by practice set details
-    //             ->havingRaw('COUNT(questions.id) > 0') // Filter to include only practice sets with questions
-    //             ->get();
-    
-    //         // Check if practice sets are found
-    //         if ($practiceSets->isEmpty()) {
-    //             return response()->json(['status' => false, 'message' => 'No practice sets found for this category.'], 404);
-    //         }
-    
-    //         return response()->json(['status' => true, 'data' => $practiceSets], 200);
-            
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
     public function practiceSet(Request $request)
     {
         try {
@@ -576,7 +539,7 @@ class StudentController extends Controller
             // Iterate over each practice video
             foreach ($practiceLessons as $practiceLesson) {
                 // Ensure both skill and video exist (status is already handled in the relationship)
-                if ($practiceLesson->skill && $practiceLesson->video && $practiceLesson->category) {
+                if ($practiceLesson->skill && $practiceLesson->lesson && $practiceLesson->category) {
                     // Get the skill name (or use an ID if there's no specific skill name)
                     $skillName = $practiceLesson->skill->name ?? 'Unknown Skill';
 
