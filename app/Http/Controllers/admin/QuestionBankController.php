@@ -12,6 +12,7 @@ use App\Models\Topic;
 use App\Models\Video;
 use App\Models\Question;
 use App\Models\Solution;
+use Illuminate\Support\Str;
 
 class QuestionBankController extends Controller
 {
@@ -1009,9 +1010,19 @@ class QuestionBankController extends Controller
             $tag = array_column($tags, 'value');
         }
 
+        $slug = Str::slug($request->input('lesson_title'));
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (Lesson::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
         // Create a new lesson record
         Lesson::create([
             'title' => $request->input('lesson_title'),
+            'slug' => $slug,
             'description' => $request->input('description'),
             'skill_id' => $request->input('skill'),
             'topic_id' => $request->input('topic'),
@@ -1060,6 +1071,16 @@ class QuestionBankController extends Controller
         $data = decrypturl($request->eq);
         $compiId = $data['id'];
         $lesson = Lesson::where('id',$compiId)->first();
+
+        $slug = Str::slug($request->input('lesson_title'));
+        $originalSlug = $slug;
+        $count = 1;
+        while (Lesson::where('slug', $slug)->where('id', '!=', $compiId)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        $lesson->slug = $slug;
         $lesson->title = $request->input('lesson_title');
         $lesson->description = $request->input('description');
         $lesson->skill_id = $request->input('skill');
@@ -1198,9 +1219,19 @@ class QuestionBankController extends Controller
             $imagePath = $imageName;
         }
 
+        $slug = Str::slug($request->input('video_title'));
+        // Ensure the slug is unique
+        $originalSlug = $slug;
+        $count = 1;
+        while (Video::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
         // Create a new lesson record
         Video::create([
             'title' => $request->input('video_title'),
+            'slug' => $slug,
             'type' => $type,
             'source' => $source,
             'description' => $request->input('description'),
@@ -1294,6 +1325,14 @@ class QuestionBankController extends Controller
         }
 
 
+        $slug = Str::slug($request->input('video_title'));
+        $originalSlug = $slug;
+        $count = 1;
+        while (Video::where('slug', $slug)->where('id', '!=', $compiId)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+        $video->slug = $slug;
         $video->title = $request->input('video_title');
         $video->type = $type;
         $video->source = $source;

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->id(); // Primary key
             $table->string('title'); // Lesson title
+            $table->string('slug'); // Lesson title
             $table->unsignedBigInteger('skill_id'); // Foreign key to the skills table
             $table->unsignedBigInteger('topic_id')->nullable(); // Foreign key to the topics table (nullable)
             $table->text('tags')->nullable(); // Tags for the lesson

@@ -12,6 +12,7 @@ class Lesson extends Model
     use HasFactory;
     protected $fillable = [
         'title',
+        'slug',
         'description',
         'skill_id',
         'topic_id',

@@ -621,57 +621,9 @@
                 success: function(response) {
                     console.log("File names stored successfully:", response);
                     $('#closeUploadFileModal').trigger('click');
-
                     // Call the reset function
                     resetDropzoneUI();
-
                     uploadedFileNames = []; // Clear the file array
-                    // if (response.created_files) {
-                    //     let content = ``;
-                    //     created_files.forEach(element => {
-                    //         content += `<div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-                    //             <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-                    //                 <img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/file.png')}}" alt="${data[i].node_name}">
-                    //                 <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2] text-center">${data[i].node_name}</h4>
-                    //                 <div  class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-                    //                     <div class="flex items-center" data-te-dropdown-ref>
-                    //                         <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                    //                             id="fileManager-${data[i].id}" data-te-dropdown-toggle-ref aria-expanded="false">
-                    //                             <i class="uil uil-ellipsis-v"></i>
-                    //                         </button>
-                    //                         <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-                    //                             aria-labelledby="fileManager-${data[i].id}" data-te-dropdown-menu-ref>
-                    //                             <li>
-                    //                                 <a href="#"
-                    //                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                    //                                     <i
-                    //                                         class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                    //                                     download
-                    //                                 </a>
-                    //                             </li>
-                    //                             <li>
-                    //                                 <a href="#"
-                    //                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                    //                                     <i
-                    //                                         class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                    //                                     copy
-                    //                                 </a>
-                    //                             </li>
-                    //                             <li>
-                    //                                 <a href="#"
-                    //                                     class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                    //                                     <i
-                    //                                         class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                    //                                     delete
-                    //                                 </a>
-                    //                             </li>
-                    //                         </ul>
-                    //                     </div>
-                    //                 </div>
-                    //             </div>
-                    //         </div>`;
-                    //     });
-                    // }
                     $('#MediaDataBox').append(content);
                     iziToast.success({
                         title: 'Success',
@@ -682,7 +634,6 @@
                 },
                 error: function(xhr) {
                     console.log(xhr);
-                    
                     // Check for validation errors
                     if (xhr.status === 422) {
                         // Extract and display validation error messages
@@ -853,7 +804,7 @@
     </script>
 
     {{-- Fetch Directory Data --}}
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             $(document).on('click', '.directory_files', function() {
                 const url = $(this).data('url');
@@ -1135,7 +1086,7 @@
 
                 $.ajax({
                     url: "{{ route('fetch-directory-data') }}", // Laravel route URL
-                    type: 'GET',
+                    type: 'POST',
                     data: { parent_id: parent_id },
                     dataType: 'json',
                     success: function (response) {
@@ -1191,5 +1142,5 @@
             });
         });
 
-    </script>
+    </script> --}}
 @endpush

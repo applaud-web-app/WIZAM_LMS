@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Session;
 use App\Models\Quizze;
 use App\Models\QuizType;
 use App\Models\PracticeSet;
+use App\Models\PracticeLesson;
+use App\Models\PracticeVideo;
+use App\Models\Video;
+use App\Models\Lesson;
 
 class StudentController extends Controller
 {
@@ -402,10 +406,188 @@ class StudentController extends Controller
         }
     }
 
-    public function allVideo(){
-        
+    // VIDEO PRACTICE
+    public function allVideo(Request $request)
+    {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer'
+            ]);
+
+            // Get practice videos with related skill and video data
+            $practiceVideos = PracticeVideo::with('skill', 'video')
+                ->where('subcategory_id', $request->category)
+                ->get();
+
+            // Initialize an empty array to hold the grouped data
+            $groupedData = [];
+
+            // Iterate over each practice video
+            foreach ($practiceVideos as $practiceVideo) {
+                // Ensure both skill and video exist (status is already handled in the relationship)
+                if ($practiceVideo->skill && $practiceVideo->video && $practiceVideo->category) {
+                    // Get the skill name (or use an ID if there's no specific skill name)
+                    $skillName = $practiceVideo->skill->name ?? 'Unknown Skill';
+
+                    // Initialize the skill group if it doesn't exist
+                    if (!isset($groupedData[$skillName])) {
+                        $groupedData[$skillName] = [];
+                    }
+
+                    // Add the video data to the respective skill group
+                    $groupedData[$skillName][] = [
+                        'video_syllabus' => $practiceVideo->category->name,
+                        'video_title' => $practiceVideo->video->title,
+                        'video_slug' => $practiceVideo->video->slug,
+                        'video_level' => $practiceVideo->video->level,
+                        'video_watch_time' => $practiceVideo->video->watch_time,
+                    ];
+                }
+            }
+            // Return the formatted grouped data as a JSON response
+            return response()->json(['status' => true, 'data' => $groupedData], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function videoDetail(Request $request, $slug)
+    {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer'
+            ]);
+
+            // Retrieve the video and its related skill
+            $video = Video::with('skill')->where('slug', $slug)->where('status', 1)->first();
+
+            if (!$video) {
+                return response()->json(['status' => false, 'error' => 'Video not found.'], 404);
+            }
+
+            // Check if the video is related to the provided category (subcategory)
+            $isVideoInCategory = PracticeVideo::where('subcategory_id', $request->category)
+                ->where('video_id', $video->id)
+                ->exists();
+
+            if (!$isVideoInCategory) {
+                return response()->json(['status' => false, 'error' => 'Video not found.'], 400);
+            }
+
+            // Prepare the video data to return (custom response format)
+            $videoData = [
+                'title' => $video->title,
+                'skill' => $video->skill->name ?? 'Unknown Skill',  // Return skill name if available
+                'watch_time' => $video->watch_time,
+                'is_free' => $video->is_free == 1 ? "Free" : "Paid",
+                'level' => $video->level,
+                'tags' => $video->tags,
+                'thumbnail' => $video->thumbnail,
+                'video_type' => $video->type,
+                'description' => $video->description,
+                'video' => $video->source,  // Assuming 'source' holds the video URL or source
+            ];
+
+            // Return the video details in the response
+            return response()->json(['status' => true, 'data' => $videoData], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // LESSON PRACTICE
+    public function allLesson(Request $request){
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer'
+            ]);
+
+            // Get practice lesson with related skill and video data
+            $practiceLessons = PracticeLesson::with('skill', 'lesson')
+                ->where('subcategory_id', $request->category)
+                ->get();
+
+            // Initialize an empty array to hold the grouped data
+            $groupedData = [];
+
+            // Iterate over each practice video
+            foreach ($practiceLessons as $practiceLesson) {
+                // Ensure both skill and video exist (status is already handled in the relationship)
+                if ($practiceLesson->skill && $practiceLesson->video && $practiceLesson->category) {
+                    // Get the skill name (or use an ID if there's no specific skill name)
+                    $skillName = $practiceLesson->skill->name ?? 'Unknown Skill';
+
+                    // Initialize the skill group if it doesn't exist
+                    if (!isset($groupedData[$skillName])) {
+                        $groupedData[$skillName] = [];
+                    }
+
+                    // Add the video data to the respective skill group
+                    $groupedData[$skillName][] = [
+                        'lesson_syllabus' => $practiceLesson->category->name,
+                        'lesson_title' => $practiceLesson->video->title,
+                        'lesson_slug' => $practiceLesson->video->slug,
+                        'lesson_level' => $practiceLesson->video->level,
+                        'lesson_read_time' => $practiceLesson->video->read_time,
+                    ];
+                }
+            }
+            // Return the formatted grouped data as a JSON response
+            return response()->json(['status' => true, 'data' => $groupedData], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
     }
     
+
+    public function lessonDetail(Request $request, $slug)
+    {
+        try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer'
+            ]);
+
+            // Retrieve the lesson and its related skill
+            $lesson = Lesson::with('skill')->where('slug', $slug)->where('status', 1)->first();
+
+            if (!$lesson) {
+                return response()->json(['status' => false, 'error' => 'Lesson not found.'], 404);
+            }
+
+            // Check if the lesson is related to the provided category (subcategory)
+            $isVessonInCategory = PracticeLesson::where('subcategory_id', $request->category)
+                ->where('lesson_id', $lesson->id)
+                ->exists();
+
+            if (!$isVessonInCategory) {
+                return response()->json(['status' => false, 'error' => 'Lesson not found.'], 400);
+            }
+
+            // Prepare the lesson data to return (custom response format)
+            $lessonData = [
+                'title' => $lesson->title,
+                'skill' => $lesson->skill->name ?? 'Unknown Skill',  // Return skill name if available
+                'read_time' => $lesson->read_time,
+                'is_free' => $lesson->is_free == 1 ? "Free" : "Paid",
+                'level' => $lesson->level,
+                'tags' => $lesson->tags,
+                'description' => $lesson->description,
+            ];
+
+            // Return the lesson details in the response
+            return response()->json(['status' => true, 'data' => $lessonData], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
 
     
     

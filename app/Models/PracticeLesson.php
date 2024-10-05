@@ -13,4 +13,19 @@ class PracticeLesson extends Model
         'subcategory_id',
         'lesson_id'
     ];
+
+    public function skill()
+    {
+        return $this->hasOne(Skill::class, 'id', 'skill_id')->where('status', 1);
+    }
+    
+    public function lesson()
+    {
+        return $this->hasOne(Lesson::class, 'id', 'lesson_id')->where('status', 1);
+    }
+
+    public function category()
+    {
+        return $this->hasOne(SubCategory::class, 'id', 'subcategory_id')->where('status', 1);
+    }
 }
