@@ -528,7 +528,7 @@ class StudentController extends Controller
                 'category' => 'required|integer'
             ]);
 
-            // Get practice lesson with related skill and video data
+            // Get practice lesson with related skill and lesson data
             $practiceLessons = PracticeLesson::with('skill', 'lesson')
                 ->where('subcategory_id', $request->category)
                 ->get();
@@ -536,9 +536,9 @@ class StudentController extends Controller
             // Initialize an empty array to hold the grouped data
             $groupedData = [];
 
-            // Iterate over each practice video
+            // Iterate over each practice lesson
             foreach ($practiceLessons as $practiceLesson) {
-                // Ensure both skill and video exist (status is already handled in the relationship)
+                // Ensure both skill and lesson exist (status is already handled in the relationship)
                 if ($practiceLesson->skill && $practiceLesson->lesson && $practiceLesson->category) {
                     // Get the skill name (or use an ID if there's no specific skill name)
                     $skillName = $practiceLesson->skill->name ?? 'Unknown Skill';
@@ -548,13 +548,13 @@ class StudentController extends Controller
                         $groupedData[$skillName] = [];
                     }
 
-                    // Add the video data to the respective skill group
+                    // Add the lesson data to the respective skill group
                     $groupedData[$skillName][] = [
                         'lesson_syllabus' => $practiceLesson->category->name,
-                        'lesson_title' => $practiceLesson->video->title,
-                        'lesson_slug' => $practiceLesson->video->slug,
-                        'lesson_level' => $practiceLesson->video->level,
-                        'lesson_read_time' => $practiceLesson->video->read_time,
+                        'lesson_title' => $practiceLesson->lesson->title,
+                        'lesson_slug' => $practiceLesson->lesson->slug,
+                        'lesson_level' => $practiceLesson->lesson->level,
+                        'lesson_read_time' => $practiceLesson->lesson->read_time,
                     ];
                 }
             }
