@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\QuizController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -85,6 +86,9 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
     Route::get('/all-quiz', [StudentController::class, 'allQuiz']);
     Route::get('/quiz-detail/{slug}', [StudentController::class, 'quizDetail']);
+
+    ## PLAY Quiz
+    Route::get('/play-quiz/{slug}',[QuizController::class, 'playQuiz']);
 
     # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);

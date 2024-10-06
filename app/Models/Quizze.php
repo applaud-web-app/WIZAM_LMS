@@ -46,4 +46,10 @@ class Quizze extends Model
         return $this->belongsTo(SubCategory::class, 'subcategory_id', 'id');
     }
 
+     // Define the relationship with QuizQuestion model
+     public function quizQuestions()
+     {
+         return $this->hasMany(QuizQuestion::class, 'quizzes_id', 'id');
+     }
+
 }
