@@ -135,7 +135,7 @@ class QuizController extends Controller
                 // Customize question display for different types
                 $questionText = $question->question;
                 if ($question->type == "FIB") {
-                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center"></span>', $question->question);
+                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
                 } elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
