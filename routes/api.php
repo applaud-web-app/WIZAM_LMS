@@ -89,6 +89,8 @@ Route::middleware('checkAuthToken')->group(function () {
 
     ## PLAY Quiz
     Route::get('/play-quiz/{slug}',[QuizController::class, 'playQuiz']);
+    Route::post('/save-progress/{uuid}',[QuizController::class, 'saveProgress']);
+    Route::post('/finish-quiz/{uuid}',[QuizController::class, 'finishQuiz']);
 
     # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);

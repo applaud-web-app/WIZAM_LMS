@@ -1204,8 +1204,9 @@ class QuestionBankController extends Controller
             $tag = array_column($tags, 'value');
         }
 
-         // Handle the image upload
+        // Handle the image upload
         $imagePath = null;
+        $baseUrl = env('APP_URL');
         if ($request->hasFile('video_thumbnail')) {
             $image = $request->file('video_thumbnail');
             
@@ -1216,7 +1217,7 @@ class QuestionBankController extends Controller
             $image->move(public_path('fileManager/thumbnail/'), $imageName);
     
             // Store the image path in the database (relative to the public directory)
-            $imagePath = $imageName;
+            $imagePath = $baseUrl."/fileManager/thumbnail/".$imageName;
         }
 
         $slug = Str::slug($request->input('video_title'));
@@ -1227,7 +1228,7 @@ class QuestionBankController extends Controller
             $slug = $originalSlug . '-' . $count;
             $count++;
         }
-
+       
         // Create a new lesson record
         Video::create([
             'title' => $request->input('video_title'),
@@ -1311,6 +1312,7 @@ class QuestionBankController extends Controller
 
          // Handle the image upload
         $imagePath = $video->thumbnail;
+        $baseUrl = env('APP_URL');
         if ($request->hasFile('video_thumbnail')) {
             $image = $request->file('video_thumbnail');
             
@@ -1321,7 +1323,7 @@ class QuestionBankController extends Controller
             $image->move(public_path('fileManager/thumbnail/'), $imageName);
     
             // Store the image path in the database (relative to the public directory)
-            $imagePath = $imageName;
+            $imagePath = $baseUrl."/fileManager/thumbnail/".$imageName;
         }
 
 

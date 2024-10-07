@@ -15,349 +15,6 @@ use Carbon\Carbon;
 
 class QuizController extends Controller
 {
-    // public function playQuiz(Request $request, $slug) {
-    //     try {
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-    
-    //         // SELECT QUIZ and related questions, marks, and watch time in one query
-    //         $quiz = Quizze::with([
-    //                 'quizQuestions.questions' => function($query) {
-    //                     $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options','answer');
-    //                 }
-    //             ])
-    //             ->select(
-    //                 'quizzes.id',
-    //                 'quizzes.title',
-    //                 'quizzes.description',
-    //                 'quizzes.pass_percentage',
-    //                 'quizzes.slug',
-    //                 'quizzes.subcategory_id',
-    //                 'quizzes.status',
-    //                 'quizzes.duration_mode',
-    //                 'quizzes.point_mode',
-    //                 'quizzes.duration',
-    //                 'quizzes.point',
-    //                 'quizzes.shuffle_questions',
-    //                 'quizzes.question_view',
-    //                 'quizzes.disable_finish_button',
-    //                 DB::raw('SUM(questions.default_marks) as total_marks'),
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-    //             )
-    //             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-    //             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-    //             ->where('quizzes.slug', $slug)
-    //             ->where('quizzes.subcategory_id', $request->category)
-    //             ->where('quizzes.status', 1)
-    //             ->where('questions.status', 1)
-    //             ->groupBy(
-    //                 'quizzes.id',
-    //                 'quizzes.title',
-    //                 'quizzes.description',
-    //                 'quizzes.pass_percentage',
-    //                 'quizzes.slug',
-    //                 'quizzes.subcategory_id',
-    //                 'quizzes.status',
-    //                 'quizzes.duration_mode',
-    //                 'quizzes.point_mode',
-    //                 'quizzes.duration',
-    //                 'quizzes.point',
-    //                 'quizzes.shuffle_questions',
-    //                 'quizzes.question_view',
-    //                 'quizzes.disable_finish_button',
-    //             )
-    //             ->first();
-    
-    //         // If quiz not found
-    //         if (!$quiz) {
-    //             return response()->json(['status' => false, 'error' => 'Quiz not found'], 404);
-    //         }
-
-    //         // Get the authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-    //         $checkOngoingResult = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('status','complete')->get();
-
-    //         // QUIZ RISTRICK ATTEMP 
-    //         if($quiz->restrict_attempts == 1){
-    //             if($quiz->total_attempts < count($checkOngoingResult)){
-    //                 //  CONTINE YOU CAN MOVE FURTURE
-    //             }else{
-    //                 return response()->json(['status' => false, 'error' => 'Maximum Attempt Reached'], 404);
-    //             }
-    //         }
-
-    //         $ongoingQuiz = $checkOngoingResult->latest()->first();
-    //         if($ongoingQuiz->status == "ongoing"){
-    //             $CurrentDuration = $ongoingQuiz->end_time - now();
-    //             if($ongoingQuiz->end_time < now()){
-    //                 // THEN MAKE THE QUIZ RESULT COMPLETE 
-    //             }
-
-
-    //             // Final output structure
-    //             $examMockData = [
-    //                 'title' => $quiz->title,
-    //                 'questions' => $ongoingQuiz->question,
-    //                 'duration' => $CurrentDuration . " mins",
-    //                 'points' => $ongoingQuiz->points,
-    //                 'question_view' =>$quiz->question_view == 1 ? "enable":"disable",
-    //                 'finish_button' => $quiz->disable_finish_button == 1 ? "enable":"disable"
-    //             ];
-        
-    //             // Return the quiz data
-    //             return response()->json(['status' => true, 'data' => $examMockData], 200);
-    //         }
-    
-    //         // Determine duration and points
-    //         $duration = $quiz->duration_mode == "manual" ? $quiz->duration : round($quiz->total_time / 60, 2); // converting seconds to minutes
-    //         $points = $quiz->point_mode == "manual" ? $quiz->point : $quiz->total_marks;
-    
-    //         // Prepare structured response data for questions
-    //         $questionsData = [];
-    //         foreach ($quiz->quizQuestions as $quizQuestion) {
-    //             $question = $quizQuestion->questions;
-
-    //             $options = $question->options ? json_decode($question->options) : []; // Decode original options
-
-    //             if ($question->type == "MTF") {
-    //                 // Decode the match values (answers)
-    //                 $match_option = $question->answer ? json_decode($question->answer, true) : [];
-
-    //                 // Check if match_option is not empty
-    //                 if (!empty($match_option)) {
-    //                     // Shuffle the match values
-    //                     $shuffled_match_values = array_values($match_option); // Get values only for shuffling
-    //                     shuffle($shuffled_match_values); // Shuffle the values
-
-    //                     // Add the shuffled match values to the options array
-    //                     $options = array_merge((array)$options, $shuffled_match_values);
-    //                 }
-    //             }
-
-    //             $questionText = $question->question;
-    //             if($question->type == "FIB"){
-    //                 $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-24 text-center"></span>', $question->question);
-    //             }
-
-    //             if($question->type == "EMQ"){
-    //                 $questionText = $question->question ? json_decode($question->question) : [];
-    //             }
-
-    //             $questionsData[] = [
-    //                 'id' => $question->id,
-    //                 'type' => $question->type, // single, multiple, MTF, etc.
-    //                 'question' => $questionText,
-    //                 'options' => $options, // Updated options for MTF or other question types
-    //             ];
-
-    //         }
-
-    //         // Shuffle questions if quiz shuffle is enabled
-    //         if ($quiz->shuffle_questions == 1) {
-    //             shuffle($questionsData); // Shuffle the questions array
-    //         }
-
-    //         // Final output structure
-    //         // $examMockData = [
-    //         //     'title' => $quiz->title,
-    //         //     'questions' => $questionsData,
-    //         //     'duration' => $duration . " mins",
-    //         //     'points' => $points,
-    //         //     'question_view' =>$quiz->question_view == 1 ? "enable":"disable",
-    //         //     'finish_button' => $quiz->disable_finish_button == 1 ? "enable":"disable"
-    //         // ];
-
-    //         $startTime =  now();
-    //         $endTIme = now() +  $duration;
-
-    //         // QUIZ RESULT
-    //         $quizResult = QuizResult::create([
-    //             'quiz_id' => $quiz->id,
-    //             'uuid' => "1234567", // Make something unique 
-    //             'subcategory_id' => $quiz->subcategory_id,
-    //             'user_id' => $user->id,
-    //             'question'=>$questionsData,
-    //             'start_time' => $startTime,
-    //             'end_time' => $endTime,
-    //             'exam_duration' => $duration, // MINUTES
-    //             'point' => $points,
-    //             'negative_marking'=> $quiz->negative_marking,
-    //             'negative_marking_type'=> $quiz->negative_marking_type,
-    //             'negative_marks'=> $quiz->negative_marks,
-    //             'pass_percentage'=>$quiz->pass_percentage,
-    //             'total_question'=>count($questionsData),
-    //             'status' => 'ongoing', // Status set to ongoing
-    //         ]);
-
-    //         $CurrentDuration = $quizResult->end_time - now();
-
-    //         // Final output structure
-    //         $examMockData = [
-    //             'title' => $quiz->title,
-    //             'questions' => $quizResult->question,
-    //             'duration' => $CurrentDuration . " mins",
-    //             'points' => $quizResult->points,
-    //             'question_view' =>$quiz->question_view == 1 ? "enable":"disable",
-    //             'finish_button' => $quiz->disable_finish_button == 1 ? "enable":"disable"
-    //         ];
-    
-    //         // Return the quiz data
-    //         return response()->json(['status' => true, 'data' => $examMockData], 200);
-    
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
-    
-    // public function playQuiz(Request $request, $slug) {
-    //     try {
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-    
-    //         // SELECT QUIZ and related questions, marks, and watch time in one query
-    //         $quiz = Quizze::with([
-    //                 'quizQuestions.questions' => function($query) {
-    //                     $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options','answer');
-    //                 }
-    //             ])
-    //             ->select(
-    //                 'quizzes.id',
-    //                 'quizzes.title',
-    //                 'quizzes.description',
-    //                 'quizzes.pass_percentage',
-    //                 'quizzes.slug',
-    //                 'quizzes.subcategory_id',
-    //                 'quizzes.status',
-    //                 'quizzes.duration_mode',
-    //                 'quizzes.point_mode',
-    //                 'quizzes.duration',
-    //                 'quizzes.point',
-    //                 'quizzes.shuffle_questions',
-    //                 'quizzes.question_view',
-    //                 'quizzes.disable_finish_button',
-    //                 DB::raw('SUM(questions.default_marks) as total_marks'),
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-    //             )
-    //             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-    //             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-    //             ->where('quizzes.slug', $slug)
-    //             ->where('quizzes.subcategory_id', $request->category)
-    //             ->where('quizzes.status', 1)
-    //             ->groupBy(
-    //                 'quizzes.id',
-    //                 'quizzes.title',
-    //                 'quizzes.description',
-    //                 'quizzes.pass_percentage',
-    //                 'quizzes.slug',
-    //                 'quizzes.subcategory_id',
-    //                 'quizzes.status',
-    //                 'quizzes.duration_mode',
-    //                 'quizzes.point_mode',
-    //                 'quizzes.duration',
-    //                 'quizzes.point',
-    //                 'quizzes.shuffle_questions',
-    //                 'quizzes.question_view',
-    //                 'quizzes.disable_finish_button',
-    //             )
-    //             ->first();
-    
-    //         // If quiz not found
-    //         if (!$quiz) {
-    //             return response()->json(['status' => false, 'error' => 'Quiz not found'], 404);
-    //         }
-    
-    //         // Determine duration and points
-    //         $duration = $quiz->duration_mode == "manual" ? $quiz->duration : round($quiz->total_time / 60, 2); // converting seconds to minutes
-    //         $points = $quiz->point_mode == "manual" ? $quiz->point : $quiz->total_marks;
-    
-    //         // Check if the user has already started this quiz session
-    //         $user = $request->attributes->get('authenticatedUser'); // Assuming you're using custom auth logic
-    //         $quizResult = QuizResult::where('quiz_id', $quiz->id)
-    //             ->where('user_id', $user->id)
-    //             ->where('status', 'ongoing') // Check for ongoing sessions
-    //             ->first();
-    
-    //         if (!$quizResult) {
-    //             // Create new quiz result with current time as the start time
-    //             $startTime = now();
-    //             $endTime = $startTime->copy()->addMinutes($duration); // Add the quiz duration to the start time
-    
-    //             $quizResult = QuizResult::create([
-    //                 'quiz_id' => $quiz->id,
-    //                 'uuid' => "123",
-    //                 'subcategory_id' => $quiz->subcategory_id,
-    //                 'user_id' => $user->id,
-    //                 'start_time' => $startTime,
-    //                 'end_time' => $endTime,
-    //                 'exam_duration' => $duration,
-    //                 'point' => $points,
-    //                 'status' => 'ongoing', // Status set to ongoing
-    //             ]);
-    //         }
-    
-    //         // Calculate the remaining duration
-    //         $currentTime = now();
-    //         $remainingDuration = max($quizResult->end_time->diffInSeconds($currentTime), 0); // Difference in seconds
-    
-    //         // Prepare structured response data for questions
-    //         $questionsData = [];
-    //         foreach ($quiz->quizQuestions as $quizQuestion) {
-    //             $question = $quizQuestion->questions;
-    //             $options = $question->options ? json_decode($question->options) : []; // Decode original options
-    
-    //             if ($question->type == "MTF") {
-    //                 $match_option = $question->answer ? json_decode($question->answer, true) : [];
-    //                 if (!empty($match_option)) {
-    //                     $shuffled_match_values = array_values($match_option);
-    //                     shuffle($shuffled_match_values); // Shuffle the match values
-    //                     $options = array_merge((array)$options, $shuffled_match_values);
-    //                 }
-    //             }
-    
-    //             $questionText = $question->question;
-    //             if ($question->type == "FIB") {
-    //                 $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-24 text-center"></span>', $question->question);
-    //             }
-    
-    //             if ($question->type == "EMQ") {
-    //                 $questionText = $question->question ? json_decode($question->question) : [];
-    //             }
-    
-    //             $questionsData[] = [
-    //                 'id' => $question->id,
-    //                 'type' => $question->type,
-    //                 'question' => $questionText,
-    //                 'options' => $options,
-    //             ];
-    //         }
-    
-    //         // Shuffle questions if quiz shuffle is enabled
-    //         if ($quiz->shuffle_questions == 1) {
-    //             shuffle($questionsData); // Shuffle the questions array
-    //         }
-    
-    //         // Final output structure
-    //         $examMockData = [
-    //             'title' => $quiz->title,
-    //             'questions' => $questionsData,
-    //             'duration' => round($remainingDuration / 60, 2) . " mins", // Remaining time in minutes
-    //             'points' => $points,
-    //             'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
-    //             'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
-    //         ];
-    
-    //         // Return the quiz data
-    //         return response()->json(['status' => true, 'data' => $examMockData], 200);
-    
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
 
     public function playQuiz(Request $request, $slug)
     {
@@ -528,6 +185,7 @@ class QuizController extends Controller
                     'points' => $quizResult->point,
                     'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
                     'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
+                    // pass uuid also
                 ]
             ], 200);
     
@@ -535,10 +193,59 @@ class QuizController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
-
     
-    
+    public function saveProgress(Request $request, $uuid) {
+        try {
+            // Validate request data
+            $request->validate([
+                'answers' => 'required|array',
+            ]);
 
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
+            // Find the quiz session by UUID
+            $quizResult = StudentQuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
+
+            // Update the answers in the database
+            $quizResult->update([
+                'answers' => json_encode($request->answers), // Save the user's answers as JSON
+                'updated_at' => now() // Update the timestamp
+            ]);
+
+            return response()->json(['status' => true, 'message' => 'Progress saved successfully'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+        }
+    }
+
+    public function finishQuiz(Request $request, $uuid) {
+        try {
+            // Validate request data
+            $request->validate([
+                'answers' => 'required|array',
+            ]);
+
+            $quizResult = StudentQuizResult::where('uuid', $uuid)->firstOrFail();
+    
+            // Update status to completed and mark the end time
+            $quizResult->update([
+                'status' => 'completed',
+                'answers' => json_encode($request->answers), // Save the user's answers as JSON
+                'end_time' => now(),
+            ]);
+    
+            // Calculate correct and incorrect answers (you can customize this based on your logic)
+            // $correctAnswers = calculateCorrectAnswers($quizResult->answers);
+            // $incorrectAnswers = calculateIncorrectAnswers($quizResult->answers);
+    
+            // You can also calculate points based on correct answers, negative marking, etc.
+    
+            return response()->json(['status' => true, 'Progress saved successfully'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+        }
+    }
     
     
     
