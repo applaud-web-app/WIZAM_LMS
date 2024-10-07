@@ -99,6 +99,7 @@ class QuizController extends Controller
                 if ($ongoingQuiz->end_time->isPast()) {
                     // If time has passed, mark the quiz as complete
                     $ongoingQuiz->update(['status' => 'complete']);
+                    return response()->json(['status' => false, 'success' => 'Quiz Completed Successfully'], 403);
                 } else {
                     // Return ongoing quiz details
                     return response()->json([
@@ -134,7 +135,7 @@ class QuizController extends Controller
                 // Customize question display for different types
                 $questionText = $question->question;
                 if ($question->type == "FIB") {
-                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-24 text-center"></span>', $question->question);
+                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center"></span>', $question->question);
                 } elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
@@ -198,14 +199,14 @@ class QuizController extends Controller
         try {
             // Validate request data
             $request->validate([
-                'answers' => 'required|array',
+                'answers' => 'required|array', // USE QUESTION ID WITH ANSWER
             ]);
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
             // Find the quiz session by UUID
-            $quizResult = StudentQuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
+            $quizResult = QuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
 
             // Update the answers in the database
             $quizResult->update([
@@ -219,33 +220,85 @@ class QuizController extends Controller
         }
     }
 
+    private function updateQuizResult($uuid){
+        $quizResult = QuizResult::where('uuid', $uuid)->firstOrFail();
+        if($quizResult){
+            // CHECK WHICH ANSWER IS CORRECT WHICH IS INCORRECT
+            $questions = json_decode($quizResult->questions); // STUDENT QUESTION
+            $answers = json_decode($quizResult->answers); // STUDENT Answers
+
+            // USER QUESTION STORE LIKE THIS
+            $questions = [
+                "id"=>4,
+                "type"=>"TOF",
+                "question"=>"\u003Cp\u003E\u003Cul\u003E\u003Cli\u003E\u003C\/li\u003E\u003C\/ul\u003E\u003C\/p\u003E\u003Cp\u003EJavaScript is a server-side programming language.\u003C\/p\u003E",
+                "options"=>["True","False"]
+            ];
+
+            // USER ANSWER STORE LIKE THIS
+            $answers = [
+                "id"=>4,
+                "answer"=>"True"
+            ];
+
+            // NOW I WANT TO CHECK ANSWER IS CORRECT OR NOT FROM QUESTION TABLE 
+        }
+    }
+
     public function finishQuiz(Request $request, $uuid) {
         try {
-            // Validate request data
+            // Validate the incoming request data
             $request->validate([
-                'answers' => 'required|array',
+                'answers' => 'required|array', // Expecting an array of answers with question IDs
             ]);
-
-            $quizResult = StudentQuizResult::where('uuid', $uuid)->firstOrFail();
     
-            // Update status to completed and mark the end time
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // Fetch the quiz result based on the UUID and user ID
+            $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+    
+            // Retrieve the stored questions from the quiz result
+            $questions = json_decode($quizResult->questions, true); // Convert to an array
+            $userAnswers = $request->answers; // Array of user's submitted answers
+    
+            // Initialize counters for correct and incorrect answers
+            $correctAnswersCount = 0;
+            $incorrectAnswersCount = 0;
+            $totalMarks = 0;
+            $negativeMarking = (float) $quizResult->negative_marking; // Negative marking if applicable
+    
+            // Loop through each submitted answer and compare it with the correct answer from the database
+            foreach ($userAnswers as $userAnswer) {
+                $question = Question::find($userAnswer['id']); // Fetch question from DB using question ID
+    
+                // Compare the user's answer with the correct answer
+                if ($question && $question->answer == $userAnswer['answer']) {
+                    $correctAnswersCount++;
+                    $totalMarks += (float) $question->default_marks; // Add marks for correct answer
+                } else {
+                    $incorrectAnswersCount++;
+                    $totalMarks -= $negativeMarking; // Deduct marks for incorrect answer, if negative marking is enabled
+                }
+            }
+    
+            // Update the quiz result with the calculated values
             $quizResult->update([
+                'correct_answer' => $correctAnswersCount,
+                'incorrect_answer' => $incorrectAnswersCount,
+                'point' => max(0, $totalMarks), // Ensure that total points don't go below zero
                 'status' => 'completed',
-                'answers' => json_encode($request->answers), // Save the user's answers as JSON
                 'end_time' => now(),
+                'answers' => json_encode($request->answers), // Store user's answers
             ]);
     
-            // Calculate correct and incorrect answers (you can customize this based on your logic)
-            // $correctAnswers = calculateCorrectAnswers($quizResult->answers);
-            // $incorrectAnswers = calculateIncorrectAnswers($quizResult->answers);
-    
-            // You can also calculate points based on correct answers, negative marking, etc.
-    
-            return response()->json(['status' => true, 'Progress saved successfully'], 200);
+            // Return success response
+            return response()->json(['status' => true, 'message' => 'Quiz completed successfully'], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+    
     
     
     
