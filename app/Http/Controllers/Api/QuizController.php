@@ -136,7 +136,7 @@ class QuizController extends Controller
                 $questionText = $question->question;
                 if ($question->type == "FIB") {
                     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
-                    $options = [count(json_decode($question->answer,true))];
+                    $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
                 } elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
