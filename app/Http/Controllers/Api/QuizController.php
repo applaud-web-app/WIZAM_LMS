@@ -106,6 +106,7 @@ class QuizController extends Controller
                         'status' => true,
                         'data' => [
                             'title' => $quiz->title,
+                            'uuid'=>$ongoingQuiz->uuid,
                             'questions' => json_decode($ongoingQuiz->questions),
                             'duration' => $remainingDuration . " mins",
                             'points' => $ongoingQuiz->point,
