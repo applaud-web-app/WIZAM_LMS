@@ -289,10 +289,4 @@ class QuizController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
-    
-    
-    
-    
-
-    
 }
