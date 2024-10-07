@@ -99,7 +99,10 @@ class QuizController extends Controller
                 if ($ongoingQuiz->end_time->isPast()) {
                     // If time has passed, mark the quiz as complete
                     $ongoingQuiz->update(['status' => 'complete']);
-                    return response()->json(['status' => false, 'success' => 'Quiz Completed Successfully'], 403);
+                    $data = [
+                        'uuid'=>$ongoingQuiz->uuid,
+                    ];
+                    return response()->json(['status' => true, 'message' => 'Quiz Timed Out','data'=>$data]);
                 } else {
                     // Return ongoing quiz details
                     return response()->json([
@@ -230,31 +233,6 @@ class QuizController extends Controller
             return response()->json(['status' => true, 'message' => 'Progress saved successfully'], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-        }
-    }
-
-    private function updateQuizResult($uuid){
-        $quizResult = QuizResult::where('uuid', $uuid)->firstOrFail();
-        if($quizResult){
-            // CHECK WHICH ANSWER IS CORRECT WHICH IS INCORRECT
-            $questions = json_decode($quizResult->questions); // STUDENT QUESTION
-            $answers = json_decode($quizResult->answers); // STUDENT Answers
-
-            // USER QUESTION STORE LIKE THIS
-            $questions = [
-                "id"=>4,
-                "type"=>"TOF",
-                "question"=>"\u003Cp\u003E\u003Cul\u003E\u003Cli\u003E\u003C\/li\u003E\u003C\/ul\u003E\u003C\/p\u003E\u003Cp\u003EJavaScript is a server-side programming language.\u003C\/p\u003E",
-                "options"=>["True","False"]
-            ];
-
-            // USER ANSWER STORE LIKE THIS
-            $answers = [
-                "id"=>4,
-                "answer"=>"True"
-            ];
-
-            // NOW I WANT TO CHECK ANSWER IS CORRECT OR NOT FROM QUESTION TABLE 
         }
     }
 
