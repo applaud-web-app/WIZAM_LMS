@@ -16,6 +16,7 @@ class QuizResult extends Model
     
     protected $fillable = [
         'quiz_id',
+        'correct_answers',
         'subcategory_id',
         'user_id',
         'uuid',
@@ -25,6 +26,7 @@ class QuizResult extends Model
         'point',
         'negative_marking',
         'pass_percentage',
+        'student_percentage',
         'total_question',
         'correct_answer',
         'incorrect_answer',
