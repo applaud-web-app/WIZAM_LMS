@@ -18,11 +18,13 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); // The ID of the user taking the quiz
             $table->string('uuid'); // Unique ID to track the quiz session
             $table->longText('questions'); // Store the quiz questions (JSON format for easy retrieval)
+            $table->longText('correct_answers')->nullable(); // Store the user's answers (JSON format)
             $table->longText('answers')->nullable(); // Store the user's answers (JSON format)
             $table->string('exam_duration'); // Total exam duration (e.g., 30 mins)
             $table->string('point'); // Total points/marks
             $table->string('negative_marking')->default(0); // Negative marking, if applicable
             $table->string('pass_percentage'); // Pass percentage for the quiz
+            $table->string('student_percentage')->nullable(); // When the user completed or abandoned the quiz
             $table->string('total_question'); // Total number of questions in the quiz
             $table->string('correct_answer')->nullable(); // Number of correct answers (updated after quiz completion)
             $table->string('incorrect_answer')->nullable(); // Number of incorrect answers (updated after quiz completion)

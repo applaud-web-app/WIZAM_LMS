@@ -157,6 +157,13 @@ class QuizController extends Controller
             // Start quiz result tracking
             $startTime = now();
             $endTime = $startTime->copy()->addMinutes($duration); 
+
+            // Add correct answer info
+            $correctAnswers[] = [
+                'id' => $question->id,
+                'correct_answer' => $question->answer,  // Use answer field
+                'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
+            ];
     
             $quizResult = QuizResult::create([
                 'quiz_id' => $quiz->id,
@@ -164,6 +171,7 @@ class QuizController extends Controller
                 'subcategory_id' => $quiz->subcategory_id,
                 'user_id' => $user->id,
                 'questions' => json_encode($questionsData,true),
+                'correct_answers' => json_encode($correctAnswers,true),
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'exam_duration' => $duration,
@@ -182,12 +190,12 @@ class QuizController extends Controller
                 'status' => true,
                 'data' => [
                     'title' => $quiz->title,
+                    'uuid'=>$quiz->uuid,
                     'questions' => json_decode($quizResult->questions),
                     'duration' => $remainingDuration . " mins",
                     'points' => $quizResult->point,
                     'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
                     'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
-                    // pass uuid also
                 ]
             ], 200);
     
