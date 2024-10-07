@@ -122,6 +122,7 @@ class QuizController extends Controller
     
             // Prepare structured response data for questions
             $questionsData = [];
+            $correctAnswers = [];
             foreach ($quiz->quizQuestions as $quizQuestion) {
                 $question = $quizQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
@@ -147,6 +148,13 @@ class QuizController extends Controller
                     'question' => $questionText,
                     'options' => $options
                 ];
+
+                // Add correct answer info
+                $correctAnswers[] = [
+                    'id' => $question->id,
+                    'correct_answer' => $question->answer,  // Use answer field
+                    'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
+                ];
             }
     
             // Shuffle questions if enabled
@@ -158,12 +166,7 @@ class QuizController extends Controller
             $startTime = now();
             $endTime = $startTime->copy()->addMinutes($duration); 
 
-            // Add correct answer info
-            $correctAnswers[] = [
-                'id' => $question->id,
-                'correct_answer' => $question->answer,  // Use answer field
-                'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
-            ];
+           
     
             $quizResult = QuizResult::create([
                 'quiz_id' => $quiz->id,
