@@ -211,7 +211,7 @@ class QuizController extends Controller
         }
     }
     
-    public function saveProgress(Request $request, $uuid) {
+    public function saveQuizProgress(Request $request, $uuid) {
         try {
             // Validate request data
             $request->validate([
