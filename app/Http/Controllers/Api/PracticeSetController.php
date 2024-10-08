@@ -365,7 +365,7 @@ class PracticeSetController extends Controller
     //     }
     // }
 
-    public function playQuiz(Request $request, $slug)
+    public function playPracticeSet(Request $request, $slug)
     {
         try {
             // Validate incoming request data
