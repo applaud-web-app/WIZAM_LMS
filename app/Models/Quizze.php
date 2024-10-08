@@ -52,4 +52,14 @@ class Quizze extends Model
          return $this->hasMany(QuizQuestion::class, 'quizzes_id', 'id');
      }
 
+
+     public function questions()
+     {
+         return $this->belongsToMany(Question::class, 'quiz_questions', 'quizzes_id', 'question_id');
+     }
+ 
+     public function results()
+     {
+         return $this->hasMany(QuizResult::class, 'quiz_id');
+     }
 }

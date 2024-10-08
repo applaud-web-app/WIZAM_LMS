@@ -512,26 +512,20 @@ class QuizController extends Controller
     public function quizResult(Request $request, $uuid)
     {
         try {
-            // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-    
-            // Find the QuizResult by UUID and user ID
-            $quizResult = QuizResult::with(['quiz', 'quiz.questions'])->where('uuid', $uuid)->where('user_id', $user->id)->first();
-    
+
+            $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
             if ($quizResult) {
-                // Initialize an empty leaderboard
+                // Build leaderboard
                 $leaderBoard = [];
-    
-                // Check if the quiz has a leaderboard feature enabled
                 if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
-                    $userQuizResults = QuizResult::with('user')
+                    $userQuiz = QuizResult::with('user')
                         ->where('quiz_id', $quizResult->quiz_id)
                         ->orderby('student_percentage', 'DESC')
                         ->take(10)
                         ->get();
-    
-                    // Populate the leaderboard with the top 10 quiz takers
-                    foreach ($userQuizResults as $userData) {
+
+                    foreach ($userQuiz as $userData) {
                         if (isset($userData->user)) {
                             $leaderBoard[] = [
                                 "username" => $userData->user->name,
@@ -541,38 +535,28 @@ class QuizController extends Controller
                         }
                     }
                 }
-    
-                // Build the user result summary
+
+                // Build result
                 $result = [
                     'correct' => $quizResult->correct_answer,
                     'incorrect' => $quizResult->incorrect_answer,
                     'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
                     'marks' => $quizResult->student_percentage,
                     'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $quizResult->time_taken, // Assuming there's a field to track time taken
                 ];
-    
-                // Prepare the exam details by comparing user's answers with correct answers
+
+                // Exam (Compare user answers with correct answers and create a detailed review)
                 $exam = [];
                 foreach ($quizResult->quiz->questions as $question) {
-                    $userAnswer = $quizResult->answers[$question->id] ?? null; // Assuming answers are stored in an array or JSON field
-    
-                    // Determine if the user's answer is correct
-                    $isCorrect = $userAnswer == $question->correct_answer;
-    
-                    // Add question preview details to the exam array
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_text' => $question->question,
-                        'correct_answer' => $question->correct_answer, // Assuming correct_answer field exists in questions
-                        'user_answer' => $userAnswer,
-                        'is_correct' => $isCorrect,
-                        'options' => $question->options, // Assuming the question has options (for multiple-choice)
-                        'explanation' => $question->explanation ?? null, // Explanation if provided
+                        'correct_answer' => $question->answer,
+                        'user_answer' => $quizResult->answers[$question->id] ?? null,
+                        'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
                     ];
                 }
-    
-                // Return the result in JSON format
+
                 return response()->json([
                     'status' => true,
                     'result' => $result,
@@ -580,20 +564,14 @@ class QuizController extends Controller
                     'leaderBoard' => $leaderBoard,
                 ]);
             }
-    
-            // If no quiz result is found, return an error
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz result not found',
-            ]);
-    
+
         } catch (\Throwable $th) {
-            // Catch any errors and return a generic error message
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong '.$th->getMessage(),
+                'message' => 'Something went wrong',
             ]);
         }
     }
+
 
 }
