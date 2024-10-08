@@ -331,7 +331,7 @@ class QuizController extends Controller
 
             return [
                 'user_answers'=>$request->answers,
-                'quiz'=>$$quizResult
+                'quiz'=>$quizResult
             ];
     
     
