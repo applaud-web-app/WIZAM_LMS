@@ -591,7 +591,7 @@ class QuizController extends Controller
             // Catch any errors and return a generic error message
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong '.$$th->getMessage(),
+                'message' => 'Something went wrong '.$th->getMessage(),
             ]);
         }
     }
