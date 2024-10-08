@@ -325,11 +325,14 @@ class QuizController extends Controller
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-            
+
             // Fetch the quiz result based on the UUID and user ID
             $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
 
-            return $request->answers;
+            return [
+                'user_answers'=>$request->answers,
+                'quiz'=>$$quizResult
+            ];
     
     
            
