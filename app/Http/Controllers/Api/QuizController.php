@@ -547,75 +547,75 @@ class QuizController extends Controller
 
                 // Exam (Compare user answers with correct answers and create a detailed review)
                 $exam = [];
-                // foreach ($quizResult->quiz->questions as $question) {
-                //     $exam[] = [
-                //         'question_id' => $question->id,
-                //         'question_text' => $question->question,
-                //         'correct_answer' => $question->answer,
-                //         'user_answer' => $quizResult->answers[$question->id] ?? null,
-                //         'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
-                //     ];
-                // }
-                $questionBox = json_decode($quizResult->quesion);
-                $userAnswers = json_decode($quizResult->answer);
-
-                foreach ($questionBox as $question) {
-                    $userAnswer = $userAnswers[$question->id] ?? null;
-                    $correctAnswer = $question['option'];
-                    $isCorrect = false;
-
-                    // Handle different question types
-                    switch ($question['type']) {
-                        case 'FIB': // Fill in the Blanks
-                            // Check if userAnswer is same as correct answer
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-
-                        case 'MSA': // Multiple Selection Answer
-                            // Check if userAnswer (which could be an array of selected choices) matches correctAnswer
-                            $isCorrect = is_array($userAnswer) && !array_diff($userAnswer, $correctAnswer);
-                            break;
-
-                        case 'MMA': // Multiple Match Answer
-                            // Assuming correctAnswer and userAnswer are arrays, compare them
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-
-                        case 'TOF': // True/False
-                            // Check if the true/false answer matches
-                            $isCorrect = $userAnswer == $correctAnswer;
-                            break;
-
-                        case 'MTF': // Match the Following
-                            // Compare match answers by checking each pair
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-
-                        case 'ORD': // Ordering
-                            // Check if the ordering is correct
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-
-                        case 'EMQ': // Extended Matching Questions
-                            // Compare EMQ answers
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-
-                        case 'SAQ': // Short Answer Question
-                            // Check if user's short answer matches the correct one
-                            $isCorrect = $userAnswer === $correctAnswer;
-                            break;
-                    }
-
-                    // Append the result for this question to the exam array
+                foreach ($quizResult->quiz->questions as $question) {
                     $exam[] = [
-                        'question_id' => $question['id'],
-                        'question_text' => $question['question'],
-                        'correct_answer' => $correctAnswer,
-                        'user_answer' => $userAnswer,
-                        'is_correct' => $isCorrect,
+                        'question_id' => $question->id,
+                        'question_text' => $question->question,
+                        'correct_answer' => $question->answer,
+                        'user_answer' => $quizResult->answers[$question->id] ?? null,
+                        'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
                     ];
                 }
+                // $questionBox = json_decode($quizResult->quesion);
+                // $userAnswers = json_decode($quizResult->answer);
+
+                // foreach ($questionBox as $question) {
+                //     $userAnswer = $userAnswers[$question->id] ?? null;
+                //     $correctAnswer = $question['option'];
+                //     $isCorrect = false;
+
+                //     // Handle different question types
+                //     switch ($question['type']) {
+                //         case 'FIB': // Fill in the Blanks
+                //             // Check if userAnswer is same as correct answer
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+
+                //         case 'MSA': // Multiple Selection Answer
+                //             // Check if userAnswer (which could be an array of selected choices) matches correctAnswer
+                //             $isCorrect = is_array($userAnswer) && !array_diff($userAnswer, $correctAnswer);
+                //             break;
+
+                //         case 'MMA': // Multiple Match Answer
+                //             // Assuming correctAnswer and userAnswer are arrays, compare them
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+
+                //         case 'TOF': // True/False
+                //             // Check if the true/false answer matches
+                //             $isCorrect = $userAnswer == $correctAnswer;
+                //             break;
+
+                //         case 'MTF': // Match the Following
+                //             // Compare match answers by checking each pair
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+
+                //         case 'ORD': // Ordering
+                //             // Check if the ordering is correct
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+
+                //         case 'EMQ': // Extended Matching Questions
+                //             // Compare EMQ answers
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+
+                //         case 'SAQ': // Short Answer Question
+                //             // Check if user's short answer matches the correct one
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+                //     }
+
+                //     // Append the result for this question to the exam array
+                //     $exam[] = [
+                //         'question_id' => $question['id'],
+                //         'question_text' => $question['question'],
+                //         'correct_answer' => $correctAnswer,
+                //         'user_answer' => $userAnswer,
+                //         'is_correct' => $isCorrect,
+                //     ];
+                // }
 
                 $quiz = [
                     'title'=>$quizResult->quiz->title,
