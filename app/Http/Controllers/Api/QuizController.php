@@ -328,10 +328,12 @@ class QuizController extends Controller
 
             // Fetch the quiz result based on the UUID and user ID
             $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+            $correct_answer = json_decode($quizResult->correct_answers);
 
             return [
                 'user_answers'=>$request->answers,
-                'quiz'=>$quizResult
+                'quiz'=>$quizResult,
+                'correct_answer'=>$correct_answer
             ];
     
     
