@@ -314,4 +314,69 @@ class QuizController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+
+    public function finalSubmit(Request $request)
+    {
+        // Validate the incoming request
+        $validator = Validator::make($request->all(), [
+            'quizId' => 'required|exists:quizzes,id', // Adjust table name
+            'answers' => 'required|array',
+            'answers.*.questionId' => 'required|exists:questions,id', // Adjust table name
+            'answers.*.answers' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $quizId = $request->quizId;
+        $submittedAnswers = $request->answers;
+
+        // Fetch the correct answers from the database
+        $correctAnswers = Question::whereIn('id', array_column($submittedAnswers, 'questionId'))
+            ->with('correctAnswer') // Assuming you have a relationship set up to get correct answers
+            ->get()
+            ->keyBy('id');
+
+        $score = 0;
+        $totalQuestions = count($submittedAnswers);
+
+        // Compare submitted answers with the correct answers
+        foreach ($submittedAnswers as $submittedAnswer) {
+            $questionId = $submittedAnswer['questionId'];
+            $userAnswers = $submittedAnswer['answers'];
+            $correctAnswer = $correctAnswers[$questionId]->correctAnswer; // Adjust this if you have a different structure
+
+            // Implement your own logic to compare answers
+            if ($this->checkAnswers($userAnswers, $correctAnswer)) {
+                $score++;
+            }
+        }
+
+        // Store the result in the quiz_results table
+        $quizResult = new QuizResult();
+        $quizResult->quiz_id = $quizId;
+        $quizResult->user_id = auth()->id(); // Assuming you have authentication
+        $quizResult->score = $score;
+        $quizResult->total_questions = $totalQuestions;
+        $quizResult->correct_answers = json_encode($submittedAnswers); // Store user answers for reference
+        $quizResult->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz submitted successfully!',
+            'score' => $score,
+            'total_questions' => $totalQuestions,
+        ]);
+    }
+
+    private function checkAnswers(array $userAnswers, $correctAnswer)
+    {
+        // Implement your logic to check if the user answers match the correct answer
+        // For example, for multiple-choice, check if they match
+        return $userAnswers == $correctAnswer; // Adjust this comparison logic as necessary
+    }
 }
