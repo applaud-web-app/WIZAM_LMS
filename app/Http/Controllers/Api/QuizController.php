@@ -211,30 +211,30 @@ class QuizController extends Controller
         }
     }
     
-    public function saveQuizProgress(Request $request, $uuid) {
-        try {
-            // Validate request data
-            $request->validate([
-                'answers' => 'required|array', // USE QUESTION ID WITH ANSWER
-            ]);
+    // public function saveQuizProgress(Request $request, $uuid) {
+    //     try {
+    //         // Validate request data
+    //         $request->validate([
+    //             'answers' => 'required|array', // USE QUESTION ID WITH ANSWER
+    //         ]);
 
-            // Get the authenticated user
-            $user = $request->attributes->get('authenticatedUser');
+    //         // Get the authenticated user
+    //         $user = $request->attributes->get('authenticatedUser');
 
-            // Find the quiz session by UUID
-            $quizResult = QuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
+    //         // Find the quiz session by UUID
+    //         $quizResult = QuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
 
-            // Update the answers in the database
-            $quizResult->update([
-                'answers' => json_encode($request->answers), // Save the user's answers as JSON
-                'updated_at' => now() // Update the timestamp
-            ]);
+    //         // Update the answers in the database
+    //         $quizResult->update([
+    //             'answers' => json_encode($request->answers), // Save the user's answers as JSON
+    //             'updated_at' => now() // Update the timestamp
+    //         ]);
 
-            return response()->json(['status' => true, 'message' => 'Progress saved successfully'], 200);
-        } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-        }
-    }
+    //         return response()->json(['status' => true, 'message' => 'Progress saved successfully'], 200);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+    //     }
+    // }
 
     public function finishQuiz(Request $request, $uuid) {
         try {
@@ -315,68 +315,68 @@ class QuizController extends Controller
         }
     }
 
-    public function finalSubmit(Request $request)
-    {
-        // Validate the incoming request
-        $validator = Validator::make($request->all(), [
-            'quizId' => 'required|exists:quizzes,id', // Adjust table name
-            'answers' => 'required|array',
-            'answers.*.questionId' => 'required|exists:questions,id', // Adjust table name
-            'answers.*.answers' => 'required|array',
-        ]);
+    // public function finalSubmit(Request $request)
+    // {
+    //     // Validate the incoming request
+    //     $validator = Validator::make($request->all(), [
+    //         'quizId' => 'required|exists:quizzes,id', // Adjust table name
+    //         'answers' => 'required|array',
+    //         'answers.*.questionId' => 'required|exists:questions,id', // Adjust table name
+    //         'answers.*.answers' => 'required|array',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors(),
-            ], 400);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'errors' => $validator->errors(),
+    //         ], 400);
+    //     }
 
-        $quizId = $request->quizId;
-        $submittedAnswers = $request->answers;
+    //     $quizId = $request->quizId;
+    //     $submittedAnswers = $request->answers;
 
-        // Fetch the correct answers from the database
-        $correctAnswers = Question::whereIn('id', array_column($submittedAnswers, 'questionId'))
-            ->with('correctAnswer') // Assuming you have a relationship set up to get correct answers
-            ->get()
-            ->keyBy('id');
+    //     // Fetch the correct answers from the database
+    //     $correctAnswers = Question::whereIn('id', array_column($submittedAnswers, 'questionId'))
+    //         ->with('correctAnswer') // Assuming you have a relationship set up to get correct answers
+    //         ->get()
+    //         ->keyBy('id');
 
-        $score = 0;
-        $totalQuestions = count($submittedAnswers);
+    //     $score = 0;
+    //     $totalQuestions = count($submittedAnswers);
 
-        // Compare submitted answers with the correct answers
-        foreach ($submittedAnswers as $submittedAnswer) {
-            $questionId = $submittedAnswer['questionId'];
-            $userAnswers = $submittedAnswer['answers'];
-            $correctAnswer = $correctAnswers[$questionId]->correctAnswer; // Adjust this if you have a different structure
+    //     // Compare submitted answers with the correct answers
+    //     foreach ($submittedAnswers as $submittedAnswer) {
+    //         $questionId = $submittedAnswer['questionId'];
+    //         $userAnswers = $submittedAnswer['answers'];
+    //         $correctAnswer = $correctAnswers[$questionId]->correctAnswer; // Adjust this if you have a different structure
 
-            // Implement your own logic to compare answers
-            if ($this->checkAnswers($userAnswers, $correctAnswer)) {
-                $score++;
-            }
-        }
+    //         // Implement your own logic to compare answers
+    //         if ($this->checkAnswers($userAnswers, $correctAnswer)) {
+    //             $score++;
+    //         }
+    //     }
 
-        // Store the result in the quiz_results table
-        $quizResult = new QuizResult();
-        $quizResult->quiz_id = $quizId;
-        $quizResult->user_id = auth()->id(); // Assuming you have authentication
-        $quizResult->score = $score;
-        $quizResult->total_questions = $totalQuestions;
-        $quizResult->correct_answers = json_encode($submittedAnswers); // Store user answers for reference
-        $quizResult->save();
+    //     // Store the result in the quiz_results table
+    //     $quizResult = new QuizResult();
+    //     $quizResult->quiz_id = $quizId;
+    //     $quizResult->user_id = auth()->id(); // Assuming you have authentication
+    //     $quizResult->score = $score;
+    //     $quizResult->total_questions = $totalQuestions;
+    //     $quizResult->correct_answers = json_encode($submittedAnswers); // Store user answers for reference
+    //     $quizResult->save();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Quiz submitted successfully!',
-            'score' => $score,
-            'total_questions' => $totalQuestions,
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Quiz submitted successfully!',
+    //         'score' => $score,
+    //         'total_questions' => $totalQuestions,
+    //     ]);
+    // }
 
-    private function checkAnswers(array $userAnswers, $correctAnswer)
-    {
-        // Implement your logic to check if the user answers match the correct answer
-        // For example, for multiple-choice, check if they match
-        return $userAnswers == $correctAnswer; // Adjust this comparison logic as necessary
-    }
+    // private function checkAnswers(array $userAnswers, $correctAnswer)
+    // {
+    //     // Implement your logic to check if the user answers match the correct answer
+    //     // For example, for multiple-choice, check if they match
+    //     return $userAnswers == $correctAnswer; // Adjust this comparison logic as necessary
+    // }
 }
