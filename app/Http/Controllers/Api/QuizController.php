@@ -340,7 +340,7 @@ class QuizController extends Controller
         // USER RESPONSE
         $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
-
+    
         // Fetch quiz result by UUID and user ID
         $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
         if (!$quizResult) {
@@ -349,25 +349,34 @@ class QuizController extends Controller
                 'message' => "Invalid Quiz"
             ]);
         }
-
+    
         $score = 0;
         $correctAnswer = 0;
         $incorrect = 0;
         $totalMarks = 0;
         $incorrectMarks = 0;
-
+    
+        // Total marks should be fixed in manual mode
+        $totalMarks = $quizResult->point_type == "manual" 
+            ? $quizResult->point * count($user_answer) // Manual mode total marks
+            : 0; // For default mode, we accumulate question marks below
+    
         foreach ($user_answer as $answer) {
             $question = Question::find($answer['id']);
             if (!$question) {
                 $incorrect += 1;
                 continue;
             }
-
+    
             // Handle different question types
-            $isCorrect = false; // Track if the answer is correct
+            $isCorrect = false;
             $userAnswer = $answer['answer'];
-            $totalMarks += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
-
+    
+            // In default mode, accumulate total possible marks
+            if ($quizResult->point_type != "manual") {
+                $totalMarks += $question->default_marks;
+            }
+    
             // Check correctness based on question type
             if ($question->type == 'MSA') {
                 $isCorrect = $question->answer == $userAnswer;
@@ -404,40 +413,39 @@ class QuizController extends Controller
                 sort($correctAnswers);
                 $isCorrect = $userAnswer == $correctAnswers;
             }
+    
             if ($isCorrect) {
-                $score += $question->default_marks;
+                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
                 $correctAnswer += 1;
             } else {
                 $incorrect += 1;
-                $incorrectMarks += $question->default_marks; // Add marks of incorrect answers
+                $incorrectMarks += $question->default_marks;
             }
         }
-
-        // CALCULATE STUDENT PERCENTAGE BEFORE APPLYING NEGATIVE MARKING
-        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
-
+    
         // Apply negative marking for incorrect answers
         if ($quizResult->negative_marking == 1) {
             if ($quizResult->negative_marking_type == "fixed") {
-                // Deduct a fixed value from the total score
-                $score = max(0, $score - $quizResult->negative_marking_value);
+                $score = max(0, $score - $quizResult->negative_marking_value * $incorrect);
             } elseif ($quizResult->negative_marking_type == "percentage") {
-                // Deduct a percentage of the total incorrect marks
                 $negativeMarks = ($quizResult->negative_marking_value / 100) * $incorrectMarks;
                 $score = max(0, $score - $negativeMarks);
             }
         }
-
+    
+        // Calculate the student's percentage AFTER applying negative marking
+        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+    
         // Determine pass or fail
         $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
-
+    
         // Update quiz result with correct/incorrect answers and student percentage
         $quizResult->answers = json_encode($user_answer, true);
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;
-        $quizResult->student_percentage = $studentPercentage; // Save percentage before negative marking
+        $quizResult->student_percentage = $studentPercentage;
         $quizResult->save();
-
+    
         // Return results
         return response()->json([
             'status' => true,
@@ -448,7 +456,7 @@ class QuizController extends Controller
             'student_percentage' => $studentPercentage
         ]);
     }
-
+    
 
 
 
