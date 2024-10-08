@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\Quizze;
 use App\Models\QuizResult;
+use App\Models\User;
 use Illuminate\Support\Str; 
 use Carbon\Carbon;
 use App\Models\Question;
@@ -132,7 +133,7 @@ class QuizController extends Controller
                 $question = $quizQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
     
-                if ($question->type == "MTF" && !empty($question->answer)) {
+                if ($question->type == "MTF" || $question->type == "ORD" && !empty($question->answer)) {
                     $matchOption = json_decode($question->answer, true);
                     shuffle($matchOption);
                     $options = array_merge($options, $matchOption);
@@ -183,6 +184,7 @@ class QuizController extends Controller
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'exam_duration' => $duration,
+                'point_type' => $quiz->point_mode,
                 'point' => $points,
                 'negative_marking' => $quiz->negative_marking,
                 'negative_marking_type' => $quiz->negative_marking_type,
@@ -568,7 +570,7 @@ class QuizController extends Controller
         $correctAnswer = 0;
         $incorrect = 0;
         $totalMarks = 0;
-        $incorrectMarks = 0; // Track total marks of incorrect answers
+        $incorrectMarks = 0; 
 
         foreach ($user_answer as $answer) {
             $question = Question::find($answer['id']);
@@ -580,7 +582,7 @@ class QuizController extends Controller
             // Handle different question types
             $isCorrect = false; // Track if the answer is correct
             $userAnswer = $answer['answer'];
-            $totalMarks += $question->default_marks;
+            $totalMarks += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
 
             // Check correctness based on question type
             if ($question->type == 'MSA') {
@@ -593,7 +595,8 @@ class QuizController extends Controller
             } elseif ($question->type == 'TOF') {
                 $isCorrect = $userAnswer == $question->answer;
             } elseif ($question->type == 'SAQ') {
-                $isCorrect = $userAnswer == $question->answer;
+                $answers = json_decode($question->options);
+                $isCorrect = in_array($userAnswer, $answers);
             } elseif ($question->type == 'FIB') {
                 $correctAnswers = json_decode($question->answer, true);
                 sort($correctAnswers);
@@ -617,7 +620,6 @@ class QuizController extends Controller
                 sort($correctAnswers);
                 $isCorrect = $userAnswer == $correctAnswers;
             }
-
             if ($isCorrect) {
                 $score += $question->default_marks;
                 $correctAnswer += 1;
@@ -646,6 +648,7 @@ class QuizController extends Controller
         $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
 
         // Update quiz result with correct/incorrect answers and student percentage
+        $quizResult->answers = json_encode($user_answer,true);
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;
         $quizResult->student_percentage = $studentPercentage;
@@ -661,6 +664,120 @@ class QuizController extends Controller
             'student_percentage' => $studentPercentage
         ]);
         
+    }
+
+    // public function quizResult(Request $request, $uuid)
+    // {
+    //    try {
+    //         $user = $request->attributes->get('authenticatedUser');
+
+    //         $quizResult = QuizResult::with('quiz')->where('uuid',$uuid)->where('user_id',$user->id)->first();
+    //         if($quizResult){
+    //             $leaderBoard = [];
+    //             if(isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1){
+    //                 $userQuiz = QuizResult::with('user')->where('quiz_id',$quizResult->quiz_id)->orderby('student_percentage','DESC')->take(10)->get();
+
+    //                 foreach ($userQuiz as $userData) {
+    //                     if (isset($userData->user)) {
+    //                         $leaderBoard[] = [
+    //                             "username"=> $users->user->name,
+    //                             "score"=>  $userQuiz->student_percentage,
+    //                             "status"=>  $userQuiz->student_percentage >= $userQuiz->pass_percentage ? "PASS" : "FAIL"
+    //                         ];
+    //                     }
+    //                 }
+    //             }
+
+    //             $result = [
+    //                 'correct' => $quizResult->correct_answer,
+    //                 'incorrect' => $quizResult->incorrect_answer,
+    //                 'skippedr' => $quizResult->total_question - ($quizResult->correct_answer+$quizResult->incorrect_answer),
+    //                 'marks' => $quizResult->student_percentage,
+    //                 'status'=> $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
+    //             ];
+
+    //             // EXAM (HERE IS THE CODE WHICH SHOW WHICH ANSWER IS CORRECT AND WHICH ANSWER IS WRONG )
+    //             $exam = [];
+
+    //             // Return results
+    //             return response()->json([
+    //                 'status' => true,
+    //                 'result' => $result,
+    //                 'exam_preview'=> $exam,
+    //                 'leaderBoard'=> $leaderBoard
+    //             ]);
+    //         }
+    //    } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Something Went Wrong'
+    //         ]);
+    //    }
+
+    // }
+
+
+    public function quizResult(Request $request, $uuid)
+    {
+        try {
+            $user = $request->attributes->get('authenticatedUser');
+
+            $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+            if ($quizResult) {
+                $leaderBoard = [];
+                if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
+                    $userQuiz = QuizResult::with('user')
+                        ->where('quiz_id', $quizResult->quiz_id)
+                        ->orderby('student_percentage', 'DESC')
+                        ->take(10)
+                        ->get();
+
+                    foreach ($userQuiz as $userData) {
+                        if (isset($userData->user)) {
+                            $leaderBoard[] = [
+                                "username" => $userData->user->name,
+                                "score" => $userData->student_percentage,
+                                "status" => $userData->student_percentage >= $userData->pass_percentage ? "PASS" : "FAIL",
+                            ];
+                        }
+                    }
+                }
+
+                // Build result
+                $result = [
+                    'correct' => $quizResult->correct_answer,
+                    'incorrect' => $quizResult->incorrect_answer,
+                    'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
+                    'marks' => $quizResult->student_percentage,
+                    'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
+                ];
+
+                // EXAM (Compare user answers with correct answers and create a detailed review)
+                $exam = [];
+                // foreach ($quizResult->quiz->questions as $question) {
+                //     $exam[] = [
+                //         'question_id' => $question->id,
+                //         'question_text' => $question->question,
+                //         'correct_answer' => $question->correct_answer,
+                //         'user_answer' => $quizResult->answers[$question->id] ?? null,
+                //         'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->correct_answer,
+                //     ];
+                // }
+
+                return response()->json([
+                    'status' => true,
+                    'result' => $result,
+                    'exam_preview' => $exam,
+                    'leaderBoard' => $leaderBoard,
+                ]);
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+            ]);
+        }
     }
 
 }
