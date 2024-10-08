@@ -12,6 +12,7 @@ use App\Models\Quizze;
 use App\Models\QuizResult;
 use Illuminate\Support\Str; 
 use Carbon\Carbon;
+use App\Models\Question;
 
 class QuizController extends Controller
 {
@@ -211,30 +212,6 @@ class QuizController extends Controller
         }
     }
     
-    // public function saveQuizProgress(Request $request, $uuid) {
-    //     try {
-    //         // Validate request data
-    //         $request->validate([
-    //             'answers' => 'required|array', // USE QUESTION ID WITH ANSWER
-    //         ]);
-
-    //         // Get the authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         // Find the quiz session by UUID
-    //         $quizResult = QuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
-
-    //         // Update the answers in the database
-    //         $quizResult->update([
-    //             'answers' => json_encode($request->answers), // Save the user's answers as JSON
-    //             'updated_at' => now() // Update the timestamp
-    //         ]);
-
-    //         return response()->json(['status' => true, 'message' => 'Progress saved successfully'], 200);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
 
     // public function finishQuiz(Request $request, $uuid) {
     //     try {
@@ -242,16 +219,22 @@ class QuizController extends Controller
     //         $request->validate([
     //             'answers' => 'required|array', // Expecting an array of answers with question IDs
     //         ]);
-    
+
+
     //         // Get the authenticated user
     //         $user = $request->attributes->get('authenticatedUser');
-    
+
     //         // Fetch the quiz result based on the UUID and user ID
     //         $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
-    
-    //         // Retrieve the stored questions from the quiz result
-    //         $questions = json_decode($quizResult->questions, true); // Convert to an array
-    //         $userAnswers = $request->answers; // Array of user's submitted answers
+    //         $correct_answer = json_decode($quizResult->correct_answers);
+
+    //         return [
+    //             'user_answers'=>$request->answers,
+    //             'quiz'=>$quizResult,
+    //             'correct_answer'=>$correct_answer
+    //         ];
+
+    //         $question = Question::where('id');
     
     //         // Initialize counters for correct and incorrect answers
     //         $correctAnswersCount = 0;
@@ -262,7 +245,7 @@ class QuizController extends Controller
     //         // Create an associative array for quick access to correct answers
     //         $correctAnswersMap = [];
     //         foreach ($questions as $question) {
-    //             $correctAnswersMap[$question['id']] = $question['correct_answer']; // Assuming correct_answer is stored in correct_answers field
+    //             $correctAnswersMap[$question['id']] = $correct_answers[$question['id']]; 
     //         }
     
     //         // Loop through each submitted answer and compare it with the correct answer from the database
@@ -280,7 +263,7 @@ class QuizController extends Controller
     //                 // Handle different question types (assuming it's stored as a string or array)
     //                 if (is_array($correctAnswer)) {
     //                     // For multiple-choice, check if user answer matches any correct answer
-    //                     $isCorrect = in_array($userSubmittedAnswer, $correctAnswer);
+    //                     $isCorrect = !empty(array_intersect($userSubmittedAnswer, $correctAnswer));
     //                 } else {
     //                     // For single answer question
     //                     $isCorrect = $userSubmittedAnswer == $correctAnswer;
@@ -305,7 +288,7 @@ class QuizController extends Controller
     //             'point' => max(0, $totalMarks), // Ensure that total points don't go below zero
     //             'status' => 'completed',
     //             'end_time' => now(),
-    //             'answers' => json_encode($request->answers), // Store user's answers
+    //             'answers' => json_encode($userAnswers), // Store user's answers
     //         ]);
     
     //         // Return success response
@@ -315,163 +298,369 @@ class QuizController extends Controller
     //     }
     // }
 
-    public function finishQuiz(Request $request, $uuid) {
-        try {
-            // Validate the incoming request data
-            $request->validate([
-                'answers' => 'required|array', // Expecting an array of answers with question IDs
-            ]);
-
-
-            // Get the authenticated user
-            $user = $request->attributes->get('authenticatedUser');
-
-            // Fetch the quiz result based on the UUID and user ID
-            $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
-            $correct_answer = json_decode($quizResult->correct_answers);
-
-            return [
-                'user_answers'=>$request->answers,
-                'quiz'=>$quizResult,
-                'correct_answer'=>$correct_answer
-            ];
-    
-    
-           
-          
-    
-            // Retrieve the stored questions from the quiz result
-            $questions = json_decode($quizResult->questions, true); // Convert to an array
-            $userAnswers = $request->answers; // Array of user's submitted answers
-
-            // ANSWERS 
-            $correct_answers = json_decode($quizResult->correct_answers, true);
-            // DEMO FOR correct_answers store value - [{"id":2,"correct_answer":"2","default_marks":"5"}]
-    
-            // Initialize counters for correct and incorrect answers
-            $correctAnswersCount = 0;
-            $incorrectAnswersCount = 0;
-            $totalMarks = 0;
-            $negativeMarking = (float) $quizResult->negative_marking; // Negative marking if applicable
-    
-            // Create an associative array for quick access to correct answers
-            $correctAnswersMap = [];
-            foreach ($questions as $question) {
-                $correctAnswersMap[$question['id']] = $correct_answers[$question['id']]; 
-            }
-    
-            // Loop through each submitted answer and compare it with the correct answer from the database
-            foreach ($userAnswers as $userAnswer) {
-                $questionId = $userAnswer['id']; // Question ID
-                $userSubmittedAnswer = $userAnswer['answer']; // User's submitted answer
-    
-                // Compare the user's answer with the correct answer
-                if (array_key_exists($questionId, $correctAnswersMap)) {
-                    $correctAnswer = $correctAnswersMap[$questionId];
-    
-                    // Compare based on the question type
-                    $isCorrect = false;
-    
-                    // Handle different question types (assuming it's stored as a string or array)
-                    if (is_array($correctAnswer)) {
-                        // For multiple-choice, check if user answer matches any correct answer
-                        $isCorrect = !empty(array_intersect($userSubmittedAnswer, $correctAnswer));
-                    } else {
-                        // For single answer question
-                        $isCorrect = $userSubmittedAnswer == $correctAnswer;
-                    }
-    
-                    if ($isCorrect) {
-                        $correctAnswersCount++;
-                        $totalMarks += (float) $quizResult->correct_answers[$questionId]['default_marks']; // Add marks for correct answer
-                    } else {
-                        $incorrectAnswersCount++;
-                        if ($negativeMarking > 0) {
-                            $totalMarks -= $negativeMarking; // Deduct marks for incorrect answer, if negative marking is enabled
-                        }
-                    }
-                }
-            }
-    
-            // Update the quiz result with the calculated values
-            $quizResult->update([
-                'correct_answer' => $correctAnswersCount,
-                'incorrect_answer' => $incorrectAnswersCount,
-                'point' => max(0, $totalMarks), // Ensure that total points don't go below zero
-                'status' => 'completed',
-                'end_time' => now(),
-                'answers' => json_encode($userAnswers), // Store user's answers
-            ]);
-    
-            // Return success response
-            return response()->json(['status' => true, 'message' => 'Quiz completed successfully'], 200);
-        } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-        }
-    }
-
-    // public function finalSubmit(Request $request)
+    // public function finishQuiz(Request $request, $uuid)
     // {
-    //     // Validate the incoming request
-    //     $validator = Validator::make($request->all(), [
-    //         'quizId' => 'required|exists:quizzes,id', // Adjust table name
-    //         'answers' => 'required|array',
-    //         'answers.*.questionId' => 'required|exists:questions,id', // Adjust table name
-    //         'answers.*.answers' => 'required|array',
-    //     ]);
+    //     // USER RESPONSE
+    //     $user_answer = $request->input('answers');
+    //     $user = $request->attributes->get('authenticatedUser');
 
-    //     if ($validator->fails()) {
+    //     // Assuming you have a method to get the quiz by UUID // 6703aa75023f9
+    //     $quizResult = QuizResult::where('uuid', $uuid)->where('user_id',$user->id)->firstOrFail();
+
+    //     if(!$quizResult){
     //         return response()->json([
     //             'status' => false,
-    //             'errors' => $validator->errors(),
-    //         ], 400);
+    //             'message'=>"Invalid Quiz"
+    //         ]);
     //     }
 
-    //     $quizId = $request->quizId;
-    //     $submittedAnswers = $request->answers;
-
-    //     // Fetch the correct answers from the database
-    //     $correctAnswers = Question::whereIn('id', array_column($submittedAnswers, 'questionId'))
-    //         ->with('correctAnswer') // Assuming you have a relationship set up to get correct answers
-    //         ->get()
-    //         ->keyBy('id');
-
     //     $score = 0;
-    //     $totalQuestions = count($submittedAnswers);
+    //     $results = [];
+    //     $correctAnswer = 0;
+    //     $incorrect = 0;
 
-    //     // Compare submitted answers with the correct answers
-    //     foreach ($submittedAnswers as $submittedAnswer) {
-    //         $questionId = $submittedAnswer['questionId'];
-    //         $userAnswers = $submittedAnswer['answers'];
-    //         $correctAnswer = $correctAnswers[$questionId]->correctAnswer; // Adjust this if you have a different structure
+    //     foreach ($user_answer as $answer) {
+    //         $question = Question::find($answer['id']);
+    //         if(!$question){
+    //             $incorrect += 1;
+    //             continue;
+    //         }
+    //         if ($question->type == 'MSA') {
+    //             if($question->answer == $answer['answer']){
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //             // return $correctAnswer." -- ".$incorrect.'---'.$score;
+    //         }
+    //         elseif($question->type == 'MMA'){
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $userAnswer = $answer['answer'];
 
-    //         // Implement your own logic to compare answers
-    //         if ($this->checkAnswers($userAnswers, $correctAnswer)) {
-    //             $score++;
+    //             // SORT BOTH
+    //             sort($correctAnswers);
+    //             sort($userAnswer);
+                
+    //             if ($userAnswer == $correctAnswers) { // CHECK BOTH ARRAY EQUAL
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+
+    //             // return $correctAnswer." -- ".$incorrect.'---'.$score;
+    //         }elseif ($question->type == 'TOF') {
+                
+    //             if ($answer['answer'] == $question->answer) {
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //         } elseif ($question->type == 'SAQ') {
+    //             if ($answer['answer'] == $question->answer) {
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //         } elseif ($question->type == 'FIB') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $userAnswer = $answer['answer'];
+
+    //             // SORT BOTH
+    //             sort($correctAnswers);
+    //             sort($userAnswer);
+               
+    //             if ($userAnswer == $correctAnswers) { // CHECK BOTH ARRAY EQUAL
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //         } elseif ($question->type == 'MTF') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $userAnswer = $answer['answer'];
+                
+    //             $isCorrect = true;
+    //             foreach ($correctAnswers as $key => $value) {
+    //                 if ($userAnswer[$key] != $value) {
+    //                     $isCorrect = false;
+    //                     break;
+    //                 }
+    //             }
+
+    //             if ($isCorrect) {
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //         } elseif ($question->type == 'ORD') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $userAnswer = $answer['answer'];
+    //             if ($userAnswer == $correctAnswers) {
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
+    //         } elseif ($question->type == 'EMQ') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $userAnswer = $answer['answer'];
+    //             if ($userAnswer == $correctAnswers) {
+    //                 $score += $question->default_marks;
+    //                 $correctAnswer += 1;
+    //             }else{
+    //                 $incorrect += 1;
+    //             }
     //         }
     //     }
 
-    //     // Store the result in the quiz_results table
-    //     $quizResult = new QuizResult();
-    //     $quizResult->quiz_id = $quizId;
-    //     $quizResult->user_id = auth()->id(); // Assuming you have authentication
-    //     $quizResult->score = $score;
-    //     $quizResult->total_questions = $totalQuestions;
-    //     $quizResult->correct_answers = json_encode($submittedAnswers); // Store user answers for reference
-    //     $quizResult->save();
+    //     // FOR NEGATIVE MARKING PER QUESTION MARKS WERE DEDUCTED SO ADD THIS LOGIC ALSO
+    //     if($quizResult->negative_marking == 1){
+    //         if($quizResult->negative_marking_type == "fixed"){
 
+    //         }elseif($quizResult->negative_marking_type == "percentage"){
+
+    //         }
+    //     }
+
+    //     // CALCUATE USER PERCENTAGE 
+        
+
+    //     // PASS PERCENTAGE 
+    //     if($quizResult->pass_percentage){
+    //     }
+
+    //     // Return results
     //     return response()->json([
     //         'status' => true,
-    //         'message' => 'Quiz submitted successfully!',
-    //         'score' => $score,
-    //         'total_questions' => $totalQuestions,
+    //         'score'=>$score,
+    //         'correct_answer' => $correctAnswer,
+    //         'incorrect_answer' => $incorrect,
+    //         'student_status'=>"PASS", // PASS OR FAIL,
+    //         'STUDENT_PERCENTAGE'=>60
     //     ]);
     // }
 
-    // private function checkAnswers(array $userAnswers, $correctAnswer)
+    // public function finishQuiz(Request $request, $uuid)
     // {
-    //     // Implement your logic to check if the user answers match the correct answer
-    //     // For example, for multiple-choice, check if they match
-    //     return $userAnswers == $correctAnswer; // Adjust this comparison logic as necessary
+    //     // USER RESPONSE
+    //     $user_answer = $request->input('answers');
+    //     $user = $request->attributes->get('authenticatedUser');
+
+    //     // Fetch quiz result by UUID and user ID
+    //     $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+    //     if (!$quizResult) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => "Invalid Quiz"
+    //         ]);
+    //     }
+
+    //     $score = 0;
+    //     $correctAnswer = 0;
+    //     $incorrect = 0;
+    //     $totalMarks = 0;
+
+    //     foreach ($user_answer as $answer) {
+    //         $question = Question::find($answer['id']);
+    //         if (!$question) {
+    //             $incorrect += 1;
+    //             continue;
+    //         }
+
+    //         // Handle different question types
+    //         $isCorrect = false; // Track if the answer is correct
+    //         $userAnswer = $answer['answer'];
+    //         $totalMarks += $question->default_marks;
+    //         if ($question->type == 'MSA') {
+    //             $isCorrect = $question->answer == $userAnswer;
+    //         } elseif ($question->type == 'MMA') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             sort($correctAnswers);
+    //             sort($userAnswer);
+    //             $isCorrect = $userAnswer == $correctAnswers;
+    //         } elseif ($question->type == 'TOF') {
+    //             $isCorrect = $userAnswer == $question->answer;
+    //         } elseif ($question->type == 'SAQ') {
+    //             $isCorrect = $userAnswer == $question->answer;
+    //         } elseif ($question->type == 'FIB') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             sort($correctAnswers);
+    //             sort($userAnswer);
+    //             $isCorrect = $userAnswer == $correctAnswers;
+    //         } elseif ($question->type == 'MTF') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             foreach ($correctAnswers as $key => $value) {
+    //                 if ($userAnswer[$key] != $value) {
+    //                     $isCorrect = false;
+    //                     break;
+    //                 }
+    //             }
+    //             $isCorrect = true;
+    //         } elseif ($question->type == 'ORD') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             $isCorrect = $userAnswer == $correctAnswers;
+    //         } elseif ($question->type == 'EMQ') {
+    //             $correctAnswers = json_decode($question->answer, true);
+    //             sort($userAnswer);
+    //             sort($correctAnswers);
+    //             $isCorrect = $userAnswer == $correctAnswers;
+    //         }
+
+    //         if ($isCorrect) {
+    //             $score += $question->default_marks;
+    //             $correctAnswer += 1;
+    //         } else {
+    //             $incorrect += 1;
+
+    //             // Apply negative marking for incorrect answers
+    //             if ($quizResult->negative_marking == 1) {
+    //                 if ($quizResult->negative_marking_type == "fixed") {
+    //                     $score = max(0, $score - $quizResult->negative_marking_value); // Deduct fixed marks per wrong answer
+    //                 } elseif ($quizResult->negative_marking_type == "percentage") {
+    //                     $negativeMarks = ($quizResult->negative_marking_value / 100) * $question->default_marks;
+    //                     $score = max(0, $score - $negativeMarks); // Deduct percentage of question marks
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // CALCULATE STUDENT PERCENTAGE
+    //     $studentPercentage = ($score / $totalMarks) * 100;
+    //     // Determine pass or fail
+    //     $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
+
+    //     $quizResult->incorrect_answer = $incorrect;
+    //     $quizResult->correct_answer = $correctAnswer;
+    //     $quizResult->student_percentage = $studentPercentage;
+
+    //     // Return results
+    //     return response()->json([
+    //         'status' => true,
+    //         'score' => $score,
+    //         'correct_answer' => $correctAnswer,
+    //         'incorrect_answer' => $incorrect,
+    //         'student_status' => $studentStatus,
+    //         'student_percentage' => $studentPercentage
+    //     ]);
     // }
+
+    public function finishQuiz(Request $request, $uuid)
+    {
+        // USER RESPONSE
+        $user_answer = $request->input('answers');
+        $user = $request->attributes->get('authenticatedUser');
+
+        // Fetch quiz result by UUID and user ID
+        $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+        if (!$quizResult) {
+            return response()->json([
+                'status' => false,
+                'message' => "Invalid Quiz"
+            ]);
+        }
+
+        $score = 0;
+        $correctAnswer = 0;
+        $incorrect = 0;
+        $totalMarks = 0;
+        $incorrectMarks = 0; // Track total marks of incorrect answers
+
+        foreach ($user_answer as $answer) {
+            $question = Question::find($answer['id']);
+            if (!$question) {
+                $incorrect += 1;
+                continue;
+            }
+
+            // Handle different question types
+            $isCorrect = false; // Track if the answer is correct
+            $userAnswer = $answer['answer'];
+            $totalMarks += $question->default_marks;
+
+            // Check correctness based on question type
+            if ($question->type == 'MSA') {
+                $isCorrect = $question->answer == $userAnswer;
+            } elseif ($question->type == 'MMA') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($correctAnswers);
+                sort($userAnswer);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'TOF') {
+                $isCorrect = $userAnswer == $question->answer;
+            } elseif ($question->type == 'SAQ') {
+                $isCorrect = $userAnswer == $question->answer;
+            } elseif ($question->type == 'FIB') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($correctAnswers);
+                sort($userAnswer);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'MTF') {
+                $correctAnswers = json_decode($question->answer, true);
+                foreach ($correctAnswers as $key => $value) {
+                    if ($userAnswer[$key] != $value) {
+                        $isCorrect = false;
+                        break;
+                    }
+                }
+                $isCorrect = true;
+            } elseif ($question->type == 'ORD') {
+                $correctAnswers = json_decode($question->answer, true);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'EMQ') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($userAnswer);
+                sort($correctAnswers);
+                $isCorrect = $userAnswer == $correctAnswers;
+            }
+
+            if ($isCorrect) {
+                $score += $question->default_marks;
+                $correctAnswer += 1;
+            } else {
+                $incorrect += 1;
+                $incorrectMarks += $question->default_marks; // Add marks of incorrect answers
+            }
+        }
+
+        // Apply negative marking for incorrect answers
+        if ($quizResult->negative_marking == 1) {
+            if ($quizResult->negative_marking_type == "fixed") {
+                // Deduct a fixed value from the total score
+                $score = max(0, $score - $quizResult->negative_marking_value);
+            } elseif ($quizResult->negative_marking_type == "percentage") {
+                // Deduct a percentage of the total incorrect marks
+                $negativeMarks = ($quizResult->negative_marking_value / 100) * $incorrectMarks;
+                $score = max(0, $score - $negativeMarks);
+            }
+        }
+
+        // CALCULATE STUDENT PERCENTAGE
+        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+
+        // Determine pass or fail
+        $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
+
+        // Update quiz result with correct/incorrect answers and student percentage
+        $quizResult->incorrect_answer = $incorrect;
+        $quizResult->correct_answer = $correctAnswer;
+        $quizResult->student_percentage = $studentPercentage;
+        $quizResult->save();
+
+        // Return results
+        return response()->json([
+            'status' => true,
+            'score' => $score,
+            'correct_answer' => $correctAnswer,
+            'incorrect_answer' => $incorrect,
+            'student_status' => $studentStatus,
+            'student_percentage' => $studentPercentage
+        ]);
+        
+    }
+
 }
