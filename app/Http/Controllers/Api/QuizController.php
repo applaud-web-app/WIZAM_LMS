@@ -547,18 +547,35 @@ class QuizController extends Controller
 
                 // Exam (Compare user answers with correct answers and create a detailed review)
                 $exam = [];
-                foreach ($quizResult->quiz->questions as $question) {
+                // foreach ($quizResult->quiz->questions as $question) {
+                //     $exam[] = [
+                //         'question_id' => $question->id,
+                //         'question_text' => $question->question,
+                //         'correct_answer' => $question->answer,
+                //         'user_answer' => $quizResult->answers[$question->id] ?? null,
+                //         'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
+                //     ];
+                // }
+                $questionBox = json_decode($quizResult->quesion);
+                $userAnswers = json_decode($quizResult->answer);
+                foreach ($questionBox as $question) {
                     $exam[] = [
-                        'question_id' => $question->id,
-                        'question_text' => $question->question,
-                        'correct_answer' => $question->answer,
-                        'user_answer' => $quizResult->answers[$question->id] ?? null,
-                        'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
+                        'question_id' => $question['id'],
+                        'question_text' =>$question['question'],
+                        'correct_answer' => $question['option'],
+                        'user_answer' => $userAnswers[$question->id] ?? null,
+                        'is_correct' => ($userAnswers[$question->id] ?? null) == $question['option'],
                     ];
                 }
 
+                $quiz = [
+                    'title'=>$quizResult->quiz->title,
+                    'duration'=>$quizResult->exam_duration,
+                ];
+
                 return response()->json([
                     'status' => true,
+                    'quiz'=>$quiz,
                     'result' => $result,
                     'exam_preview' => $exam,
                     'leaderBoard' => $leaderBoard,
