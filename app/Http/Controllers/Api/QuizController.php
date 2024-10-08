@@ -140,8 +140,7 @@ class QuizController extends Controller
                 }
 
                 if ($question->type == "ORD") {
-                    $options = shuffle($options);
-                    $options = $options;
+                    shuffle($options);
                 }
     
                 // Customize question display for different types
