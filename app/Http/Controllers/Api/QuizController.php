@@ -321,12 +321,19 @@ class QuizController extends Controller
             $request->validate([
                 'answers' => 'required|array', // Expecting an array of answers with question IDs
             ]);
-    
+
+
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-    
+            
             // Fetch the quiz result based on the UUID and user ID
             $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+
+            return $request->answers;
+    
+    
+           
+          
     
             // Retrieve the stored questions from the quiz result
             $questions = json_decode($quizResult->questions, true); // Convert to an array
