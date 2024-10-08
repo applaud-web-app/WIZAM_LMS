@@ -236,6 +236,85 @@ class QuizController extends Controller
     //     }
     // }
 
+    // public function finishQuiz(Request $request, $uuid) {
+    //     try {
+    //         // Validate the incoming request data
+    //         $request->validate([
+    //             'answers' => 'required|array', // Expecting an array of answers with question IDs
+    //         ]);
+    
+    //         // Get the authenticated user
+    //         $user = $request->attributes->get('authenticatedUser');
+    
+    //         // Fetch the quiz result based on the UUID and user ID
+    //         $quizResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+    
+    //         // Retrieve the stored questions from the quiz result
+    //         $questions = json_decode($quizResult->questions, true); // Convert to an array
+    //         $userAnswers = $request->answers; // Array of user's submitted answers
+    
+    //         // Initialize counters for correct and incorrect answers
+    //         $correctAnswersCount = 0;
+    //         $incorrectAnswersCount = 0;
+    //         $totalMarks = 0;
+    //         $negativeMarking = (float) $quizResult->negative_marking; // Negative marking if applicable
+    
+    //         // Create an associative array for quick access to correct answers
+    //         $correctAnswersMap = [];
+    //         foreach ($questions as $question) {
+    //             $correctAnswersMap[$question['id']] = $question['correct_answer']; // Assuming correct_answer is stored in correct_answers field
+    //         }
+    
+    //         // Loop through each submitted answer and compare it with the correct answer from the database
+    //         foreach ($userAnswers as $userAnswer) {
+    //             $questionId = $userAnswer['id']; // Question ID
+    //             $userSubmittedAnswer = $userAnswer['answer']; // User's submitted answer
+    
+    //             // Compare the user's answer with the correct answer
+    //             if (array_key_exists($questionId, $correctAnswersMap)) {
+    //                 $correctAnswer = $correctAnswersMap[$questionId];
+    
+    //                 // Compare based on the question type
+    //                 $isCorrect = false;
+    
+    //                 // Handle different question types (assuming it's stored as a string or array)
+    //                 if (is_array($correctAnswer)) {
+    //                     // For multiple-choice, check if user answer matches any correct answer
+    //                     $isCorrect = in_array($userSubmittedAnswer, $correctAnswer);
+    //                 } else {
+    //                     // For single answer question
+    //                     $isCorrect = $userSubmittedAnswer == $correctAnswer;
+    //                 }
+    
+    //                 if ($isCorrect) {
+    //                     $correctAnswersCount++;
+    //                     $totalMarks += (float) $quizResult->correct_answers[$questionId]['default_marks']; // Add marks for correct answer
+    //                 } else {
+    //                     $incorrectAnswersCount++;
+    //                     if ($negativeMarking > 0) {
+    //                         $totalMarks -= $negativeMarking; // Deduct marks for incorrect answer, if negative marking is enabled
+    //                     }
+    //                 }
+    //             }
+    //         }
+    
+    //         // Update the quiz result with the calculated values
+    //         $quizResult->update([
+    //             'correct_answer' => $correctAnswersCount,
+    //             'incorrect_answer' => $incorrectAnswersCount,
+    //             'point' => max(0, $totalMarks), // Ensure that total points don't go below zero
+    //             'status' => 'completed',
+    //             'end_time' => now(),
+    //             'answers' => json_encode($request->answers), // Store user's answers
+    //         ]);
+    
+    //         // Return success response
+    //         return response()->json(['status' => true, 'message' => 'Quiz completed successfully'], 200);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
+    //     }
+    // }
+
     public function finishQuiz(Request $request, $uuid) {
         try {
             // Validate the incoming request data
@@ -280,7 +359,7 @@ class QuizController extends Controller
                     // Handle different question types (assuming it's stored as a string or array)
                     if (is_array($correctAnswer)) {
                         // For multiple-choice, check if user answer matches any correct answer
-                        $isCorrect = in_array($userSubmittedAnswer, $correctAnswer);
+                        $isCorrect = !empty(array_intersect($userSubmittedAnswer, $correctAnswer));
                     } else {
                         // For single answer question
                         $isCorrect = $userSubmittedAnswer == $correctAnswer;
@@ -305,7 +384,7 @@ class QuizController extends Controller
                 'point' => max(0, $totalMarks), // Ensure that total points don't go below zero
                 'status' => 'completed',
                 'end_time' => now(),
-                'answers' => json_encode($request->answers), // Store user's answers
+                'answers' => json_encode($userAnswers), // Store user's answers
             ]);
     
             // Return success response
