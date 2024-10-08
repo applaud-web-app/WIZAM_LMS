@@ -331,6 +331,10 @@ class QuizController extends Controller
             // Retrieve the stored questions from the quiz result
             $questions = json_decode($quizResult->questions, true); // Convert to an array
             $userAnswers = $request->answers; // Array of user's submitted answers
+
+            // ANSWERS 
+            $correct_answers = json_decode($quizResult->correct_answers, true);
+            // DEMO FOR correct_answers store value - [{"id":2,"correct_answer":"2","default_marks":"5"}]
     
             // Initialize counters for correct and incorrect answers
             $correctAnswersCount = 0;
@@ -341,7 +345,7 @@ class QuizController extends Controller
             // Create an associative array for quick access to correct answers
             $correctAnswersMap = [];
             foreach ($questions as $question) {
-                $correctAnswersMap[$question['id']] = $question['correct_answer']; // Assuming correct_answer is stored in correct_answers field
+                $correctAnswersMap[$question['id']] = $correct_answers[$question['id']]; 
             }
     
             // Loop through each submitted answer and compare it with the correct answer from the database
