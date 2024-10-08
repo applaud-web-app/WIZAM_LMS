@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\Api\PracticeSetController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -95,6 +96,10 @@ Route::middleware('checkAuthToken')->group(function () {
     # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);
     Route::get('/practice-set-detail/{slug}', [StudentController::class, 'practiceSetDetail']);
+    Route::get('/play-practice-set/{slug}', [PracticeSetController::class, 'playPracticeSet']);
+
+    Route::get('/all-question', [PracticeSetController::class, 'allQuestion']);
+
 
     # Lesson
     Route::get('/all-lesson',[StudentController::class, 'allLesson']);

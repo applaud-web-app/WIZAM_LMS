@@ -12,4 +12,9 @@ class PracticeSetQuestion extends Model
         'practice_set_id',
         'question_id'
     ];
+    
+    public function questions()
+    {
+        return $this->belongsTo(Question::class, 'question_id');
+    }
 }

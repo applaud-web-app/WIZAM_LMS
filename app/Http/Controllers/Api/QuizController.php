@@ -259,17 +259,42 @@ class QuizController extends Controller
             $totalMarks = 0;
             $negativeMarking = (float) $quizResult->negative_marking; // Negative marking if applicable
     
+            // Create an associative array for quick access to correct answers
+            $correctAnswersMap = [];
+            foreach ($questions as $question) {
+                $correctAnswersMap[$question['id']] = $question['correct_answer']; // Assuming correct_answer is stored in correct_answers field
+            }
+    
             // Loop through each submitted answer and compare it with the correct answer from the database
             foreach ($userAnswers as $userAnswer) {
-                $question = Question::find($userAnswer['id']); // Fetch question from DB using question ID
+                $questionId = $userAnswer['id']; // Question ID
+                $userSubmittedAnswer = $userAnswer['answer']; // User's submitted answer
     
                 // Compare the user's answer with the correct answer
-                if ($question && $question->answer == $userAnswer['answer']) {
-                    $correctAnswersCount++;
-                    $totalMarks += (float) $question->default_marks; // Add marks for correct answer
-                } else {
-                    $incorrectAnswersCount++;
-                    $totalMarks -= $negativeMarking; // Deduct marks for incorrect answer, if negative marking is enabled
+                if (array_key_exists($questionId, $correctAnswersMap)) {
+                    $correctAnswer = $correctAnswersMap[$questionId];
+    
+                    // Compare based on the question type
+                    $isCorrect = false;
+    
+                    // Handle different question types (assuming it's stored as a string or array)
+                    if (is_array($correctAnswer)) {
+                        // For multiple-choice, check if user answer matches any correct answer
+                        $isCorrect = in_array($userSubmittedAnswer, $correctAnswer);
+                    } else {
+                        // For single answer question
+                        $isCorrect = $userSubmittedAnswer == $correctAnswer;
+                    }
+    
+                    if ($isCorrect) {
+                        $correctAnswersCount++;
+                        $totalMarks += (float) $quizResult->correct_answers[$questionId]['default_marks']; // Add marks for correct answer
+                    } else {
+                        $incorrectAnswersCount++;
+                        if ($negativeMarking > 0) {
+                            $totalMarks -= $negativeMarking; // Deduct marks for incorrect answer, if negative marking is enabled
+                        }
+                    }
                 }
             }
     
