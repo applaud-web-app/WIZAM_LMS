@@ -133,10 +133,14 @@ class QuizController extends Controller
                 $question = $quizQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
     
-                if ($question->type == "MTF" || $question->type == "ORD" && !empty($question->answer)) {
+                if ($question->type == "MTF"  && !empty($question->answer)) {
                     $matchOption = json_decode($question->answer, true);
                     shuffle($matchOption);
                     $options = array_merge($options, $matchOption);
+                }
+
+                if ($question->type == "ORD") {
+                    $options = shuffle($options);
                 }
     
                 // Customize question display for different types
