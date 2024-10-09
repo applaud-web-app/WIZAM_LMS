@@ -675,7 +675,7 @@ class QuizController extends Controller
                     }
                 }
     
-                $timeTakenInMinutes = $quizResult->updated_at->diffInMinutes($quizResult->created_at);
+                $timeTakenInMinutes = $quizResult->start_time->diffInMinutes($quizResult->updated_at);
 
                 // Build result
                 $result = [
