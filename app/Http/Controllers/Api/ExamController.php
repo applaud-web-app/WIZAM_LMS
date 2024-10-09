@@ -388,7 +388,11 @@ class ExamController extends Controller
         
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-            $examResult = ExamResult::with('exam:id,title')->select('updated_at','student_percentage','pass_percentage','status','uuid')->where('user_id',$user->id)->where('subcategory_id',$request->category)->get();
+            $examResults = ExamResult::with('exam:id,title')
+            ->select('updated_at', 'student_percentage', 'pass_percentage', 'status', 'uuid')
+            ->where('user_id', $user->id)
+            ->where('subcategory_id', $request->category)
+            ->get();    
 
             // Return success JSON response
             return response()->json([
