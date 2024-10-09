@@ -697,24 +697,18 @@ class QuizController extends Controller
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
                         case 'FIB': // Fill in the Blanks
+                            return [
+                                'userAnswer'=>$userAnswer,
+                                'correct_anser'=>$correctAnswer,
+                                'status'=>$userAnswer === $correctAnswer
+                            ];
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
     
                         case 'MSA': // Multiple Selection Answer
-                            // Convert correctAnswer to array if needed
-                            
-
-                            return [
-                                'corrct_answer'=>$correctAnswer,
-                                'userAnswer'=>$userAnswer,
-                                'status'=>$correctAnswer == $userAnswer,
-                            ];
-                            if (!is_array($correctAnswer)) {
-                                $correctAnswer = json_decode($correctAnswer, true);
-                            }
-                            $isCorrect = is_array($userAnswer) && !array_diff($userAnswer, $correctAnswer);
+                            $isCorrect = $userAnswer == $correctAnswer;
                             break;
-    
+
                         case 'MMA': // Multiple Match Answer
                             if (!is_array($correctAnswer)) {
                                 $correctAnswer = json_decode($correctAnswer, true);
