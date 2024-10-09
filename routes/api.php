@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\PracticeSetController;
 use App\Http\Controllers\Api\ExamController;
+use App\Http\Controllers\Api\DashboardController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -83,6 +84,8 @@ Route::middleware('checkAuthToken')->group(function () {
     
     ## PLAY EXAM
     Route::get('/play-exam/{slug}', [ExamController::class, 'playExam']);
+    Route::post('/finish-exam/{uuid}',[ExamController::class, 'finishExam']);
+
 
     # QUIZ
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
@@ -93,7 +96,6 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/play-quiz/{slug}',[QuizController::class, 'playQuiz']);
     Route::post('/save-quiz-progress/{uuid}',[QuizController::class, 'saveQuizProgress']);
     Route::post('/finish-quiz/{uuid}',[QuizController::class, 'finishQuiz']);
-
     Route::get('/quiz-result/{uuid}',[QuizController::class, 'quizResult']);
 
     # Practice Set
@@ -114,6 +116,10 @@ Route::middleware('checkAuthToken')->group(function () {
     # Video
     Route::get('/all-video',[StudentController::class, 'allVideo']);
     Route::get('/video-detail/{slug}',[StudentController::class, 'videoDetail']);
+
+
+    // DASHBOARD
+    Route::get('/student-dashboard',[DashboardController::class, 'studentDashboard']);
 
 });
 
