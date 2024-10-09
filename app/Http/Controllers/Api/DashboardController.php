@@ -25,12 +25,31 @@ class DashboardController extends Controller
     
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+
+            // Fetch all exam results for the authenticated user where status is complete
+            $exams = ExamResult::where('user_id', $user->id)->where('status', 'complete')->get();
+
+            // Use a single query to get passed, failed counts, and the average score
+            $examStats = ExamResult::selectRaw(
+                'COUNT(CASE WHEN student_percentage >= pass_percentage THEN 1 END) as passed_count, ' .
+                'COUNT(CASE WHEN student_percentage < pass_percentage THEN 1 END) as failed_count, ' .
+                'AVG(student_percentage) as average_score'
+            )->where('user_id', $user->id)->where('status', 'complete')->first();
+
+            // Extract the counts and average score
+            $passedExamCount = $examStats->passed_count;
+            $failedExamCount = $examStats->failed_count;
+            $averageScore = $examStats->average_score;
     
             // Fetch all exam results for the authenticated user where status is complete
             $examData = Exam::select(
-                'exam_types.slug as exam_type_slug', // Fetch exam type slug
-                'exams.slug', // Fetch exam slug
-                'exams.title', // Fetch exam title
+                'exam_types.slug as exam_type_slug', 
+                'exams.slug', 
+                'exams.title', 
+                'exams.duration_mode', 
+                'exams.exam_duration', 
+                'exams.point_mode',
+                'exams.point', 
                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
@@ -40,7 +59,7 @@ class DashboardController extends Controller
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
             ->where('exams.status', 1) // Filter by exam status
-            ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title') // Group by necessary fields
+            ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title','exams.duration_mode', 'exams.exam_duration','exams.point_mode', 'exams.point') // Group by necessary fields
             ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
             ->get();
 
@@ -52,6 +71,10 @@ class DashboardController extends Controller
                 'quizzes.pass_percentage',
                 'sub_categories.name as sub_category_name',
                 'quiz_types.name as exam_type_name',
+                'quizzes.duration_mode', 
+                'quizzes.exam_duration', 
+                'quizzes.point_mode',
+                'quizzes.point', 
                 DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
@@ -69,7 +92,11 @@ class DashboardController extends Controller
                 'quizzes.description',
                 'quizzes.pass_percentage',
                 'sub_categories.name',
-                'quiz_types.name'
+                'quiz_types.name',
+                'quizzes.duration_mode', 
+                'quizzes.exam_duration', 
+                'quizzes.point_mode',
+                'quizzes.point'
             )
             ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
             ->first();
