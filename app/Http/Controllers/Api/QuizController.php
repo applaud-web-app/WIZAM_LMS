@@ -856,7 +856,7 @@ class QuizController extends Controller
     }
     
 
-    public function QuizController(){
+    public function quizAll(Request $request){
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
