@@ -761,6 +761,16 @@ class QuizController extends Controller
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
                         case 'FIB':
+                            return [
+                                'userAnswer'=>$userAnswer,
+                                'correct_anser'=>$correctAnswer,
+                                'status'=>$userAnswer === $correctAnswer,
+                                'questionBox'=>$questionBox,
+                                'userAnswers'=>$userAnswers,
+                                'correct_answers'=>$correct_answers,
+                                'id'=>$question->id,
+                                'ddd'=>$userAnswers[$question->id]
+                            ];
                             $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
                         case 'MSA':
