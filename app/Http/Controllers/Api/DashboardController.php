@@ -65,7 +65,8 @@ class DashboardController extends Controller
                     'exams.subcategory_id',
                     'exams.status',
                     'exams.exam_duration',
-                    DB::raw('SUM(COALESCE(exam_questions.watch_time, 0)) as total_duration') // Total duration
+                    DB::raw('COUNT(exam_questions.id) as total_questions'), // Count total questions
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_duration') // Total duration
                 )
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
