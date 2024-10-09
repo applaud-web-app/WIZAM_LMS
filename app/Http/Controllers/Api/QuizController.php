@@ -825,6 +825,7 @@ class QuizController extends Controller
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_text' => $question->question,
+                        'question_option' => $question->options,
                         'correct_answer' => $correct_answ ?? null,
                         'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
