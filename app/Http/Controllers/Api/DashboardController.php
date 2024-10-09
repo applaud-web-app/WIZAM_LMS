@@ -49,13 +49,13 @@ class DashboardController extends Controller
             ->get()
             ->map(function($examResult) {
                 return [
-                    'exam_title' => $examResult->exam->title ?? 'N/A',
-                    'duration' => $examResult->exam->exam_duration ?? 'N/A',
-                    'total_questions' => $examResult->examQuestions->count() ?? 0, // Safely count
-                    'status' => $examResult->status,
+                    'exam_title' => $examResult->exam->title ?? 'N/A', // Exam title
+                    'duration' => $examResult->exam->exam_duration ?? 'N/A', // Exam duration
+                    'total_questions' => $examResult->examQuestions->count() ?? 0, // Total questions count
+                    'status' => $examResult->status, // Status of the exam result
                 ];
             });
-    
+            
             // Extract the counts and average score
             $passedExamCount = $examStats->passed_count ?? 0;
             $failedExamCount = $examStats->failed_count ?? 0;
