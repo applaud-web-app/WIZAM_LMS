@@ -917,4 +917,40 @@ class QuizController extends Controller
     }
 
 
+    public function quizProgress(Request $request){
+        try {
+            $request->validate(['category' => 'required']);
+        
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+            $quizResults = QuizResult::join('quizzes', 'quiz_results.quiz_id', '=', 'quizzes.id')
+            ->select(
+                'quiz_results.updated_at', 
+                'quiz_results.student_percentage', 
+                'quiz_results.pass_percentage', 
+                'quiz_results.status', 
+                'quiz_results.uuid', 
+                'exams.title as exam_title'
+            )
+            ->where('quiz_results.user_id', $user->id)
+            ->where('quiz_results.subcategory_id', $request->category)
+            ->get();
+   
+
+            // Return success JSON response
+            return response()->json([
+                'status' => true,
+                'data' => $quizResults
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching the data.',
+                'error' => 'Error logged. :' . $th->getMessage() 
+            ], 500);
+        }
+    }
+
+
 }
