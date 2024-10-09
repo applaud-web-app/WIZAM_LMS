@@ -824,6 +824,7 @@ class QuizController extends Controller
                 
                     $exam[] = [
                         'question_id' => $question->id,
+                        'question_type' => $question->type,
                         'question_text' => $question->question,
                         'question_option' => $question->options,
                         'correct_answer' => $correct_answ ?? null,
