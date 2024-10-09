@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\ExamResult;
 use App\Models\Exam;
 use App\Models\Quizze;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str; 
+use Carbon\Carbon;
+use App\Models\Question;
 
 class DashboardController extends Controller
 {
