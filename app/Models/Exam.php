@@ -55,4 +55,10 @@ class Exam extends Model
         return $this->belongsToMany(Question::class, 'exam_questions');
     }
 
+    // Define the relationship with QuizQuestion model
+    public function examQuestions()
+    {
+        return $this->hasMany(ExamQuestion::class, 'exam_id', 'id');
+    }
+
 }

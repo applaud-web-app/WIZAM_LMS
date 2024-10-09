@@ -702,6 +702,13 @@ class QuizController extends Controller
     
                         case 'MSA': // Multiple Selection Answer
                             // Convert correctAnswer to array if needed
+                            
+
+                            return [
+                                'corrct_answer'=>$correctAnswer,
+                                'userAnswer'=>$userAnswer,
+                                'status'=>$correctAnswer == $userAnswer,
+                            ];
                             if (!is_array($correctAnswer)) {
                                 $correctAnswer = json_decode($correctAnswer, true);
                             }
