@@ -52,7 +52,7 @@ class ExamController extends Controller
                     DB::raw('SUM(questions.default_marks) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
-                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exams_id')
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.slug', $slug)
                 ->where('exams.subcategory_id', $request->category)
