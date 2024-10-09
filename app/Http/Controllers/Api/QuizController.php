@@ -699,7 +699,7 @@ class QuizController extends Controller
                 //         case 'FIB': // Fill in the Blanks
                 //             return [
                 //                 'userAnswer'=>$userAnswer,
-                //                 'correct_anser'=>$correctAnswer,
+                //                 'correct_answer'=>$correctAnswer,
                 //                 'status'=>$userAnswer === $correctAnswer,
                 //                 'questionBox'=>$questionBox,
                 //                 'userAnswers'=>$userAnswers,
@@ -762,17 +762,17 @@ class QuizController extends Controller
                     switch ($question->type) {
                         case 'FIB':
                             $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_anser']);
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
                             $user_answ = $userAnswer['answer'];
-                            $correct_answ = $correctAnswer['correct_anser'];
+                            $correct_answ = $correctAnswer['correct_answer'];
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MMA':
                             $user_answ = $userAnswer['answer'];
-                            $correct_answ = $correctAnswer['correct_anser'];
+                            $correct_answ = $correctAnswer['correct_answer'];
                             return [
                                 'user_answ'=>$user_answ,
                                 'correctAnswer'=>$correct_answ,
