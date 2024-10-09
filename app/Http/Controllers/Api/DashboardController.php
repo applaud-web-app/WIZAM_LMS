@@ -104,6 +104,7 @@ class DashboardController extends Controller
             // Return success JSON response
             return response()->json([
                 'status' => true,
+                'completed_exam' => $passedExamCount+$failedExamCount ?? 0,
                 'pass_exam' => $passedExamCount ?? 0,
                 'failed_exam' => $failedExamCount ?? 0,
                 'average_exam' => $averageScore ?? 0,

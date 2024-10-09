@@ -85,6 +85,7 @@ Route::middleware('checkAuthToken')->group(function () {
     ## PLAY EXAM
     Route::get('/play-exam/{slug}', [ExamController::class, 'playExam']);
     Route::post('/finish-exam/{uuid}',[ExamController::class, 'finishExam']);
+    Route::get('/exam-result/{uuid}',[ExamController::class, 'examResult']);
 
 
     # QUIZ

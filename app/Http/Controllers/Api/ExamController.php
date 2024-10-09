@@ -320,6 +320,7 @@ class ExamController extends Controller
     
         // Update quiz result with correct/incorrect answers and student percentage
         $examResult->status = "complete";
+        $examResult->updated_at = now();
         $examResult->answers = json_encode($user_answer, true);
         $examResult->incorrect_answer = $incorrect;
         $examResult->correct_answer = $correctAnswer;
@@ -335,6 +336,159 @@ class ExamController extends Controller
             'student_status' => $studentStatus,
             'student_percentage' => $studentPercentage
         ]);
+    }
+
+    public function examResult(Request $request){
+        try {
+            $user = $request->attributes->get('authenticatedUser');
+    
+            $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+            if ($quizResult) {
+                // Build leaderboard
+                $leaderBoard = [];
+                if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
+                    $userQuiz = QuizResult::with('user')
+                        ->where('quiz_id', $quizResult->quiz_id)
+                        ->orderby('student_percentage', 'DESC')
+                        ->take(10)
+                        ->get();
+    
+                    foreach ($userQuiz as $userData) {
+                        if (isset($userData->user)) {
+                            $leaderBoard[] = [
+                                "username" => $userData->user->name,
+                                "score" => $userData->student_percentage,
+                                "status" => $userData->student_percentage >= $userData->pass_percentage ? "PASS" : "FAIL",
+                            ];
+                        }
+                    }
+                }
+
+                $openTime = Carbon::parse($quizResult->created_at);
+                $closeTime = Carbon::parse($quizResult->updated_at); 
+    
+                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
+
+                // Build result
+                $result = [
+                    'correct' => $quizResult->correct_answer,
+                    'incorrect' => $quizResult->incorrect_answer,
+                    'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
+                    'marks' => $quizResult->student_percentage,
+                    'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
+                    'timeTaken' => $timeTakenInMinutes,
+                    'openTime'=>$openTime,
+                    'closeTime'=>$closeTime,
+                ];
+    
+                // Process exam details (Compare user answers with correct answers)
+                $exam = [];
+                $questionBox = json_decode($quizResult->questions);
+                $correct_answers = json_decode($quizResult->correct_answers, true);
+                $userAnswers = json_decode($quizResult->answers, true);
+
+                foreach ($questionBox as $question) {
+                    // Get the user answer for the current question by matching the IDs
+                    $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
+                    $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
+                    $isCorrect = false;
+                
+                    // Ensure correctAnswer is an array when needed
+                    switch ($question->type) {
+                        case 'FIB':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MSA':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $correctAnswer['correct_answer'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MMA':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            sort($user_answ);
+                            sort($correct_answ);
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'TOF':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $correctAnswer['correct_answer'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MTF':
+                            $isCorrect = true;
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            foreach ($correct_answ as $key => $value) {
+                                if ($user_answ[$key] != $value) {
+                                    $isCorrect = false;
+                                    break;
+                                }
+                            }
+                            break;
+                        case 'ORD':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $isCorrect = $user_answ === $correct_answ;
+                            break;
+                        case 'EMQ':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $isCorrect = $user_answ === $correct_answ;
+                            break;
+                        case 'SAQ':
+                            $user_answ = $userAnswer['answer']; // string
+                            $correct_answ = $question->options;
+                            $options = $question->options; // array
+                            // Loop through each option and compare after sanitizing HTML
+                            foreach ($options as $option) {
+                                // Strip HTML tags and extra spaces from both user answer and the option
+                                $sanitizedUserAnswer = trim(strip_tags($user_answ));
+                                $sanitizedOption = trim(strip_tags($option));
+
+                                // Check if the sanitized user answer matches any sanitized option
+                                if ($sanitizedUserAnswer === $sanitizedOption) {
+                                    $isCorrect = true;
+                                    break;
+                                }
+                            }
+                            break;
+                    }
+                
+
+                    $exam[] = [
+                        'question_id' => $question->id,
+                        'question_type' => $question->type,
+                        'question_text' => $question->question,
+                        'question_option' => $question->options,
+                        'correct_answer' => $correct_answ ?? null,
+                        'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
+                        'is_correct' => $isCorrect,
+                    ];
+                }
+    
+                $quiz = [
+                    'title' => $quizResult->quiz->title,
+                    'duration' => $quizResult->exam_duration,
+                ];
+    
+                return response()->json([
+                    'status' => true,
+                    'quiz' => $quiz,
+                    'result' => $result,
+                    'exam_preview' => $exam,
+                    'leaderBoard' => $leaderBoard,
+                ]);
+            }
+    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong: '. $th->getMessage(),
+            ]);
+        }
     }
 
 
