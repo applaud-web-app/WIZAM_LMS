@@ -14,6 +14,11 @@ class ExamQuestion extends Model
         'section_id'
     ];
 
+    public function question()
+    {
+        return $this->belongsTo(Question::class, 'question_id', 'id');
+    }
+
     public function questions()
     {
         return $this->belongsTo(Question::class, 'question_id', 'id');
