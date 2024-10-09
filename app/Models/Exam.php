@@ -14,6 +14,7 @@ class Exam extends Model
         'title',
         'slug',
         'img_url',
+        'point',
         'duration_type',
         'subcategory_id',
         'exam_type_id',
