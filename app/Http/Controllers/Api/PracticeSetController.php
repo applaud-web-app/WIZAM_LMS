@@ -704,7 +704,7 @@ class PracticeSetController extends Controller
             }
     
             if ($isCorrect) {
-                $score += $practiceSetResult->point_type == "manual" ? $practiceSetResult->point : $question->default_marks;
+                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
                 $correctAnswer += 1;
             } else {
                 $incorrect += 1;
@@ -741,8 +741,6 @@ class PracticeSetController extends Controller
             'score' => $score,
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
-            // 'student_status' => $studentStatus,
-            // 'student_percentage' => $studentPercentage
         ]);
     }
     
