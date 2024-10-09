@@ -652,7 +652,7 @@ class QuizController extends Controller
     {
         try {
             $user = $request->attributes->get('authenticatedUser');
-
+    
             $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
             if ($quizResult) {
                 // Build leaderboard
@@ -663,7 +663,7 @@ class QuizController extends Controller
                         ->orderby('student_percentage', 'DESC')
                         ->take(10)
                         ->get();
-
+    
                     foreach ($userQuiz as $userData) {
                         if (isset($userData->user)) {
                             $leaderBoard[] = [
@@ -674,7 +674,7 @@ class QuizController extends Controller
                         }
                     }
                 }
-
+    
                 // Build result
                 $result = [
                     'correct' => $quizResult->correct_answer,
@@ -683,73 +683,75 @@ class QuizController extends Controller
                     'marks' => $quizResult->student_percentage,
                     'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
                 ];
-
-                // Retrieve questions, user answers, and correct answers
-                $questionBox = json_decode($quizResult->questions, true);
+    
+                // Process exam details (Compare user answers with correct answers)
+                $exam = [];
+                $questionBox = json_decode($quizResult->questions);
                 $correct_answers = json_decode($quizResult->correct_answers, true);
                 $userAnswers = json_decode($quizResult->answers, true);
-
-                // Exam (Compare user answers with correct answers and create a detailed review)
-                $exam = [];
+    
                 foreach ($questionBox as $question) {
-                    $userAnswer = $userAnswers[$question['id']] ?? null;
-                    $correctAnswer = $correct_answers[$question['id']]['correct_answer'] ?? null;
+                    $userAnswer = $userAnswers[$question->id] ?? null;
+                    $correctAnswer = $correct_answers[$question->id]['correct_answer'];
                     $isCorrect = false;
-
-                    // Handle different question types
-                    switch ($question['type']) {
+    
+                    // Ensure correctAnswer is an array when needed
+                    switch ($question->type) {
                         case 'FIB': // Fill in the Blanks
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
-
+    
                         case 'MSA': // Multiple Selection Answer
-                            // Check if the user-selected options match the correct options
+                            // Convert correctAnswer to array if needed
+                            if (!is_array($correctAnswer)) {
+                                $correctAnswer = json_decode($correctAnswer, true);
+                            }
                             $isCorrect = is_array($userAnswer) && !array_diff($userAnswer, $correctAnswer);
                             break;
-
+    
                         case 'MMA': // Multiple Match Answer
-                            // Compare arrays for matching
+                            if (!is_array($correctAnswer)) {
+                                $correctAnswer = json_decode($correctAnswer, true);
+                            }
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
-
+    
                         case 'TOF': // True/False
-                            $isCorrect = intval($userAnswer) === intval($correctAnswer);
+                            $isCorrect = $userAnswer == $correctAnswer;
                             break;
-
+    
                         case 'MTF': // Match the Following
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
-
+    
                         case 'ORD': // Ordering
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
-
+    
                         case 'EMQ': // Extended Matching Questions
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
-
+    
                         case 'SAQ': // Short Answer Question
-                            // Case-insensitive comparison
-                            $isCorrect = strtolower($userAnswer) === strtolower($correctAnswer);
+                            $isCorrect = $userAnswer === $correctAnswer;
                             break;
                     }
-
+    
                     // Append the result for this question to the exam array
                     $exam[] = [
-                        'question_id' => $question['id'],
-                        'question_text' => $question['question'],
+                        'question_id' => $question->id,
+                        'question_text' => $question->question,
                         'correct_answer' => $correctAnswer,
                         'user_answer' => $userAnswer,
                         'is_correct' => $isCorrect,
                     ];
                 }
-
-                // Quiz metadata
+    
                 $quiz = [
                     'title' => $quizResult->quiz->title,
                     'duration' => $quizResult->exam_duration,
                 ];
-
+    
                 return response()->json([
                     'status' => true,
                     'quiz' => $quiz,
@@ -758,15 +760,15 @@ class QuizController extends Controller
                     'leaderBoard' => $leaderBoard,
                 ]);
             }
-
+    
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong: ' . $th->getMessage(),
+                'message' => 'Something went wrong: '. $th->getMessage(),
             ]);
         }
     }
-
+    
 
 
 }
