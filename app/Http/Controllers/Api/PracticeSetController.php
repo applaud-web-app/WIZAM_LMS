@@ -732,7 +732,7 @@ class PracticeSetController extends Controller
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
-        $practiceSetResult->student_percentage = $studentPercentage;
+        // $practiceSetResult->student_percentage = $studentPercentage;
         $practiceSetResult->save();
     
         // Return results
