@@ -678,7 +678,7 @@ class QuizController extends Controller
                 $openTime = Carbon::parse($quizResult->start_time);
                 $closeTime = Carbon::parse($quizResult->updated_at);
     
-                $timeTakenInMinutes = $startTime->diffInMinutes($endTime);
+                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime);
 
                 // Build result
                 $result = [
