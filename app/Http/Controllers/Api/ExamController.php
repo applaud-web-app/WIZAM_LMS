@@ -4,8 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\StudentExamResult;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use App\Models\Exam;
+use App\Models\ExamResult;
+use App\Models\User;
+use Illuminate\Support\Str; 
+use Carbon\Carbon;
+use App\Models\Question;
 
 class ExamController extends Controller
 {
