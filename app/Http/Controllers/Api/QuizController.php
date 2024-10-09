@@ -755,7 +755,9 @@ class QuizController extends Controller
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
                     $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
-                    $correctAnswer = $correct_answers[$question->id]['correct_answer'];
+                    $correctAnswer = isset($correct_answers[$question->id]['correct_answer']) 
+                    ? $correct_answers[$question->id]['correct_answer']
+                    : null;
                     $isCorrect = false;
                 
                     // Ensure correctAnswer is an array when needed
