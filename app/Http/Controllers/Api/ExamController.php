@@ -39,9 +39,9 @@ class ExamController extends Controller
                     'exams.slug',
                     'exams.subcategory_id',
                     'exams.status',
-                    'exams.duration_mode',
-                    'exams.point_mode',
-                    'exams.duration',
+                    'exams.duration_type', // duration_type
+                    'exams.point_mode', 
+                    'exams.exam_duration', // exam_duration
                     'exams.point',
                     'exams.shuffle_questions',
                     'exams.question_view',
@@ -60,8 +60,8 @@ class ExamController extends Controller
                 ->where('questions.status', 1)
                 ->groupBy(
                     'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
-                    'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_mode',
-                    'exams.point_mode', 'exams.duration', 'exams.point', 'exams.shuffle_questions',
+                    'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
+                    'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
                     'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
                     'exams.negative_marking_type', 'exams.negative_marks'
                 )
