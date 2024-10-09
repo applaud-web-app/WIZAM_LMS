@@ -395,7 +395,8 @@ class ExamController extends Controller
                 'exam_results.pass_percentage', 
                 'exam_results.status', 
                 'exam_results.uuid', 
-                'exams.title as exam_title'
+                'exams.title as exam_title',
+                'exams.slug as exam_slug'
             )
             ->where('exam_results.user_id', $user->id)
             ->where('exam_results.subcategory_id', $request->category)
