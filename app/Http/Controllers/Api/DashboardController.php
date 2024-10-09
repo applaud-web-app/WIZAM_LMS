@@ -50,60 +50,87 @@ class DashboardController extends Controller
             $averageScore = $examStats->average_score ?? 0;
 
             // Fetch exams
-            $exams = Exam::withCount('examQuestions') // Count total questions
-                ->with([
-                    'examQuestions.questions' => function($query) {
-                        $query->select('id', 'default_marks', 'watch_time', 'status');
-                    }
-                ])
-                ->select(
-                    'exams.id',
-                    'exams.title',
-                    'exams.is_free',
-                    'exams.pass_percentage',
-                    'exams.slug',
-                    'exams.subcategory_id',
-                    'exams.status',
-                    'exams.exam_duration',
-                    DB::raw('COUNT(exam_questions.id) as total_questions'), // Count total questions
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_duration') // Total duration
-                )
-                ->where('exams.subcategory_id', $request->category)
-                ->where('exams.status', 1)
-                ->groupBy(
-                    'exams.id',
-                    'exams.title',
-                    'exams.is_free',
-                    'exams.pass_percentage',
-                    'exams.slug',
-                    'exams.subcategory_id',
-                    'exams.status',
-                    'exams.exam_duration'
-                )
-                ->get();
+            // Fetch the exam along with related questions in one query
+            $exam = Exam::with([
+                'examQuestions.questions' => function($query) {
+                    $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
+                }
+            ])
+            ->select(
+                'exams.id',
+                'exams.title',
+                'exams.description',
+                'exams.pass_percentage',
+                'exams.slug',
+                'exams.subcategory_id',
+                'exams.status',
+                'exams.duration_type', // duration_type
+                'exams.point_mode', 
+                'exams.exam_duration', // exam_duration
+                'exams.point',
+                'exams.shuffle_questions',
+                'exams.question_view',
+                'exams.disable_finish_button',
+                'exams.negative_marking',
+                'exams.negative_marking_type',
+                'exams.negative_marks',
+                DB::raw('SUM(questions.default_marks) as total_marks'),
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+            )
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+            ->where('exams.subcategory_id', $request->category)
+            ->where('exams.status', 1)
+            ->where('questions.status', 1)
+            ->groupBy(
+                'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
+                'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
+                'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
+                'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
+                'exams.negative_marking_type', 'exams.negative_marks'
+            )
+            ->first();
 
             // Fetch quizzes
-            $quizzes = Quizze::withCount('quizQuestions') // Count total questions
-                ->with([
-                    'quizQuestions.questions' => function($query) {
-                        $query->select('id', 'default_marks', 'watch_time', 'status');
-                    }
-                ])
-                ->select(
-                    'quizzes.id',
-                    'quizzes.title',
-                    'quizzes.is_free',
-                    DB::raw('COUNT(quiz_questions.id) as total_questions'), // Count total questions
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_duration') // Total duration
-                )
-                ->where('quizzes.subcategory_id', $request->category)
-                ->where('quizzes.status', 1)
-                ->groupBy(
-                    'quizzes.id',
-                    'quizzes.title',
-                    'quizzes.is_free'
-                )
-                ->get();
+            $quizzes = Quizze::with([
+                'quizQuestions.questions' => function($query) {
+                    $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
+                }
+            ])
+            ->select(
+                'quizzes.id',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'quizzes.slug',
+                'quizzes.subcategory_id',
+                'quizzes.status',
+                'quizzes.duration_mode',
+                'quizzes.point_mode',
+                'quizzes.duration',
+                'quizzes.point',
+                'quizzes.shuffle_questions',
+                'quizzes.question_view',
+                'quizzes.disable_finish_button',
+                'quizzes.negative_marking',
+                'quizzes.negative_marking_type',
+                'quizzes.negative_marks',
+                DB::raw('SUM(questions.default_marks) as total_marks'),
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+            )
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+            ->where('quizzes.subcategory_id', $request->category)
+            ->where('quizzes.status', 1)
+            ->where('questions.status', 1)
+            ->groupBy(
+                'quizzes.id', 'quizzes.title', 'quizzes.description', 'quizzes.pass_percentage',
+                'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
+                'quizzes.point_mode', 'quizzes.duration', 'quizzes.point', 'quizzes.shuffle_questions',
+                'quizzes.question_view', 'quizzes.disable_finish_button', 'quizzes.negative_marking',
+                'quizzes.negative_marking_type', 'quizzes.negative_marks'
+            )
+            ->first();
 
             // Return success JSON response
             return response()->json([
