@@ -544,7 +544,6 @@ class PracticeSetController extends Controller
             ->select(
                 'practice_set_results.updated_at', 
                 'practice_set_results.student_percentage', 
-                'practice_set_results.pass_percentage', 
                 'practice_set_results.status', 
                 'practice_set_results.uuid', 
                 'practice_sets.title as practice_title',
