@@ -784,14 +784,23 @@ class QuizController extends Controller
                             break;
                         case 'MTF':
                             $user_answ = $userAnswer['answer'];
-                            $correct_answ = $correctAnswer['correct_answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            foreach ($correct_answ as $key => $value) {
+                                return $user_answ[$key];
+                                if ($user_answ[$key] != $value) {
+                                    $isCorrect = false;
+                                    break;
+                                }
+                            }
+                            $isCorrect = true;
+
                             return [
                                 'user_answ'=>$user_answ,
                                 'correctAnswer'=>$correct_answ,
                                 'question->id'=>$question->id,
                                 'question'=>$question,
+                                'isCorrect'=>$isCorrect
                             ];
-                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
                         case 'ORD':
                             $isCorrect = $userAnswer['answer'] === $correctAnswer;
