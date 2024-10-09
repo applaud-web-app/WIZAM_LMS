@@ -99,7 +99,7 @@ class DashboardController extends Controller
                 'quizzes.point'
             )
             ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
-            ->first();
+            ->get();
     
             // Return success JSON response
             return response()->json([
