@@ -704,6 +704,7 @@ class QuizController extends Controller
                                 'questionBox'=>$questionBox,
                                 'userAnswers'=>$userAnswers,
                                 'correct_answers'=>$correct_answers,
+                                'id'=>$question->id,
                             ];
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
