@@ -43,9 +43,4 @@ class ExamResult extends Model
     public function user(){
         return $this->hasOne(User::class, 'id', 'user_id');
     }
-
-    public function examQuestions()
-    {
-        return $this->hasMany(ExamQuestion::class, 'exam_result_id'); // Adjust based on your actual foreign key
-    }
 }
