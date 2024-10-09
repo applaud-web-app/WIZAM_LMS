@@ -674,8 +674,11 @@ class QuizController extends Controller
                         }
                     }
                 }
+
+                $openTime = Carbon::parse($quizResult->start_time);
+                $closeTime = Carbon::parse($quizResult->updated_at);
     
-                $timeTakenInMinutes = $quizResult->start_time->diffInMinutes($quizResult->updated_at);
+                $timeTakenInMinutes = $startTime->diffInMinutes($endTime);
 
                 // Build result
                 $result = [
@@ -692,69 +695,6 @@ class QuizController extends Controller
                 $questionBox = json_decode($quizResult->questions);
                 $correct_answers = json_decode($quizResult->correct_answers, true);
                 $userAnswers = json_decode($quizResult->answers, true);
-    
-                // foreach ($questionBox as $question) {
-                //     $userAnswer = $userAnswers[$question->id] ?? null;
-                //     $correctAnswer = $correct_answers[$question->id]['correct_answer'];
-                //     $isCorrect = false;
-    
-                //     // Ensure correctAnswer is an array when needed
-                //     switch ($question->type) {
-                //         case 'FIB': // Fill in the Blanks
-                //             return [
-                //                 'userAnswer'=>$userAnswer,
-                //                 'correct_answer'=>$correctAnswer,
-                //                 'status'=>$userAnswer === $correctAnswer,
-                //                 'questionBox'=>$questionBox,
-                //                 'userAnswers'=>$userAnswers,
-                //                 'correct_answers'=>$correct_answers,
-                //                 'id'=>$question->id,
-                //                 'ddd'=>$userAnswers[$question->id]
-                //             ];
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-    
-                //         case 'MSA': // Multiple Selection Answer
-                //             $isCorrect = $userAnswer == $correctAnswer;
-                //             break;
-
-                //         case 'MMA': // Multiple Match Answer
-                //             if (!is_array($correctAnswer)) {
-                //                 $correctAnswer = json_decode($correctAnswer, true);
-                //             }
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-    
-                //         case 'TOF': // True/False
-                //             $isCorrect = $userAnswer == $correctAnswer;
-                //             break;
-    
-                //         case 'MTF': // Match the Following
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-    
-                //         case 'ORD': // Ordering
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-    
-                //         case 'EMQ': // Extended Matching Questions
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-    
-                //         case 'SAQ': // Short Answer Question
-                //             $isCorrect = $userAnswer === $correctAnswer;
-                //             break;
-                //     }
-    
-                //     // Append the result for this question to the exam array
-                //     $exam[] = [
-                //         'question_id' => $question->id,
-                //         'question_text' => $question->question,
-                //         'correct_answer' => $correctAnswer,
-                //         'user_answer' => $userAnswer,
-                //         'is_correct' => $isCorrect,
-                //     ];
-                // }
 
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
