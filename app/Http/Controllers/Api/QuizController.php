@@ -767,15 +767,18 @@ class QuizController extends Controller
                             break;
                         case 'MSA':
                             $user_answ = $userAnswer['answer'];
+                            $correct_answ = $userAnswer['correct_anser'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MMA':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $userAnswer['correct_anser'];
                             return [
                                 'user_answ'=>$user_answ,
                                 'correctAnswer'=>$correctAnswer,
                                 'question->id'=>$question->id,
                                 'question'=>$question,
                             ];
-                            $isCorrect = $userAnswer['answer'] == $correctAnswer;
-                            break;
-                        case 'MMA':
                             $correctAnswerArray = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
                             $isCorrect = $userAnswer['answer'] === $correctAnswerArray;
                             break;
