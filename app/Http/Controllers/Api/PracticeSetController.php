@@ -533,5 +533,41 @@ class PracticeSetController extends Controller
             'student_percenatge' => $studentPercentage,
         ]);
     }
+
+    public function praticeSetProgress(Request $request){
+        try {
+            $request->validate(['category' => 'required']);
+        
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+            $practiceResults = PracticeSetResult::join('practice_sets', 'practice_set_results.practice_sets_id', '=', 'practice_sets.id')
+            ->select(
+                'practice_set_results.updated_at', 
+                'practice_set_results.student_percentage', 
+                'practice_set_results.pass_percentage', 
+                'practice_set_results.status', 
+                'practice_set_results.uuid', 
+                'practice_sets.title as practice_title',
+                'practice_sets.slug as practice_slug'
+            )
+            ->where('practice_set_results.user_id', $user->id)
+            ->where('practice_set_results.subcategory_id', $request->category)
+            ->get();
+   
+
+            // Return success JSON response
+            return response()->json([
+                'status' => true,
+                'data' => $practiceResults
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching the data.',
+                'error' => 'Error logged. :' . $th->getMessage() 
+            ], 500);
+        }
+    }
     
 }

@@ -130,7 +130,9 @@ Route::middleware('checkAuthToken')->group(function () {
     // MY PROGRESS
     Route::get('/exam-progress',[ExamController::class, 'examProgress']);
     Route::get('/quiz-progress',[QuizController::class, 'quizProgress']);
-    Route::get('/pratice-set-progress',[ExamController::class, 'praticeSetProgress']);
+    Route::get('/pratice-set-progress',[PracticeSetController::class, 'praticeSetProgress']);
+
+    // FINISH EXAM (STUDENT PERCENTAGE/UPDATE TIME)
 });
 
 
