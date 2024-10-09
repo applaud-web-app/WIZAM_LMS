@@ -801,6 +801,11 @@ class QuizController extends Controller
                         case 'EMQ':
                             $user_answ = $userAnswer['answer'];
                             $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $isCorrect = $user_answ === $correct_answ;
+                            break;
+                        case 'SAQ':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
                             return [
                                 'user_answ'=>$user_answ,
                                 'correctAnswer'=>$correct_answ,
@@ -808,9 +813,6 @@ class QuizController extends Controller
                                 'question'=>$question,
                                 'isCorrect'=>$isCorrect
                             ];
-                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
-                            break;
-                        case 'SAQ':
                             $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
                     }
