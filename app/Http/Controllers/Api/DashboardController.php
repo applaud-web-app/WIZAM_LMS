@@ -38,7 +38,6 @@ class DashboardController extends Controller
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-            ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
             ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
             ->where('exams.status', 1) // Filter by exam status
             ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title') // Group by necessary fields
@@ -62,7 +61,6 @@ class DashboardController extends Controller
             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
             ->where('quizzes.subcategory_id', $request->category)  // Filter by category
-            ->where('quizzes.slug', $slug)  // Filter by quiz slug
             ->where('quizzes.status', 1)  // Only active quizzes
             ->groupBy(
                 'quiz_types.slug',
