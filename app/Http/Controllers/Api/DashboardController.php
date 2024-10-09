@@ -84,7 +84,7 @@ class DashboardController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while fetching the dashboard data.',
-                'error' => 'Error logged.' // For security
+                'error' => 'Error logged. :' . $th->getMessage() // For security
             ], 500);
         }
     }
