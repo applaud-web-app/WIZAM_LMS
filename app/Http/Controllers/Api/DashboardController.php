@@ -41,15 +41,20 @@ class DashboardController extends Controller
                     ];
                 });
     
-            // Fetch exam stats
-            $examStats = ExamResult::selectRaw(
-                    'COUNT(CASE WHEN student_percentage >= pass_percentage THEN 1 END) as passed_count, ' .
-                    'COUNT(CASE WHEN student_percentage < pass_percentage THEN 1 END) as failed_count, ' .
-                    'AVG(student_percentage) as average_score'
-                )
-                ->where('user_id', $user->id)
-                ->where('status', 'complete')
-                ->first();
+            // Fetch all exam results for the authenticated user where status is complete
+            $exams = ExamResult::where('user_id', $user->id)
+            ->where('subcategory_id', $request->category)
+            ->where('status', 'complete')
+            ->with(['exam', 'examQuestions']) // Eager load the related models
+            ->get()
+            ->map(function($examResult) {
+                return [
+                    'exam_title' => $examResult->exam->title ?? 'N/A',
+                    'duration' => $examResult->exam->exam_duration ?? 'N/A',
+                    'total_questions' => $examResult->examQuestions->count() ?? 0, // Safely count
+                    'status' => $examResult->status,
+                ];
+            });
     
             // Extract the counts and average score
             $passedExamCount = $examStats->passed_count ?? 0;
@@ -58,17 +63,17 @@ class DashboardController extends Controller
     
             // Fetch quizzes with only the required fields
             $quizzes = Quizze::where('subcategory_id', $request->category)
-                ->where('status', 1)
-                ->withCount('quizQuestions') // Count total questions
-                ->get()
-                ->map(function($quiz) {
-                    return [
-                        'quiz_title' => $quiz->title,
-                        'duration' => $quiz->duration,
-                        'total_questions' => $quiz->quiz_questions_count,
-                        'status' => $quiz->status,
-                    ];
-                });
+            ->where('status', 1)
+            ->withCount('quizQuestions') // This should work correctly
+            ->get()
+            ->map(function($quiz) {
+                return [
+                    'quiz_title' => $quiz->title,
+                    'duration' => $quiz->duration,
+                    'total_questions' => $quiz->quiz_questions_count, // Should be accessible if counted correctly
+                    'status' => $quiz->status,
+                ];
+            });
     
             // Return success JSON response
             return response()->json([
