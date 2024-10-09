@@ -791,7 +791,6 @@ class QuizController extends Controller
                                     break;
                                 }
                             }
-                            $isCorrect = true;
 
                             return [
                                 'user_answ'=>$user_answ,
