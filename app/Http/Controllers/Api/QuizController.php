@@ -786,7 +786,6 @@ class QuizController extends Controller
                             $user_answ = $userAnswer['answer'];
                             $correct_answ = json_decode($correctAnswer['correct_answer'],true);
                             foreach ($correct_answ as $key => $value) {
-                                return $user_answ[$key];
                                 if ($user_answ[$key] != $value) {
                                     $isCorrect = false;
                                     break;
