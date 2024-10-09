@@ -804,24 +804,29 @@ class QuizController extends Controller
                             $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'SAQ':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
-                            return [
-                                'user_answ'=>$user_answ,
-                                'correctAnswer'=>$correct_answ,
-                                'question->id'=>$question->id,
-                                'question'=>$question,
-                                'isCorrect'=>$isCorrect
-                            ];
-                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
+                            $user_answ = $userAnswer['answer']; // string
+                            $correct_answ = $question->options;
+                            $options = $question->options; // array
+                            // Loop through each option and compare after sanitizing HTML
+                            foreach ($options as $option) {
+                                // Strip HTML tags and extra spaces from both user answer and the option
+                                $sanitizedUserAnswer = trim(strip_tags($user_answ));
+                                $sanitizedOption = trim(strip_tags($option));
+
+                                // Check if the sanitized user answer matches any sanitized option
+                                if ($sanitizedUserAnswer === $sanitizedOption) {
+                                    $isCorrect = true;
+                                    break;
+                                }
+                            }
                             break;
                     }
                 
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_text' => $question->question,
-                        'correct_answer' => $correctAnswer,
-                        'user_answer' => $userAnswer['answer'] ?? null,  // Handle case where there's no user answer
+                        'correct_answer' => $correct_answ ?? null,
+                        'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
                     ];
                 }
