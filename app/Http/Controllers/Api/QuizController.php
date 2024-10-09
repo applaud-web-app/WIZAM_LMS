@@ -783,6 +783,7 @@ class QuizController extends Controller
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MTF':
+                            $isCorrect = true;
                             $user_answ = $userAnswer['answer'];
                             $correct_answ = json_decode($correctAnswer['correct_answer'],true);
                             foreach ($correct_answ as $key => $value) {
