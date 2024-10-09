@@ -930,7 +930,7 @@ class QuizController extends Controller
                 'quiz_results.pass_percentage', 
                 'quiz_results.status', 
                 'quiz_results.uuid', 
-                'exams.title as exam_title'
+                'quizzes.title as quiz_title'
             )
             ->where('quiz_results.user_id', $user->id)
             ->where('quiz_results.subcategory_id', $request->category)
