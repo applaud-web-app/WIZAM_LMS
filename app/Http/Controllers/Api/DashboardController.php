@@ -50,8 +50,8 @@ class DashboardController extends Controller
             $averageScore = $examStats->average_score ?? 0;
 
             // Fetch exams
-            // Fetch the exam along with related questions in one query
-            $exam = Exam::with([
+            $exam = Exam::withCount(['examQuestions as total_questions']) // Count total questions
+            ->with([
                 'examQuestions.questions' => function($query) {
                     $query->select('id', 'default_marks', 'watch_time');
                 }
@@ -79,10 +79,11 @@ class DashboardController extends Controller
                 'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
                 'exams.point_mode', 'exams.exam_duration', 'exams.point'
             )
-            ->first();
+            ->get();
 
-            // Fetch quizzes
-            $quizzes = Quizze::with([
+        // Fetch quizzes
+        $quizzes = Quizze::withCount(['quizQuestions as total_questions']) // Count total questions
+            ->with([
                 'quizQuestions.questions' => function($query) {
                     $query->select('id', 'default_marks', 'watch_time');
                 }
@@ -106,10 +107,11 @@ class DashboardController extends Controller
             ->where('quizzes.status', 1)
             ->where('questions.status', 1)
             ->groupBy(
-                'quizzes.id', 'quizzes.title', 'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
+                'quizzes.id', 'quizzes.title', 'quizzes.slug', 'quizzes.subcategory_id', 
+                'quizzes.status', 'quizzes.duration_mode',
                 'quizzes.point_mode', 'quizzes.duration', 'quizzes.point'
             )
-            ->first();
+            ->get();
 
             // Return success JSON response
             return response()->json([
