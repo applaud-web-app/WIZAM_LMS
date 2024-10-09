@@ -17,6 +17,7 @@ class PracticeSetResult extends Model
         'practice_sets_id',
         'allow_point',
         'point_mode',
+        'student_percentage',
         'correct_answers',
         'subcategory_id',
         'user_id',
