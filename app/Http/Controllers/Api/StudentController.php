@@ -234,13 +234,16 @@ class StudentController extends Controller
                         $formattedQuizData[$quiz->slug] = [];
                     }
 
+                    $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
+                    $marks = $quiz->point_mode == "manual" ? $quiz->point : $quiz->total_marks;
+
                     // Add quiz details to the corresponding type slug
                     $formattedQuizData[$quiz->slug][] = [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
-                        'time' => $formattedTime, // Use the formatted time
-                        'marks' => $quiz->total_marks ?? 0,
+                        'time' => $time, // Use the formatted time
+                        'marks' => $marks ?? 0,
                     ];
                 }
 
