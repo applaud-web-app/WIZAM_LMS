@@ -561,6 +561,11 @@ class QuizController extends Controller
                 $questionBox = json_decode($quizResult->quesion);
                 $userAnswers = json_decode($quizResult->answer);
 
+                return [
+                    'questionBox'=>$questionBox,
+                    'userAnswers'=>$userAnswers,
+                ];
+
                 foreach ($questionBox as $question) {
                     $userAnswer = $userAnswers[$question->id] ?? null;
                     $correctAnswer = $question['option'];
