@@ -856,5 +856,65 @@ class QuizController extends Controller
     }
     
 
+    public function QuizController(){
+        try {
+            // Validate the request
+            $request->validate(['category' => 'required']);
+    
+            // Fetch all exam results for the authenticated user where status is complete
+            $quizData = Quizze::select(
+                'quiz_types.slug as exam_type_slug',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name as sub_category_name',
+                'quiz_types.name as exam_type_name',
+                'quizzes.duration_mode', 
+                'quizzes.duration', 
+                'quizzes.point_mode',
+                'quizzes.point', 
+                'quizzes.is_free', 
+                DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
+            )
+            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
+            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
+            ->where('quizzes.subcategory_id', $request->category)  // Filter by category
+            ->where('quizzes.status', 1)  // Only active quizzes
+            ->groupBy(
+                'quiz_types.slug',
+                'quizzes.id',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name',
+                'quiz_types.name',
+                'quizzes.duration_mode', 
+                'quizzes.duration', 
+                'quizzes.point_mode',
+                'quizzes.point',
+                'quizzes.is_free',
+            )
+            ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+            ->get();
+    
+            // Return success JSON response
+            return response()->json([
+                'status' => true,
+                'data' => $quizData
+            ], 200);
+        } catch (\Throwable $th) {
+            // Return error JSON response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching the dashboard data.',
+                'error' => 'Error logged. :' . $th->getMessage() // For security
+            ], 500);
+        }
+    }
+
 
 }

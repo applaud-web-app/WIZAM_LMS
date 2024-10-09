@@ -121,6 +121,11 @@ Route::middleware('checkAuthToken')->group(function () {
     // DASHBOARD
     Route::get('/student-dashboard',[DashboardController::class, 'studentDashboard']);
 
+    // ALL EXAMS (WITH ALL TYPE)
+    Route::get('/exam-all',[ExamController::class, 'examAll']);
+
+    // ALL QUIZ (WITH ALL TYPE)
+    Route::get('/quiz-all',[QuizController::class, 'quizAll']);
 });
 
 
