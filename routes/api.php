@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\PracticeSetController;
+use App\Http\Controllers\Api\ExamController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
