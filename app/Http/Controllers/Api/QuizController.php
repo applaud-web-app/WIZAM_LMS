@@ -687,7 +687,9 @@ class QuizController extends Controller
                     'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
                     'marks' => $quizResult->student_percentage,
                     'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $timeTakenInMinutes
+                    'timeTaken' => $timeTakenInMinutes,
+                    'openTime'=>$openTime,
+                    'closeTime'=>$closeTime,
                 ];
     
                 // Process exam details (Compare user answers with correct answers)
