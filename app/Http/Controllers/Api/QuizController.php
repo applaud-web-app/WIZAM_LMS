@@ -440,7 +440,7 @@ class QuizController extends Controller
     
         // Update quiz result with correct/incorrect answers and student percentage
         $quizResult->status = "complete";
-        $examResult->updated_at = now();
+        $quizResult->updated_at = now();
         $quizResult->answers = json_encode($user_answer, true);
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;

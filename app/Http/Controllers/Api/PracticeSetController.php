@@ -508,7 +508,7 @@ class PracticeSetController extends Controller
     
         // Update pratice result with correct/incorrect answers and student percentage
         $practiceSetResult->status = "complete";
-        $examResult->updated_at = now();
+        $practiceSetResult->updated_at = now();
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
