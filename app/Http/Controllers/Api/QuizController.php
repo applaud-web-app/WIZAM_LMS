@@ -175,8 +175,6 @@ class QuizController extends Controller
             // Start quiz result tracking
             $startTime = now();
             $endTime = $startTime->copy()->addMinutes($duration); 
-
-           
     
             $quizResult = QuizResult::create([
                 'quiz_id' => $quiz->id,

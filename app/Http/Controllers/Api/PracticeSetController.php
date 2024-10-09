@@ -270,49 +270,86 @@ class PracticeSetController extends Controller
             $correctAnswers = [];
             
             foreach ($practice->practiceQuestions as $practiceQuestion) {
+                // $question = $practiceQuestion->questions;
+                // $options = $question->options ? json_decode($question->options, true) : [];
+
+                // $formattedAnswer = null;
+
+                // // Handling each question type and formatting the answer
+                // switch ($question->type) {
+                //     case "MSA":
+                //         $formattedAnswer = (int) $question->answer; // Assuming single answer as an integer index
+                //         break;
+                //     case "MMA":
+                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct indices
+                //         break;
+                //     case "TOF":
+                //         $formattedAnswer = (int) $question->answer; // Assuming True/False as integer (1 or 2)
+                //         break;
+                //     case "SAQ":
+                //         $formattedAnswer = $question->answer; // Assuming answer as string for short answers
+                //         break;
+                //     case "MTF":
+                //         $formattedAnswer = json_decode($question->answer, true); // Key-value pair for matching
+                //         break;
+                //     case "ORD":
+                //         $formattedAnswer = json_decode($question->answer, true); // Array of indices for ordering
+                //         break;
+                //     case "FIB":
+                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct answers for blanks
+                //         break;
+                //     case "EMQ":
+                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct options
+                //         break;
+                // }
+
+                // // Customize question display for different types
+                // $questionText = $question->question;
+                // if ($question->type == "FIB") {
+                //     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center"></span>', $question->question);
+                //     $options = [is_array(json_decode($question->answer, true)) ? count(json_decode($question->answer, true)) : 0];
+                // } elseif ($question->type == "EMQ") {
+                //     $questionText = json_decode($question->question, true);
+                // }
+
+                // // Add question data
+                // $questionsData[] = [
+                //     'id' => $question->id,
+                //     'type' => $question->type,
+                //     'question' => $questionText,
+                //     'options' => $options
+                // ];
+
+                // // Add correct answer info
+                // $correctAnswers[] = [
+                //     'id' => $question->id,
+                //     'correct_answer' => $formattedAnswer,
+                //     'default_marks' => $practice->point_mode == "manual" ? $practice->points : $question->default_marks
+                // ];
+
+
                 $question = $practiceQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
-
-                $formattedAnswer = null;
-
-                // Handling each question type and formatting the answer
-                switch ($question->type) {
-                    case "MSA":
-                        $formattedAnswer = (int) $question->answer; // Assuming single answer as an integer index
-                        break;
-                    case "MMA":
-                        $formattedAnswer = json_decode($question->answer, true); // Array of correct indices
-                        break;
-                    case "TOF":
-                        $formattedAnswer = (int) $question->answer; // Assuming True/False as integer (1 or 2)
-                        break;
-                    case "SAQ":
-                        $formattedAnswer = $question->answer; // Assuming answer as string for short answers
-                        break;
-                    case "MTF":
-                        $formattedAnswer = json_decode($question->answer, true); // Key-value pair for matching
-                        break;
-                    case "ORD":
-                        $formattedAnswer = json_decode($question->answer, true); // Array of indices for ordering
-                        break;
-                    case "FIB":
-                        $formattedAnswer = json_decode($question->answer, true); // Array of correct answers for blanks
-                        break;
-                    case "EMQ":
-                        $formattedAnswer = json_decode($question->answer, true); // Array of correct options
-                        break;
+    
+                if ($question->type == "MTF" && !empty($question->answer)) {
+                    $matchOption = json_decode($question->answer, true);
+                    shuffle($matchOption);
+                    $options = array_merge($options, $matchOption);
                 }
 
+                if ($question->type == "ORD") {
+                    shuffle($options);
+                }
+    
                 // Customize question display for different types
                 $questionText = $question->question;
                 if ($question->type == "FIB") {
-                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center"></span>', $question->question);
-                    $options = [is_array(json_decode($question->answer, true)) ? count(json_decode($question->answer, true)) : 0];
+                    $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
+                    $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
                 } elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
-
-                // Add question data
+    
                 $questionsData[] = [
                     'id' => $question->id,
                     'type' => $question->type,
@@ -323,7 +360,7 @@ class PracticeSetController extends Controller
                 // Add correct answer info
                 $correctAnswers[] = [
                     'id' => $question->id,
-                    'correct_answer' => $formattedAnswer,
+                    'correct_answer' => $question->answer,  // Use answer field
                     'default_marks' => $practice->point_mode == "manual" ? $practice->points : $question->default_marks
                 ];
             }
@@ -455,7 +492,7 @@ class PracticeSetController extends Controller
             }
     
             if ($isCorrect) {
-                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
+                $score += $practiceSetResult->point_type == "manual" ? $practiceSetResult->point : $question->default_marks;
                 $correctAnswer += 1;
             } else {
                 $incorrect += 1;
