@@ -220,7 +220,7 @@ class ExamController extends Controller
         $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
     
-        // Fetch quiz result by UUID and user ID
+        // Fetch exam result by UUID and user ID
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
         if (!$examResult) {
             return response()->json([
@@ -318,13 +318,13 @@ class ExamController extends Controller
         // Determine pass or fail
         $studentStatus = ($studentPercentage >= $examResult->pass_percentage) ? 'PASS' : 'FAIL';
     
-        // Update quiz result with correct/incorrect answers and student percentage
+        // Update exam result with correct/incorrect answers and student percentage
         $examResult->status = "complete";
         $examResult->updated_at = now();
         $examResult->answers = json_encode($user_answer, true);
         $examResult->incorrect_answer = $incorrect;
         $examResult->correct_answer = $correctAnswer;
-        $examResult->student_percentage = $studentPercentage;
+        $examResult->student_percentage = round($studentPercentage,2);
         $examResult->save();
     
         // Return results
@@ -342,18 +342,18 @@ class ExamController extends Controller
         try {
             $user = $request->attributes->get('authenticatedUser');
     
-            $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
-            if ($quizResult) {
+            $examResult = ExamResult::with('exam')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+            if ($examResult) {
                 // Build leaderboard
                 $leaderBoard = [];
-                if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
-                    $userQuiz = QuizResult::with('user')
-                        ->where('quiz_id', $quizResult->quiz_id)
+                if (isset($examResult->exam) && $examResult->exam->leaderboard == 1) {
+                    $userExam = ExamResult::with('user')
+                        ->where('exam_id', $examResult->exam_id)
                         ->orderby('student_percentage', 'DESC')
                         ->take(10)
                         ->get();
     
-                    foreach ($userQuiz as $userData) {
+                    foreach ($userExam as $userData) {
                         if (isset($userData->user)) {
                             $leaderBoard[] = [
                                 "username" => $userData->user->name,
@@ -364,18 +364,18 @@ class ExamController extends Controller
                     }
                 }
 
-                $openTime = Carbon::parse($quizResult->created_at);
-                $closeTime = Carbon::parse($quizResult->updated_at); 
+                $openTime = Carbon::parse($examResult->created_at);
+                $closeTime = Carbon::parse($examResult->updated_at); 
     
                 $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
 
                 // Build result
                 $result = [
-                    'correct' => $quizResult->correct_answer,
-                    'incorrect' => $quizResult->incorrect_answer,
-                    'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
-                    'marks' => $quizResult->student_percentage,
-                    'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
+                    'correct' => $examResult->correct_answer,
+                    'incorrect' => $examResult->incorrect_answer,
+                    'skipped' => $examResult->total_question - ($examResult->correct_answer + $examResult->incorrect_answer),
+                    'marks' => $examResult->student_percentage,
+                    'status' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
                     'timeTaken' => $timeTakenInMinutes,
                     'openTime'=>$openTime,
                     'closeTime'=>$closeTime,
@@ -383,9 +383,9 @@ class ExamController extends Controller
     
                 // Process exam details (Compare user answers with correct answers)
                 $exam = [];
-                $questionBox = json_decode($quizResult->questions);
-                $correct_answers = json_decode($quizResult->correct_answers, true);
-                $userAnswers = json_decode($quizResult->answers, true);
+                $questionBox = json_decode($examResult->questions);
+                $correct_answers = json_decode($examResult->correct_answers, true);
+                $userAnswers = json_decode($examResult->answers, true);
 
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
@@ -458,7 +458,7 @@ class ExamController extends Controller
                     }
                 
 
-                    $exam[] = [
+                    $examData[] = [
                         'question_id' => $question->id,
                         'question_type' => $question->type,
                         'question_text' => $question->question,
@@ -469,16 +469,16 @@ class ExamController extends Controller
                     ];
                 }
     
-                $quiz = [
-                    'title' => $quizResult->quiz->title,
-                    'duration' => $quizResult->exam_duration,
+                $exam = [
+                    'title' => $examResult->exam->title,
+                    'duration' => $examResult->exam_duration,
                 ];
     
                 return response()->json([
                     'status' => true,
-                    'quiz' => $quiz,
+                    'exam' => $exam,
                     'result' => $result,
-                    'exam_preview' => $exam,
+                    'exam_preview' => $examData,
                     'leaderBoard' => $leaderBoard,
                 ]);
             }
