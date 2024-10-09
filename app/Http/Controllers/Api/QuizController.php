@@ -780,15 +780,17 @@ class QuizController extends Controller
                         case 'TOF':
                             $user_answ = $userAnswer['answer'];
                             $correct_answ = $correctAnswer['correct_answer'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MTF':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $correctAnswer['correct_answer'];
                             return [
                                 'user_answ'=>$user_answ,
                                 'correctAnswer'=>$correct_answ,
                                 'question->id'=>$question->id,
                                 'question'=>$question,
                             ];
-                            $isCorrect = $userAnswer['answer'] == $correctAnswer;
-                            break;
-                        case 'MTF':
                             $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
                         case 'ORD':
