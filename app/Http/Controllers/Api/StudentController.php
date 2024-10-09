@@ -56,7 +56,7 @@ class StudentController extends Controller
                     'exams.slug', // Fetch exam slug
                     'exams.title', // Fetch exam title
                     'exams.duration_mode', 
-                    'exams.duration', 
+                    'exams.exam_duration', 
                     'exams.point_mode',
                     'exams.point', 
                     'exams.is_free',
@@ -71,7 +71,7 @@ class StudentController extends Controller
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
                 ->where('exams.status', 1) // Filter by exam status
                 ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title',  'exams.duration_mode', 
-                'exams.duration', 
+                'exams.exam_duration', 
                 'exams.point_mode',
                 'exams.point', 
                 'exams.is_free',) // Group by necessary fields
@@ -90,7 +90,7 @@ class StudentController extends Controller
                         $formattedExamData[$examType->slug] = [];
                     }
 
-                    $time = $exam->duration_mode == "manual" ? $exam->duration : $formattedTime;
+                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
 
                     // Add exam details to the corresponding type slug
@@ -155,7 +155,7 @@ class StudentController extends Controller
                 'sub_categories.name as sub_category_name',
                 'exam_types.name as exam_type_name',
                 'exams.duration_mode', 
-                'exams.duration', 
+                'exams.exam_duration', 
                 'exams.point_mode',
                 'exams.point', 
                 'exams.is_free',
@@ -171,7 +171,7 @@ class StudentController extends Controller
             ->where('exams.slug', $slug) 
             ->where('exams.status', 1)
             ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 'sub_categories.name', 'exam_types.name',  'exams.duration_mode', 
-            'exams.duration', 
+            'exams.exam_duration', 
             'exams.point_mode',
             'exams.point', 
             'exams.is_free',) 
@@ -183,7 +183,7 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
             }
 
-            $time = $examData->duration_mode == "manual" ? $examData->duration : $this->formatTime($examData->total_time);
+            $time = $examData->duration_mode == "manual" ? $examData->exam_duration : $this->formatTime($examData->total_time);
             $marks = $examData->point_mode == "manual" ? ($examData->point*$examData->total_questions) : $examData->total_marks;
 
             // Format response to match the structure needed by frontend
