@@ -202,6 +202,11 @@ class StudentController extends Controller
                         'quizzes.slug as quizSlug',
                         'quiz_types.slug', // Fetch type slug
                         'quizzes.title', // Fetch quiz title
+                        'quizzes.duration_mode', 
+                        'quizzes.duration', 
+                        'quizzes.point_mode',
+                        'quizzes.point', 
+                        'quizzes.is_free', 
                         DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
                         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
                         DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
@@ -212,7 +217,8 @@ class StudentController extends Controller
                     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
                     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('quizzes.status', 1) // Filter by quiz status
-                    ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title') // Group by type and quiz details
+                    ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
+                    'quizzes.duration', 'quizzes.point_mode','quizzes.point',  'quizzes.is_free', ) // Group by type and quiz details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                     ->get();
 
