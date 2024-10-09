@@ -511,7 +511,7 @@ class PracticeSetController extends Controller
         // }
     
         // Calculate the student's percentage AFTER applying negative marking
-        // $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+        $studentPercentage = ($practiceSetResult->total_question > 0) ? ($correctAnswer / $practiceSetResult->total_question) * 100 : 0;
     
         // Determine pass or fail
         // $studentStatus = ($studentPercentage >= $practiceSetResult->pass_percentage) ? 'PASS' : 'FAIL';
@@ -520,7 +520,7 @@ class PracticeSetController extends Controller
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
-        // $practiceSetResult->student_percentage = $studentPercentage;
+        $practiceSetResult->student_percentage = $studentPercentage;
         $practiceSetResult->save();
     
         // Return results
@@ -529,6 +529,7 @@ class PracticeSetController extends Controller
             'score' => $score,
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
+            'student_percenatge' => $studentPercentage,
         ]);
     }
     
