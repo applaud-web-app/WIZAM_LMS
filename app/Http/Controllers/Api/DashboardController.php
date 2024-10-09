@@ -27,60 +27,54 @@ class DashboardController extends Controller
             $user = $request->attributes->get('authenticatedUser');
     
             // Fetch all exam results for the authenticated user where status is complete
-            $exams = ExamResult::where('user_id', $user->id)
-                ->where('subcategory_id', $request->category)
-                ->where('status', 'complete')
-                ->with('exam') // Assuming you have a relation set up
-                ->get()
-                ->map(function($examResult) {
-                    return [
-                        'exam_title' => $examResult->exam->title ?? 'N/A',
-                        'duration' => $examResult->exam->exam_duration ?? 'N/A',
-                        'total_questions' => $examResult->examQuestions->count() ?? 0,
-                        'status' => $examResult->status,
-                    ];
-                });
-    
-            // Fetch all exam results for the authenticated user where status is complete
-            $exams = ExamResult::select(
-                'exam_results.*', // Select all columns from exam_results
-                DB::raw('COUNT(exam_questions.id) as total_questions'), // Count of questions
-                'exams.exam_duration' // Duration from exams table
+            $examData = Exam::select(
+                'exam_types.slug as exam_type_slug', // Fetch exam type slug
+                'exams.slug', // Fetch exam slug
+                'exams.title', // Fetch exam title
+                DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
             )
-            ->where('exam_results.user_id', $userId)
-            ->where('exam_results.subcategory_id', $subcategoryId)
-            ->where('exam_results.status', 'complete')
-            ->join('exams', 'exam_results.exam_id', '=', 'exams.id') // Join with exams table
-            ->leftJoin('exam_questions', 'exam_results.id', '=', 'exam_questions.exam_result_id') // Join with exam_questions table
-            ->groupBy('exam_results.id') // Group by exam result ID to aggregate counts
-            ->get()
-            ->map(function ($examResult) {
-                return [
-                    'exam_title' => $examResult->exam->title ?? 'N/A',
-                    'duration' => $examResult->exam_duration ?? 'N/A',
-                    'total_questions' => $examResult->total_questions ?? 0,
-                    'status' => $examResult->status,
-                ];
-            });
+            ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+            ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
+            ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
+            ->where('exams.status', 1) // Filter by exam status
+            ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title') // Group by necessary fields
+            ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
+            ->get();
 
-            // Extract the counts and average score
-            // $passedExamCount = $examStats->passed_count ?? 0;
-            // $failedExamCount = $examStats->failed_count ?? 0;
-            // $averageScore = $examStats->average_score ?? 0;
-    
-            // Fetch quizzes with only the required fields
-            // $quizzes = Quizze::where('subcategory_id', $request->category)
-            // ->where('status', 1)
-            // ->withCount('quizQuestions') // This should work correctly
-            // ->get()
-            // ->map(function($quiz) {
-            //     return [
-            //         'quiz_title' => $quiz->title,
-            //         'duration' => $quiz->duration,
-            //         'total_questions' => $quiz->quiz_questions_count, // Should be accessible if counted correctly
-            //         'status' => $quiz->status,
-            //     ];
-            // });
+
+            $quizData = Quizze::select(
+                'quiz_types.slug as exam_type_slug',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name as sub_category_name',
+                'quiz_types.name as exam_type_name',
+                DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
+            )
+            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
+            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
+            ->where('quizzes.subcategory_id', $request->category)  // Filter by category
+            ->where('quizzes.slug', $slug)  // Filter by quiz slug
+            ->where('quizzes.status', 1)  // Only active quizzes
+            ->groupBy(
+                'quiz_types.slug',
+                'quizzes.id',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name',
+                'quiz_types.name'
+            )
+            ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+            ->first();
     
             // Return success JSON response
             return response()->json([
@@ -88,8 +82,8 @@ class DashboardController extends Controller
                 'pass_exam' => $passedExamCount,
                 'failed_exam' => $failedExamCount,
                 'average_exam' => $averageScore,
-                'exams' => $exams,
-                // 'quizzes' => $quizzes,
+                'exams' => $examData,
+                'quizzes' => $quizData,
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
