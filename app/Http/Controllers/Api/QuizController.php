@@ -675,7 +675,7 @@ class QuizController extends Controller
                     }
                 }
 
-                $openTime = Carbon::parse($quizResult->start_time); // 2024-10-09 05:25:06 
+                $openTime = $quizResult->start_time; // 2024-10-09 05:25:06 
                 $closeTime = Carbon::parse($quizResult->updated_at); // 2024-10-09 06:25:06
     
                 $timeTakenInMinutes = $closeTime->diffInMinutes($openTime); // it show -226.45
