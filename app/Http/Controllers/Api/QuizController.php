@@ -558,12 +558,14 @@ class QuizController extends Controller
                 // }
 
                 $exam = [];
-                $questionBox = json_decode($quizResult->quesion);
-                $userAnswers = json_decode($quizResult->answer);
+                $questionBox = json_decode($quizResult->questions);
+                $correct_answers = json_decode($quizResult->correct_answers);
+                $userAnswers = json_decode($quizResult->answers);
 
                 return [
                     'questionBox'=>$questionBox,
                     'userAnswers'=>$userAnswers,
+                    'correct_answers'=>$correct_answers,
                 ];
 
                 foreach ($questionBox as $question) {
