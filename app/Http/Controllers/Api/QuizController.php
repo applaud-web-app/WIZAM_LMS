@@ -811,7 +811,7 @@ class QuizController extends Controller
     
             // Fetch all exam results for the authenticated user where status is complete
             $quizData = Quizze::select(
-                'quiz_types.slug as exam_type_slug',
+                'quizzes.slug',
                 'quizzes.title',
                 'quizzes.description',
                 'quizzes.pass_percentage',
@@ -833,7 +833,7 @@ class QuizController extends Controller
             ->where('quizzes.subcategory_id', $request->category)  // Filter by category
             ->where('quizzes.status', 1)  // Only active quizzes
             ->groupBy(
-                'quiz_types.slug',
+                'quizzes.slug',
                 'quizzes.id',
                 'quizzes.title',
                 'quizzes.description',
