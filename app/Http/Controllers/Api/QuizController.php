@@ -772,6 +772,13 @@ class QuizController extends Controller
                             break;
                         case 'MMA':
                             $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            sort($user_answ);
+                            sort($correct_answ);
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'TOF':
+                            $user_answ = $userAnswer['answer'];
                             $correct_answ = $correctAnswer['correct_answer'];
                             return [
                                 'user_answ'=>$user_answ,
@@ -779,10 +786,6 @@ class QuizController extends Controller
                                 'question->id'=>$question->id,
                                 'question'=>$question,
                             ];
-                            $correctAnswerArray = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
-                            $isCorrect = $userAnswer['answer'] === $correctAnswerArray;
-                            break;
-                        case 'TOF':
                             $isCorrect = $userAnswer['answer'] == $correctAnswer;
                             break;
                         case 'MTF':
