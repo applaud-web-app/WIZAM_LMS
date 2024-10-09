@@ -705,6 +705,7 @@ class QuizController extends Controller
                                 'userAnswers'=>$userAnswers,
                                 'correct_answers'=>$correct_answers,
                                 'id'=>$question->id,
+                                'ddd'=>$userAnswers[$question->id]
                             ];
                             $isCorrect = $userAnswer === $correctAnswer;
                             break;
