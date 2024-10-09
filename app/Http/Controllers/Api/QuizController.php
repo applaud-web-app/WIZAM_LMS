@@ -775,7 +775,7 @@ class QuizController extends Controller
                             $correct_answ = $correctAnswer['correct_anser'];
                             return [
                                 'user_answ'=>$user_answ,
-                                'correctAnswer'=>$correctAnswer,
+                                'correctAnswer'=>$correct_answ,
                                 'question->id'=>$question->id,
                                 'question'=>$question,
                             ];
