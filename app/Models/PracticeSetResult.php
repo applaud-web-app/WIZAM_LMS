@@ -33,4 +33,12 @@ class PracticeSetResult extends Model
         'start_time',
         'end_time'
     ];
+
+    public function pratice(){
+        return $this->hasOne(PracticeSet::class, 'id', 'practice_sets_id');
+    }
+
+    public function user(){
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
 }

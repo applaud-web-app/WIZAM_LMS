@@ -420,7 +420,7 @@ class PracticeSetController extends Controller
         $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
     
-        // Fetch quiz result by UUID and user ID
+        // Fetch pratice result by UUID and user ID
         $practiceSetResult = PracticeSetResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
         if (!$practiceSetResult) {
             return response()->json([
@@ -500,28 +500,19 @@ class PracticeSetController extends Controller
             }
         }
     
-        // Apply negative marking for incorrect answers
-        // if ($practiceSetResult->negative_marking == 1) {
-        //     if ($practiceSetResult->negative_marking_type == "fixed") {
-        //         $score = max(0, $score - $practiceSetResult->negative_marking_value * $incorrect);
-        //     } elseif ($practiceSetResult->negative_marking_type == "percentage") {
-        //         $negativeMarks = ($practiceSetResult->negative_marking_value / 100) * $incorrectMarks;
-        //         $score = max(0, $score - $negativeMarks);
-        //     }
-        // }
-    
         // Calculate the student's percentage AFTER applying negative marking
         $studentPercentage = ($practiceSetResult->total_question > 0) ? ($correctAnswer / $practiceSetResult->total_question) * 100 : 0;
     
         // Determine pass or fail
         // $studentStatus = ($studentPercentage >= $practiceSetResult->pass_percentage) ? 'PASS' : 'FAIL';
     
-        // Update quiz result with correct/incorrect answers and student percentage
+        // Update pratice result with correct/incorrect answers and student percentage
         $practiceSetResult->status = "complete";
+        $examResult->updated_at = now();
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
-        $practiceSetResult->student_percentage = $studentPercentage;
+        $practiceSetResult->student_percentage = round($studentPercentage,2);
         $practiceSetResult->save();
     
         // Return results
@@ -532,6 +523,158 @@ class PracticeSetController extends Controller
             'incorrect_answer' => $incorrect,
             'student_percenatge' => $studentPercentage,
         ]);
+    }
+
+
+    public function practiceSetResult(Request $request, $uuid){
+        try {
+            $user = $request->attributes->get('authenticatedUser');
+    
+            $practiceResult = PracticeSetResult::with('pratice')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+            if ($practiceResult) {
+                // Build leaderboard
+                $leaderBoard = [];
+                if (isset($practiceResult->pratice) && $practiceResult->pratice->leaderboard == 1) {
+                    $userPractice = PracticeSetResult::with('user')
+                        ->where('practice_sets_id', $practiceResult->practice_sets_id)
+                        ->orderby('student_percentage', 'DESC')
+                        ->take(10)
+                        ->get();
+    
+                    foreach ($userPractice as $userData) {
+                        if (isset($userData->user)) {
+                            $leaderBoard[] = [
+                                "username" => $userData->user->name,
+                                "score" => $userData->student_percentage,
+                                "status" => "COMPLETED",
+                            ];
+                        }
+                    }
+                }
+
+                $openTime = Carbon::parse($practiceResult->created_at);
+                $closeTime = Carbon::parse($practiceResult->updated_at); 
+    
+                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
+
+                // Build result
+                $result = [
+                    'correct' => $practiceResult->correct_answer,
+                    'incorrect' => $practiceResult->incorrect_answer,
+                    'skipped' => $practiceResult->total_question - ($practiceResult->correct_answer + $practiceResult->incorrect_answer),
+                    'marks' => $practiceResult->student_percentage,
+                    'status' => $practiceResult->student_percentage >= $practiceResult->pass_percentage ? "PASS" : "FAIL",
+                    'timeTaken' => $timeTakenInMinutes,
+                ];
+    
+                // Process exam details (Compare user answers with correct answers)
+                $exam = [];
+                $questionBox = json_decode($practiceResult->questions);
+                $correct_answers = json_decode($practiceResult->correct_answers, true);
+                $userAnswers = json_decode($practiceResult->answers, true);
+
+                foreach ($questionBox as $question) {
+                    // Get the user answer for the current question by matching the IDs
+                    $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
+                    $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
+                    $isCorrect = false;
+                
+                    // Ensure correctAnswer is an array when needed
+                    switch ($question->type) {
+                        case 'FIB':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MSA':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $correctAnswer['correct_answer'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MMA':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            sort($user_answ);
+                            sort($correct_answ);
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'TOF':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = $correctAnswer['correct_answer'];
+                            $isCorrect = $user_answ == $correct_answ;
+                            break;
+                        case 'MTF':
+                            $isCorrect = true;
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            foreach ($correct_answ as $key => $value) {
+                                if ($user_answ[$key] != $value) {
+                                    $isCorrect = false;
+                                    break;
+                                }
+                            }
+                            break;
+                        case 'ORD':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $isCorrect = $user_answ === $correct_answ;
+                            break;
+                        case 'EMQ':
+                            $user_answ = $userAnswer['answer'];
+                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $isCorrect = $user_answ === $correct_answ;
+                            break;
+                        case 'SAQ':
+                            $user_answ = $userAnswer['answer']; // string
+                            $correct_answ = $question->options;
+                            $options = $question->options; // array
+                            // Loop through each option and compare after sanitizing HTML
+                            foreach ($options as $option) {
+                                // Strip HTML tags and extra spaces from both user answer and the option
+                                $sanitizedUserAnswer = trim(strip_tags($user_answ));
+                                $sanitizedOption = trim(strip_tags($option));
+
+                                // Check if the sanitized user answer matches any sanitized option
+                                if ($sanitizedUserAnswer === $sanitizedOption) {
+                                    $isCorrect = true;
+                                    break;
+                                }
+                            }
+                            break;
+                    }
+                
+
+                    $exam[] = [
+                        'question_id' => $question->id,
+                        'question_type' => $question->type,
+                        'question_text' => $question->question,
+                        'question_option' => $question->options,
+                        'correct_answer' => $correct_answ ?? null,
+                        'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
+                        'is_correct' => $isCorrect,
+                    ];
+                }
+    
+                $pratice = [
+                    'title' => $practiceResult->pratice->title,
+                    'duration' => $practiceResult->exam_duration,
+                ];
+    
+                return response()->json([
+                    'status' => true,
+                    'pratice' => $pratice,
+                    'result' => $result,
+                    'exam_preview' => $exam,
+                    'leaderBoard' => $leaderBoard,
+                ]);
+            }
+    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong: '. $th->getMessage(),
+            ]);
+        }
     }
 
     public function praticeSetProgress(Request $request){
