@@ -382,4 +382,20 @@ class ExamController extends Controller
         }
     }
 
+    public function examProgress(Request $request){
+        try {
+            $request->validate(['category' => 'required']);
+        
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+            $examResult = ExamResult::with('exam:id,title')->select('updated_at','student_percentage','pass_percentage','status','uuid')->where('user_id',$user->id)->where('subcategory_id',$request->category)->get();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching the data.',
+                'error' => 'Error logged. :' . $th->getMessage() 
+            ], 500);
+        }
+    }
+
 }

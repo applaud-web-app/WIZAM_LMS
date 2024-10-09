@@ -126,6 +126,9 @@ Route::middleware('checkAuthToken')->group(function () {
 
     // ALL QUIZ (WITH ALL TYPE)
     Route::get('/quiz-all',[QuizController::class, 'quizAll']);
+
+    // MY PROGRESS
+    Route::get('/exam-progress',[ExamController::class, 'examProgress']);
 });
 
 
