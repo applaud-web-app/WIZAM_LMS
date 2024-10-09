@@ -42,17 +42,24 @@ class DashboardController extends Controller
                 });
     
             // Fetch all exam results for the authenticated user where status is complete
-            $exams = ExamResult::where('user_id', $user->id)
-            ->where('subcategory_id', $request->category)
-            ->where('status', 'complete')
-            ->with(['exam', 'examQuestions']) // Eager load the related models
+            $exams = ExamResult::select(
+                'exam_results.*', // Select all columns from exam_results
+                DB::raw('COUNT(exam_questions.id) as total_questions'), // Count of questions
+                'exams.exam_duration' // Duration from exams table
+            )
+            ->where('exam_results.user_id', $userId)
+            ->where('exam_results.subcategory_id', $subcategoryId)
+            ->where('exam_results.status', 'complete')
+            ->join('exams', 'exam_results.exam_id', '=', 'exams.id') // Join with exams table
+            ->leftJoin('exam_questions', 'exam_results.id', '=', 'exam_questions.exam_result_id') // Join with exam_questions table
+            ->groupBy('exam_results.id') // Group by exam result ID to aggregate counts
             ->get()
-            ->map(function($examResult) {
+            ->map(function ($examResult) {
                 return [
-                    'exam_title' => $examResult->exam->title ?? 'N/A', // Exam title
-                    'duration' => $examResult->exam->exam_duration ?? 'N/A', // Exam duration
-                    'total_questions' => $examResult->examQuestions->count() ?? 0, // Total questions count
-                    'status' => $examResult->status, // Status of the exam result
+                    'exam_title' => $examResult->exam->title ?? 'N/A',
+                    'duration' => $examResult->exam_duration ?? 'N/A',
+                    'total_questions' => $examResult->total_questions ?? 0,
+                    'status' => $examResult->status,
                 ];
             });
 
