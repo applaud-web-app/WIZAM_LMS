@@ -689,65 +689,109 @@ class QuizController extends Controller
                 $correct_answers = json_decode($quizResult->correct_answers, true);
                 $userAnswers = json_decode($quizResult->answers, true);
     
+                // foreach ($questionBox as $question) {
+                //     $userAnswer = $userAnswers[$question->id] ?? null;
+                //     $correctAnswer = $correct_answers[$question->id]['correct_answer'];
+                //     $isCorrect = false;
+    
+                //     // Ensure correctAnswer is an array when needed
+                //     switch ($question->type) {
+                //         case 'FIB': // Fill in the Blanks
+                //             return [
+                //                 'userAnswer'=>$userAnswer,
+                //                 'correct_anser'=>$correctAnswer,
+                //                 'status'=>$userAnswer === $correctAnswer,
+                //                 'questionBox'=>$questionBox,
+                //                 'userAnswers'=>$userAnswers,
+                //                 'correct_answers'=>$correct_answers,
+                //                 'id'=>$question->id,
+                //                 'ddd'=>$userAnswers[$question->id]
+                //             ];
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+    
+                //         case 'MSA': // Multiple Selection Answer
+                //             $isCorrect = $userAnswer == $correctAnswer;
+                //             break;
+
+                //         case 'MMA': // Multiple Match Answer
+                //             if (!is_array($correctAnswer)) {
+                //                 $correctAnswer = json_decode($correctAnswer, true);
+                //             }
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+    
+                //         case 'TOF': // True/False
+                //             $isCorrect = $userAnswer == $correctAnswer;
+                //             break;
+    
+                //         case 'MTF': // Match the Following
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+    
+                //         case 'ORD': // Ordering
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+    
+                //         case 'EMQ': // Extended Matching Questions
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+    
+                //         case 'SAQ': // Short Answer Question
+                //             $isCorrect = $userAnswer === $correctAnswer;
+                //             break;
+                //     }
+    
+                //     // Append the result for this question to the exam array
+                //     $exam[] = [
+                //         'question_id' => $question->id,
+                //         'question_text' => $question->question,
+                //         'correct_answer' => $correctAnswer,
+                //         'user_answer' => $userAnswer,
+                //         'is_correct' => $isCorrect,
+                //     ];
+                // }
+
                 foreach ($questionBox as $question) {
-                    $userAnswer = $userAnswers[$question->id] ?? null;
+                    // Get the user answer for the current question by matching the IDs
+                    $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
                     $correctAnswer = $correct_answers[$question->id]['correct_answer'];
                     $isCorrect = false;
-    
+                
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
-                        case 'FIB': // Fill in the Blanks
-                            return [
-                                'userAnswer'=>$userAnswer,
-                                'correct_anser'=>$correctAnswer,
-                                'status'=>$userAnswer === $correctAnswer,
-                                'questionBox'=>$questionBox,
-                                'userAnswers'=>$userAnswers,
-                                'correct_answers'=>$correct_answers,
-                                'id'=>$question->id,
-                                'ddd'=>$userAnswers[$question->id]
-                            ];
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'FIB':
+                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
-    
-                        case 'MSA': // Multiple Selection Answer
-                            $isCorrect = $userAnswer == $correctAnswer;
+                        case 'MSA':
+                            $isCorrect = $userAnswer['answer'] == $correctAnswer;
                             break;
-
-                        case 'MMA': // Multiple Match Answer
-                            if (!is_array($correctAnswer)) {
-                                $correctAnswer = json_decode($correctAnswer, true);
-                            }
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'MMA':
+                            $correctAnswerArray = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
+                            $isCorrect = $userAnswer['answer'] === $correctAnswerArray;
                             break;
-    
-                        case 'TOF': // True/False
-                            $isCorrect = $userAnswer == $correctAnswer;
+                        case 'TOF':
+                            $isCorrect = $userAnswer['answer'] == $correctAnswer;
                             break;
-    
-                        case 'MTF': // Match the Following
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'MTF':
+                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
-    
-                        case 'ORD': // Ordering
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'ORD':
+                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
-    
-                        case 'EMQ': // Extended Matching Questions
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'EMQ':
+                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
-    
-                        case 'SAQ': // Short Answer Question
-                            $isCorrect = $userAnswer === $correctAnswer;
+                        case 'SAQ':
+                            $isCorrect = $userAnswer['answer'] === $correctAnswer;
                             break;
                     }
-    
-                    // Append the result for this question to the exam array
+                
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_text' => $question->question,
                         'correct_answer' => $correctAnswer,
-                        'user_answer' => $userAnswer,
+                        'user_answer' => $userAnswer['answer'] ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
                     ];
                 }
