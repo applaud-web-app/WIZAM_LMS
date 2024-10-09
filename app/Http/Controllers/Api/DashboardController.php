@@ -79,7 +79,7 @@ class DashboardController extends Controller
                 'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
                 'exams.point_mode', 'exams.exam_duration', 'exams.point'
             )
-            ->get();
+            ->first();
 
         // Fetch quizzes
         $quizzes = Quizze::withCount(['quizQuestions as total_questions']) // Count total questions
@@ -111,7 +111,7 @@ class DashboardController extends Controller
                 'quizzes.status', 'quizzes.duration_mode',
                 'quizzes.point_mode', 'quizzes.duration', 'quizzes.point'
             )
-            ->get();
+            ->first();
 
             // Return success JSON response
             return response()->json([
