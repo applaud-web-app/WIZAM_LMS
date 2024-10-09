@@ -338,7 +338,7 @@ class ExamController extends Controller
         ]);
     }
 
-    public function examResult(Request $request){
+    public function examResult(Request $request, $uuid){
         try {
             $user = $request->attributes->get('authenticatedUser');
     
