@@ -24,6 +24,8 @@ class Exam extends Model
         'duration_mode',
         'point_mode',
         'negative_marking',
+        'negative_marking_type',
+        'negative_marks',
         'pass_percentage',
         'cutoff',
         'shuffle_questions',
