@@ -343,9 +343,9 @@ class PracticeSetController extends Controller
                 'allow_point' => $practice->allow_point,
                 'point_mode' => $practice->point_mode,
                 'start_time' => $startTime,
-                'end_time' => $practice->points,
+                'end_time' => $endTime,
                 'exam_duration' => $duration,
-                'point' => $points,
+                'point' => $practice->points,
                 'total_question' => count($questionsData),
                 'status' => 'ongoing',
             ]);
