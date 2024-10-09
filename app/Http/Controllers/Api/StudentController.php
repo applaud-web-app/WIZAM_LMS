@@ -71,10 +71,7 @@ class StudentController extends Controller
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
                 ->where('exams.status', 1) // Filter by exam status
                 ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title',  'exams.duration_mode', 
-                'exams.exam_duration', 
-                'exams.point_mode',
-                'exams.point', 
-                'exams.is_free',) // Group by necessary fields
+                'exams.exam_duration',   'exams.point_mode','exams.point', 'exams.is_free',) // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                 ->get();
 
