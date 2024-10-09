@@ -15,6 +15,8 @@ class PracticeSetResult extends Model
     
     protected $fillable = [
         'practice_sets_id',
+        'allow_point',
+        'point_mode',
         'correct_answers',
         'subcategory_id',
         'user_id',
