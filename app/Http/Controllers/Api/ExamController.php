@@ -397,7 +397,7 @@ class ExamController extends Controller
             // Return success JSON response
             return response()->json([
                 'status' => true,
-                'data' => $examResult
+                'data' => $examResults
             ], 200);
             
         } catch (\Throwable $th) {
