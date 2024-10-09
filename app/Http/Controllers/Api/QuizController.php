@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Question;
 
+
 class QuizController extends Controller
 {
 
@@ -674,6 +675,8 @@ class QuizController extends Controller
                     }
                 }
     
+                $timeTakenInMinutes = $quizResult->updated_at->diffInMinutes($quizResult->created_at);
+
                 // Build result
                 $result = [
                     'correct' => $quizResult->correct_answer,
@@ -681,6 +684,7 @@ class QuizController extends Controller
                     'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
                     'marks' => $quizResult->student_percentage,
                     'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
+                    'timeTaken' => $timeTakenInMinutes
                 ];
     
                 // Process exam details (Compare user answers with correct answers)
@@ -822,6 +826,7 @@ class QuizController extends Controller
                             break;
                     }
                 
+
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_type' => $question->type,
