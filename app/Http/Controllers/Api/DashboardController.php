@@ -72,7 +72,7 @@ class DashboardController extends Controller
                 'sub_categories.name as sub_category_name',
                 'quiz_types.name as exam_type_name',
                 'quizzes.duration_mode', 
-                'quizzes.exam_duration', 
+                'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point', 
                 DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
@@ -94,7 +94,7 @@ class DashboardController extends Controller
                 'sub_categories.name',
                 'quiz_types.name',
                 'quizzes.duration_mode', 
-                'quizzes.exam_duration', 
+                'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point'
             )
