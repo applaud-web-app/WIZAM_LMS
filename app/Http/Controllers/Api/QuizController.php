@@ -438,6 +438,7 @@ class QuizController extends Controller
         $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update quiz result with correct/incorrect answers and student percentage
+        $quizResult->status = "complete";
         $quizResult->answers = json_encode($user_answer, true);
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;

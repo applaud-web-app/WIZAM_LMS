@@ -517,6 +517,7 @@ class PracticeSetController extends Controller
         // $studentStatus = ($studentPercentage >= $practiceSetResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update quiz result with correct/incorrect answers and student percentage
+        $practiceSetResult->status = "complete";
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
