@@ -59,8 +59,6 @@ class DashboardController extends Controller
             ->select(
                 'exams.id',
                 'exams.title',
-                'exams.description',
-                'exams.pass_percentage',
                 'exams.slug',
                 'exams.subcategory_id',
                 'exams.status',
@@ -68,12 +66,6 @@ class DashboardController extends Controller
                 'exams.point_mode', 
                 'exams.exam_duration', // exam_duration
                 'exams.point',
-                'exams.shuffle_questions',
-                'exams.question_view',
-                'exams.disable_finish_button',
-                'exams.negative_marking',
-                'exams.negative_marking_type',
-                'exams.negative_marks',
                 DB::raw('SUM(questions.default_marks) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
@@ -83,11 +75,9 @@ class DashboardController extends Controller
             ->where('exams.status', 1)
             ->where('questions.status', 1)
             ->groupBy(
-                'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
+                'exams.id', 'exams.title',
                 'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
-                'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
-                'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
-                'exams.negative_marking_type', 'exams.negative_marks'
+                'exams.point_mode', 'exams.exam_duration', 'exams.point'
             )
             ->first();
 
@@ -100,8 +90,6 @@ class DashboardController extends Controller
             ->select(
                 'quizzes.id',
                 'quizzes.title',
-                'quizzes.description',
-                'quizzes.pass_percentage',
                 'quizzes.slug',
                 'quizzes.subcategory_id',
                 'quizzes.status',
@@ -109,12 +97,6 @@ class DashboardController extends Controller
                 'quizzes.point_mode',
                 'quizzes.duration',
                 'quizzes.point',
-                'quizzes.shuffle_questions',
-                'quizzes.question_view',
-                'quizzes.disable_finish_button',
-                'quizzes.negative_marking',
-                'quizzes.negative_marking_type',
-                'quizzes.negative_marks',
                 DB::raw('SUM(questions.default_marks) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
@@ -124,11 +106,8 @@ class DashboardController extends Controller
             ->where('quizzes.status', 1)
             ->where('questions.status', 1)
             ->groupBy(
-                'quizzes.id', 'quizzes.title', 'quizzes.description', 'quizzes.pass_percentage',
-                'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
-                'quizzes.point_mode', 'quizzes.duration', 'quizzes.point', 'quizzes.shuffle_questions',
-                'quizzes.question_view', 'quizzes.disable_finish_button', 'quizzes.negative_marking',
-                'quizzes.negative_marking_type', 'quizzes.negative_marks'
+                'quizzes.id', 'quizzes.title', 'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
+                'quizzes.point_mode', 'quizzes.duration', 'quizzes.point'
             )
             ->first();
 
