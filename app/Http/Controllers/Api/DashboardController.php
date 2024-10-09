@@ -53,7 +53,7 @@ class DashboardController extends Controller
             // Fetch the exam along with related questions in one query
             $exam = Exam::with([
                 'examQuestions.questions' => function($query) {
-                    $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
+                    $query->select('id', 'default_marks', 'watch_time');
                 }
             ])
             ->select(
@@ -84,7 +84,7 @@ class DashboardController extends Controller
             // Fetch quizzes
             $quizzes = Quizze::with([
                 'quizQuestions.questions' => function($query) {
-                    $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
+                    $query->select('id', 'default_marks', 'watch_time');
                 }
             ])
             ->select(
