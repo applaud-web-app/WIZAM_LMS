@@ -623,5 +623,126 @@ class PracticeSetController extends Controller
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
     }
+
+    public function finishPracticeSet(){
+        // USER RESPONSE
+        $user_answer = $request->input('answers');
+        $user = $request->attributes->get('authenticatedUser');
+    
+        // Fetch quiz result by UUID and user ID
+        $practiceSetResult = PracticeSetResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+        if (!$practiceSetResult) {
+            return response()->json([
+                'status' => false,
+                'message' => "Invalid Practice Set"
+            ]);
+        }
+    
+        $score = 0;
+        $correctAnswer = 0;
+        $incorrect = 0;
+        $totalMarks = 0;
+        $incorrectMarks = 0;
+    
+        // Total marks should be fixed in manual mode
+        $totalMarks = $practiceSetResult->point_type == "manual" 
+            ? $practiceSetResult->point * count($user_answer) // Manual mode total marks
+            : 0; // For default mode, we accumulate question marks below
+    
+        foreach ($user_answer as $answer) {
+            $question = Question::find($answer['id']);
+            if (!$question) {
+                $incorrect += 1;
+                continue;
+            }
+    
+            // Handle different question types
+            $isCorrect = false;
+            $userAnswer = $answer['answer'];
+    
+            // In default mode, accumulate total possible marks
+            if ($quizResult->point_type != "manual") {
+                $totalMarks += $question->default_marks;
+            }
+    
+            // Check correctness based on question type
+            if ($question->type == 'MSA') {
+                $isCorrect = $question->answer == $userAnswer;
+            } elseif ($question->type == 'MMA') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($correctAnswers);
+                sort($userAnswer);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'TOF') {
+                $isCorrect = $userAnswer == $question->answer;
+            } elseif ($question->type == 'SAQ') {
+                $answers = json_decode($question->options);
+                $isCorrect = in_array($userAnswer, $answers);
+            } elseif ($question->type == 'FIB') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($correctAnswers);
+                sort($userAnswer);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'MTF') {
+                $correctAnswers = json_decode($question->answer, true);
+                foreach ($correctAnswers as $key => $value) {
+                    if ($userAnswer[$key] != $value) {
+                        $isCorrect = false;
+                        break;
+                    }
+                }
+                $isCorrect = true;
+            } elseif ($question->type == 'ORD') {
+                $correctAnswers = json_decode($question->answer, true);
+                $isCorrect = $userAnswer == $correctAnswers;
+            } elseif ($question->type == 'EMQ') {
+                $correctAnswers = json_decode($question->answer, true);
+                sort($userAnswer);
+                sort($correctAnswers);
+                $isCorrect = $userAnswer == $correctAnswers;
+            }
+    
+            if ($isCorrect) {
+                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
+                $correctAnswer += 1;
+            } else {
+                $incorrect += 1;
+                $incorrectMarks += $question->default_marks;
+            }
+        }
+    
+        // Apply negative marking for incorrect answers
+        if ($quizResult->negative_marking == 1) {
+            if ($quizResult->negative_marking_type == "fixed") {
+                $score = max(0, $score - $quizResult->negative_marking_value * $incorrect);
+            } elseif ($quizResult->negative_marking_type == "percentage") {
+                $negativeMarks = ($quizResult->negative_marking_value / 100) * $incorrectMarks;
+                $score = max(0, $score - $negativeMarks);
+            }
+        }
+    
+        // Calculate the student's percentage AFTER applying negative marking
+        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+    
+        // Determine pass or fail
+        $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
+    
+        // Update quiz result with correct/incorrect answers and student percentage
+        $quizResult->answers = json_encode($user_answer, true);
+        $quizResult->incorrect_answer = $incorrect;
+        $quizResult->correct_answer = $correctAnswer;
+        $quizResult->student_percentage = $studentPercentage;
+        $quizResult->save();
+    
+        // Return results
+        return response()->json([
+            'status' => true,
+            'score' => $score,
+            'correct_answer' => $correctAnswer,
+            'incorrect_answer' => $incorrect,
+            'student_status' => $studentStatus,
+            'student_percentage' => $studentPercentage
+        ]);
+    }
     
 }

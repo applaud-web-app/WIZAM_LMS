@@ -100,6 +100,9 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/practice-set-detail/{slug}', [StudentController::class, 'practiceSetDetail']);
     Route::get('/play-practice-set/{slug}', [PracticeSetController::class, 'playPracticeSet']);
 
+    Route::post('/finish-practice-set/{uuid}',[PracticeSetController::class, 'finishPracticeSet']);
+
+
     Route::get('/all-question', [PracticeSetController::class, 'allQuestion']);
 
 
