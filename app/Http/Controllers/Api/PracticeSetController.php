@@ -624,7 +624,7 @@ class PracticeSetController extends Controller
         }
     }
 
-    public function finishPracticeSet(){
+    public function finishPracticeSet(Request $request){
         // USER RESPONSE
         $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
@@ -645,9 +645,7 @@ class PracticeSetController extends Controller
         $incorrectMarks = 0;
     
         // Total marks should be fixed in manual mode
-        $totalMarks = $practiceSetResult->point_type == "manual" 
-            ? $practiceSetResult->point * count($user_answer) // Manual mode total marks
-            : 0; // For default mode, we accumulate question marks below
+        $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * count($user_answer)  : 0; 
     
         foreach ($user_answer as $answer) {
             $question = Question::find($answer['id']);
@@ -661,7 +659,7 @@ class PracticeSetController extends Controller
             $userAnswer = $answer['answer'];
     
             // In default mode, accumulate total possible marks
-            if ($quizResult->point_type != "manual") {
+            if ($practiceSetResult->point_type != "manual") {
                 $totalMarks += $question->default_marks;
             }
     
@@ -703,7 +701,7 @@ class PracticeSetController extends Controller
             }
     
             if ($isCorrect) {
-                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
+                $score += $practiceSetResult->point_type == "manual" ? $practiceSetResult->point : $question->default_marks;
                 $correctAnswer += 1;
             } else {
                 $incorrect += 1;
@@ -712,27 +710,27 @@ class PracticeSetController extends Controller
         }
     
         // Apply negative marking for incorrect answers
-        if ($quizResult->negative_marking == 1) {
-            if ($quizResult->negative_marking_type == "fixed") {
-                $score = max(0, $score - $quizResult->negative_marking_value * $incorrect);
-            } elseif ($quizResult->negative_marking_type == "percentage") {
-                $negativeMarks = ($quizResult->negative_marking_value / 100) * $incorrectMarks;
-                $score = max(0, $score - $negativeMarks);
-            }
-        }
+        // if ($practiceSetResult->negative_marking == 1) {
+        //     if ($practiceSetResult->negative_marking_type == "fixed") {
+        //         $score = max(0, $score - $practiceSetResult->negative_marking_value * $incorrect);
+        //     } elseif ($practiceSetResult->negative_marking_type == "percentage") {
+        //         $negativeMarks = ($practiceSetResult->negative_marking_value / 100) * $incorrectMarks;
+        //         $score = max(0, $score - $negativeMarks);
+        //     }
+        // }
     
         // Calculate the student's percentage AFTER applying negative marking
-        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+        // $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
     
         // Determine pass or fail
-        $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
+        // $studentStatus = ($studentPercentage >= $practiceSetResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update quiz result with correct/incorrect answers and student percentage
-        $quizResult->answers = json_encode($user_answer, true);
-        $quizResult->incorrect_answer = $incorrect;
-        $quizResult->correct_answer = $correctAnswer;
-        $quizResult->student_percentage = $studentPercentage;
-        $quizResult->save();
+        $practiceSetResult->answers = json_encode($user_answer, true);
+        $practiceSetResult->incorrect_answer = $incorrect;
+        $practiceSetResult->correct_answer = $correctAnswer;
+        $practiceSetResult->student_percentage = $studentPercentage;
+        $practiceSetResult->save();
     
         // Return results
         return response()->json([
@@ -740,8 +738,8 @@ class PracticeSetController extends Controller
             'score' => $score,
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
-            'student_status' => $studentStatus,
-            'student_percentage' => $studentPercentage
+            // 'student_status' => $studentStatus,
+            // 'student_percentage' => $studentPercentage
         ]);
     }
     
