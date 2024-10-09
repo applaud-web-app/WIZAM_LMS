@@ -340,7 +340,10 @@ class PracticeSetController extends Controller
                 'questions' => json_encode($questionsData, true),
                 'correct_answers' => json_encode($correctAnswers, true),
                 'start_time' => $startTime,
-                'end_time' => $endTime,
+                'allow_point' => $practice->allow_point,
+                'point_mode' => $practice->point_mode,
+                'start_time' => $startTime,
+                'end_time' => $practice->points,
                 'exam_duration' => $duration,
                 'point' => $points,
                 'total_question' => count($questionsData),
@@ -624,7 +627,7 @@ class PracticeSetController extends Controller
         }
     }
 
-    public function finishPracticeSet(Request $request){
+    public function finishPracticeSet(Request $request,$uuid){
         // USER RESPONSE
         $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
