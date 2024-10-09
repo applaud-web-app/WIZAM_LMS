@@ -41,9 +41,9 @@ class DashboardController extends Controller
              // return  success json respose
             return [
                 'status'=>true,
-                'pass_exam'=>$passedExamCount,
-                'failed_exam'=>$failedExamCount,
-                'average_exam'=>$averageScore,
+                'pass_exam'=>$passedExamCount ?? 0,
+                'failed_exam'=>$failedExamCount ?? 0,
+                'average_exam'=>$averageScore ?? 0,
                 'exams'=>$exams,
                 'quizs'=>$quizs,
             ];
