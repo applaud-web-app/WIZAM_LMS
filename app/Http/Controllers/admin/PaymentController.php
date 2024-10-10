@@ -68,7 +68,7 @@ class PaymentController extends Controller
 
       // Ensure features is always an array
       if (!empty($validatedData['features'])) {
-         $validatedData['features'] = [0 => $validatedData['features']];
+         $validatedData['features'] = $validatedData['features'];
       } else {
          $validatedData['features'] = []; // Use an empty array if no features are provided
       }
