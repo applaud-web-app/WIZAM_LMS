@@ -68,11 +68,11 @@ class PaymentController extends Controller
       ]);
 
       // Ensure features is always an array
-      if (!empty($validatedData['features'])) {
-         $validatedData['features'] = $validatedData['features'];
-      } else {
-         $validatedData['features'] = []; // Use an empty array if no features are provided
-      }
+      // if (!empty($validatedData['features'])) {
+      //    $validatedData['features'] = $validatedData['features'];
+      // } else {
+      //    $validatedData['features'] = []; // Use an empty array if no features are provided
+      // }
 
       // Create a new instance of your model and fill it with the validated data
       $data = new Plan;
@@ -86,7 +86,7 @@ class PaymentController extends Controller
       $data->description = $validatedData['description'] ?? null;
       $data->sort_order = $validatedData['order'] ?? null;
       $data->feature_access = $validatedData['feature_access'] ?? null;
-      $data->features = json_encode($validatedData['features']) ?? null;
+      $data->features = $validatedData['features'] ? json_encode($validatedData['features']) : [];
       $data->popular = $validatedData['popular'] ?? null; 
       $data->status = $validatedData['status'] ?? null;
       $data->save();
@@ -130,11 +130,11 @@ class PaymentController extends Controller
       ]);
 
       // Ensure features is always an array
-      if (!empty($validatedData['features'])) {
-         $validatedData['features'] = $validatedData['features'];
-      } else {
-         $validatedData['features'] = []; // Use an empty array if no features are provided
-      }
+      // if (!empty($validatedData['features'])) {
+      //    $validatedData['features'] = $validatedData['features'];
+      // } else {
+      //    $validatedData['features'] = []; // Use an empty array if no features are provided
+      // }
 
       // Create a new instance of your model and fill it with the validated data
       $data = decrypturl($request->eq);
@@ -151,7 +151,7 @@ class PaymentController extends Controller
          $data->description = $validatedData['description'];
          $data->sort_order = $validatedData['order'];
          $data->feature_access = $validatedData['feature_access'];
-         $data->features = json_encode($validatedData['features']);
+         $data->features = $validatedData['features'] ? json_encode($validatedData['features']) : [];
          $data->popular = $validatedData['popular']; 
          $data->status = $validatedData['status'];
          $data->save();
