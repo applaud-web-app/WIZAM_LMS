@@ -742,30 +742,29 @@ class PracticeSetController extends Controller
                     $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
                     $isCorrect = false;
     
-                    // Ensure userAnswer and correctAnswer are arrays when needed
-                    if ($userAnswer && isset($userAnswer['answer'])) {
-                        $user_answ = $userAnswer['answer'];
-                    } else {
-                        $user_answ = null; // Handle case where there's no user answer
+                    // Initialize variables for user and correct answers
+                    $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
+                    $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
+    
+                    // Check if user_answ is a string before decoding
+                    if (is_string($user_answ)) {
+                        $user_answ = json_decode($user_answ, true);
                     }
     
-                    if ($correctAnswer && isset($correctAnswer['correct_answer'])) {
-                        $correct_answ = $correctAnswer['correct_answer'];
-                    } else {
-                        $correct_answ = null; // Handle case where there's no correct answer
+                    // Check if correct_answ is a string before decoding
+                    if (is_string($correct_answ)) {
+                        $correct_answ = json_decode($correct_answ, true);
                     }
     
                     // Check correctness based on question type
                     switch ($question->type) {
                         case 'FIB':
-                            $isCorrect = $user_answ == json_decode($correct_answ);
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MMA':
-                            $user_answ = json_decode($user_answ); // Assuming this should be an array
-                            $correct_answ = json_decode($correct_answ); // Ensure it's an array
                             sort($user_answ);
                             sort($correct_answ);
                             $isCorrect = $user_answ == $correct_answ;
@@ -785,13 +784,9 @@ class PracticeSetController extends Controller
                             }
                             break;
                         case 'ORD':
-                            $user_answ = json_decode($user_answ, true);
-                            $correct_answ = json_decode($correct_answ, true);
                             $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'EMQ':
-                            $user_answ = json_decode($user_answ, true);
-                            $correct_answ = json_decode($correct_answ, true);
                             $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'SAQ':
@@ -841,8 +836,7 @@ class PracticeSetController extends Controller
                 'message' => 'Something went wrong: ' . $th->getMessage(),
             ]);
         }
-    }
-    
+    }    
 
     public function praticeSetProgress(Request $request){
         try {
