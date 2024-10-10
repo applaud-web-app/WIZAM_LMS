@@ -535,8 +535,161 @@ class PracticeSetController extends Controller
         ]);
     }
 
+    // OLD (UNDEFINE ARRAY INDEX ISSUE ONLY)
+    // public function practiceSetResult(Request $request, $uuid){
+    //     try {
+    //         $user = $request->attributes->get('authenticatedUser');
+    
+    //         $practiceResult = PracticeSetResult::with('pratice')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+    //         if ($practiceResult) {
+    //             // Build leaderboard
+    //             $leaderBoard = [];
+    //             if (isset($practiceResult->pratice) && $practiceResult->pratice->leaderboard == 1) {
+    //                 $userPractice = PracticeSetResult::with('user')
+    //                     ->where('practice_sets_id', $practiceResult->practice_sets_id)
+    //                     ->orderby('student_percentage', 'DESC')
+    //                     ->take(10)
+    //                     ->get();
+    
+    //                 foreach ($userPractice as $userData) {
+    //                     if (isset($userData->user)) {
+    //                         $leaderBoard[] = [
+    //                             "username" => $userData->user->name,
+    //                             "score" => $userData->student_percentage,
+    //                             "status" => "COMPLETED",
+    //                         ];
+    //                     }
+    //                 }
+    //             }
 
-    public function practiceSetResult(Request $request, $uuid){
+    //             $openTime = Carbon::parse($practiceResult->created_at);
+    //             $closeTime = Carbon::parse($practiceResult->updated_at); 
+    
+    //             $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
+
+    //             // Build result
+    //             $result = [
+    //                 'correct' => $practiceResult->correct_answer,
+    //                 'incorrect' => $practiceResult->incorrect_answer,
+    //                 'skipped' => $practiceResult->total_question - ($practiceResult->correct_answer + $practiceResult->incorrect_answer),
+    //                 'marks' => $practiceResult->student_percentage,
+    //                 'status' => $practiceResult->student_percentage >= $practiceResult->pass_percentage ? "PASS" : "FAIL",
+    //                 'timeTaken' => $timeTakenInMinutes,
+    //             ];
+    
+    //             // Process exam details (Compare user answers with correct answers)
+    //             $exam = [];
+    //             $questionBox = json_decode($practiceResult->questions);
+    //             $correct_answers = json_decode($practiceResult->correct_answers, true);
+    //             $userAnswers = json_decode($practiceResult->answers, true);
+
+    //             foreach ($questionBox as $question) {
+    //                 // Get the user answer for the current question by matching the IDs
+    //                 $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
+    //                 $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
+    //                 $isCorrect = false;
+                
+    //                 // Ensure correctAnswer is an array when needed
+    //                 switch ($question->type) {
+    //                     case 'FIB':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = json_decode($correctAnswer['correct_answer']);
+    //                         $isCorrect = $user_answ == $correct_answ;
+    //                         break;
+    //                     case 'MSA':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = $correctAnswer['correct_answer'];
+    //                         $isCorrect = $user_answ == $correct_answ;
+    //                         break;
+    //                     case 'MMA':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = json_decode($correctAnswer['correct_answer']);
+    //                         sort($user_answ);
+    //                         sort($correct_answ);
+    //                         $isCorrect = $user_answ == $correct_answ;
+    //                         break;
+    //                     case 'TOF':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = $correctAnswer['correct_answer'];
+    //                         $isCorrect = $user_answ == $correct_answ;
+    //                         break;
+    //                     case 'MTF':
+    //                         $isCorrect = true;
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+    //                         foreach ($correct_answ as $key => $value) {
+    //                             if ($user_answ[$key] != $value) {
+    //                                 $isCorrect = false;
+    //                                 break;
+    //                             }
+    //                         }
+    //                         break;
+    //                     case 'ORD':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+    //                         $isCorrect = $user_answ === $correct_answ;
+    //                         break;
+    //                     case 'EMQ':
+    //                         $user_answ = $userAnswer['answer'];
+    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+    //                         $isCorrect = $user_answ === $correct_answ;
+    //                         break;
+    //                     case 'SAQ':
+    //                         $user_answ = $userAnswer['answer']; // string
+    //                         $correct_answ = $question->options;
+    //                         $options = $question->options; // array
+    //                         // Loop through each option and compare after sanitizing HTML
+    //                         if (is_string($user_answ)) {
+    //                             foreach ($options as $option) {
+    //                                 // Strip HTML tags and extra spaces from both user answer and the option
+    //                                 $sanitizedUserAnswer = trim(strip_tags($user_answ));
+    //                                 $sanitizedOption = trim(strip_tags($option));
+
+    //                                 // Check if the sanitized user answer matches any sanitized option
+    //                                 if ($sanitizedUserAnswer === $sanitizedOption) {
+    //                                     $isCorrect = true;
+    //                                     break;
+    //                                 }
+    //                             }
+    //                         }
+    //                         break;
+    //                 }
+                
+
+    //                 $exam[] = [
+    //                     'question_id' => $question->id,
+    //                     'question_type' => $question->type,
+    //                     'question_text' => $question->question,
+    //                     'question_option' => $question->options,
+    //                     'correct_answer' => $correct_answ ?? null,
+    //                     'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
+    //                     'is_correct' => $isCorrect,
+    //                 ];
+    //             }
+    
+    //             $pratice = [
+    //                 'title' => $practiceResult->pratice->title,
+    //                 'duration' => $practiceResult->exam_duration,
+    //             ];
+    
+    //             return response()->json([
+    //                 'status' => true,
+    //                 'pratice' => $pratice,
+    //                 'result' => $result,
+    //                 'exam_preview' => $exam,
+    //                 'leaderBoard' => $leaderBoard,
+    //             ]);
+    //         }
+    
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Something went wrong: '. $th->getMessage(),
+    //         ]);
+    //     }
+    // }
+
+    public function practiceSetResult(Request $request, $uuid) {
         try {
             $user = $request->attributes->get('authenticatedUser');
     
@@ -547,7 +700,7 @@ class PracticeSetController extends Controller
                 if (isset($practiceResult->pratice) && $practiceResult->pratice->leaderboard == 1) {
                     $userPractice = PracticeSetResult::with('user')
                         ->where('practice_sets_id', $practiceResult->practice_sets_id)
-                        ->orderby('student_percentage', 'DESC')
+                        ->orderBy('student_percentage', 'DESC')
                         ->take(10)
                         ->get();
     
@@ -561,12 +714,12 @@ class PracticeSetController extends Controller
                         }
                     }
                 }
-
-                $openTime = Carbon::parse($practiceResult->created_at);
-                $closeTime = Carbon::parse($practiceResult->updated_at); 
     
-                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
-
+                $openTime = Carbon::parse($practiceResult->created_at);
+                $closeTime = Carbon::parse($practiceResult->updated_at);
+    
+                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime);
+    
                 // Build result
                 $result = [
                     'correct' => $practiceResult->correct_answer,
@@ -582,69 +735,72 @@ class PracticeSetController extends Controller
                 $questionBox = json_decode($practiceResult->questions);
                 $correct_answers = json_decode($practiceResult->correct_answers, true);
                 $userAnswers = json_decode($practiceResult->answers, true);
-
+    
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
                     $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
                     $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
                     $isCorrect = false;
-                
-                    // Ensure correctAnswer is an array when needed
+    
+                    // Ensure userAnswer and correctAnswer are arrays when needed
+                    if ($userAnswer && isset($userAnswer['answer'])) {
+                        $user_answ = $userAnswer['answer'];
+                    } else {
+                        $user_answ = null; // Handle case where there's no user answer
+                    }
+    
+                    if ($correctAnswer && isset($correctAnswer['correct_answer'])) {
+                        $correct_answ = $correctAnswer['correct_answer'];
+                    } else {
+                        $correct_answ = null; // Handle case where there's no correct answer
+                    }
+    
+                    // Check correctness based on question type
                     switch ($question->type) {
                         case 'FIB':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer']);
-                            $isCorrect = $user_answ == $correct_answ;
+                            $isCorrect = $user_answ == json_decode($correct_answ);
                             break;
                         case 'MSA':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = $correctAnswer['correct_answer'];
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MMA':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer']);
+                            $user_answ = json_decode($user_answ); // Assuming this should be an array
+                            $correct_answ = json_decode($correct_answ); // Ensure it's an array
                             sort($user_answ);
                             sort($correct_answ);
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'TOF':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = $correctAnswer['correct_answer'];
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MTF':
-                            $isCorrect = true;
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
-                            foreach ($correct_answ as $key => $value) {
-                                if ($user_answ[$key] != $value) {
-                                    $isCorrect = false;
-                                    break;
+                            if (is_array($user_answ) && is_array($correct_answ)) {
+                                $isCorrect = true;
+                                foreach ($correct_answ as $key => $value) {
+                                    if (!isset($user_answ[$key]) || $user_answ[$key] != $value) {
+                                        $isCorrect = false;
+                                        break;
+                                    }
                                 }
                             }
                             break;
                         case 'ORD':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $user_answ = json_decode($user_answ, true);
+                            $correct_answ = json_decode($correct_answ, true);
                             $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'EMQ':
-                            $user_answ = $userAnswer['answer'];
-                            $correct_answ = json_decode($correctAnswer['correct_answer'],true);
+                            $user_answ = json_decode($user_answ, true);
+                            $correct_answ = json_decode($correct_answ, true);
                             $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'SAQ':
-                            $user_answ = $userAnswer['answer']; // string
-                            $correct_answ = $question->options;
-                            $options = $question->options; // array
-                            // Loop through each option and compare after sanitizing HTML
-                            if (is_string($user_answ)) {
-                                foreach ($options as $option) {
+                            if (is_string($user_answ) && is_array($question->options)) {
+                                foreach ($question->options as $option) {
                                     // Strip HTML tags and extra spaces from both user answer and the option
                                     $sanitizedUserAnswer = trim(strip_tags($user_answ));
                                     $sanitizedOption = trim(strip_tags($option));
-
+    
                                     // Check if the sanitized user answer matches any sanitized option
                                     if ($sanitizedUserAnswer === $sanitizedOption) {
                                         $isCorrect = true;
@@ -654,15 +810,14 @@ class PracticeSetController extends Controller
                             }
                             break;
                     }
-                
-
+    
                     $exam[] = [
                         'question_id' => $question->id,
                         'question_type' => $question->type,
                         'question_text' => $question->question,
                         'question_option' => $question->options,
-                        'correct_answer' => $correct_answ ?? null,
-                        'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
+                        'correct_answer' => $correct_answ,
+                        'user_answer' => $user_answ,
                         'is_correct' => $isCorrect,
                     ];
                 }
@@ -680,14 +835,14 @@ class PracticeSetController extends Controller
                     'leaderBoard' => $leaderBoard,
                 ]);
             }
-    
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong: '. $th->getMessage(),
+                'message' => 'Something went wrong: ' . $th->getMessage(),
             ]);
         }
     }
+    
 
     public function praticeSetProgress(Request $request){
         try {
