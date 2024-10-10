@@ -333,9 +333,22 @@ class CmsController extends Controller
 
     public function pricing() {
         try {
-            $pricing = Plan::with('category:id,name') // Load the related SubCategory fields (id, name)
-                ->select('id', 'name', 'price_type', 'duration', 'price', 'discount', 'description', 'sort_order', 'feature_access', 'features', 'popular') // Ensure category_id is selected
-                ->where('status', 1)
+            $pricing = Plan::join('sub_categories', 'plans.category_id', '=', 'sub_categories.id') // Join the Plan table with SubCategory (category)
+                ->select(
+                    'plans.id', 
+                    'plans.name', 
+                    'plans.price_type', 
+                    'plans.duration', 
+                    'plans.price', 
+                    'plans.discount', 
+                    'plans.description', 
+                    'plans.sort_order', 
+                    'plans.feature_access', 
+                    'plans.features', 
+                    'plans.popular', 
+                    'sub_categories.name as category_name' // Select the category name from SubCategory
+                )
+                ->where('plans.status', 1)
                 ->get();
                     
             return response()->json(['status' => true, 'data' => $pricing], 200);
@@ -343,6 +356,7 @@ class CmsController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
     
 
 }
