@@ -719,7 +719,7 @@ class PracticeSetController extends Controller
                 $openTime = Carbon::parse($practiceResult->created_at);
                 $closeTime = Carbon::parse($practiceResult->updated_at); 
     
-                $timeTakenInMinutes = $openTime->diffInMinutes($closeTime); 
+                $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime));
 
                 // Build result
                 $result = [
