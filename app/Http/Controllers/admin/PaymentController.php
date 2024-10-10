@@ -84,7 +84,7 @@ class PaymentController extends Controller
       $data->description = $validatedData['description'] ?? null;
       $data->sort_order = $validatedData['order'] ?? null;
       $data->feature_access = $validatedData['feature_access'] ?? null;
-      $data->features = $validatedData['features'] ?? null;
+      $data->features = json_encode($validatedData['features']) ?? null;
       $data->popular = $validatedData['popular'] ?? null; 
       $data->status = $validatedData['status'] ?? null;
       $data->save();
