@@ -332,4 +332,13 @@ class CmsController extends Controller
     }
 
 
+    public function pricing(){
+        try {
+            $pricing = Plan::with('category:id,name')->select('name','price_type','duration','price','discount','description','sort_order','feature_access','features','popular')->where('status',1)->get();
+            return response()->json(['status'=> true,'data' => $pricing], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
 }
