@@ -322,7 +322,6 @@ class CMSController extends Controller
         $blog = Blog::findOrFail($blogId); // Use findOrFail to handle the case where the blog does not exist
     
         // Handle the image upload
-        $imagePath = $blog->image;
         $baseUrl = env('APP_URL');
         if ($request->hasFile('blogImage')) {
             $image = $request->file('blogImage');
@@ -335,6 +334,7 @@ class CMSController extends Controller
     
             // Store the image path in the database (relative to the public directory)
             $imagePath = $imageName;
+            $blog->image = $baseUrl."/blogs/".$imagePath;
         }
     
         // Update blog data
@@ -342,7 +342,7 @@ class CMSController extends Controller
         $blog->category_id = $request->input('blogCategory');
         $blog->short_description = $request->input('shortDescription');
         $blog->content = $request->input('blogContent');
-        $blog->image = $baseUrl."/blogs/".$imagePath;
+        
     
         // Generate a new slug from the blog title
         $slug = Str::slug($request->input('blogTitle'));
