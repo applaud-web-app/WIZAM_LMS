@@ -470,7 +470,19 @@ class PracticeSetController extends Controller
                     $isCorrect = $userAnswer == $question->answer;
                 } elseif ($question->type == 'SAQ') {
                     $answers = json_decode($question->options);
-                    $isCorrect = in_array($userAnswer, $answers);
+                    // $isCorrect = in_array($userAnswer, $answers);
+                    $isCorrect = false;
+                    foreach ($answers as $option) {
+                        // Convert both the option and the user answer to lowercase and trim them
+                        $sanitizedOption = strtolower(trim(strip_tags($option)));
+                        $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
+
+                        // Check if the sanitized option matches the sanitized user answer
+                        if ($sanitizedUserAnswer == $sanitizedOption) {
+                            $isCorrect = true;
+                            break;  // Exit the loop once a match is found
+                        }
+                    }
                 } elseif ($question->type == 'FIB') {
                     $correctAnswers = json_decode($question->answer, true);
                     sort($correctAnswers);
