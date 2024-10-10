@@ -447,54 +447,59 @@ class PracticeSetController extends Controller
     
             // Handle different question types
             $isCorrect = false;
-            $userAnswer = $answer['answer'];
     
-            // In default mode, accumulate total possible marks
-            if ($practiceSetResult->point_type != "manual") {
-                $totalMarks += $question->default_marks;
-            }
-    
-            // Check correctness based on question type
-            if ($question->type == 'MSA') {
-                $isCorrect = $question->answer == $userAnswer;
-            } elseif ($question->type == 'MMA') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($correctAnswers);
-                sort($userAnswer);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'TOF') {
-                $isCorrect = $userAnswer == $question->answer;
-            } elseif ($question->type == 'SAQ') {
-                $answers = json_decode($question->options);
-                $isCorrect = in_array($userAnswer, $answers);
-            } elseif ($question->type == 'FIB') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($correctAnswers);
-                sort($userAnswer);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'MTF') {
-                $correctAnswers = json_decode($question->answer, true);
-                foreach ($correctAnswers as $key => $value) {
-                    if ($userAnswer[$key] != $value) {
-                        $isCorrect = false;
-                        break;
-                    }
+            if (isset($answer['answer'])) {
+                $userAnswer = $answer['answer'];
+                // In default mode, accumulate total possible marks
+                if ($practiceSetResult->point_type != "manual") {
+                    $totalMarks += $question->default_marks;
                 }
-                $isCorrect = true;
-            } elseif ($question->type == 'ORD') {
-                $correctAnswers = json_decode($question->answer, true);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'EMQ') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($userAnswer);
-                sort($correctAnswers);
-                $isCorrect = $userAnswer == $correctAnswers;
-            }
-    
-            if ($isCorrect) {
-                $score += $practiceSetResult->point_type == "manual" ? $practiceSetResult->point : $question->default_marks;
-                $correctAnswer += 1;
-            } else {
+        
+                // Check correctness based on question type
+                if ($question->type == 'MSA') {
+                    $isCorrect = $question->answer == $userAnswer;
+                } elseif ($question->type == 'MMA') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($correctAnswers);
+                    sort($userAnswer);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'TOF') {
+                    $isCorrect = $userAnswer == $question->answer;
+                } elseif ($question->type == 'SAQ') {
+                    $answers = json_decode($question->options);
+                    $isCorrect = in_array($userAnswer, $answers);
+                } elseif ($question->type == 'FIB') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($correctAnswers);
+                    sort($userAnswer);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'MTF') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    foreach ($correctAnswers as $key => $value) {
+                        if (!isset($userAnswer[$key]) || $userAnswer[$key] != $value) {
+                            $isCorrect = false; 
+                            break;
+                        }
+                    }
+                    $isCorrect = true;
+                } elseif ($question->type == 'ORD') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'EMQ') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($userAnswer);
+                    sort($correctAnswers);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                }
+        
+                if ($isCorrect) {
+                    $score += $practiceSetResult->point_type == "manual" ? $practiceSetResult->point : $question->default_marks;
+                    $correctAnswer += 1;
+                } else {
+                    $incorrect += 1;
+                    $incorrectMarks += $question->default_marks;
+                }
+            }else{
                 $incorrect += 1;
                 $incorrectMarks += $question->default_marks;
             }
