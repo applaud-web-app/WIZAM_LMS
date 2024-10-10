@@ -356,69 +356,80 @@ class QuizController extends Controller
         $incorrectMarks = 0;
     
         // Total marks should be fixed in manual mode
-        $totalMarks = $quizResult->point_type == "manual" 
-            ? $quizResult->point * count($user_answer) // Manual mode total marks
-            : 0; // For default mode, we accumulate question marks below
+        $totalMarks = $quizResult->point_type == "manual" ? $quizResult->point * count($user_answer) : 0; 
     
         foreach ($user_answer as $answer) {
+            if (!isset($answer['id'])) {
+                $incorrect += 1;
+                continue;
+            }
             $question = Question::find($answer['id']);
             if (!$question) {
                 $incorrect += 1;
                 continue;
             }
-    
+
             // Handle different question types
             $isCorrect = false;
-            $userAnswer = $answer['answer'];
-    
-            // In default mode, accumulate total possible marks
-            if ($quizResult->point_type != "manual") {
-                $totalMarks += $question->default_marks;
-            }
-    
-            // Check correctness based on question type
-            if ($question->type == 'MSA') {
-                $isCorrect = $question->answer == $userAnswer;
-            } elseif ($question->type == 'MMA') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($correctAnswers);
-                sort($userAnswer);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'TOF') {
-                $isCorrect = $userAnswer == $question->answer;
-            } elseif ($question->type == 'SAQ') {
-                $answers = json_decode($question->options);
-                $isCorrect = in_array($userAnswer, $answers);
-            } elseif ($question->type == 'FIB') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($correctAnswers);
-                sort($userAnswer);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'MTF') {
-                $correctAnswers = json_decode($question->answer, true);
-                foreach ($correctAnswers as $key => $value) {
-                    if ($userAnswer[$key] != $value) {
-                        $isCorrect = false;
-                        break;
+            
+            if (isset($answer['answer'])) {
+                $userAnswer = $answer['answer'];
+                // In default mode, accumulate total possible marks
+                if ($quizResult->point_type != "manual") {
+                    $totalMarks += $question->default_marks;
+                }
+        
+                // Check correctness based on question type
+                if ($question->type == 'MSA') {
+                    $isCorrect = $question->answer == $userAnswer;
+                } elseif ($question->type == 'MMA') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($correctAnswers);
+                    sort($userAnswer);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'TOF') {
+                    $isCorrect = $userAnswer == $question->answer;
+                } elseif ($question->type == 'SAQ') {
+                    $answers = json_decode($question->options);
+                    $isCorrect = in_array($userAnswer, $answers);
+                } elseif ($question->type == 'FIB') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($correctAnswers);
+                    sort($userAnswer);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'MTF') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = true; // Assume correct until proven otherwise
+                    foreach ($correctAnswers as $key => $value) {
+                        if (!isset($userAnswer[$key]) || $userAnswer[$key] != $value) {
+                            $isCorrect = false; 
+                            break;
+                        }
+                    }
+                } elseif ($question->type == 'ORD') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                } elseif ($question->type == 'EMQ') {
+                    $correctAnswers = json_decode($question->answer, true);
+                    sort($userAnswer);
+                    sort($correctAnswers);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                }
+        
+                if ($isCorrect) {
+                    $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
+                    $correctAnswer += 1;
+                } else {
+                    $incorrect += 1;
+                    if (isset($question->default_marks)) {
+                        $incorrectMarks += $question->default_marks;
                     }
                 }
-                $isCorrect = true;
-            } elseif ($question->type == 'ORD') {
-                $correctAnswers = json_decode($question->answer, true);
-                $isCorrect = $userAnswer == $correctAnswers;
-            } elseif ($question->type == 'EMQ') {
-                $correctAnswers = json_decode($question->answer, true);
-                sort($userAnswer);
-                sort($correctAnswers);
-                $isCorrect = $userAnswer == $correctAnswers;
-            }
-    
-            if ($isCorrect) {
-                $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
-                $correctAnswer += 1;
-            } else {
+            }else{
                 $incorrect += 1;
-                $incorrectMarks += $question->default_marks;
+                if (isset($question->default_marks)) {
+                    $incorrectMarks += $question->default_marks;
+                }
             }
         }
     
