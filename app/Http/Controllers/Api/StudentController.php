@@ -434,6 +434,9 @@ class StudentController extends Controller
                     'practice_sets.slug',
                     'practice_sets.subCategory_id',
                     'skills.name as skill_name', // Select skill name
+                    'practice_sets.point_mode',
+                    'practice_sets.points',
+                    'practice_sets.is_free',
                     DB::raw('COUNT(questions.id) as total_questions'), // Count total questions
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum total watch time
@@ -443,7 +446,7 @@ class StudentController extends Controller
                 ->leftJoin('skills', 'practice_sets.skill_id', '=', 'skills.id') // Join with skills to get skill name
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
-                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug', 'practice_sets.subCategory_id', 'skills.name') // Group by practice set and skill name
+                ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug', 'practice_sets.subCategory_id', 'skills.name','practice_sets.point_mode','practice_sets.points','practice_sets.is_free',) // Group by practice set and skill name
                 ->havingRaw('COUNT(questions.id) > 0') // Only include practice sets with questions
                 ->get();
 
@@ -459,13 +462,15 @@ class StudentController extends Controller
                 if (!isset($groupedData[$skillName])) {
                     $groupedData[$skillName] = [];
                 }
+
+                $marks = $practiceSet->point_mode == "manual" ? $practiceSet->points*$practiceSet->total_questions : $practiceSet->total_marks;
                 
                 // Add the practice set data to the corresponding skill name group
                 $groupedData[$skillName][] = [
                     'practice_title'   => $practiceSet->title,
                     'practice_question'=> $practiceSet->total_questions, // Use data from query result
                     'practice_time'    => $practiceSet->total_time,      // Use data from query result
-                    'practice_marks'   => $practiceSet->total_marks,     // Use data from query result
+                    'practice_marks'   => $marks,     // Use data from query result
                     'practice_slug'    => $practiceSet->slug,
                 ];
             }
