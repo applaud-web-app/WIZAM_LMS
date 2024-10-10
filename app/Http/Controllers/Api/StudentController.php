@@ -497,6 +497,9 @@ class StudentController extends Controller
                     'practice_sets.title',
                     'practice_sets.description',
                     'sub_categories.name as sub_category_name',
+                    'practice_sets.point_mode',
+                    'practice_sets.points',
+                    'practice_sets.is_free',
                     DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
@@ -511,7 +514,10 @@ class StudentController extends Controller
                     'practice_sets.id',
                     'practice_sets.title',
                     'practice_sets.description',
-                    'sub_categories.name'
+                    'sub_categories.name',
+                    'practice_sets.point_mode',
+                    'practice_sets.points',
+                    'practice_sets.is_free',
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->first();
@@ -520,6 +526,8 @@ class StudentController extends Controller
             if (!$practiceSetData) {
                 return response()->json(['status' => false, 'message' => 'Practice set not found'], 404);
             }
+
+            $marks = $practiceSetData->point_mode == "manual" ? $practiceSetData->points*$practiceSetData->total_questions : $this->formatTime($practiceSetData->total_time);
     
             // Format response to match the structure needed by frontend
             return response()->json([
@@ -528,9 +536,10 @@ class StudentController extends Controller
                     'title' => $practiceSetData->title,
                     'syllabus' => $practiceSetData->sub_category_name,
                     'totalQuestions' => $practiceSetData->total_questions,
-                    'duration' => $this->formatTime($practiceSetData->total_time), // Call formatTime from within the class
-                    'marks' => $practiceSetData->total_marks,
+                    'duration' => $this->formatTime($practiceSetData->total_time),
+                    'marks' => $marks,
                     'description' => $practiceSetData->description,
+                    'is_free'=> $practiceSetData->is_free
                 ],
             ], 200);
         } catch (\Throwable $th) {
