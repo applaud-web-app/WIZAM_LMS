@@ -259,7 +259,7 @@ class CmsController extends Controller
 
     public function pages(){
         try {
-            $pages = Pages::select('title','slug')->where('status',1)->latest()->get();
+            $pages = Pages::select('title','slug')->where('status',1)->get();
             return response()->json(['status'=> true,'data' => $pages], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
