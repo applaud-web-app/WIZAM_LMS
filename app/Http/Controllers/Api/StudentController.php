@@ -472,6 +472,7 @@ class StudentController extends Controller
                     'practice_time'    => $practiceSet->total_time,      // Use data from query result
                     'practice_marks'   => $marks,     // Use data from query result
                     'practice_slug'    => $practiceSet->slug,
+                    'is_free' => $practiceSet->is_free,
                 ];
             }
 
