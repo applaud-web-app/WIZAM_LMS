@@ -306,7 +306,7 @@ class ManageTest extends Controller
             'subCategory' => 'required|exists:sub_categories,id',  // assumes categories are stored in the categories table
             'description' => 'nullable|string|max:1000',
             'isFee'=>'required|string|in:1,0',
-            'visibility' => 'required|in:0,1',   // visibility should be either 0 or 1
+            'visibility' => 'required|in:0,1',   // visibility should be either 0 or 1  
         ]);
 
         $slug = Str::slug($request->input('testTitle'));
@@ -341,6 +341,7 @@ class ManageTest extends Controller
             'description' => 'nullable|string|max:1000',
             'isFee'=>'required|string|in:1,0',
             'visibility' => 'required|in:0,1',   // visibility should be either 0 or 1
+            'status' => 'required|in:0,1',
         ]);
 
         // Update Quizz
@@ -361,6 +362,7 @@ class ManageTest extends Controller
         $quiz->description = $request->description; 
         $quiz->is_free= $request->isFee; 
         $quiz->is_public= $request->visibility; 
+        $quiz->status = $request->status; 
         $quiz->save();
 
         // Redirect with success message
