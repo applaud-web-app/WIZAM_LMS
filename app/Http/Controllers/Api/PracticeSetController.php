@@ -439,6 +439,10 @@ class PracticeSetController extends Controller
         $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * count($user_answer)  : 0; 
     
         foreach ($user_answer as $answer) {
+            if (!isset($answer['id'])) {
+                $incorrect += 1;
+                continue;
+            }
             $question = Question::find($answer['id']);
             if (!$question) {
                 $incorrect += 1;
@@ -475,13 +479,13 @@ class PracticeSetController extends Controller
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'MTF') {
                     $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = true; // Assume correct until proven otherwise
                     foreach ($correctAnswers as $key => $value) {
                         if (!isset($userAnswer[$key]) || $userAnswer[$key] != $value) {
                             $isCorrect = false; 
                             break;
                         }
                     }
-                    $isCorrect = true;
                 } elseif ($question->type == 'ORD') {
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = $userAnswer == $correctAnswers;
@@ -497,19 +501,20 @@ class PracticeSetController extends Controller
                     $correctAnswer += 1;
                 } else {
                     $incorrect += 1;
-                    $incorrectMarks += $question->default_marks;
+                    if (isset($question->default_marks)) {
+                        $incorrectMarks += $question->default_marks;
+                    }
                 }
             }else{
                 $incorrect += 1;
-                $incorrectMarks += $question->default_marks;
+                if (isset($question->default_marks)) {
+                    $incorrectMarks += $question->default_marks;
+                }
             }
         }
     
         // Calculate the student's percentage AFTER applying negative marking
         $studentPercentage = ($practiceSetResult->total_question > 0) ? ($correctAnswer / $practiceSetResult->total_question) * 100 : 0;
-    
-        // Determine pass or fail
-        // $studentStatus = ($studentPercentage >= $practiceSetResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update pratice result with correct/incorrect answers and student percentage
         $practiceSetResult->status = "complete";
