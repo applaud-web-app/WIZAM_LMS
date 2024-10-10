@@ -187,6 +187,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-faq', 'updateFaq')->name('update-faq');
         Route::post('/update-resource', 'updateResource')->name('update-resource');
         Route::post('/update-get-started', 'updateGetstarted')->name('update-get-started');
+        Route::get('/enquiry', 'enquiry')->name('enquiry');
+        Route::get('/delete-enquiry', 'deleteEnquiry')->name('delete-enquiry');
 
         // ABOUT PAGE
         Route::get('/about-settings', 'aboutSetting')->name('about-settings');

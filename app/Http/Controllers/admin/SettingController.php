@@ -15,6 +15,8 @@ use App\Models\HomeCms;
 use App\Models\Question;
 use App\Models\Quizze;
 use App\Models\PracticeSet;
+use App\Models\Enquiry;
+use Yajra\DataTables\Facades\DataTables;
 use Auth;
 use Hash;
 
@@ -930,6 +932,48 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Best Data saved successfully!');
     }
 
+
+    public function enquiry(Request $request){
+        if ($request->ajax()) {
+            $sections = Enquiry::with('course')->latest();
+
+            return DataTables::of($sections)
+                ->addIndexColumn()
+                ->addColumn('action', function ($section) {
+                    $parms = "id=".$section->id;
+                    $deleteUrl = encrypturl(route('delete-enquiry'),$parms);
+                    return '<button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                })
+                ->addColumn('created_at', function($row) {
+                    return date('d/m/Y', strtotime($row->created_at));
+                })
+                ->addColumn('course', function($row) {
+                    if(isset($row->course)){
+                        return $row->course->name;
+                    }
+                    return "----";
+                })
+                ->rawColumns(['course','created_at','action'])
+                ->make(true);
+        }
+        return view('setting.enquiry');
+    }
+
+
+    public function deleteEnquiry(Request $request){
+        $request->validate([
+            'eq'=>'required'
+        ]);
+
+        $data = decrypturl($request->eq);
+        $skillId = $data['id'];
+        $user = Enquiry::where('id',$skillId)->first();
+        if($user){
+            $user->delete();
+            return redirect()->back()->with('success','Enquiry Removed Successfully');
+        }
+        return redirect()->back()->with('error','Something Went Wrong');
+    }
 
 
 }

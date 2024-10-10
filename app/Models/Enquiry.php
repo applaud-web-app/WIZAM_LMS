@@ -20,4 +20,8 @@ class Enquiry extends Model
         'accept_condition',
         'contact_me'
     ];
+
+    public function course(){
+        return $this->belongsTo(SubCategory::class, 'course_id', 'id');
+    }
 }
