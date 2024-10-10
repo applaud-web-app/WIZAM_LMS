@@ -786,13 +786,13 @@ class PracticeSetController extends Controller
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
-                            $isCorrect = $user_answ === $correct_answ;
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'EMQ':
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
-                            $isCorrect = $user_answ === $correct_answ;
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'SAQ': // string
                             $correct_answ = $question->options;
@@ -805,7 +805,7 @@ class PracticeSetController extends Controller
                                     $sanitizedOption = trim(strip_tags($option));
 
                                     // Check if the sanitized user answer matches any sanitized option
-                                    if ($sanitizedUserAnswer === $sanitizedOption) {
+                                    if ($sanitizedUserAnswer == $sanitizedOption) {
                                         $isCorrect = true;
                                         break;
                                     }
