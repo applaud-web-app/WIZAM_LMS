@@ -150,7 +150,7 @@
                                     class="text-red-500">*</span></label>
                             <input type="number"  min="0" name="discount_percentage" id="discount"
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
-                                placeholder="Enter Discount" value="{{$plan->discount}}" required>
+                                placeholder="Enter Discount" value="{{$plan->discount == 0 ? 0 : $plan->discount_percentage}}" required>
                         </div>
 
                         <!-- Feature Access - Unlimited Checkbox -->

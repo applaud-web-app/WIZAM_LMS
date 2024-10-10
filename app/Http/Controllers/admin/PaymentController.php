@@ -78,9 +78,10 @@ class PaymentController extends Controller
       $data->category_id = $validatedData['category'] ?? null;
       $data->name = $validatedData['plan_name'] ?? null;
       $data->price_type = $validatedData['price_type'] ?? null;  // MONTHLY // FIXED
-      $data->duration = $validatedData['discount_percentage'] ?? null;
+      $data->duration = $validatedData['duration'] ?? null;
       $data->price = $validatedData['price'] ?? null;
       $data->discount = $validatedData['discount'] ?? null;
+      $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
       $data->description = $validatedData['description'] ?? null;
       $data->sort_order = $validatedData['order'] ?? null;
       $data->feature_access = $validatedData['feature_access'] ?? null;
@@ -143,7 +144,8 @@ class PaymentController extends Controller
          $data->price_type = $validatedData['price_type'];  // MONTHLY // FIXED
          $data->duration = $validatedData['duration'];
          $data->price = $validatedData['price'];
-         $data->discount = $validatedData['discount_percentage'];
+         $data->discount = $validatedData['discount'];
+         $data->discount_percentage = $validatedData['discount_percentage'];
          $data->description = $validatedData['description'];
          $data->sort_order = $validatedData['order'];
          $data->feature_access = $validatedData['feature_access'];
