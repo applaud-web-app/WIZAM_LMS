@@ -784,10 +784,10 @@ class PracticeSetController extends Controller
                             }
                             break;
                         case 'ORD':
-                            $isCorrect = $user_answ === $correct_answ;
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'EMQ':
-                            $isCorrect = $user_answ === $correct_answ;
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'SAQ':
                             if (is_string($user_answ) && is_array($question->options)) {
@@ -797,7 +797,7 @@ class PracticeSetController extends Controller
                                     $sanitizedOption = trim(strip_tags($option));
     
                                     // Check if the sanitized user answer matches any sanitized option
-                                    if ($sanitizedUserAnswer === $sanitizedOption) {
+                                    if ($sanitizedUserAnswer == $sanitizedOption) {
                                         $isCorrect = true;
                                         break;
                                     }
