@@ -639,15 +639,17 @@ class PracticeSetController extends Controller
                             $correct_answ = $question->options;
                             $options = $question->options; // array
                             // Loop through each option and compare after sanitizing HTML
-                            foreach ($options as $option) {
-                                // Strip HTML tags and extra spaces from both user answer and the option
-                                $sanitizedUserAnswer = trim(strip_tags($user_answ));
-                                $sanitizedOption = trim(strip_tags($option));
+                            if (is_string($user_answ)) {
+                                foreach ($options as $option) {
+                                    // Strip HTML tags and extra spaces from both user answer and the option
+                                    $sanitizedUserAnswer = trim(strip_tags($user_answ));
+                                    $sanitizedOption = trim(strip_tags($option));
 
-                                // Check if the sanitized user answer matches any sanitized option
-                                if ($sanitizedUserAnswer === $sanitizedOption) {
-                                    $isCorrect = true;
-                                    break;
+                                    // Check if the sanitized user answer matches any sanitized option
+                                    if ($sanitizedUserAnswer === $sanitizedOption) {
+                                        $isCorrect = true;
+                                        break;
+                                    }
                                 }
                             }
                             break;
