@@ -82,9 +82,9 @@
                         <option value="manual" {{$quizSetting->duration_mode == "manual" ? "selected" : ""}}>Manual</option>
                     </select>
                 </div>
-                <div class="mb-[20px] {{$quizSetting->point_mode == "manual" ? "" : "hidden"}}" id="durationBox">
+                <div class="mb-[20px] {{$quizSetting->duration_mode == "manual" ? "" : "hidden"}}" id="durationBox">
                     <label for="duration" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration (Minutes) <span class="text-red-500">*</span></label>
-                    <input type="text" id="duration" name="duration" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->duration){{$quizSetting->duration}}@endisset" placeholder="Enter Duration" min="1">
+                    <input type="text" id="duration" name="duration" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->duration){{$quizSetting->duration}}@endisset" placeholder="Enter Duration" min="1" required>
                 </div>
                 <!-- Point Mode -->
                 <div class="mb-[20px]">
@@ -96,7 +96,7 @@
                 </div>
                 <div class="mb-[20px] {{$quizSetting->point_mode == "manual" ? "" : "hidden"}}" id="PointBox">
                     <label for="points" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Marks for Correct Answer <span class="text-red-500">*</span></label>
-                    <input type="text" id="points" name="points" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->point){{$quizSetting->point}}@endisset" placeholder="Enter Point" min="1">
+                    <input type="text" id="points" name="points" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->point){{$quizSetting->point}}@endisset" placeholder="Enter Point" min="1" required>
                 </div>
                 <!-- Show Award Popup -->
                 <div class="mb-[20px]">
@@ -111,13 +111,13 @@
                     <div class="mb-[20px]">
                         <label for="negative_marking_type" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marking Type</label>
                         <select id="negative_marking_type" name="negative_marking_type" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                            <option value="fixed" {{$quizSetting->negative_marking_type == "fixed" ? "checked" : ""}}>Fixed</option>
-                            <option value="percentage" {{$quizSetting->negative_marking_type == "percentage" ? "checked" : ""}}>Percentage</option>
+                            <option value="fixed" {{$quizSetting->negative_marking_type == "fixed" ? "selected" : ""}}>Fixed</option>
+                            <option value="percentage" {{$quizSetting->negative_marking_type == "percentage" ? "selected" : ""}}>Percentage</option>
                         </select>
                     </div>
                     
                     <label for="negative_marks" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marks <span class="text-red-500">*</span></label>
-                    <input type="text" id="negative_marks" name="negative_marks" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->negative_marks){{$quizSetting->negative_marks}}@endisset" placeholder="Enter Negative Marks" min="1">
+                    <input type="text" id="negative_marks" name="negative_marks" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($quizSetting->negative_marks){{$quizSetting->negative_marks}}@endisset" placeholder="Enter Negative Marks" min="1" required>
                 </div>
 
                 <div class="mb-[20px]">

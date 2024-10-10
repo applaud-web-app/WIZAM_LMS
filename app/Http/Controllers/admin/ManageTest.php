@@ -758,9 +758,9 @@ class ManageTest extends Controller
         // Update validation rules to include 'img_url'
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'duration_type' => 'required|in:exam_wise,ques_wise',
-            'exam_duration' => 'required_if:duration_type,exam_wise|nullable|integer|min:1',
-            'sub_category' => 'required|exists:categories,id',
+            // 'duration_type' => 'required|in:exam_wise,ques_wise',
+            // 'exam_duration' => 'required_if:duration_type,exam_wise|nullable|integer|min:1',
+            'sub_category' => 'required',
             'exam_type' => 'required|exists:exam_types,id',
             'is_free' => 'required|boolean',
             'price' => 'required_if:is_free,0|nullable|numeric|min:0',
@@ -801,7 +801,7 @@ class ManageTest extends Controller
         // Create Exam with image URL
         $exam = Exam::create([
             'title' => $validatedData['title'],
-            'duration_type' => $validatedData['duration_type'],
+            'duration_type' => $validatedData['duration_type'] ?? null,
             'exam_duration' => $validatedData['exam_duration'] ?? null, // Add duration if provided
             'subcategory_id' => $validatedData['sub_category'],
             'exam_type_id' => $validatedData['exam_type'],
@@ -835,9 +835,9 @@ class ManageTest extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'duration_type' => 'required|in:exam_wise,ques_wise',
-            'exam_duration' => 'required_if:duration_type,exam_wise|nullable|integer|min:1',
-            'sub_category' => 'required|exists:categories,id',
+            // 'duration_type' => 'required|in:exam_wise,ques_wise',
+            // 'exam_duration' => 'required_if:duration_type,exam_wise|nullable|integer|min:1',
+            'sub_category' => 'required',
             'exam_type' => 'required|exists:exam_types,id',
             'is_free' => 'required|boolean',
             'price' => 'required_if:is_free,0|nullable|numeric|min:0',
@@ -853,8 +853,8 @@ class ManageTest extends Controller
         $exam = Exam::find($id); // Using find() is more concise
         if ($exam) {
             $exam->title = $validatedData['title'];
-            $exam->duration_type = $validatedData['duration_type'];
-            $exam->exam_duration = $validatedData['exam_duration'] ?? null; // Add duration if provided
+            // $exam->duration_type = $validatedData['duration_type'];
+            // $exam->exam_duration = $validatedData['exam_duration'] ?? null; // Add duration if provided
             $exam->subcategory_id = $validatedData['sub_category'];
             $exam->exam_type_id = $validatedData['exam_type'];
             $exam->description = $validatedData['description']; 
@@ -927,6 +927,23 @@ class ManageTest extends Controller
             'hide_solutions' => 'required|boolean',
             'leaderboard' => 'required|boolean',
         ]);
+
+        $validatedData['duration'] = null;
+        if($request->duration_mode == "manual"){
+            $validatedData['exam_duration'] = $request->duration;
+        }
+
+        $validatedData['point'] = null;
+        if($request->point_mode == "manual"){
+            $validatedData['point'] = $request->points;
+        }
+
+        $validatedData['negative_marking_type'] = null;
+        $validatedData['negative_marks'] = null;
+        if($request->negative_marking == 1){
+            $validatedData['negative_marking_type'] = $request->negative_marking_type;
+            $validatedData['negative_marks'] = $request->negative_marks;
+        }
 
         $exam = Exam::where('id',$id)->first();
         if($exam){

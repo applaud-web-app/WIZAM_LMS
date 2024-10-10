@@ -80,31 +80,78 @@
             @csrf
             <div class="grid grid-cols-12 gap-5">
               <!-- Duration Mode -->
-              <div class="col-span-12 md:col-span-6">
+              {{-- <div class="col-span-12 md:col-span-6">
                 <label for="duration_mode" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration Mode</label>
                 <select id="duration_mode" name="duration_mode" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px]">
                     <option value="automatic" {{$examSetting->duration_mode == "automatic" ? "selected" : ""}}>Automatic</option>
                     <option value="manual" {{$examSetting->duration_mode == "manual" ? "selected" : ""}}>Manual</option>
                 </select>
-              </div>
+              </div> --}}
+
+              <!-- Duration Mode -->
+              <div class="col-span-12 md:col-span-6 mb-[20px]">
+                <label for="duration_mode" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration Mode <span class="text-red-500">*</span></label>
+                <select id="duration_mode" name="duration_mode" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                    <option value="automatic" {{$examSetting->duration_mode == "automatic" ? "selected" : ""}}>Automatic</option>
+                    <option value="manual" {{$examSetting->duration_mode == "manual" ? "selected" : ""}}>Manual</option>
+                </select>
+            </div>
+            <div class="col-span-12 md:col-span-6 mb-[20px] {{$examSetting->duration_mode == "manual" ? "" : "hidden"}}" id="durationBox">
+                <label for="duration" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration (Minutes) <span class="text-red-500">*</span></label>
+                <input type="text" id="duration" name="duration" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($examSetting->exam_duration){{$examSetting->exam_duration}}@endisset" placeholder="Enter Duration" min="1" required>
+            </div>
 
               <!-- Marks/Points Mode -->
-              <div class="col-span-12 md:col-span-6">
+              {{-- <div class="col-span-12 md:col-span-6">
                 <label for="point_mode" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Marks/Points Mode</label>
                 <select id="point_mode" name="point_mode" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px]">
                     <option value="automatic" {{$examSetting->point_mode == "automatic" ? "selected" : ""}}>Automatic</option>
                     <option value="manual" {{$examSetting->point_mode == "manual" ? "selected" : ""}}>Manual</option>
                 </select>
-              </div>
+              </div> --}}
+
+
+              <div class="col-span-12 md:col-span-6 mb-[20px]">
+                <label for="point_mode" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Marks/Points Mode</label>
+                <select id="point_mode" name="point_mode" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                    <option value="automatic" {{$examSetting->point_mode == "automatic" ? "selected" : ""}}>Automatic</option>
+                    <option value="manual" {{$examSetting->point_mode == "manual" ? "selected" : ""}}>Manual</option>
+                </select>
+            </div>
+            <div class="col-span-12 md:col-span-6 mb-[20px] {{$examSetting->point_mode == "manual" ? "" : "hidden"}}" id="PointBox">
+                <label for="points" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Marks for Correct Answer <span class="text-red-500">*</span></label>
+                <input type="text" id="points" name="points" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($examSetting->point){{$examSetting->point}}@endisset" placeholder="Enter Point" min="1" required>
+            </div>
 
               <!-- Negative Marking -->
-              <div class="col-span-12 md:col-span-6">
+              {{-- <div class="col-span-12 md:col-span-6">
                 <label for="negative_marking" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marking</label>
                 <select id="negative_marking" name="negative_marking" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px]">
                     <option value="1" {{$examSetting->negative_marking == 1 ? "selected" : ""}}>Yes</option>
                     <option value="0" {{$examSetting->negative_marking == 0 ? "selected" : ""}}>No</option>
                 </select>
-              </div>
+              </div> --}}
+
+              <div class="col-span-12 md:col-span-6 mb-[20px]">
+                <label for="negative_marking" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marking</label>
+                <select id="negative_marking" name="negative_marking" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                    <option value="1" {{$examSetting->negative_marking == 1 ? "selected" : ""}}>Yes</option>
+                    <option value="0" {{$examSetting->negative_marking == 0 ? "selected" : ""}}>No</option>
+                </select>
+            </div>
+            <div class="col-span-12 md:col-span-6 mb-[20px] {{$examSetting->negative_marking == "1" ? "" : "hidden"}}" id="negativeMarkingBox">
+                 <!-- Allow Reward Points -->
+                <div class="mb-[20px]">
+                    <label for="negative_marking_type" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marking Type</label>
+                    <select id="negative_marking_type" name="negative_marking_type" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                        <option value="fixed" {{$examSetting->negative_marking_type == "fixed" ? "selected" : ""}}>Fixed</option>
+                        <option value="percentage" {{$examSetting->negative_marking_type == "percentage" ? "selected" : ""}}>Percentage</option>
+                    </select>
+                </div>
+                
+                <label for="negative_marks" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marks <span class="text-red-500">*</span></label>
+                <input type="text" id="negative_marks" name="negative_marks" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($examSetting->negative_marks){{$examSetting->negative_marks}}@endisset" placeholder="Enter Negative Marks" min="1" required>
+            </div>
 
               <!-- Overall Pass Percentage -->
               <div class="col-span-12 md:col-span-6">
@@ -210,6 +257,39 @@
         const attemptsInput = document.getElementById('attempts_input');
         attemptsInput.style.display = select.value === "1" ? 'block' : 'none';
     }
+
+    // Dynamic visibility for conditional fields
+    $("#duration_mode").change(function() {
+        if ($(this).val() === "manual") {
+            $("#durationBox").removeClass("hidden");
+        } else {
+            $("#durationBox").addClass("hidden");
+        }
+    });
+
+    $("#point_mode").change(function() {
+        if ($(this).val() === "manual") {
+            $("#PointBox").removeClass("hidden");
+        } else {
+            $("#PointBox").addClass("hidden");
+        }
+    });
+
+    $("#negative_marking").change(function() {
+        if ($(this).val() === "1") {
+            $("#negativeMarkingBox").removeClass("hidden");
+        } else {
+            $("#negativeMarkingBox").addClass("hidden");
+        }
+    });
+
+    $("#restrict_attempts").change(function() {
+        if ($(this).val() === "1") {
+            $("#restrictAttemptsBox").removeClass("hidden");
+        } else {
+            $("#restrictAttemptsBox").addClass("hidden");
+        }
+    });
 
     $(document).ready(function() {
         $("#form").validate({

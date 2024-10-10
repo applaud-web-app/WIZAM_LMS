@@ -99,7 +99,7 @@
             </div>
 
             <!-- Duration Type -->
-            <div class="mb-[20px]">
+            {{-- <div class="mb-[20px]">
                <label for="duration_type" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Duration Type <span class="text-red-500">*</span></label>
                <select id="duration_type" name="duration_type" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" onchange="toggleExamDurationInput(this)">
                     <option selected disabled>Select Duration Type</option>
@@ -112,7 +112,7 @@
             <div id="exam_duration_input " class="mb-[20px] {{$exam->duration_type == "ques_wise" ? "hidden" : ""}}">
                <label for="exam_duration" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Exam Duration (Minutes) <span class="text-red-500">*</span></label>
                <input id="exam_duration" name="exam_duration" type="number" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($exam){{$exam->exam_duration}}@endisset" placeholder="Enter exam duration in minutes" />
-            </div>
+            </div> --}}
 
             <!-- Sub Category -->
             <div class="mb-[20px]">
