@@ -56,6 +56,7 @@ class PaymentController extends Controller
          'price_type' => 'required|string',
          'duration' => 'nullable|integer', // Assuming duration is optional
          'price' => 'required|numeric',
+         'discount'=>'required',
          'discount_percentage' => 'nullable|integer',
          'description' => 'nullable|string',
          'order' => 'nullable|integer',
@@ -80,7 +81,7 @@ class PaymentController extends Controller
       $data->price_type = $validatedData['price_type'] ?? null;  // MONTHLY // FIXED
       $data->duration = $validatedData['duration'] ?? null;
       $data->price = $validatedData['price'] ?? null;
-      $data->discount = $validatedData['discount'] ?? null;
+      $data->discount = $validatedData['discount'] ?? 0;
       $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
       $data->description = $validatedData['description'] ?? null;
       $data->sort_order = $validatedData['order'] ?? null;
@@ -116,6 +117,7 @@ class PaymentController extends Controller
          'price_type' => 'required|string',
          'duration' => 'nullable|integer', // Assuming duration is optional
          'price' => 'required|numeric',
+         'discount'=>'required',
          'discount_percentage' => 'nullable|integer',
          'description' => 'nullable|string',
          'order' => 'nullable|integer',
