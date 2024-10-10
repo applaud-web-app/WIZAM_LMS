@@ -110,10 +110,10 @@
                     { data: 'course', name: 'course' },
                     { data: 'email', name: 'email' },
                     { data: 'phone', name: 'phone' },
-                    { data: 'study_mode', name: 'study_mode' },
                     { data: 'hear_by', name: 'hear_by' },
-                    { data: 'message', name: 'message' },
+                    { data: 'study_mode', name: 'study_mode' },
                     { data: 'contact_me', name: 'contact_me' },
+                    { data: 'message', name: 'message' },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'action', name: 'action', orderable: false, searchable: false },
                 ]
