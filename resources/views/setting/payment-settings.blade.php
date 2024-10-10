@@ -108,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+        {{-- <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
             <div class="col-span-12 md:col-span-12">
                 <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
                     <div class="p-[25px]">
@@ -156,7 +156,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
         <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
             <div class="col-span-12 md:col-span-12">
                 <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
@@ -206,7 +206,7 @@
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+        {{-- <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
             <div class="col-span-12 md:col-span-12">
                 <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
                     <div class="p-[25px]">
@@ -348,7 +348,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </section>
 @endsection
 @push('scripts')
