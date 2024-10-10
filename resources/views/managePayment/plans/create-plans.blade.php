@@ -194,6 +194,7 @@
                                     <option value="practice">Practice Sets</option>
                                     <option value="quizzes">Quizzes</option>
                                     <option value="lessons">Lessons</option>
+                                    <option value="videos">Videos</option>
                                     <option value="exams">Exams</option>
                                 </select>
                             </div>
