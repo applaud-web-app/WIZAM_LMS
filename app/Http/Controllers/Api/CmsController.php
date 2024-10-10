@@ -334,7 +334,7 @@ class CmsController extends Controller
     public function pricing() {
         try {
             $pricing = Plan::with('category:id,name') // Load the related SubCategory fields (id, name)
-                ->select('id', 'name', 'price_type', 'duration', 'price', 'discount', 'description', 'sort_order', 'feature_access', 'features', 'popular', 'category_id') // Ensure category_id is selected
+                ->select('id', 'name', 'price_type', 'duration', 'price', 'discount', 'description', 'sort_order', 'feature_access', 'features', 'popular') // Ensure category_id is selected
                 ->where('status', 1)
                 ->get();
                     
