@@ -331,13 +331,16 @@ class CmsController extends Controller
         }
     }
 
-
-    public function pricing(){
+    public function pricing() {
         try {
-            $pricing = Plan::with('category:id,name')->select('name','price_type','duration','price','discount','description','sort_order','feature_access','features','popular')->where('status',1)->get();
-            return response()->json(['status'=> true,'data' => $pricing], 201);
+            $pricing = Plan::with('category:id,name')
+                ->select('id', 'name', 'price_type', 'duration', 'price', 'discount', 'description', 'sort_order', 'feature_access', 'features', 'popular')
+                ->where('status', 1)
+                ->get();
+                
+            return response()->json(['status' => true, 'data' => $pricing], 200);  // Use 200 status code for a successful GET request
         } catch (\Throwable $th) {
-            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
 
