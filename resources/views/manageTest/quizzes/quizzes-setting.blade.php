@@ -111,8 +111,8 @@
                     <div class="mb-[20px]">
                         <label for="negative_marking_type" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Negative Marking Type</label>
                         <select id="negative_marking_type" name="negative_marking_type" class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                            <option value="fixed" {{$quizSetting->negative_marking_type == 1 ? "fixed" : ""}}>Fixed</option>
-                            <option value="percentage" {{$quizSetting->negative_marking_type == 0 ? "percentage" : ""}}>Percentage</option>
+                            <option value="fixed" {{$quizSetting->negative_marking_type == "fixed" ? "fixed" : ""}}>Fixed</option>
+                            <option value="percentage" {{$quizSetting->negative_marking_type == "percentage" ? "percentage" : ""}}>Percentage</option>
                         </select>
                     </div>
                     
