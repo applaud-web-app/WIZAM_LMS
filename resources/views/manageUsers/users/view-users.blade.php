@@ -35,10 +35,10 @@
                 <h1 class="mb-0 inline-flex items-center py-[16px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
                     Users</h1>
                 <div class="flex items-center gap-x-[10px] gap-y-[5px]">
-                    <button type="button"
+                    {{-- <button type="button"
                         class="flex items-center px-[14px] text-sm hover:text-white hover:bg-secondary text-secondary rounded-md font-normal bg-secondary/10 border-primary h-10 gap-[6px] transition-[0.3s]">
                         <span class="m-0">Import</span>
-                    </button>
+                    </button> --}}
                     <a href="{{route('add-users')}}"
                         class="flex items-center px-[14px] text-sm text-white rounded-md  bg-primary border-primary h-10 gap-[6px] transition-[0.3s]">
                         <i class="uil uil-plus"></i>
