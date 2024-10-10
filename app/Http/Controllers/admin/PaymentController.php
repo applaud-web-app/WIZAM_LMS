@@ -86,7 +86,7 @@ class PaymentController extends Controller
       $data->description = $validatedData['description'] ?? null;
       $data->sort_order = $validatedData['order'] ?? null;
       $data->feature_access = $validatedData['feature_access'] ?? null;
-      $data->features = $validatedData['features'] ? $validatedData['features'] : [];
+      $data->features = $validatedData['features'] ? array_values($validatedData['features']) : [];
       $data->popular = $validatedData['popular'] ?? null; 
       $data->status = $validatedData['status'] ?? null;
       $data->save();
@@ -151,7 +151,7 @@ class PaymentController extends Controller
          $data->description = $validatedData['description'];
          $data->sort_order = $validatedData['order'];
          $data->feature_access = $validatedData['feature_access'];
-         $data->features = $validatedData['features'] ? $validatedData['features'] : [];
+         $data->features = $validatedData['features'] ? array_values($validatedData['features']) : [];
          $data->popular = $validatedData['popular']; 
          $data->status = $validatedData['status'];
          $data->save();
