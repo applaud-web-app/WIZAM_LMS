@@ -91,11 +91,11 @@
             <div class="mb-[20px]" id="optionsContainer">
                <div class="optionItem mb-[20px]">
                   <label for="option1" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 1  <span class="text-red-500">*</span></label>
-                  <textarea id="option1" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">True</textarea>
+                  <textarea id="option1" name="option[]" rows="1" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">True</textarea>
                </div>
                <div class="optionItem mb-[20px]">
                   <label for="option2" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Option 2  <span class="text-red-500">*</span></label>
-                  <textarea id="option2" name="option[]" rows="1" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">False</textarea>
+                  <textarea id="option2" name="option[]" rows="1" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">False</textarea>
                </div>
             </div>
 

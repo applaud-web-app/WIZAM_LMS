@@ -94,7 +94,7 @@
                         <label for="question"
                             class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Question <span
                                 class="text-red-500">*</span></label>
-                        <textarea id="question" name="question" rows="2" required
+                        <textarea id="question" name="question" rows="5" required
                             class=" w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary"
                             placeholder="Enter the question. Wrap the word or phrase you want as a blank with ## (e.g., The capital of France is ##Paris##)."></textarea>
                     </div>
