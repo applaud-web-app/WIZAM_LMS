@@ -49,6 +49,7 @@
                      <th>Course</th>
                      <th>Email</th>
                      <th>Phone</th>
+                     <th>Hear By</th>
                      <th>Study Mode</th>
                      <th>Contact Me</th>
                      <th>Message</th>
@@ -110,6 +111,7 @@
                     { data: 'email', name: 'email' },
                     { data: 'phone', name: 'phone' },
                     { data: 'study_mode', name: 'study_mode' },
+                    { data: 'hear_by', name: 'hear_by' },
                     { data: 'message', name: 'message' },
                     { data: 'contact_me', name: 'contact_me' },
                     { data: 'created_at', name: 'created_at' },
