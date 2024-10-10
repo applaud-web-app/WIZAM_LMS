@@ -14,6 +14,7 @@ class Plan extends Model
         'name',
         'price_type',
         'duration',
+        'discount_percentage',
         'price',
         'discount',
         'description',
