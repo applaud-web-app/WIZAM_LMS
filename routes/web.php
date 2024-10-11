@@ -400,7 +400,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/save-directory-media', 'saveDirectoryMedia')->name('save-directory-media');
         Route::post('/delete-directory', 'deleteDirectory')->name('delete-directory');
 
-        Route::get('/fetch-directory', 'fetchDirectoryData')->name('fetch-directory-data');
+        Route::post('/fetch-directory', 'fetchDirectoryData')->name('fetch-directory-data');
 
 
 

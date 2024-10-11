@@ -88,7 +88,7 @@ class FileManagerController extends Controller
             }
 
             // Check for a valid parent directory
-            $parentDirectory = FileManager::where(['id' => $directory_id, 'type' => 'directory'])->first();
+            $parentDirectory = FileManager::where(['id' => $directory_id])->first();
             if ($parentDirectory) {
                 // Create a child directory under the parent
                 $childDirectory = FileManager::create([
@@ -484,21 +484,41 @@ class FileManagerController extends Controller
 
     public function fetchDirectoryData(Request $request)
     {
-        $parent_id = $request->input('parent_id', 0); // Default to 0 if not provided
+        try {
+            $request->validate([
+                'parent_id' => 'required'
+            ]);
     
-        // Fetch data from your FileManager model based on the parent_id
-        $parentData = FileManager::where('parent_node', $parent_id)->get();
+            $parent_id = $request->input('parent_id', 0);
     
-        // Separate folders and files
-        $folders = $parentData->filter(fn($item) => $item->type === 'folder');
-        $files = $parentData->filter(fn($item) => $item->type !== 'folder');
+            // Fetch data from your FileManager model based on the parent_id
+            $parentData = FileManager::where('parent_node', $parent_id)->get();
     
-        return response()->json([
-            'success' => true,
-            'folders' => $folders,
-            'files' => $files
-        ]);
+            // Separate folders and files
+            $folders = $parentData->filter(fn($item) => $item->type === 'folder')->values(); // Collect only folder items
+            $files = $parentData->filter(fn($item) => $item->type !== 'folder')->values(); // Collect only file items
+    
+            // Ensure folders and files are always arrays
+            $parms = "id=".$parent_id;
+            $encryptUrl = encrypturl(route('add-folder'),$parms);
+            return response()->json([
+                'success' => true,
+                'folders' => $folders->isEmpty() ? [] : $folders, // Return empty array if no folders
+                'files' => $files->isEmpty() ? [] : $files, // Return empty array if no files
+                'uploadUrl' => encrypturl(route('save-directory-media'),$parms),  // Example URL for uploading files
+                'addFolderUrl' => encrypturl(route('add-folder'),$parms),  // Example URL for adding folders
+                'deleteUrl' => encrypturl(route('delete-directory'),$parms)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
+    
+
     
 
     public function deleteDirectory(Request $request) {
