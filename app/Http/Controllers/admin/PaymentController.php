@@ -680,40 +680,43 @@ class PaymentController extends Controller
    public function handleWebhook(Request $request)
    {
       $event = null;
+
+      Log::info('Stripe Environment Variables', [
+         'webhook_secret' => config('stripe.webhook.secret'),
+      ]);
+      // Log raw payload and headers for debugging
+      Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+      Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
+  
       // Validate the webhook
       try {
-         $event = Webhook::constructEvent(
-               $request->getContent(),
-               $request->header('Stripe-Signature'),
-               config('stripe.webhook.secret')
-         );
+          $event = Webhook::constructEvent(
+              $request->getContent(),
+              $request->header('Stripe-Signature'),
+              config('stripe.webhook.secret')
+          );
       } catch (\UnexpectedValueException $e) {
-         // Log the invalid payload error
-         Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
-         return response()->json(['error' => 'Invalid payload'], 400);
+          Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
+          return response()->json(['error' => 'Invalid payload'], 400);
       } catch (\Stripe\Exception\SignatureVerificationException $e) {
-         // Log the invalid signature error
-         Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
-         return response()->json(['error' => 'Invalid signature'], 400);
+          Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
+          return response()->json(['error' => 'Invalid signature'], 400);
       }
-
+  
       try {
          switch ($event->type) {
-               case 'payment_intent.succeeded':
-                  $this->storePaymentDetails($event->data->object);
-                  break;
+            case 'payment_intent.succeeded':
+               $this->storePaymentDetails($event->data->object);
+               break;
 
-               case 'invoice.payment_succeeded':
-                  $this->storeSubscriptionPaymentDetails($event->data->object);
-                  break;
+            case 'invoice.payment_succeeded':
+               $this->storeSubscriptionPaymentDetails($event->data->object);
+               break;
 
-               case 'customer.subscription.created':
-                  $this->storeSubscriptionDetails($event->data->object);
-                  break;
-
-               // Handle other events...
+            case 'customer.subscription.created':
+               $this->storeSubscriptionDetails($event->data->object);
+               break;
          }
-
          return response()->json(['status' => 'success']);
       } catch (\Exception $e) {
          // Log any other exceptions during event handling
@@ -726,11 +729,11 @@ class PaymentController extends Controller
    {
       try {
          Payment::create([
-               'user_id' => $paymentIntent->metadata->user_id,
-               'stripe_payment_id' => $paymentIntent->id,
-               'amount' => $paymentIntent->amount_received / 100, // Convert from cents
-               'currency' => $paymentIntent->currency,
-               'status' => $paymentIntent->status,
+            'user_id' => $paymentIntent->metadata->user_id,
+            'stripe_payment_id' => $paymentIntent->id,
+            'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+            'currency' => $paymentIntent->currency,
+            'status' => $paymentIntent->status,
          ]);
       } catch (\Exception $e) {
          // Log the error during payment storage
@@ -743,12 +746,12 @@ class PaymentController extends Controller
       try {
          $userId = $invoice->customer; // Assuming you store the Stripe customer ID in your user table
          Payment::create([
-               'user_id' => $userId,
-               'stripe_payment_id' => $invoice->id,
-               'amount' => $invoice->amount_paid / 100, // Convert from cents
-               'currency' => $invoice->currency,
-               'status' => $invoice->status,
-               'subscription_id' => $invoice->subscription, // Link to subscription
+            'user_id' => $userId,
+            'stripe_payment_id' => $invoice->id,
+            'amount' => $invoice->amount_paid / 100, // Convert from cents
+            'currency' => $invoice->currency,
+            'status' => $invoice->status,
+            'subscription_id' => $invoice->subscription,
          ]);
       } catch (\Exception $e) {
          // Log the error during subscription payment storage
