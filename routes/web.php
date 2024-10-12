@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 //     return "SITE HOME PAGE <a href='".$login."'>Login</a>";
 // });
 
-Route::get('stripe/webhooks',[LoginController::class, 'stripeLogin'])->name('stripe-login');
+Route::post('stripe/webhook', [PaymentController::class, 'handleWebhook'])->name('stripe-webhook');
 
 // PUBLIC ROUTES
 Route::get('/', [LoginController::class, 'login'])->name('admin-login');

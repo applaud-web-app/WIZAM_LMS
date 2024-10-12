@@ -10,6 +10,10 @@ use App\Models\Plan;
 use Stripe\Product;
 use Stripe\Price;
 use App\Models\GeneralSetting;
+use Laravel\Cashier\Cashier;
+use Stripe\Webhook;
+use App\Models\Payment;
+use App\Models\Subscription;
 
 class PaymentController extends Controller
 {
@@ -669,5 +673,85 @@ class PaymentController extends Controller
       return redirect()->back()->with('error','Something Went Wrong');
    }
 
+
+
+   // handle Webhook
+   public function handleWebhook(Request $request)
+   {
+      $event = null;
+
+      // You can validate the webhook here if necessary
+      try {
+         $event = Webhook::constructEvent(
+               $request->getContent(),
+               $request->header('Stripe-Signature'),
+               config('stripe.webhook.secret')
+         );
+      } catch (\UnexpectedValueException $e) {
+         // Invalid payload
+         return response()->json(['error' => 'Invalid payload'], 400);
+      } catch (\Stripe\Exception\SignatureVerificationException $e) {
+         // Invalid signature
+         return response()->json(['error' => 'Invalid signature'], 400);
+      }
+
+      switch ($event->type) {
+         case 'payment_intent.succeeded':
+               $this->storePaymentDetails($event->data->object);
+               break;
+
+         case 'invoice.payment_succeeded':
+               $this->storeSubscriptionPaymentDetails($event->data->object);
+               break;
+
+         case 'customer.subscription.created':
+               $this->storeSubscriptionDetails($event->data->object);
+               break;
+
+         // Handle other events...
+      }
+
+      return response()->json(['status' => 'success']);
+   }
+
+   protected function storePaymentDetails($paymentIntent)
+   {
+      // Extract relevant data from the payment intent
+      Payment::create([
+         'user_id' => $paymentIntent->metadata->user_id,
+         'stripe_payment_id' => $paymentIntent->id,
+         'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+         'currency' => $paymentIntent->currency,
+         'status' => $paymentIntent->status,
+      ]);
+   }
+
+   protected function storeSubscriptionPaymentDetails($invoice)
+   {
+      // Extract relevant data from the invoice
+      $userId = $invoice->customer; // Assuming you store the Stripe customer ID in your user table
+      Payment::create([
+         'user_id' => $userId,
+         'stripe_payment_id' => $invoice->id,
+         'amount' => $invoice->amount_paid / 100, // Convert from cents
+         'currency' => $invoice->currency,
+         'status' => $invoice->status,
+         'subscription_id' => $invoice->subscription, // Link to subscription
+      ]);
+   }
+
+   protected function storeSubscriptionDetails($subscription)
+   {
+      // Extract relevant data from the subscription
+      Subscription::create([
+         'user_id' => $subscription->metadata->user_id,
+         'stripe_id' => $subscription->id,
+         'stripe_status' => $subscription->status,
+         'stripe_price' => $subscription->plan->id,
+         'quantity' => $subscription->quantity,
+         'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
+         'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
+      ]);
+   }
 
 }
