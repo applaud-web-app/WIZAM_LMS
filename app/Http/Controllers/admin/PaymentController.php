@@ -676,54 +676,107 @@ class PaymentController extends Controller
 
 
 
-   // handle Webhook
    public function handleWebhook(Request $request)
    {
       $event = null;
-
+      // Logging for debugging
       Log::info('Stripe Environment Variables', [
-         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+         'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
       ]);
-      // Log raw payload and headers for debugging
       Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
       Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
-  
-      // Validate the webhook
+      Log::info('Stripe Webhook Signature', ['stripe-signature' => $request->header('Stripe-Signature')]);
       try {
-          $event = Webhook::constructEvent(
-              $request->getContent(),
-              $request->header('Stripe-Signature'),
-              env('STRIPE_WEBHOOK_SECRET')
-          );
+         // Validate the webhook signature
+         $event = Webhook::constructEvent(
+               $request->getContent(),
+               $request->header('Stripe-Signature'),
+               env('STRIPE_SIGNATURE_WEBHOOK')
+         );
       } catch (\UnexpectedValueException $e) {
-          Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
-          return response()->json(['error' => 'Invalid payload'], 400);
+         Log::error('Stripe Webhook Error: Invalid payload', [
+               'error' => $e->getMessage(),
+               'payload' => $request->getContent()
+         ]);
+         return response()->json(['error' => 'Invalid payload'], 400);
       } catch (\Stripe\Exception\SignatureVerificationException $e) {
-          Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
-          return response()->json(['error' => 'Invalid signature'], 400);
+         Log::error('Stripe Webhook Error: Invalid signature', [
+               'error' => $e->getMessage(),
+               'payload' => $request->getContent()
+         ]);
+         return response()->json(['error' => 'Invalid signature'], 400);
       }
-  
+      // Handle specific event types
       try {
          switch ($event->type) {
-            case 'payment_intent.succeeded':
-               $this->storePaymentDetails($event->data->object);
-               break;
-
-            case 'invoice.payment_succeeded':
-               $this->storeSubscriptionPaymentDetails($event->data->object);
-               break;
-
-            case 'customer.subscription.created':
-               $this->storeSubscriptionDetails($event->data->object);
-               break;
+               case 'payment_intent.succeeded':
+                  $this->storePaymentDetails($event->data->object);
+                  break;
+               case 'invoice.payment_succeeded':
+                  $this->storeSubscriptionPaymentDetails($event->data->object);
+                  break;
+               case 'customer.subscription.created':
+                  $this->storeSubscriptionDetails($event->data->object);
+                  break;
          }
          return response()->json(['status' => 'success']);
       } catch (\Exception $e) {
-         // Log any other exceptions during event handling
-         Log::error('Stripe Webhook Error: General error', ['error' => $e->getMessage(), 'event_type' => $event->type]);
+         Log::error('Stripe Webhook Error: General error', [
+               'error' => $e->getMessage(),
+               'event_type' => $event->type
+         ]);
          return response()->json(['error' => 'Failed to process event'], 500);
       }
    }
+
+   // handle Webhook
+   // public function handleWebhook(Request $request)
+   // {
+   //    $event = null;
+
+   //    Log::info('Stripe Environment Variables', [
+   //       'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
+   //    ]);
+   //    // Log raw payload and headers for debugging
+   //    Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+   //    Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
+  
+   //    // Validate the webhook
+   //    try {
+   //        $event = Webhook::constructEvent(
+   //            $request->getContent(),
+   //            $request->header('Stripe-Signature'),
+   //            env('STRIPE_SIGNATURE_WEBHOOK')
+   //        );
+   //    } catch (\UnexpectedValueException $e) {
+   //        Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
+   //        return response()->json(['error' => 'Invalid payload'], 400);
+   //    } catch (\Stripe\Exception\SignatureVerificationException $e) {
+   //        Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
+   //        return response()->json(['error' => 'Invalid signature'], 400);
+   //    }
+  
+   //    try {
+   //       switch ($event->type) {
+   //          case 'payment_intent.succeeded':
+   //             $this->storePaymentDetails($event->data->object);
+   //             break;
+
+   //          case 'invoice.payment_succeeded':
+   //             $this->storeSubscriptionPaymentDetails($event->data->object);
+   //             break;
+
+   //          case 'customer.subscription.created':
+   //             $this->storeSubscriptionDetails($event->data->object);
+   //             break;
+   //       }
+   //       return response()->json(['status' => 'success']);
+   //    } catch (\Exception $e) {
+   //       // Log any other exceptions during event handling
+   //       Log::error('Stripe Webhook Error: General error', ['error' => $e->getMessage(), 'event_type' => $event->type]);
+   //       return response()->json(['error' => 'Failed to process event'], 500);
+   //    }
+   // }
 
    protected function storePaymentDetails($paymentIntent)
    {
