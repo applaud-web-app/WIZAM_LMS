@@ -682,7 +682,7 @@ class PaymentController extends Controller
       $event = null;
 
       Log::info('Stripe Environment Variables', [
-         'webhook_secret' => config('stripe.webhook.secret'),
+         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
       ]);
       // Log raw payload and headers for debugging
       Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
@@ -693,7 +693,7 @@ class PaymentController extends Controller
           $event = Webhook::constructEvent(
               $request->getContent(),
               $request->header('Stripe-Signature'),
-              config('stripe.webhook.secret')
+              env('STRIPE_WEBHOOK_SECRET')
           );
       } catch (\UnexpectedValueException $e) {
           Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
