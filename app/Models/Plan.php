@@ -22,7 +22,9 @@ class Plan extends Model
         'feature_access',
         'features',
         'popular',
-        'status'
+        'status',
+        'stripe_product_id',
+        'stripe_price_id'
     ];
 
     public function category(){

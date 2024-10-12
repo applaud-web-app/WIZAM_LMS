@@ -116,7 +116,7 @@
                             <label for="price"
                                 class="block text-sm font-medium text-body dark:text-title-dark mb-2">Price<span
                                     class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" value="0" min="0" name="price" id="price"
+                            <input type="number" value="0" min="0" name="price" id="price"
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter price" required>
                         </div>
