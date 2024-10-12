@@ -680,7 +680,6 @@ class PaymentController extends Controller
    public function handleWebhook(Request $request)
    {
       $event = null;
-
       // Validate the webhook
       try {
          $event = Webhook::constructEvent(

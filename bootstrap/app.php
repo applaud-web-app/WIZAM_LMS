@@ -15,7 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\VerifyLoggedInUser::class,
             'checkAuthToken' => \App\Http\Middleware\CheckAuthToken::class,
         ]);
+        $middleware->validateCsrfTokens(
+            except: ['stripe/*']
+        );
     })
+    
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
