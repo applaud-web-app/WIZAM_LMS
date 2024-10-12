@@ -14,6 +14,7 @@ use Laravel\Cashier\Cashier;
 use Stripe\Webhook;
 use App\Models\Payment;
 use App\Models\Subscription;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -680,7 +681,7 @@ class PaymentController extends Controller
    {
       $event = null;
 
-      // You can validate the webhook here if necessary
+      // Validate the webhook
       try {
          $event = Webhook::constructEvent(
                $request->getContent(),
@@ -688,70 +689,90 @@ class PaymentController extends Controller
                config('stripe.webhook.secret')
          );
       } catch (\UnexpectedValueException $e) {
-         // Invalid payload
+         // Log the invalid payload error
+         Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage(), 'payload' => $request->getContent()]);
          return response()->json(['error' => 'Invalid payload'], 400);
       } catch (\Stripe\Exception\SignatureVerificationException $e) {
-         // Invalid signature
+         // Log the invalid signature error
+         Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
          return response()->json(['error' => 'Invalid signature'], 400);
       }
 
-      switch ($event->type) {
-         case 'payment_intent.succeeded':
-               $this->storePaymentDetails($event->data->object);
-               break;
+      try {
+         switch ($event->type) {
+               case 'payment_intent.succeeded':
+                  $this->storePaymentDetails($event->data->object);
+                  break;
 
-         case 'invoice.payment_succeeded':
-               $this->storeSubscriptionPaymentDetails($event->data->object);
-               break;
+               case 'invoice.payment_succeeded':
+                  $this->storeSubscriptionPaymentDetails($event->data->object);
+                  break;
 
-         case 'customer.subscription.created':
-               $this->storeSubscriptionDetails($event->data->object);
-               break;
+               case 'customer.subscription.created':
+                  $this->storeSubscriptionDetails($event->data->object);
+                  break;
 
-         // Handle other events...
+               // Handle other events...
+         }
+
+         return response()->json(['status' => 'success']);
+      } catch (\Exception $e) {
+         // Log any other exceptions during event handling
+         Log::error('Stripe Webhook Error: General error', ['error' => $e->getMessage(), 'event_type' => $event->type]);
+         return response()->json(['error' => 'Failed to process event'], 500);
       }
-
-      return response()->json(['status' => 'success']);
    }
 
    protected function storePaymentDetails($paymentIntent)
    {
-      // Extract relevant data from the payment intent
-      Payment::create([
-         'user_id' => $paymentIntent->metadata->user_id,
-         'stripe_payment_id' => $paymentIntent->id,
-         'amount' => $paymentIntent->amount_received / 100, // Convert from cents
-         'currency' => $paymentIntent->currency,
-         'status' => $paymentIntent->status,
-      ]);
+      try {
+         Payment::create([
+               'user_id' => $paymentIntent->metadata->user_id,
+               'stripe_payment_id' => $paymentIntent->id,
+               'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+               'currency' => $paymentIntent->currency,
+               'status' => $paymentIntent->status,
+         ]);
+      } catch (\Exception $e) {
+         // Log the error during payment storage
+         Log::error('Stripe Webhook Error: Failed to store payment details', ['error' => $e->getMessage(), 'payment_intent' => $paymentIntent]);
+      }
    }
 
    protected function storeSubscriptionPaymentDetails($invoice)
    {
-      // Extract relevant data from the invoice
-      $userId = $invoice->customer; // Assuming you store the Stripe customer ID in your user table
-      Payment::create([
-         'user_id' => $userId,
-         'stripe_payment_id' => $invoice->id,
-         'amount' => $invoice->amount_paid / 100, // Convert from cents
-         'currency' => $invoice->currency,
-         'status' => $invoice->status,
-         'subscription_id' => $invoice->subscription, // Link to subscription
-      ]);
+      try {
+         $userId = $invoice->customer; // Assuming you store the Stripe customer ID in your user table
+         Payment::create([
+               'user_id' => $userId,
+               'stripe_payment_id' => $invoice->id,
+               'amount' => $invoice->amount_paid / 100, // Convert from cents
+               'currency' => $invoice->currency,
+               'status' => $invoice->status,
+               'subscription_id' => $invoice->subscription, // Link to subscription
+         ]);
+      } catch (\Exception $e) {
+         // Log the error during subscription payment storage
+         Log::error('Stripe Webhook Error: Failed to store subscription payment details', ['error' => $e->getMessage(), 'invoice' => $invoice]);
+      }
    }
 
    protected function storeSubscriptionDetails($subscription)
    {
-      // Extract relevant data from the subscription
-      Subscription::create([
-         'user_id' => $subscription->metadata->user_id,
-         'stripe_id' => $subscription->id,
-         'stripe_status' => $subscription->status,
-         'stripe_price' => $subscription->plan->id,
-         'quantity' => $subscription->quantity,
-         'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
-         'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
-      ]);
+      try {
+         Subscription::create([
+               'user_id' => $subscription->metadata->user_id,
+               'stripe_id' => $subscription->id,
+               'stripe_status' => $subscription->status,
+               'stripe_price' => $subscription->plan->id,
+               'quantity' => $subscription->quantity,
+               'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
+               'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
+         ]);
+      } catch (\Exception $e) {
+         // Log the error during subscription storage
+         Log::error('Stripe Webhook Error: Failed to store subscription details', ['error' => $e->getMessage(), 'subscription' => $subscription]);
+      }
    }
 
 }
