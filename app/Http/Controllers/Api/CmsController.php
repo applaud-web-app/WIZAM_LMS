@@ -556,8 +556,8 @@ class CmsController extends Controller
                     'price' => $request->priceId, // Ensure priceId is passed in the request
                     'quantity' => 1,
                 ]],
-                'success_url' => env('NEXT_PUBLIC_API_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => env('NEXT_PUBLIC_API_URL') . '/cancel',
+                'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => env('FRONTEND_URL') . '/cancel',
             ]);
 
             return response()->json(['status' => true, 'sessionId' => $session->id], 200);
