@@ -15,6 +15,7 @@ use Stripe\Webhook;
 use App\Models\Payment;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class PaymentController extends Controller
 {
