@@ -17,6 +17,8 @@ use App\Models\HomeCms;
 use App\Models\User;
 use Stripe\StripeClient;
 use Illuminate\Support\Facades\Log;
+use App\Models\Payment;
+use App\Models\Subscription;
 
 class CmsController extends Controller
 {
@@ -437,6 +439,13 @@ class CmsController extends Controller
                         ]);
                         // Log cancellation
                         \Log::info('Canceled subscription: ' . $subscription->id);
+
+                        // UPDATE SUBSBCRIPTION STATUS 
+                        $subscrption = Subscription::where('stripe_id', $subscription->id)->first();
+                        if ($subscrption) {
+                            $subscrption->stripe_status = "canceled";
+                            $subscrption->save();
+                        }
                     }
                 }
             }

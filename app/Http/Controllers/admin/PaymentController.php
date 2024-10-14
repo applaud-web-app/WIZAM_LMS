@@ -909,75 +909,286 @@ class PaymentController extends Controller
    // }
 
 
-   // NEWWW 
+   // public function handleWebhook(Request $request)
+   // {
+   //    $event = null;
+
+   //    // Logging for debugging
+   //    Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+   //    Log::info('Stripe Webhook Signature', ['stripe-signature' => $request->header('Stripe-Signature')]);
+
+   //    try {
+   //       // Validate the webhook signature
+   //       $event = Webhook::constructEvent(
+   //             $request->getContent(),
+   //             $request->header('Stripe-Signature'),
+   //             env('STRIPE_SIGNATURE_WEBHOOK')
+   //       );
+   //    } catch (\UnexpectedValueException $e) {
+   //       Log::error('Stripe Webhook Error: Invalid payload', [
+   //             'error' => $e->getMessage(),
+   //             'payload' => $request->getContent()
+   //       ]);
+   //       return response()->json(['error' => 'Invalid payload'], 400);
+   //    } catch (\Stripe\Exception\SignatureVerificationException $e) {
+   //       Log::error('Stripe Webhook Error: Invalid signature', [
+   //             'error' => $e->getMessage(),
+   //             'payload' => $request->getContent()
+   //       ]);
+   //       return response()->json(['error' => 'Invalid signature'], 400);
+   //    }
+
+   //    // Handle specific event types
+   //    try {
+   //       switch ($event->type) {
+   //             case 'payment_intent.succeeded':
+   //                $this->storePaymentDetails($event->data->object);
+   //                break;
+
+   //             case 'invoice.payment_succeeded':
+   //                $this->storeSubscriptionPaymentDetails($event->data->object);
+   //                break;
+
+   //             case 'customer.subscription.created':
+   //                $this->storeSubscriptionDetails($event->data->object);
+   //                break;
+
+   //             case 'customer.subscription.deleted':
+   //                $this->handleSubscriptionCancellation($event->data->object);
+   //                break;
+
+   //             case 'invoice.payment_failed':
+   //                $this->handleFailedPayment($event->data->object);
+   //                break;
+
+   //             default:
+   //                Log::info("Unhandled event type: {$event->type}");
+   //                break;
+   //       }
+
+   //       return response()->json(['status' => 'success']);
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: General error', [
+   //             'error' => $e->getMessage(),
+   //             'event_type' => $event->type
+   //       ]);
+   //       return response()->json(['error' => 'Failed to process event'], 500);
+   //    }
+   // }
+
+   // protected function storePaymentDetails($paymentIntent)
+   // {
+   //    try {
+   //       $customerId = $paymentIntent->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if ($user) {
+   //             // Check if payment already exists to avoid duplicates
+   //             $existingPayment = Payment::where('stripe_payment_id', $paymentIntent->id)->first();
+   //             if (!$existingPayment) {
+   //                Payment::create([
+   //                   'user_id' => $user->id,
+   //                   'stripe_payment_id' => $paymentIntent->id,
+   //                   'amount' => $paymentIntent->amount_received / 100,
+   //                   'currency' => $paymentIntent->currency,
+   //                   'status' => $paymentIntent->status,
+   //                ]);
+   //             } else {
+   //                Log::info('Duplicate payment prevented for paymentIntent ID: ' . $paymentIntent->id);
+   //             }
+   //       } else {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to store payment details', ['error' => $e->getMessage(), 'payment_intent' => $paymentIntent]);
+   //    }
+   // }
+
+   // protected function storeSubscriptionPaymentDetails($invoice)
+   // {
+   //    try {
+   //       $customerId = $invoice->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if ($user) {
+   //             $existingPayment = Payment::where('stripe_payment_id', $invoice->id)->first();
+   //             if (!$existingPayment) {
+   //                Payment::create([
+   //                   'user_id' => $user->id,
+   //                   'stripe_payment_id' => $invoice->id,
+   //                   'amount' => $invoice->amount_paid / 100,
+   //                   'currency' => $invoice->currency,
+   //                   'status' => $invoice->status,
+   //                   'subscription_id' => $invoice->subscription,
+   //                ]);
+   //             } else {
+   //                Log::info('Duplicate payment prevented for invoice ID: ' . $invoice->id);
+   //             }
+   //       } else {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to store subscription payment details', ['error' => $e->getMessage(), 'invoice' => $invoice]);
+   //    }
+   // }
+
+   // protected function storeSubscriptionDetails($subscription)
+   // {
+   //    try {
+   //       $customerId = $subscription->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if ($user) {
+   //             $existingSubscription = Subscription::where('stripe_id', $subscription->id)->first();
+   //             if (!$existingSubscription) {
+   //                Subscription::create([
+   //                   'user_id' => $user->id,
+   //                   'stripe_id' => $subscription->id,
+   //                   'stripe_status' => $subscription->status,
+   //                   'stripe_price' => $subscription->plan->id,
+   //                   'quantity' => $subscription->quantity,
+   //                   'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
+   //                   'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
+   //                ]);
+   //             } else {
+   //                Log::info('Duplicate subscription prevented for subscription ID: ' . $subscription->id);
+   //             }
+   //       } else {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to store subscription details', ['error' => $e->getMessage(), 'subscription' => $subscription]);
+   //    }
+   // }
+
+   // protected function handleSubscriptionCancellation($subscription)
+   // {
+   //    try {
+   //       $customerId = $subscription->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if ($user) {
+   //             $existingSubscription = Subscription::where('stripe_id', $subscription->id)->first();
+   //             if ($existingSubscription) {
+   //                $existingSubscription->update([
+   //                   'stripe_status' => 'canceled',
+   //                   'ends_at' => \Carbon\Carbon::createFromTimestamp($subscription->canceled_at),
+   //                ]);
+   //                Log::info('Subscription canceled for subscription ID: ' . $subscription->id);
+   //             } else {
+   //                Log::warning('Subscription not found for subscription ID: ' . $subscription->id);
+   //             }
+   //       } else {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to handle subscription cancellation', ['error' => $e->getMessage(), 'subscription' => $subscription]);
+   //    }
+   // }
+
+   // protected function handleFailedPayment($invoice)
+   // {
+   //    try {
+   //       $customerId = $invoice->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if ($user) {
+   //             // Log the failed payment for tracking purposes
+   //             Log::warning('Payment failed for user ID: ' . $user->id . ', Invoice ID: ' . $invoice->id);
+   //       } else {
+   //             Log::warning('User not found for failed payment, Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to handle payment failure', ['error' => $e->getMessage(), 'invoice' => $invoice]);
+   //    }
+   // }
+
+
    public function handleWebhook(Request $request)
    {
       $event = null;
 
-      Log::info('Stripe Webhook Payload', [
-         'payload' => $request->getContent(),
-         'headers' => $request->headers->all(),
+      // Logging for debugging
+      Log::info('Stripe Environment Variables', [
+         'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
       ]);
+      Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+      Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
+      Log::info('Stripe Webhook Signature', ['stripe-signature' => $request->header('Stripe-Signature')]);
 
       try {
          // Validate the webhook signature
-         $event = Webhook::constructEvent(
+         $event = \Stripe\Webhook::constructEvent(
                $request->getContent(),
                $request->header('Stripe-Signature'),
                env('STRIPE_SIGNATURE_WEBHOOK')
          );
       } catch (\UnexpectedValueException $e) {
-         Log::error('Stripe Webhook Error: Invalid payload', ['error' => $e->getMessage()]);
+         Log::error('Stripe Webhook Error: Invalid payload', [
+               'error' => $e->getMessage(),
+               'payload' => $request->getContent()
+         ]);
          return response()->json(['error' => 'Invalid payload'], 400);
       } catch (\Stripe\Exception\SignatureVerificationException $e) {
-         Log::error('Stripe Webhook Error: Invalid signature', ['error' => $e->getMessage()]);
+         Log::error('Stripe Webhook Error: Invalid signature', [
+               'error' => $e->getMessage(),
+               'payload' => $request->getContent()
+         ]);
          return response()->json(['error' => 'Invalid signature'], 400);
       }
 
       // Handle specific event types
       try {
          switch ($event->type) {
-               case 'payment_intent.succeeded':
-                  $this->storePaymentDetails($event->data->object);
+               case 'payment_intent.succeeded': // One-time payment
+                  $this->storeOneTimePaymentDetails($event->data->object);
                   break;
-               case 'invoice.payment_succeeded':
+               case 'invoice.payment_succeeded': // Recurring subscription payment
                   $this->storeSubscriptionPaymentDetails($event->data->object);
                   break;
-               case 'customer.subscription.created':
+               case 'customer.subscription.created': // Subscription created
                   $this->storeSubscriptionDetails($event->data->object);
                   break;
-               default:
-                  Log::info('Received unhandled event type: ' . $event->type);
          }
          return response()->json(['status' => 'success']);
       } catch (\Exception $e) {
-         Log::error('Stripe Webhook Error: Failed to process event', [
+         Log::error('Stripe Webhook Error: General error', [
                'error' => $e->getMessage(),
-               'event_type' => $event->type,
+               'event_type' => $event->type
          ]);
          return response()->json(['error' => 'Failed to process event'], 500);
       }
    }
 
-   protected function storePaymentDetails($paymentIntent)
+   protected function storeOneTimePaymentDetails($paymentIntent)
    {
       try {
          $customerId = $paymentIntent->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first();
+         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
 
          if ($user) {
-               Payment::create([
-                  'user_id' => $user->id,
-                  'stripe_payment_id' => $paymentIntent->id,
-                  'amount' => $paymentIntent->amount_received / 100,
-                  'currency' => $paymentIntent->currency,
-                  'status' => $paymentIntent->status,
-               ]);
+               // Check for duplicate payment
+               if (!Payment::where('stripe_payment_id', $paymentIntent->id)->exists()) {
+                  // Create the payment entry with subscription_id set to NULL
+                  Payment::create([
+                     'user_id' => $user->id,
+                     'stripe_payment_id' => $paymentIntent->id,
+                     'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+                     'currency' => $paymentIntent->currency,
+                     'status' => $paymentIntent->status,
+                     'subscription_id' => null, // Explicitly set subscription_id to NULL for one-time payments
+                  ]);
+               } else {
+                  Log::info('Duplicate Payment: ' . $paymentIntent->id);
+               }
          } else {
                Log::warning('User not found for Stripe customer ID: ' . $customerId);
          }
       } catch (\Exception $e) {
-         Log::error('Failed to store payment details: ' . $e->getMessage());
+         Log::error('Stripe Webhook Error: Failed to store one-time payment details', [
+               'error' => $e->getMessage(),
+               'payment_intent' => $paymentIntent
+         ]);
       }
    }
 
@@ -985,22 +1196,31 @@ class PaymentController extends Controller
    {
       try {
          $customerId = $invoice->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first();
+         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
 
          if ($user) {
-               Payment::create([
-                  'user_id' => $user->id,
-                  'stripe_payment_id' => $invoice->id,
-                  'amount' => $invoice->amount_paid / 100,
-                  'currency' => $invoice->currency,
-                  'status' => $invoice->status,
-                  'subscription_id' => $invoice->subscription,
-               ]);
+               // Check for duplicate payment
+               if (!Payment::where('stripe_payment_id', $invoice->id)->exists()) {
+                  // Create the payment entry with subscription_id
+                  Payment::create([
+                     'user_id' => $user->id,
+                     'stripe_payment_id' => $invoice->id,
+                     'amount' => $invoice->amount_paid / 100, // Convert from cents
+                     'currency' => $invoice->currency,
+                     'status' => $invoice->status,
+                     'subscription_id' => $invoice->subscription, // Set subscription_id for recurring payments
+                  ]);
+               } else {
+                  Log::info('Duplicate Payment: ' . $invoice->id);
+               }
          } else {
                Log::warning('User not found for Stripe customer ID: ' . $customerId);
          }
       } catch (\Exception $e) {
-         Log::error('Failed to store subscription payment details: ' . $e->getMessage());
+         Log::error('Stripe Webhook Error: Failed to store subscription payment details', [
+               'error' => $e->getMessage(),
+               'invoice' => $invoice
+         ]);
       }
    }
 
@@ -1008,26 +1228,34 @@ class PaymentController extends Controller
    {
       try {
          $customerId = $subscription->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first();
+         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
 
          if ($user) {
-               Subscription::create([
-                  'user_id' => $user->id,
-                  'stripe_id' => $subscription->id,
-                  'stripe_status' => $subscription->status,
-                  'stripe_price' => $subscription->items->data[0]->price->id, // Accessing the price
-                  'quantity' => $subscription->quantity,
-                  'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
-                  'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
-               ]);
+               // Prevent duplicate subscription entries
+               if (!Subscription::where('stripe_id', $subscription->id)->exists()) {
+                  // Create the subscription if it doesn't exist
+                  Subscription::create([
+                     'user_id' => $user->id,
+                     'stripe_id' => $subscription->id,
+                     'stripe_status' => $subscription->status,
+                     'stripe_price' => $subscription->plan->id,
+                     'quantity' => $subscription->quantity,
+                     'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
+                     'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
+                  ]);
+               } else {
+                  Log::info('Duplicate Subscription: ' . $subscription->id);
+               }
          } else {
                Log::warning('User not found for Stripe customer ID: ' . $customerId);
          }
       } catch (\Exception $e) {
-         Log::error('Failed to store subscription details: ' . $e->getMessage());
+         Log::error('Stripe Webhook Error: Failed to store subscription details', [
+               'error' => $e->getMessage(),
+               'subscription' => $subscription
+         ]);
       }
    }
-
 
 
 
