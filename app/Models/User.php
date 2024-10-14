@@ -30,7 +30,8 @@ class User extends Authenticatable
         'title',
         'phone_number',
         'dob',
-        'country'
+        'country',
+        'stripe_customer_id'
     ];
 
     /**
