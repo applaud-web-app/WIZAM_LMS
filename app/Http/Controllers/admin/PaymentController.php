@@ -1265,72 +1265,71 @@ class PaymentController extends Controller
 
    public function handleWebhook(Request $request)
    {
-      $event = null;
-      // Logging for debugging
-      Log::info('Stripe Environment Variables', [
-         'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
-      ]);
-      Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
-      Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
-      Log::info('Stripe Webhook Signature', ['stripe-signature' => $request->header('Stripe-Signature')]);
-      try {
-         // Validate the webhook signature
-         $event = \Stripe\Webhook::constructEvent(
+       $event = null;
+   
+       // Logging for debugging
+       Log::info('Stripe Environment Variables', [
+           'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
+       ]);
+       Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+       Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
+   
+       try {
+           // Validate the webhook signature
+           $event = \Stripe\Webhook::constructEvent(
                $request->getContent(),
                $request->header('Stripe-Signature'),
                env('STRIPE_SIGNATURE_WEBHOOK')
-         );
-      } catch (\UnexpectedValueException $e) {
-         Log::error('Stripe Webhook Error: Invalid payload', [
+           );
+       } catch (\UnexpectedValueException $e) {
+           Log::error('Stripe Webhook Error: Invalid payload', [
                'error' => $e->getMessage(),
                'payload' => $request->getContent()
-         ]);
-         return response()->json(['error' => 'Invalid payload'], 400);
-      } catch (\Stripe\Exception\SignatureVerificationException $e) {
-         Log::error('Stripe Webhook Error: Invalid signature', [
+           ]);
+           return response()->json(['error' => 'Invalid payload'], 400);
+       } catch (\Stripe\Exception\SignatureVerificationException $e) {
+           Log::error('Stripe Webhook Error: Invalid signature', [
                'error' => $e->getMessage(),
                'payload' => $request->getContent()
-         ]);
-         return response()->json(['error' => 'Invalid signature'], 400);
-      }
-
-      Log::error('Test Event Type Check : Invalid signature', [
-         'error' => $event->type
-      ]);
-      // Handle specific event types
-      try {
-         switch ($event->type) {
-               case 'payment_intent.succeeded': // One-time payment
-                  $this->storeOneTimePaymentDetails($event->data->object);
-                  break;
-               case 'invoice.payment_succeeded': // Recurring subscription payment
-                  $this->storeSubscriptionPaymentDetails($event->data->object);
-                  break;
-               case 'customer.subscription.created': // Subscription created
-                  $this->storeSubscriptionDetails($event->data->object);
-                  break;
-         }
-         return response()->json(['status' => 'success']);
-      } catch (\Exception $e) {
-         Log::error('Stripe Webhook Error: General error', [
-               'error' => $e->getMessage(),
-               'event_type' => $event->type
-         ]);
-         return response()->json(['error' => 'Failed to process event'], 500);
-      }
+           ]);
+           return response()->json(['error' => 'Invalid signature'], 400);
+       }
+   
+       // Handle specific event types
+       switch ($event->type) {
+           case 'payment_intent.succeeded':
+               $this->storeOneTimePaymentDetails($event->data->object);
+               break;
+           case 'invoice.payment_succeeded':
+               $this->storeSubscriptionPaymentDetails($event->data->object);
+               break;
+           case 'customer.subscription.created':
+               $this->storeSubscriptionDetails($event->data->object);
+               break;
+           // Add other relevant cases as needed
+           default:
+               Log::info('Unhandled event type: ' . $event->type);
+       }
+   
+       return response()->json(['status' => 'success']);
    }
+
+   
    protected function storeOneTimePaymentDetails($paymentIntent)
    {
       try {
          // Log when the method is called
          Log::info('Handling one-time payment for Payment Intent: ' . $paymentIntent->id);
+         
          // Check for valid payment intent object
          if (!isset($paymentIntent->customer)) {
                Log::warning('Payment Intent does not contain a customer ID.');
                return;
          }
+
          $customerId = $paymentIntent->customer;
          $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
+
          if ($user) {
                // Check for duplicate payment
                if (!Payment::where('stripe_payment_id', $paymentIntent->id)->exists()) {
@@ -1357,6 +1356,7 @@ class PaymentController extends Controller
          ]);
       }
    }
+
    protected function storeSubscriptionPaymentDetails($invoice)
    {
       try {
