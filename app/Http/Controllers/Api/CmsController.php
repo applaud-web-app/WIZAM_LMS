@@ -371,7 +371,7 @@ class CmsController extends Controller
             // Prepare response data
             $data = [
                 'pricing' => $pricing,
-                'user' => $user
+                'customer_id' => $user->stripe_customer_id ?? null
             ];
     
             // Return response with data
