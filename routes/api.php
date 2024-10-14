@@ -136,7 +136,7 @@ Route::middleware('checkAuthToken')->group(function () {
     
     // PRICING PAGE
     Route::get('pricing',[CmsController::class, 'pricing']);
-    Route::get('create-checkout-session',[CmsController::class, 'createCheckoutSession']);
+    Route::post('create-checkout-session',[CmsController::class, 'createCheckoutSession']);
 
 });
 
