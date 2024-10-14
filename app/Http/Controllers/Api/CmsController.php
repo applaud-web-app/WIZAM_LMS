@@ -16,6 +16,7 @@ use App\Models\Plan;
 use App\Models\HomeCms;
 use App\Models\User;
 use Stripe\StripeClient;
+use Illuminate\Support\Facades\Log;
 
 class CmsController extends Controller
 {
@@ -500,7 +501,7 @@ class CmsController extends Controller
         try {
             // Retrieve the authenticated user from request attributes
             $user = $request->attributes->get('authenticatedUser');
-
+    
             // Check if the user is authenticated
             if (!$user) {
                 return response()->json([
@@ -508,54 +509,54 @@ class CmsController extends Controller
                     'message' => 'User not authenticated',
                 ], 401);
             }
-
+    
             // Fetch the user from the database
             $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
             
             $stripe = new StripeClient(env('STRIPE_SECRET'));
             $customerId = $user->stripe_customer_id;
-
+    
             // Create a customer if it doesn't exist
             if (!$customerId) {
                 $stripeCustomer = $stripe->customers->create([
-                    'email' => $request->email,
-                    'name' => $request->full_name,
-                    'phone' => $request->phone,
+                    'email' => $user->email, // Make sure to get the email and other details from the $user
+                    'name' => $user->name,
                     'metadata' => [
                         'user_id' => $user->id,
                     ],
                 ]);
-
+    
                 // Update user with stripe_customer_id
                 $user->update([
                     'stripe_customer_id' => $stripeCustomer->id, // Add stripe_customer_id to user
                 ]);
-
+    
                 $customerId = $stripeCustomer->id;
             }
-
+    
             // Cancel previous subscriptions if they exist
             $subscriptions = $stripe->subscriptions->all(['customer' => $customerId]);
-
+    
+            // Check and cancel any active or trialing subscriptions
             foreach ($subscriptions->data as $subscription) {
-                // Check if the subscription is active
                 if ($subscription->status === 'active' || $subscription->status === 'trialing') {
-                    // Cancel the subscription
-                    $stripe->subscriptions->update($subscription->id, [
-                        'cancel_at_period_end' => false, // Cancel immediately
+                    // Cancel the subscription immediately
+                    $canceledSubscription = $stripe->subscriptions->cancel($subscription->id, [
+                        'invoice_now' => true, // Invoice immediately
+                        'prorate' => true, // Prorate based on current billing period
                     ]);
-                    // Log cancellation
-                    \Log::info('Canceled subscription: ' . $subscription->id);
+                    // Log successful cancellation
+                    \Log::info('Canceled subscription: ' . $canceledSubscription->id . ' with status: ' . $canceledSubscription->status);
                 } else {
-                    // Log if subscription is not canceled
+                    // Log skipped subscription
                     \Log::info('Skipped subscription cancellation, status: ' . $subscription->status, ['subscription_id' => $subscription->id]);
                 }
             }
-
+    
             // Create the checkout session
             $session = $stripe->checkout->sessions->create([
                 'payment_method_types' => ['card'],
-                'mode' => 'subscription', // Change to 'payment' if you're handling one-time payments
+                'mode' => 'subscription', // 'payment' for one-time payments
                 'customer' => $customerId,
                 'line_items' => [[
                     'price' => $request->priceId, // Ensure priceId is passed in the request
@@ -564,14 +565,13 @@ class CmsController extends Controller
                 'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('FRONTEND_URL') . '/cancel',
             ]);
-
+    
             return response()->json(['status' => true, 'sessionId' => $session->id], 200);
         } catch (\Throwable $th) {
             // Handle exceptions and return error response
+            \Log::error('Error in createCheckoutSession: ' . $th->getMessage());
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-
-    
 
 }
