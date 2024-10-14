@@ -782,7 +782,7 @@ class PaymentController extends Controller
    {
       try {
          Payment::create([
-            'user_id' => 14,
+            'user_id' => 11,
             'stripe_payment_id' => $paymentIntent->id,
             'amount' => $paymentIntent->amount_received / 100, // Convert from cents
             'currency' => $paymentIntent->currency,
@@ -799,7 +799,7 @@ class PaymentController extends Controller
       try {
          $userId = $invoice->customer; // Assuming you store the Stripe customer ID in your user table
          Payment::create([
-            'user_id' => 14,
+            'user_id' => 11,
             'stripe_payment_id' => $invoice->id,
             'amount' => $invoice->amount_paid / 100, // Convert from cents
             'currency' => $invoice->currency,
@@ -816,7 +816,7 @@ class PaymentController extends Controller
    {
       try {
          Subscription::create([
-               'user_id' => 14,
+               'user_id' => 11,
                'stripe_id' => $subscription->id,
                'stripe_status' => $subscription->status,
                'stripe_price' => $subscription->plan->id,
