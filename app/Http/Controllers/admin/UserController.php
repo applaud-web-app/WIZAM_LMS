@@ -15,6 +15,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\ValidationException;
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Stripe\StripeClient;
 
 class UserController extends Controller
 {
@@ -268,6 +269,85 @@ class UserController extends Controller
         return view('manageUsers.users.add-users',compact('roles','userGroups','country'));
     }
 
+    // public function storeUserDetails(Request $request)
+    // {
+    //     // Validate the request data
+    //     $request->validate([
+    //         'full_name' => 'required|string|min:3',
+    //         'dob' => 'required|date',
+    //         'nationality' => 'required|string',
+    //         'phone' => 'nullable|string',
+    //         'email' => 'required|email|unique:users,email',
+    //         'role' => 'required|string',
+    //         'groups' => 'required|array',
+    //         'password' => 'required|string|min:8|confirmed',
+    //         // 'email_verified' => 'required|string|in:yes,no',
+    //         'status' => 'required|string|in:1,0',
+    //         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+    //     ]);
+    
+    //     // Begin transaction
+    //     \DB::beginTransaction();
+    
+    //     try {
+
+    //         // Handle image upload
+    //         if ($request->hasFile('image')) {
+    //             $image = $request->file('image');
+    //             $imageName = time() . '_' . $image->getClientOriginalName();
+                
+    //             // Store the image directly in the public folder
+    //             $image->move(public_path('users'), $imageName); 
+                
+    //             // Construct the full URL to the uploaded image
+    //             $imageUrl = env('APP_URL') . '/users/' . $imageName; 
+    //         } else {
+    //             $imageUrl = env('APP_URL') . '/users/' . "default.png";
+    //         }
+
+
+    //         // Create the user
+    //         $user = User::create([
+    //             'title' => $request->title ?? null, // Use null coalescing to handle optional 'title'
+    //             'image' => $imageUrl,
+    //             'name' => $request->full_name,
+    //             'dob' => $request->dob,
+    //             'country' => $request->nationality,
+    //             'phone_number' => $request->phone,
+    //             'email' => $request->email,
+    //             'password' => Hash::make($request->password),
+    //             // 'email_verified_at' => $request->email_verified === 'yes' ? now() : null,
+    //             'status' => $request->status,
+    //         ]);
+    
+    //         // Attach groups to the user
+    //         foreach ($request->groups as $key => $groupId) {
+    //             if($key > 0){
+    //                 GroupUsers::create([
+    //                     'group_id' => $groupId,
+    //                     'user_id' => $user->id,
+    //                 ]);
+    //             }
+    //         }
+    
+    //         // Assign roles
+    //         $user->assignRole($request->role);
+    
+    //         // Commit transaction
+    //         \DB::commit();
+    
+    //         // Redirect with success message
+    //         return redirect()->route('users')->with('success', 'User created successfully.');
+    
+    //     } catch (\Throwable $th) {
+    //         // Rollback transaction on failure
+    //         \DB::rollback();
+    
+    //         // Redirect with error message
+    //         return redirect()->route('add-users')->with('error', $th->getMessage());
+    //     }
+    // }
+
     public function storeUserDetails(Request $request)
     {
         // Validate the request data
@@ -280,34 +360,27 @@ class UserController extends Controller
             'role' => 'required|string',
             'groups' => 'required|array',
             'password' => 'required|string|min:8|confirmed',
-            // 'email_verified' => 'required|string|in:yes,no',
             'status' => 'required|string|in:1,0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-    
+
         // Begin transaction
         \DB::beginTransaction();
-    
-        try {
 
+        try {
             // Handle image upload
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageName = time() . '_' . $image->getClientOriginalName();
-                
-                // Store the image directly in the public folder
                 $image->move(public_path('users'), $imageName); 
-                
-                // Construct the full URL to the uploaded image
                 $imageUrl = env('APP_URL') . '/users/' . $imageName; 
             } else {
                 $imageUrl = env('APP_URL') . '/users/' . "default.png";
             }
 
-
             // Create the user
             $user = User::create([
-                'title' => $request->title ?? null, // Use null coalescing to handle optional 'title'
+                'title' => $request->title ?? null,
                 'image' => $imageUrl,
                 'name' => $request->full_name,
                 'dob' => $request->dob,
@@ -315,10 +388,25 @@ class UserController extends Controller
                 'phone_number' => $request->phone,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                // 'email_verified_at' => $request->email_verified === 'yes' ? now() : null,
                 'status' => $request->status,
             ]);
-    
+
+            // Create Stripe customer
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $stripeCustomer = $stripe->customers->create([
+                'email' => $request->email,
+                'name' => $request->full_name,
+                'phone' => $request->phone,
+                'metadata' => [
+                    'user_id' => $user->id,
+                ],
+            ]);
+
+            // Update user with stripe_customer_id
+            $user->update([
+                'stripe_customer_id' => $stripeCustomer->id, // Add stripe_customer_id to user
+            ]);
+
             // Attach groups to the user
             foreach ($request->groups as $key => $groupId) {
                 if($key > 0){
@@ -328,24 +416,25 @@ class UserController extends Controller
                     ]);
                 }
             }
-    
+
             // Assign roles
             $user->assignRole($request->role);
-    
+
             // Commit transaction
             \DB::commit();
-    
+
             // Redirect with success message
             return redirect()->route('users')->with('success', 'User created successfully.');
-    
+
         } catch (\Throwable $th) {
             // Rollback transaction on failure
             \DB::rollback();
-    
+
             // Redirect with error message
             return redirect()->route('add-users')->with('error', $th->getMessage());
         }
     }
+
 
     public function editUserdetails(Request $request)
     {

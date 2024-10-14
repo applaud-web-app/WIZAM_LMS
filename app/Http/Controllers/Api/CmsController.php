@@ -334,30 +334,12 @@ class CmsController extends Controller
     public function pricing() {
         try {
             $pricing = Plan::join('sub_categories', 'plans.category_id', '=', 'sub_categories.id') 
-                ->select(
-                    'plans.id', 
-                    'plans.name', 
-                    'plans.price_type', 
-                    'plans.duration', 
-                    'plans.price', 
-                    'plans.discount', 
-                    'plans.description', 
-                    'plans.sort_order', 
-                    'plans.feature_access', 
-                    'plans.features', 
-                    'plans.popular', 
-                    'sub_categories.name as category_name',
-                    'stripe_product_id',
-                    'stripe_price_id'
-                )
-                ->where('plans.status', 1)
-                ->get(); 
+                ->select('plans.id', 'plans.name', 'plans.price_type', 'plans.duration', 'plans.price', 'plans.discount', 'plans.description', 'plans.sort_order', 'plans.feature_access', 'plans.features', 'plans.popular', 'sub_categories.name as category_name','stripe_product_id','stripe_price_id')->where('plans.status', 1)->get(); 
             return response()->json(['status' => true, 'data' => $pricing], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-    
     
 
 }

@@ -104,7 +104,7 @@ class AuthController extends Controller
                 }
 
                 // Check if the user has the 'student' role
-                if (!$user->hasRole('student')) {
+                if (!$user->hasAnyRole(['student', 'guest'])) {
                     return response()->json([
                         'status' => false,
                         'message' => 'You do not have the required permission to access this resource.',
