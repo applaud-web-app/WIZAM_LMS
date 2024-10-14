@@ -14,6 +14,7 @@ use App\Models\GeneralSetting;
 use App\Models\Enquiry;
 use App\Models\Plan;
 use App\Models\HomeCms;
+use App\Models\User;
 
 class CmsController extends Controller
 {
