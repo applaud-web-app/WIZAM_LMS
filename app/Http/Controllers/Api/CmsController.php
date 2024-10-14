@@ -611,9 +611,8 @@ class CmsController extends Controller
                 $customerId = $stripeCustomer->id;
             }
     
-            // Handle subscriptions if the priceType is 'monthly'
+            // Only cancel previous subscriptions if the priceType is 'monthly'
             if ($request->priceType === 'monthly') {
-                // Cancel previous subscriptions if they exist
                 $subscriptions = $stripe->subscriptions->all(['customer' => $customerId]);
     
                 foreach ($subscriptions->data as $subscription) {
@@ -623,6 +622,8 @@ class CmsController extends Controller
                             'invoice_now' => true,
                             'prorate' => true,
                         ]);
+                        // Log cancellation
+                        \Log::info('Canceled subscription: ' . $subscription->id);
                     }
                 }
             }
@@ -650,6 +651,7 @@ class CmsController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
     
 
 }
