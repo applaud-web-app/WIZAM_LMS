@@ -56,8 +56,6 @@ Route::post('contact-us', [CmsController::class, 'contactUs']);
 // ABOUT PAGE 
 Route::get('about', [CmsController::class, 'about']);
 
-// PRICING PAGE
-Route::get('pricing',[CmsController::class, 'pricing']);
 
 
 // API Route
@@ -134,6 +132,10 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/pratice-set-progress',[PracticeSetController::class, 'praticeSetProgress']);
 
     // FINISH EXAM (STUDENT PERCENTAGE/UPDATE TIME)
+
+    
+    // PRICING PAGE
+    Route::get('pricing',[CmsController::class, 'pricing']);
 });
 
 

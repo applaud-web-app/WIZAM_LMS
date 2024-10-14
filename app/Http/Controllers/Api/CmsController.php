@@ -331,12 +331,54 @@ class CmsController extends Controller
         }
     }
 
-    public function pricing() {
+    public function pricing(Request $request) {
         try {
+            // Retrieve the authenticated user from request attributes
+            $user = $request->attributes->get('authenticatedUser');
+            
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+    
+            // Fetch the user from the database
+            $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
+    
+            // Fetch pricing plans with sub-category information
             $pricing = Plan::join('sub_categories', 'plans.category_id', '=', 'sub_categories.id') 
-                ->select('plans.id', 'plans.name', 'plans.price_type', 'plans.duration', 'plans.price', 'plans.discount', 'plans.description', 'plans.sort_order', 'plans.feature_access', 'plans.features', 'plans.popular', 'sub_categories.name as category_name','stripe_product_id','stripe_price_id')->where('plans.status', 1)->get(); 
-            return response()->json(['status' => true, 'data' => $pricing], 200);
+                ->select(
+                    'plans.id',
+                    'plans.name',
+                    'plans.price_type',
+                    'plans.duration',
+                    'plans.price',
+                    'plans.discount',
+                    'plans.description',
+                    'plans.sort_order',
+                    'plans.feature_access',
+                    'plans.features',
+                    'plans.popular',
+                    'sub_categories.name as category_name',
+                    'plans.stripe_product_id',
+                    'plans.stripe_price_id'
+                )
+                ->where('plans.status', 1) // Only fetch active plans
+                ->get();
+    
+            // Prepare response data
+            $data = [
+                'pricing' => $pricing,
+                'user' => $user
+            ];
+    
+            // Return response with data
+            return response()->json(['status' => true, 'data' => $data], 200);
+    
         } catch (\Throwable $th) {
+            // Handle exceptions and return error response
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
