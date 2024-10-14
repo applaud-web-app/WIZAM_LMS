@@ -544,6 +544,11 @@ class CmsController extends Controller
                     $stripe->subscriptions->update($subscription->id, [
                         'cancel_at_period_end' => false, // Cancel immediately
                     ]);
+                    // Log cancellation
+                    \Log::info('Canceled subscription: ' . $subscription->id);
+                } else {
+                    // Log if subscription is not canceled
+                    \Log::info('Skipped subscription cancellation, status: ' . $subscription->status, ['subscription_id' => $subscription->id]);
                 }
             }
 
