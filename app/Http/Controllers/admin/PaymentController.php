@@ -1293,6 +1293,10 @@ class PaymentController extends Controller
          ]);
          return response()->json(['error' => 'Invalid signature'], 400);
       }
+
+      Log::error('Test Event Type Check : Invalid signature', [
+         'error' => $event->type
+      ]);
       // Handle specific event types
       try {
          switch ($event->type) {
