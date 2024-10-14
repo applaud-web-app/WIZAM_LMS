@@ -424,7 +424,78 @@ class CmsController extends Controller
     //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
     //     }
     // }
-    
+
+    // public function createCheckoutSession(Request $request) {
+    //     try {
+    //         // Retrieve the authenticated user from request attributes
+    //         $user = $request->attributes->get('authenticatedUser');
+
+    //         // Check if the user is authenticated
+    //         if (!$user) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'User not authenticated',
+    //             ], 401);
+    //         }
+
+    //         // Fetch the user from the database
+    //         $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
+            
+    //         $stripe = new StripeClient(env('STRIPE_SECRET'));
+    //         $customerId = $user->stripe_customer_id;
+
+    //         // Create a customer if it doesn't exist
+    //         if (!$customerId) {
+    //             $stripeCustomer = $stripe->customers->create([
+    //                 'email' => $request->email,
+    //                 'name' => $request->full_name,
+    //                 'phone' => $request->phone,
+    //                 'metadata' => [
+    //                     'user_id' => $user->id,
+    //                 ],
+    //             ]);
+
+    //             // Update user with stripe_customer_id
+    //             $user->update([
+    //                 'stripe_customer_id' => $stripeCustomer->id, // Add stripe_customer_id to user
+    //             ]);
+
+    //             $customerId = $stripeCustomer->id;
+    //         }
+
+    //         // Cancel previous subscriptions if they exist
+    //         $subscriptions = $stripe->subscriptions->all(['customer' => $customerId]);
+
+    //         foreach ($subscriptions->data as $subscription) {
+    //             // Check if the subscription is active
+    //             if ($subscription->status === 'active' || $subscription->status === 'trialing') {
+    //                 // Cancel the subscription
+    //                 $stripe->subscriptions->update($subscription->id, [
+    //                     'cancel_at_period_end' => false, // Cancel immediately
+    //                 ]);
+    //             }
+    //         }
+
+    //         // Create the checkout session
+    //         $session = $stripe->checkout->sessions->create([
+    //             'payment_method_types' => ['card'],
+    //             'mode' => 'subscription', // Change to 'payment' if you're handling one-time payments
+    //             'customer' => $customerId,
+    //             'line_items' => [[
+    //                 'price' => $request->priceId, // Ensure priceId is passed in the request
+    //                 'quantity' => 1,
+    //             ]],
+    //             'success_url' => env('NEXT_PUBLIC_API_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
+    //             'cancel_url' => env('NEXT_PUBLIC_API_URL') . '/cancel',
+    //         ]);
+
+    //         return response()->json(['status' => true, 'sessionId' => $session->id], 200);
+    //     } catch (\Throwable $th) {
+    //         // Handle exceptions and return error response
+    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+    //     }
+    // }
+
     public function createCheckoutSession(Request $request) {
         try {
             // Retrieve the authenticated user from request attributes
