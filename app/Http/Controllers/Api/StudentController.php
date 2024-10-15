@@ -22,6 +22,7 @@ use App\Models\Lesson;
 use App\Models\Subscription;
 use App\Models\Plan;
 use Carbon\Carbon;
+use App\Models\Payment;
 
 class StudentController extends Controller
 {
