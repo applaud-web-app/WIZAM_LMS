@@ -981,7 +981,17 @@ class StudentController extends Controller
             $currentDate = now();
     
             // Fetch the user's subscriptions with associated plan details
-            $payments = Payment::select('amount','currency','status','created_at')->where('user_id', $user->id)->get();
+            $payments = Payment::select('amount', 'currency', 'status', 'created_at')
+            ->where('user_id', $user->id)
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'amount' => $payment->amount,
+                    'currency' => $payment->currency,
+                    'status' => $payment->status,
+                    'created_at' => Carbon::parse($payment->created_at)->format('Y-m-d'), // Format created_at
+                ];
+            });
     
             
             // Return a successful response with the subscription data
