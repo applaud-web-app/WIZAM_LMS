@@ -1261,8 +1261,7 @@ class PaymentController extends Controller
    //    }
    // }
 
-
-
+   // WEBHOOK
    public function handleWebhook(Request $request)
    {
        $event = null;
@@ -1313,7 +1312,6 @@ class PaymentController extends Controller
    
        return response()->json(['status' => 'success']);
    }
-
    
    protected function storeOneTimePaymentDetails($paymentIntent)
    {
