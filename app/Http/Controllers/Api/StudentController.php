@@ -19,6 +19,8 @@ use App\Models\PracticeLesson;
 use App\Models\PracticeVideo;
 use App\Models\Video;
 use App\Models\Lesson;
+use App\Models\Subscription;
+use App\Models\Plan;
 
 class StudentController extends Controller
 {
