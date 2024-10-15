@@ -89,7 +89,10 @@ class StudentController extends Controller
                         $formattedExamData[$examType->slug] = [];
                     }
 
-                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                    // $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                    // $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
+                    
+                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $this->formatTime($formattedTime);
                     $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
 
                     // Add exam details to the corresponding type slug

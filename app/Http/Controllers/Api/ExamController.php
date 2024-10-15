@@ -518,7 +518,7 @@ class ExamController extends Controller
             ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
             ->where('exams.status', 1) // Filter by exam status
             ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title','exams.duration_mode', 'exams.exam_duration','exams.point_mode', 'exams.point','exams.is_free', 'exams.price') // Group by necessary fields
-            ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
+            // ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
             ->get();
     
             // Return success JSON response
@@ -555,7 +555,6 @@ class ExamController extends Controller
             ->where('exam_results.user_id', $user->id)
             ->where('exam_results.subcategory_id', $request->category)
             ->get();
-   
 
             // Return success JSON response
             return response()->json([
