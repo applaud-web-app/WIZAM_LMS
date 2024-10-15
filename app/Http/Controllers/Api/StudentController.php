@@ -902,7 +902,7 @@ class StudentController extends Controller
         try {
             // Retrieve the authenticated user from request attributes
             $user = $request->attributes->get('authenticatedUser');
-    
+
             // Check if the user is authenticated
             if (!$user) {
                 return response()->json([
@@ -910,9 +910,9 @@ class StudentController extends Controller
                     'message' => 'User not authenticated',
                 ], 401);
             }
-    
+
             $currentDate = now();
-    
+
             // Fetch the user's subscriptions with associated plan details
             $subscriptions = Subscription::select(
                     'subscriptions.created_at as purchase_date',
@@ -923,42 +923,42 @@ class StudentController extends Controller
                 )
                 ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
                 ->where('subscriptions.user_id', $user->id)
-                ->orderBy('subscriptions.ends_at', 'desc') // Order by ends_at to get the latest first
+                ->orderBy('subscriptions.created_at', 'desc') // Order by created_at to get the latest first
                 ->get();
-    
-            // Identify the latest subscription
-            $latestSubscription = $subscriptions->first(); // Get the latest subscription based on the ends_at date
-    
+
+            // Loop through the subscriptions and mark the latest as active if its ends_at is in the future
+            $subscriptions = $subscriptions->map(function ($subscription, $index) use ($currentDate) {
+                // Convert dates to Carbon instances if they are not already
+                $purchaseDate = Carbon::parse($subscription->purchase_date);
+                $endsDate = Carbon::parse($subscription->ends_date);
+
+                // Only the latest subscription can be active
+                if ($index == 0 && $endsDate > $currentDate && $subscription->stripe_status == 'complete') {
+                    $status = 'Active';
+                } else {
+                    $status = 'Ended';
+                }
+
+                return [
+                    'plan_name' => $subscription->plan_name,
+                    'plan_price' => $subscription->plan_price,
+                    'purchase_date' => $purchaseDate->format('Y-m-d'), // Format purchase date
+                    'ends_date' => $endsDate->format('Y-m-d'),         // Format ends date
+                    'status' => $status,
+                ];
+            });
+
             // Return a successful response with the subscription data
             return response()->json([
                 'status' => true,
-                'subscriptions' => $subscriptions->map(function ($subscription) use ($latestSubscription, $currentDate) {
-                    // Convert dates to Carbon instances if they are not already
-                    $purchaseDate = Carbon::parse($subscription->purchase_date);
-                    $endsDate = Carbon::parse($subscription->ends_date);
-    
-                    // If this is the latest subscription, mark it as "Active"
-                    if ($subscription->ends_date == $latestSubscription->ends_date && $subscription->stripe_status == 'complete') {
-                        $status = 'Active';
-                    } else {
-                        // Mark all other subscriptions as "Ended"
-                        $status = 'Ended';
-                    }
-    
-                    return [
-                        'plan_name' => $subscription->plan_name,
-                        'plan_price' => $subscription->plan_price,
-                        'purchase_date' => $purchaseDate->format('Y-m-d'), // Format purchase date
-                        'ends_date' => $endsDate->format('Y-m-d'),         // Format ends date
-                        'status' => $status,
-                    ];
-                }),
-            ], 200); // Use 200 for a successful response
-    
+                'subscriptions' => $subscriptions,
+            ], 200);
+
         } catch (\Throwable $th) {
             // Return a JSON response with error details if an exception occurs
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
     
 }
