@@ -14,6 +14,8 @@ use App\Models\User;
 use Illuminate\Support\Str; 
 use Carbon\Carbon;
 use App\Models\Question;
+use App\Models\Subscription;
+use App\Models\Plan;
 
 class ExamController extends Controller
 {
