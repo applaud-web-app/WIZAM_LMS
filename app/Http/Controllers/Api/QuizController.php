@@ -24,7 +24,6 @@ class QuizController extends Controller
     public function playQuiz(Request $request, $slug)
     {
         try {
-
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
             $type = "quizzes";
