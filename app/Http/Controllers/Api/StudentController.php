@@ -414,6 +414,7 @@ class StudentController extends Controller
                     'duration' => $time,  // Use formatted time as in allQuiz
                     'marks' => $marks,
                     'description' => $quizData->description,
+                    'is_free'=>$quizData->is_free,
                 ],
             ], 200);
         } catch (\Throwable $th) {
