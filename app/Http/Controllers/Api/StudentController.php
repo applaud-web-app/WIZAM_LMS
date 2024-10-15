@@ -92,7 +92,7 @@ class StudentController extends Controller
                     // $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     // $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
                     
-                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $this->formatTime($formattedTime);
+                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
 
                     // Add exam details to the corresponding type slug
@@ -895,4 +895,50 @@ class StudentController extends Controller
         }
     }
     
+
+    public function mySubscription(Request $request){
+        try {
+            // Retrieve the authenticated user from request attributes
+            $user = $request->attributes->get('authenticatedUser');
+                
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+             // Fetch the user's active subscriptions with associated plan details
+            $subscriptions = Subscription::select(
+                'subscriptions.created_at as purchase_date',
+                'subscriptions.ends_at as ends_date',
+                'subscriptions.stripe_status as subscription_status',
+                'plans.name as plan_name',
+                'plans.price as plan_price'
+            )
+            ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
+            ->where('subscriptions.user_id', $user->id)
+            ->where('subscriptions.ends_at', '>', $currentDate)  // Ensure subscription is still active
+            ->get();
+
+            // Return a successful response with the subscription data
+            return response()->json([
+                'status' => true,
+                'subscriptions' => $subscriptions->map(function ($subscription) use ($currentDate) {
+                    return [
+                        'plan_name' => $subscription->plan_name,
+                        'plan_price' => $subscription->plan_price,
+                        'purchase_date' => $subscription->purchase_date->format('Y-m-d'),
+                        'ends_date' => $subscription->ends_date->format('Y-m-d'),
+                        'status' => $subscription->stripe_status == 'canceled' ? 'Ended' : 
+                                ($subscription->ends_date > $currentDate && $subscription->stripe_status == 'complete' ? 'Active' : 'Inactive'),
+                    ];
+                }),
+            ], 200); // Use 200 for a successful response
+        } catch (\Throwable $th) {
+            // Return a JSON response with error details if an exception occurs
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
 }
