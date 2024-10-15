@@ -743,6 +743,54 @@ class StudentController extends Controller
     public function lessonDetail(Request $request, $slug)
     {
         try {
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+            $type = "lessons";
+
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+            // Fetch the user from the database
+            $user = User::findOrFail($user->id);
+
+            // Get the current date and time
+            $currentDate = now();
+
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
+
+            // If no active subscription, return error
+            if (!$subscription) {
+                return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
+            }
+    
+            // Fetch the plan related to this subscription
+            $plan = $subscription->plans;
+    
+            if (!$plan) {
+                return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
+            }
+    
+            // Check if the plan allows unlimited access
+            if ($plan->feature_access == 1) {
+                // return response()->json(['status' => true, 'data' => $subscription], 200);
+            } else {
+                // Fetch the allowed features for this plan
+                $allowed_features = json_decode($plan->features, true);
+    
+                // Check if the requested feature type is in the allowed features
+                if (in_array($type, $allowed_features)) {
+                    // return response()->json(['status' => true, 'data' => $subscription], 200);
+                } else {
+                    return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
+                }
+            }
+
             // Validate incoming request data
             $request->validate([
                 'category' => 'required|integer'
