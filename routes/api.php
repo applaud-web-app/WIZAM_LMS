@@ -144,7 +144,7 @@ Route::middleware('checkAuthToken')->group(function () {
     // USER SUBSCRIPTION & PAYMENT
     Route::get('my-subscription',[StudentController::class,'mySubscription']);
     Route::get('my-payment',[StudentController::class,'myPayment']);
-
+    Route::get('cancel-subscription',[StudentController::class,'cancelSubscription']);
 });
 
 

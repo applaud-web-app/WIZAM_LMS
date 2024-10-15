@@ -1005,6 +1005,11 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
+
+    public function cancelSubscription(){
+        
+    }
     
 
     

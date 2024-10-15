@@ -474,6 +474,76 @@ class CmsController extends Controller
         }
     }
     
+
+    public function cancelSubscription(Request $request)
+    {
+        try {
+            // Retrieve the authenticated user from request attributes
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+    
+            // Fetch the user from the database
+            $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
+    
+            $stripe = new StripeClient(env('STRIPE_SECRET'));
+            $customerId = $user->stripe_customer_id;
+    
+            // Ensure the customer ID exists before proceeding
+            if (!$customerId) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No Stripe customer ID found. Cannot cancel subscription.',
+                ], 404);
+            }
+    
+            // Retrieve all subscriptions for the customer
+            $subscriptions = $stripe->subscriptions->all(['customer' => $customerId]);
+    
+            foreach ($subscriptions->data as $subscription) {
+                if ($subscription->status === 'active' || $subscription->status === 'trialing') {
+                    // Cancel the subscription immediately
+                    $stripe->subscriptions->cancel($subscription->id, [
+                        'invoice_now' => true,
+                        'prorate' => true,
+                    ]);
+    
+                    // Log cancellation
+                    \Log::info('Canceled subscription: ' . $subscription->id);
+    
+                    // Update the subscription status in the database
+                    $subscrption = Subscription::where('stripe_id', $subscription->id)->first();
+                    if ($subscrption) {
+                        $subscrption->stripe_status = "canceled";
+                        $subscrption->save();
+                    }
+                }
+            }
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Subscription(s) canceled successfully.',
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            // Log the error
+            \Log::error('Error canceling subscription: ' . $th->getMessage());
+    
+            // Return a JSON response with error details
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while canceling the subscription.',
+                'error' => $th->getMessage(), // For debugging purposes (consider removing in production)
+            ], 500);
+        }
+    }
+    
     
 
 }
