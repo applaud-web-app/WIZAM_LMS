@@ -23,7 +23,7 @@ class Subscription extends Model
 
     public function plans()
     {
-        return $this->hasOne(Plan::class, 'stripe_price_id', 'stripe_price_id');
+        return $this->hasOne(Plan::class, 'stripe_price_id', 'stripe_price');
     }
 
 }

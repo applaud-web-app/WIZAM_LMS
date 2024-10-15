@@ -759,12 +759,7 @@ class StudentController extends Controller
             $currentDate = now();
     
             // Fetch the user's active subscription
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
     
             // If no active subscription, return error
             if (!$subscription) {
