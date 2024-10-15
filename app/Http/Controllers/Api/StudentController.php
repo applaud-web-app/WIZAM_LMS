@@ -909,7 +909,9 @@ class StudentController extends Controller
                 ], 401);
             }
 
-             // Fetch the user's active subscriptions with associated plan details
+            $currentDate = now();
+            
+            // Fetch the user's active subscriptions with associated plan details
             $subscriptions = Subscription::select(
                 'subscriptions.created_at as purchase_date',
                 'subscriptions.ends_at as ends_date',
@@ -919,7 +921,7 @@ class StudentController extends Controller
             )
             ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
             ->where('subscriptions.user_id', $user->id)
-            ->where('subscriptions.ends_at', '>', $currentDate)  // Ensure subscription is still active
+            // ->where('subscriptions.ends_at', '>', $currentDate)  // Ensure subscription is still active
             ->get();
 
             // Return a successful response with the subscription data
