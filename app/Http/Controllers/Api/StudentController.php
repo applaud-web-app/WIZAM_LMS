@@ -267,6 +267,7 @@ class StudentController extends Controller
                         'questions' => $quiz->total_questions ?? 0,
                         'time' => $time, // Use the formatted time
                         'marks' => $marks ?? 0,
+                        'is_free'=> $quiz->is_free,
                     ];
                 }
 
