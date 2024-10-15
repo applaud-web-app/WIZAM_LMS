@@ -438,17 +438,19 @@ class QuizController extends Controller
                 } elseif ($question->type == 'TOF') {
                     $isCorrect = $userAnswer == $question->answer;
                 } elseif ($question->type == 'SAQ') {
-                    $answers = json_decode($question->options);
                     $isCorrect = false;
-                    foreach ($answers as $option) {
-                        // Convert both the option and the user answer to lowercase and trim them
-                        $sanitizedOption = strtolower(trim(strip_tags($option)));
-                        $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
+                    if (is_string($userAnswer) && is_array($question->options)) {
+                        $answers = json_decode($question->options);
+                        foreach ($answers as $option) {
+                            // Convert both the option and the user answer to lowercase and trim them
+                            $sanitizedOption = strtolower(trim(strip_tags($option)));
+                            $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
 
-                        // Check if the sanitized option matches the sanitized user answer
-                        if ($sanitizedUserAnswer == $sanitizedOption) {
-                            $isCorrect = true;
-                            break;  // Exit the loop once a match is found
+                            // Check if the sanitized option matches the sanitized user answer
+                            if ($sanitizedUserAnswer == $sanitizedOption) {
+                                $isCorrect = true;
+                                break;  // Exit the loop once a match is found
+                            }
                         }
                     }
                 } elseif ($question->type == 'FIB') {
