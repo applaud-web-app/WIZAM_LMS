@@ -931,8 +931,8 @@ class StudentController extends Controller
                     return [
                         'plan_name' => $subscription->plan_name,
                         'plan_price' => $subscription->plan_price,
-                        'purchase_date' => $subscription->purchase_date->format('Y-m-d'),
-                        'ends_date' => $subscription->ends_date->format('Y-m-d'),
+                        'purchase_date' => $subscription->created_at->format('Y-m-d'),
+                        'ends_date' => $subscription->ends_at->format('Y-m-d'),
                         'status' => $subscription->stripe_status == 'canceled' ? 'Ended' : 
                                 ($subscription->ends_date > $currentDate && $subscription->stripe_status == 'complete' ? 'Active' : 'Inactive'),
                     ];
