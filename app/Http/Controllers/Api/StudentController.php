@@ -924,17 +924,21 @@ class StudentController extends Controller
             // ->where('subscriptions.ends_at', '>', $currentDate)  // Ensure subscription is still active
             ->get();
 
-            // Return a successful response with the subscription data
+             // Return a successful response with the subscription data
             return response()->json([
                 'status' => true,
                 'subscriptions' => $subscriptions->map(function ($subscription) use ($currentDate) {
+                    // Convert dates to Carbon instances if they are not already
+                    $purchaseDate = Carbon::parse($subscription->purchase_date);
+                    $endsDate = Carbon::parse($subscription->ends_date);
+
                     return [
                         'plan_name' => $subscription->plan_name,
                         'plan_price' => $subscription->plan_price,
-                        'purchase_date' => $subscription->created_at->format('Y-m-d'),
-                        'ends_date' => $subscription->ends_at->format('Y-m-d'),
+                        'purchase_date' => $purchaseDate->format('Y-m-d'), // Format purchase date
+                        'ends_date' => $endsDate->format('Y-m-d'),         // Format ends date
                         'status' => $subscription->stripe_status == 'canceled' ? 'Ended' : 
-                                ($subscription->ends_date > $currentDate && $subscription->stripe_status == 'complete' ? 'Active' : 'Inactive'),
+                                ($endsDate > $currentDate && $subscription->stripe_status == 'complete' ? 'Active' : 'Inactive'),
                     ];
                 }),
             ], 200); // Use 200 for a successful response
