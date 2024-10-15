@@ -587,6 +587,7 @@ class StudentController extends Controller
                         'video_slug' => $practiceVideo->video->slug,
                         'video_level' => $practiceVideo->video->level,
                         'video_watch_time' => $practiceVideo->video->watch_time,
+                        'is_free' => $practiceVideo->video->is_free,
                     ];
                 }
             }
