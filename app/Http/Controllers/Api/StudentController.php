@@ -963,6 +963,37 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
+    public function myPayment(Request $request){
+        try {
+            // Retrieve the authenticated user from request attributes
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // Check if the user is authenticated
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+    
+            $currentDate = now();
+    
+            // Fetch the user's subscriptions with associated plan details
+            $payments = Payment::select('amount','currency','status','created_at')->where('user_id', $user->id)->get();
+    
+            
+            // Return a successful response with the subscription data
+            return response()->json([
+                'status' => true,
+                'payments' => $payments,
+            ], 200);
+    
+        } catch (\Throwable $th) {
+            // Return a JSON response with error details if an exception occurs
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
     
 
     
