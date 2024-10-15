@@ -10,7 +10,7 @@ class Subscription extends Model
     use HasFactory;
     protected $table = "subscriptions";
 
-   protected $fillable = [
+    protected $fillable = [
         'user_id',
         'type',
         'stripe_id',
@@ -20,5 +20,10 @@ class Subscription extends Model
         'trial_ends_at',
         'ends_at',
     ];
+
+    public function plans()
+    {
+        return $this->hasOne(Plan::class, 'stripe_price_id', 'stripe_price_id');
+    }
 
 }

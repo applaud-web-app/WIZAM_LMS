@@ -138,6 +138,9 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('pricing',[CmsController::class, 'pricing']);
     Route::post('create-checkout-session',[CmsController::class, 'createCheckoutSession']);
 
+    // CHECK USER SUBSCRIPTION
+    Route::get('user-subscription',[StudentController::class,'userSubscription']);
+
 });
 
 

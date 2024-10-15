@@ -1338,7 +1338,7 @@ class PaymentController extends Controller
                      'amount' => $paymentIntent->amount_received / 100, // Convert from cents
                      'currency' => $paymentIntent->currency,
                      'status' => $paymentIntent->status,
-                     'subscription_id' => null, // Explicitly set subscription_id to NULL for one-time payments
+                     'subscription_id' => "one-time", // Explicitly set subscription_id to NULL for one-time payments
                   ]);
                   Log::info('One-time payment stored successfully for Payment Intent: ' . $paymentIntent->id);
                } else {
@@ -1364,14 +1364,16 @@ class PaymentController extends Controller
                // Check for duplicate payment
                if (!Payment::where('stripe_payment_id', $invoice->id)->exists()) {
                   // Create the payment entry with subscription_id
-                  Payment::create([
-                     'user_id' => $user->id,
-                     'stripe_payment_id' => $invoice->id,
-                     'amount' => $invoice->amount_paid / 100, // Convert from cents
-                     'currency' => $invoice->currency,
-                     'status' => $invoice->status,
-                     'subscription_id' => $invoice->subscription, // Set subscription_id for recurring payments
-                  ]);
+                  if($invoice->amount_paid > 0){
+                     Payment::create([
+                        'user_id' => $user->id,
+                        'stripe_payment_id' => $invoice->id,
+                        'amount' => $invoice->amount_paid / 100, // Convert from cents
+                        'currency' => $invoice->currency,
+                        'status' => $invoice->status,
+                        'subscription_id' => $invoice->subscription, // Set subscription_id for recurring payments
+                     ]);
+                  }
                } else {
                   Log::info('Duplicate Payment: ' . $invoice->id);
                }
@@ -1397,7 +1399,7 @@ class PaymentController extends Controller
                   Subscription::create([
                      'user_id' => $user->id,
                      'stripe_id' => $subscription->id,
-                     'stripe_status' => $subscription->status,
+                     'stripe_status' => $subscription->status == "incomplete" ? "complete" : $paymentIntent->status,
                      'stripe_price' => $subscription->plan->id,
                      'quantity' => $subscription->quantity,
                      'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
