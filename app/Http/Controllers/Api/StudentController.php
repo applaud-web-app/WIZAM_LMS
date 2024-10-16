@@ -1007,8 +1007,13 @@ class StudentController extends Controller
     }
 
 
-    public function cancelSubscription(){
-        
+    public function invoiceDetail(Request $request){
+        try {
+            $data = BillingSetting::select('vendor_name','address','city_id','state_id','country_id','zip','phone_number','vat_number','enable_invoicing','invoice_prefix')->first();
+            return response()->json(['status'=> true,'data' => $data], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
     }
     
 

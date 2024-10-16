@@ -40,7 +40,7 @@
 
    <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
       <!-- Billing Information Card -->
-      <div class="col-span-12 md:col-span-6">
+      <div class="col-span-12 md:col-span-12">
          <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
             <div class="p-[25px]">
                <h5 class="text-[18px] text-dark dark:text-title-dark font-semibold mb-[15px]">Billing Information</h5>
@@ -149,7 +149,7 @@
       </div>
 
       <!-- Tax Information Card -->
-      <div class="col-span-12 md:col-span-6">
+      {{-- <div class="col-span-12 md:col-span-6">
          <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
             <div class="p-[25px]">
                <h5 class="text-[18px] text-dark dark:text-title-dark font-semibold mb-[15px]">Tax Information</h5>
@@ -242,7 +242,7 @@
                </form>
             </div>
          </div>
-      </div>
+      </div> --}}
    </div>
 
 </section>
