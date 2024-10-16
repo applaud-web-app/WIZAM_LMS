@@ -23,6 +23,7 @@ use App\Models\Subscription;
 use App\Models\Plan;
 use Carbon\Carbon;
 use App\Models\Payment;
+use App\Models\BillingSetting;
 
 class StudentController extends Controller
 {
