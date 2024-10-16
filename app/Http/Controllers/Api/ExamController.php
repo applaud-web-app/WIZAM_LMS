@@ -484,8 +484,8 @@ class ExamController extends Controller
                     }
                 }
 
-                $openTime = Carbon::parse($quizResult->created_at);
-                $closeTime = Carbon::parse($quizResult->updated_at);
+                $openTime = Carbon::parse($examResult->created_at);
+                $closeTime = Carbon::parse($examResult->updated_at);
                 $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime),2);
 
                 // Build result
