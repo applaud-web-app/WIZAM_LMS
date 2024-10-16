@@ -46,7 +46,12 @@ class CmsController extends Controller
     public function banners(){
         try {
             $banner = HomeCms::select('title','description','button_text','button_link')->where('status',1)->where('type','banner')->get();
-            return response()->json(['status'=> true,'data' => $banner], 201);
+            $youtube = HomeCms::select('description')->where('status',1)->where('type','youtube')->get();
+            $data = [
+                'banner'=>$banner,
+                'youtube'=>$youtube,
+            ];
+            return response()->json(['status'=> true,'data' => $data], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
@@ -55,8 +60,8 @@ class CmsController extends Controller
     // HOME Youtube Video
     public function youtube(){
         try {
-            $data = HomeCms::select('description')->where('status',1)->where('type','youtube')->get();
-            return response()->json(['status'=> true,'data' => $data], 201);
+            $youtube = HomeCms::select('description')->where('status',1)->where('type','youtube')->get();
+            return response()->json(['status'=> true,'data' => $youtube], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
