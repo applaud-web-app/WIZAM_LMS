@@ -1470,7 +1470,7 @@ class PaymentController extends Controller
             })
             ->addColumn('status', function($row) {
               // Create the status badge HTML
-              $status = $row->status == "cancel" ? "Active" : $row->status;
+              $status = $row->stripe_status == "incomplete" ? "Active" : $row->stripe_status;
               return $status = "<span class='bg-primary/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-primary text-xs'>{$status}</span>";
             })
             ->addColumn('user', function($row) {
@@ -1492,7 +1492,7 @@ class PaymentController extends Controller
                return "---";
             })
             ->addColumn('subscription_id', function($row) {
-               return $row->stripe_subscription_id;
+               return $row->stripe_id;
             })
             ->rawColumns(['status','purchase_date','user','plan','price','subscription_id','end_date'])
             ->make(true);
