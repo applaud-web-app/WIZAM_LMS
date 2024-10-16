@@ -996,11 +996,32 @@ class StudentController extends Controller
 
     public function invoiceDetail(Request $request){
         try {
-            $data = BillingSetting::select('billing_settings.vendor_name','billing_settings.address','billing_settings.city_id','billing_settings.state_id','billing_settings.country_id','billing_settings.zip','billing_settings.phone_number','billing_settings.vat_number','billing_settings.enable_invoicing','billing_settings.invoice_prefix','countries.name as country_name','states.name as state_name','cities.name as city_name')
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
+            $user = User::where('id',$user->id)->first();
+
+            $billing = BillingSetting::select('billing_settings.vendor_name','billing_settings.address','billing_settings.city_id','billing_settings.state_id','billing_settings.country_id','billing_settings.zip','billing_settings.phone_number','billing_settings.vat_number','billing_settings.enable_invoicing','billing_settings.invoice_prefix','countries.name as country_name','states.name as state_name','cities.name as city_name')
             ->leftJoin('countries', 'billing_settings.country_id', '=', 'countries.id')
             ->leftJoin('states', 'billing_settings.state_id', '=', 'states.id')
             ->leftJoin('cities', 'billing_settings.city_id', '=', 'cities.id')
             ->first();
+            
+            $subscriptions = Subscription::select(
+                'subscriptions.created_at as purchase_date',
+                'subscriptions.ends_at as ends_date',
+                'subscriptions.stripe_status as subscription_status',
+                'plans.name as plan_name',
+                'plans.price as plan_price'
+            )
+            ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
+            ->where('subscriptions.user_id', $user->id)
+            ->latest()->first();
+
+            $data = [
+                'billing'=>$billing,
+                'subscription'=>$subscriptions
+            ];
             return response()->json(['status'=> true,'data' => $data], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
