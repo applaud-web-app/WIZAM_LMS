@@ -1442,10 +1442,10 @@ class PaymentController extends Controller
                if ($row->subscription_id == "one-time") {
                   return "One Time";
                }
-               return "Subscription :" . $row->subscription_id;
+               return "Subscription";
              })
              ->addColumn('price', function($row) {
-               return $row->amount." ".$row->currency;
+               return $row->amount." ".ucfirst($row->currency);
              })
              ->addColumn('payment_id', function($row) {
                return $row->stripe_payment_id;
@@ -1458,7 +1458,7 @@ class PaymentController extends Controller
 
    public function subscription(Request $request){
       if ($request->ajax()) {
-         $sections = Subscription::with('user','plan');
+         $sections = Subscription::with('user','plans');
 
          return DataTables::of($sections)
             ->addIndexColumn()
@@ -1480,14 +1480,14 @@ class PaymentController extends Controller
                return "---";
             })
             ->addColumn('plan', function($row) {
-               if ($row->plan) {
-                  return $row->plan->name;
+               if ($row->plans) {
+                  return $row->plans->name;
                }
                return "---";
             })
             ->addColumn('price', function($row) {
-               if ($row->plan) {
-                  return $row->plan->price;
+               if ($row->plans) {
+                  return $row->plans->price;
                }
                return "---";
             })
