@@ -428,6 +428,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/edit-plan', 'updatePlan')->name('update-plan');
 
         Route::get('/delete-plan', 'deletePlan')->name('delete-plan');
+
+        // PLAYMENT AND SUBSCRIPTION
+        Route::get('/payment', 'payment')->name('view-payment');
+        Route::get('/subscription', 'subscription')->name('view-subscription');
+
     });
 
 });

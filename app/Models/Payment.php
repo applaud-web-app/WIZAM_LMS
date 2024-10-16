@@ -17,4 +17,8 @@ class Payment extends Model
         'currency',
         'status',
     ];
+
+    public function user(){
+        return $this->hasOne(User::class, 'user_id', 'id');
+    }
 }

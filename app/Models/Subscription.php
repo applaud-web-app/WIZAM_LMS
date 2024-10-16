@@ -21,6 +21,11 @@ class Subscription extends Model
         'ends_at',
     ];
 
+    
+    public function user(){
+        return $this->hasOne(User::class, 'user_id', 'id');
+    }
+
     public function plans()
     {
         return $this->hasOne(Plan::class, 'stripe_price_id', 'stripe_price');

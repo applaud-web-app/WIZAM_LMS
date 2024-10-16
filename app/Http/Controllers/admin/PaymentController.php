@@ -1419,5 +1419,86 @@ class PaymentController extends Controller
       }
    }
 
+   public function payment(Request $request){
+      if ($request->ajax()) {
+         $sections = Payment::with('user');
+
+         return DataTables::of($sections)
+             ->addIndexColumn()
+             ->addColumn('pay_date', function($row) {
+                 return date('d/m/Y', strtotime($row->created_at));
+             })
+             ->addColumn('status', function($row) {
+               // Create the status badge HTML
+               return $status = "<span class='bg-primary/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-primary text-xs'>{$row->status}</span>";
+             })
+             ->addColumn('user', function($row) {
+               if ($row->user) {
+                  return $row->user->email;
+               }
+               return "---";
+             })
+             ->addColumn('type', function($row) {
+               if ($row->subscription_id == "one-time") {
+                  return "One Time";
+               }
+               return "Subscription :" . $row->subscription_id;
+             })
+             ->addColumn('price', function($row) {
+               return $row->amount." ".$row->currency;
+             })
+             ->addColumn('payment_id', function($row) {
+               return $row->stripe_payment_id;
+             })
+             ->rawColumns(['status','pay_date','user','price','type','payment_id'])
+             ->make(true);
+     }
+     return view('managePayment.payment.view-payment');
+   }
+
+   public function subscription(Request $request){
+      if ($request->ajax()) {
+         $sections = Subscription::with('user','plan');
+
+         return DataTables::of($sections)
+            ->addIndexColumn()
+            ->addColumn('purchase_date', function($row) {
+               return date('d/m/Y', strtotime($row->created_at));
+            })
+            ->addColumn('end_date', function($row) {
+               return date('d/m/Y', strtotime($row->ends_at));
+            })
+            ->addColumn('status', function($row) {
+              // Create the status badge HTML
+              $status = $row->status == "cancel" ? "Active" : $row->status;
+              return $status = "<span class='bg-primary/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-primary text-xs'>{$status}</span>";
+            })
+            ->addColumn('user', function($row) {
+               if ($row->user) {
+                  return $row->user->email;
+               }
+               return "---";
+            })
+            ->addColumn('plan', function($row) {
+               if ($row->plan) {
+                  return $row->plan->name;
+               }
+               return "---";
+            })
+            ->addColumn('price', function($row) {
+               if ($row->plan) {
+                  return $row->plan->price;
+               }
+               return "---";
+            })
+            ->addColumn('subscription_id', function($row) {
+               return $row->stripe_subscription_id;
+            })
+            ->rawColumns(['status','purchase_date','user','plan','price','subscription_id','end_date'])
+            ->make(true);
+   }
+     return view('managePayment.subscription.view-subscription');
+   }
+
 
 }
