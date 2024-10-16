@@ -1036,7 +1036,8 @@ class StudentController extends Controller
             )
             ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
             ->where('subscriptions.user_id', $user->id)
-            ->latest()->first();
+            ->orderBy('subscriptions.created_at', 'desc') // Specify the table for created_at
+            ->first();
 
             // Prepare the response data
             $data = [
