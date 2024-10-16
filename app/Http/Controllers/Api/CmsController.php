@@ -463,7 +463,7 @@ class CmsController extends Controller
                     'quantity' => 1,
                 ]],
                 'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => env('FRONTEND_URL') . '/cancel',
+                'cancel_url' => env('FRONTEND_URL') . '/failure',
             ]);
     
             return response()->json(['status' => true, 'sessionId' => $session->id], 200);

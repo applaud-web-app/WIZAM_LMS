@@ -420,7 +420,6 @@ class QuizController extends Controller
 
             // Handle different question types
             $isCorrect = false;
-            
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
                 // In default mode, accumulate total possible marks
@@ -899,7 +898,7 @@ class QuizController extends Controller
 
                 $openTime = Carbon::parse($quizResult->created_at);
                 $closeTime = Carbon::parse($quizResult->updated_at);
-                $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime));
+                $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime),2);
 
                 // Build result
                 $result = [
