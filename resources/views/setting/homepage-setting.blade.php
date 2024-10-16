@@ -55,7 +55,7 @@
                     <div class="p-[25px]">
                         <form action="{{ route('update-banner') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <h1 class="mb-4 text-xl"><b>Banner Section</b></h1>
+                            <h1 class="mb-4 text-xl"><b>Slider Section</b></h1>
                             <div id="bannerBox">
                                 @foreach ($banners as $index => $banner)
                                     <div class="banner-slide mb-[15px] border-b-2 pb-3" data-index="{{ $index }}">
@@ -109,7 +109,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mb-[15px]">
+                                        {{-- <div class="mb-[15px]">
                                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                                 for="file_input">Banner Image <span class="text-danger">*</span></label>
                                             <input
@@ -120,7 +120,7 @@
                                                 <img src="{{ $banner->image }}" alt="Banner Image"
                                                     class="mt-2 w-[150px] h-[100px] object-cover">
                                             @endif
-                                        </div>
+                                        </div> --}}
 
                                         <!-- Remove Button -->
                                         <button type="button"
@@ -140,6 +140,37 @@
                                     class="mt-3 bg-primary text-white py-[10px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- YOTUBE VIDEO --}}
+        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+            <div class="col-span-12 md:col-span-12">
+                <div
+                    class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
+                    <div class="p-[25px]">
+                        <form action="{{ route('update-youtube-video') }}" method="POST" autocomplete="off"
+                            enctype="multipart/form-data" id="addSetting">
+                            @csrf
+                            <h1 class="mb-4 text-xl"><b>Youtube Video</b></h1>
+                            <div class="mb-[15px]">
+                                <label for="youtube_link"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Link <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="url" id="youtube_link" name="youtube_link" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter Youtube Link" value="{{ old('youtube', $youtube->description ?? '') }}" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-[15px]">
+                                <button type="submit"
+                                    class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -211,20 +242,9 @@
                 <div
                     class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
                     <div class="p-[25px]">
-                        <form action="{{ route('update-help') }}" method="POST" autocomplete="off" enctype="multipart/form-data" id="addSetting">
+                        {{-- <form action="{{ route('update-help') }}" method="POST" autocomplete="off" enctype="multipart/form-data" id="addSetting">
                             @csrf
                             <h1 class="mb-4 text-xl"><b>Help Section</b></h1>
-                            
-                            <!-- Display validation errors -->
-                            @if ($errors->any())
-                                <div class="mb-4">
-                                    <ul class="text-red-500">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
                         
                             <div class="mb-[15px]">
                                 <label for="title" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
@@ -235,9 +255,17 @@
                                 </div>
                             </div>
                         
-                            @for ($i = 0; $i < 3; $i++)
+                            @for ($i = 0; $i < 4; $i++)
                                 <div class="border-b-2 mb-[15px]">
                                     <h2 class="slide-title text-lg mb-3"><b>Card {{ $i + 1 }}</b></h2>
+                                    <div class="mb-[15px]">
+                                        <label for="card_title[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                            Card Image <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-col flex-1">
+                                            <input type="file" name="card_image[]" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white" required>
+                                        </div>
+                                    </div>
                                     <div class="mb-[15px]">
                                         <label for="card_title[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                                             Card Title <span class="text-red-500">*</span>
@@ -246,6 +274,66 @@
                                             <input type="text" name="card_title[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Card Title" value="{{ old('card_title.' . $i, optional(json_decode($help->extra ?? null))[$i]->title ?? '') }}" required>
                                         </div>
                                     </div>
+                                    <div class="mb-[15px]">
+                                        <label for="card_description[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                            Card Description <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-col flex-1">
+                                            <textarea name="card_description[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" maxlength="300" placeholder="Your Card Description" required>{{ old('card_description.' . $i, optional(json_decode($help->extra ?? null))[$i]->description ?? '') }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endfor
+                        
+                            <div class="mb-[15px]">
+                                <button type="submit" class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
+                            </div>
+                        </form> --}}
+                        <form action="{{ route('update-help') }}" method="POST" autocomplete="off" enctype="multipart/form-data" id="addSetting">
+                            @csrf
+                            <h1 class="mb-4 text-xl"><b>Help Section</b></h1>
+                        
+                            <div class="mb-[15px]">
+                                <label for="title" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Title <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="text" id="title" name="title" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Site Name" value="{{ old('title', $help->title ?? '') }}" required>
+                                </div>
+                            </div>
+                        
+                            @for ($i = 0; $i < 4; $i++)
+                                <div class="border-b-2 mb-[15px]">
+                                    <h2 class="slide-title text-lg mb-3"><b>Card {{ $i + 1 }}</b></h2>
+                                    
+                                    <div class="mb-[15px]">
+                                        <label for="card_image[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                            Card Image <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-col flex-1">
+                                            @php
+                                                $existingImage = optional(json_decode($help->extra ?? null))[$i]->image ?? null;
+                                            @endphp
+                                            <input type="file" name="card_image[]" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white" {{ $existingImage ? '' : 'required' }} onchange="previewImage(event, {{ $i }})">
+                                            
+                                            <!-- Show existing image if available -->
+                                            @if ($existingImage)
+                                                <img src="{{$existingImage}}" alt="Card Image" id="imagePreview{{ $i }}" class="mt-2" width="200px">
+                                            @else
+                                                <img id="imagePreview{{ $i }}" class="mt-2 h-24 hidden">
+                                            @endif
+                                        </div>
+                                    </div>
+                        
+                                    <div class="mb-[15px]">
+                                        <label for="card_title[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                            Card Title <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-col flex-1">
+                                            <input type="text" name="card_title[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Card Title" value="{{ old('card_title.' . $i, optional(json_decode($help->extra ?? null))[$i]->title ?? '') }}" required>
+                                        </div>
+                                    </div>
+                        
                                     <div class="mb-[15px]">
                                         <label for="card_description[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                                             Card Description <span class="text-red-500">*</span>
@@ -503,6 +591,17 @@
 
 @endsection
 @push('scripts')
+    <script>
+        function previewImage(event, index) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('imagePreview' + index);
+                output.src = reader.result;
+                output.classList.remove('hidden');
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
     {{-- <script>
         $(document).ready(function() {
             // Function to update slide numbers
@@ -605,14 +704,6 @@
                             </div>
                         </div>
 
-                        <div class="mb-[15px]">
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input${bannerIndex}">
-                                Banner Image <span class="text-danger">*</span>
-                            </label>
-                            <input class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white"
-                                name="banner_img[]" type="file" id="file_input${bannerIndex}" required>
-                        </div>
-
                         <!-- Remove Button -->
                         <button type="button" class="remove-banner mt-2 bg-danger text-white py-[5px] px-[10px] rounded-4 border-none cursor-pointer hover:bg-danger-dark focus:ring-danger focus:border-danger">
                             Remove
@@ -621,6 +712,14 @@
                 `);
                 }
             });
+
+            // <div class="mb-[15px]">
+            //                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input${bannerIndex}">
+            //                     Banner Image <span class="text-danger">*</span>
+            //                 </label>
+            //                 <input class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white"
+            //                     name="banner_img[]" type="file" id="file_input${bannerIndex}" required>
+            //             </div>
 
             // Click event to remove a banner slide
             $(document).on('click', '.remove-banner', function() {

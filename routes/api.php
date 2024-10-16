@@ -19,6 +19,7 @@ Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
 // CMS API (FRONTEND)
 Route::get('banners', [CmsController::class, 'banners']);
+Route::get('youtube', [CmsController::class, 'youtube']);
 Route::get('popular-exam-data', [CmsController::class, 'popularExamData']);
 Route::get('help-data', [CmsController::class, 'helpData']);
 Route::get('whyus-data', [CmsController::class, 'whyusData']);

@@ -543,7 +543,8 @@ class SettingController extends Controller
         $faq = HomeCms::where('type', 'faq')->first();
         $resource = HomeCms::where('type', 'resource')->first();
         $getStarted = HomeCms::where('type', 'started')->first();
-        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq','resource','getStarted'));
+        $youtube = HomeCms::where('type', 'youtube')->first();
+        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq','resource','getStarted','youtube'));
     }
 
     public function updateGetstarted(Request $request){
@@ -666,12 +667,51 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Why Us saved successfully!');
     }
 
-    public function updateHelp(Request $request){
+    // public function updateHelp(Request $request){
+    //     // Validate the request input
+    //     $request->validate([
+    //         'title' => 'required|max:255',
+    //         'card_title' => 'required|array',
+    //         'card_description' => 'required|array',
+    //     ]);
+
+    //     // Find the existing help entry
+    //     $help = HomeCms::where('type', 'help')->first();
+
+    //     // If no existing help is found, create a new one
+    //     if (!$help) {
+    //         $help = new HomeCms();
+    //         $help->type = 'help'; // Set the type if necessary
+    //     }
+
+    //     // Update the help record
+    //     $help->title = $request->input('title');
+
+    //     // Prepare data for card titles and descriptions
+    //     $cards = [];
+    //     foreach ($request->input('card_title') as $key => $title) {
+    //         $cards[] = [
+    //             'title' => $title,
+    //             'description' => $request->input('card_description')[$key],
+    //         ];
+    //     }
+
+    //     // Store the data in JSON format
+    //     $help->extra = json_encode($cards);
+    //     $help->save();
+
+    //     // Redirect back with a success message
+    //     return redirect()->back()->with('success', 'Help saved successfully!');
+    // }
+
+    public function updateHelp(Request $request)
+    {
         // Validate the request input
         $request->validate([
             'title' => 'required|max:255',
             'card_title' => 'required|array',
             'card_description' => 'required|array',
+            'card_image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate image files
         ]);
 
         // Find the existing help entry
@@ -686,13 +726,42 @@ class SettingController extends Controller
         // Update the help record
         $help->title = $request->input('title');
 
-        // Prepare data for card titles and descriptions
+        // Prepare data for card titles, descriptions, and images
         $cards = [];
         foreach ($request->input('card_title') as $key => $title) {
-            $cards[] = [
+            $card = [
                 'title' => $title,
                 'description' => $request->input('card_description')[$key],
             ];
+            
+            // Handle image upload
+            if ($request->hasFile("card_image.$key")) {
+
+                $image = $request->file("card_image.$key");
+    
+                // Generate a unique filename with the current timestamp
+                $imageName = 'helping_' . time() . '_' . $key . '.' . $image->getClientOriginalExtension();
+    
+                // Move the image to the 'public/banners' directory
+                $image->move(public_path('banners'), $imageName);
+    
+                // Store the image path in the database (relative to the public directory)
+                $imagePath = $imageName;
+    
+                // Save the complete URL in the database
+                $completeImageUrl = env('APP_URL') . '/banners/' . $imagePath; // Create URL based on public path
+                
+                // Save the image URL to the banner
+                $card['image'] = $completeImageUrl;
+            } else {
+                // Keep the existing image if no new one was uploaded
+                $existingData = json_decode($help->extra ?? null);
+                if (isset($existingData[$key]->image)) {
+                    $card['image'] = $existingData[$key]->image;
+                }
+            }
+
+            $cards[] = $card;
         }
 
         // Store the data in JSON format
@@ -702,6 +771,7 @@ class SettingController extends Controller
         // Redirect back with a success message
         return redirect()->back()->with('success', 'Help saved successfully!');
     }
+
 
     public function updateExam(Request $request)
     {
@@ -802,6 +872,22 @@ class SettingController extends Controller
         $operate = HomeCms::where('type', 'operate')->first();
         $bestData = HomeCms::where('type', 'bestData')->first();
         return view('setting.aboutpage-setting',compact('mission','vision','values','strategy','operate','bestData'));
+    }
+
+    public function updateYoutubeVideo(Request $request){
+        $request->validate([
+            'youtube_link' => 'required|max:300'
+        ]);
+
+        // Find the existing mission entry or create a new one
+        $youtube = HomeCms::where('type', 'youtube')->first() ?: new HomeCms(['type' => 'youtube']);
+        
+        // Update fields
+        $youtube->title = "Youtube";
+        $youtube->description = $request->input('youtube_link');
+        $youtube->save();
+
+        return redirect()->back()->with('success', 'Youtube Url saved successfully!');
     }
 
     // Update Mission Section

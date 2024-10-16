@@ -45,8 +45,18 @@ class CmsController extends Controller
     // HOME PAGE SECTIONS
     public function banners(){
         try {
-            $banner = HomeCms::select('title','description','image','button_text','button_link')->where('status',1)->where('type','banner')->get();
+            $banner = HomeCms::select('title','description','button_text','button_link')->where('status',1)->where('type','banner')->get();
             return response()->json(['status'=> true,'data' => $banner], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // HOME Youtube Video
+    public function youtube(){
+        try {
+            $data = HomeCms::select('description')->where('status',1)->where('type','youtube')->get();
+            return response()->json(['status'=> true,'data' => $data], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }

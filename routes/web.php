@@ -183,6 +183,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         // FOR HOME PAGE
         Route::get('/home-settings', 'homeSetting')->name('home-settings');
         Route::post('/update-banner', 'updateBanner')->name('update-banner');
+        Route::post('/update-youtube-video', 'updateYoutubeVideo')->name('update-youtube-video');
         Route::post('/update-exam', 'updateExam')->name('update-exam');
         Route::post('/update-help', 'updateHelp')->name('update-help');
         Route::post('/update-whyus', 'updateWhyus')->name('update-whyus');
