@@ -24,51 +24,6 @@ class ExamController extends Controller
         try {
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-            $type = "exams";
-
-            // Check if the user is authenticated
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not authenticated',
-                ], 401);
-            }
-
-            // Fetch the user from the database
-            $user = User::findOrFail($user->id);
-
-            // Get the current date and time
-            $currentDate = now();
-
-            // Fetch the user's active subscription
-            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-            // If no active subscription, return error
-            if (!$subscription) {
-                return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-            }
-    
-            // Fetch the plan related to this subscription
-            $plan = $subscription->plans;
-    
-            if (!$plan) {
-                return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-            }
-    
-            // Check if the plan allows unlimited access
-            if ($plan->feature_access == 1) {
-                // return response()->json(['status' => true, 'data' => $subscription], 200);
-            } else {
-                // Fetch the allowed features for this plan
-                $allowed_features = json_decode($plan->features, true);
-    
-                // Check if the requested feature type is in the allowed features
-                if (in_array($type, $allowed_features)) {
-                    // return response()->json(['status' => true, 'data' => $subscription], 200);
-                } else {
-                    return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                }
-            }
             
             // Validate incoming request data
             $request->validate([
@@ -99,6 +54,7 @@ class ExamController extends Controller
                     'exams.negative_marking',
                     'exams.negative_marking_type',
                     'exams.negative_marks',
+                    'exams.is_free',
                     DB::raw('SUM(questions.default_marks) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
@@ -113,13 +69,51 @@ class ExamController extends Controller
                     'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
                     'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
                     'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
-                    'exams.negative_marking_type', 'exams.negative_marks'
+                    'exams.negative_marking_type', 'exams.negative_marks','exams.is_free'
                 )
                 ->first();
     
             // If exam not found
             if (!$exam) {
                 return response()->json(['status' => false, 'error' => 'Exam not found'], 404);
+            }
+
+            // PAID EXAM
+            if ($exam->is_free == 0) {
+                $type = "exams";
+
+                // Get the current date and time
+                $currentDate = now();
+
+                // Fetch the user's active subscription
+                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
+
+                // If no active subscription, return error
+                if (!$subscription) {
+                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
+                }
+        
+                // Fetch the plan related to this subscription
+                $plan = $subscription->plans;
+        
+                if (!$plan) {
+                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
+                }
+        
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // return response()->json(['status' => true, 'data' => $subscription], 200);
+                } else {
+                    // Fetch the allowed features for this plan
+                    $allowed_features = json_decode($plan->features, true);
+        
+                    // Check if the requested feature type is in the allowed features
+                    if (in_array($type, $allowed_features)) {
+                        // return response()->json(['status' => true, 'data' => $subscription], 200);
+                    } else {
+                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
+                    }
+                }
             }
     
             // Get the authenticated user
