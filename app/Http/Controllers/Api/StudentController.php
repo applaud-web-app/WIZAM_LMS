@@ -994,18 +994,40 @@ class StudentController extends Controller
     }
 
 
-    public function invoiceDetail(Request $request){
+    public function invoiceDetail(Request $request)
+    {
         try {
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+            
+            // Ensure $user is available
+            if (!$user) {
+                return response()->json(['status' => false, 'error' => 'User not authenticated'], 401);
+            }
 
-            $billing = BillingSetting::select('billing_settings.vendor_name','billing_settings.address','billing_settings.city_id','billing_settings.state_id','billing_settings.country_id','billing_settings.zip','billing_settings.phone_number','billing_settings.vat_number','billing_settings.enable_invoicing','billing_settings.invoice_prefix','countries.name as country_name','states.name as state_name','cities.name as city_name')
+            // Retrieve billing information with joins
+            $billing = BillingSetting::select(
+                'billing_settings.vendor_name',
+                'billing_settings.address',
+                'billing_settings.city_id',
+                'billing_settings.state_id',
+                'billing_settings.country_id',
+                'billing_settings.zip',
+                'billing_settings.phone_number',
+                'billing_settings.vat_number',
+                'billing_settings.enable_invoicing',
+                'billing_settings.invoice_prefix',
+                'countries.name as country_name',
+                'states.name as state_name',
+                'cities.name as city_name'
+            )
             ->leftJoin('countries', 'billing_settings.country_id', '=', 'countries.id')
             ->leftJoin('states', 'billing_settings.state_id', '=', 'states.id')
             ->leftJoin('cities', 'billing_settings.city_id', '=', 'cities.id')
             ->first();
 
-            $subscriptions = Subscription::select(
+            // Retrieve the most recent subscription for the user
+            $subscription = Subscription::select(
                 'subscriptions.created_at as purchase_date',
                 'subscriptions.ends_at as ends_date',
                 'subscriptions.stripe_status as subscription_status',
@@ -1016,15 +1038,21 @@ class StudentController extends Controller
             ->where('subscriptions.user_id', $user->id)
             ->latest()->first();
 
+            // Prepare the response data
             $data = [
-                'billing'=>$billing,
-                'subscription'=>$subscriptions
+                'billing' => $billing,
+                'subscription' => $subscription
             ];
-            return response()->json(['status'=> true,'data' => $data], 201);
+
+            // Return the response with status 200
+            return response()->json(['status' => true, 'data' => $data], 200);
+            
         } catch (\Throwable $th) {
-            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+            // Handle exceptions and return error message
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
     
 
     
