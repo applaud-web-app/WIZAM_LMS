@@ -1010,7 +1010,11 @@ class StudentController extends Controller
 
     public function invoiceDetail(Request $request){
         try {
-            $data = BillingSetting::select('vendor_name','address','city_id','state_id','country_id','zip','phone_number','vat_number','enable_invoicing','invoice_prefix')->first();
+            $data = BillingSetting::select('billing_settings.vendor_name','billing_settings.address','billing_settings.city_id','billing_settings.state_id','billing_settings.country_id','billing_settings.zip','billing_settings.phone_number','billing_settings.vat_number','billing_settings.enable_invoicing','billing_settings.invoice_prefix','countries.name as country_name','states.name as state_name','cities.name as city_name')
+            ->leftJoin('countries', 'billing_settings.country_id', '=', 'countries.id')
+            ->leftJoin('states', 'billing_settings.state_id', '=', 'states.id')
+            ->leftJoin('cities', 'billing_settings.city_id', '=', 'cities.id')
+            ->first();
             return response()->json(['status'=> true,'data' => $data], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
