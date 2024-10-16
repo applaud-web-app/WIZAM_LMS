@@ -339,7 +339,7 @@
                                             Card Description <span class="text-red-500">*</span>
                                         </label>
                                         <div class="flex flex-col flex-1">
-                                            <textarea name="card_description[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" maxlength="300" placeholder="Your Card Description" required>{{ old('card_description.' . $i, optional(json_decode($help->extra ?? null))[$i]->description ?? '') }}</textarea>
+                                            <textarea name="card_description[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Card Description" required>{{ old('card_description.' . $i, optional(json_decode($help->extra ?? null))[$i]->description ?? '') }}</textarea>
                                         </div>
                                     </div>
                                 </div>
