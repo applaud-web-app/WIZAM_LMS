@@ -497,12 +497,32 @@ class FileManagerController extends Controller
             // Separate folders and files
             $folders = $parentData->filter(fn($item) => $item->type === 'folder')->values(); // Collect only folder items
             $files = $parentData->filter(fn($item) => $item->type !== 'folder')->values(); // Collect only file items
+
+
+            // Encrypt URLs for each item
+            foreach ($folders as $item) {
+                $url = route('fetch-directory-data');
+                $parms = 'id=' . $item->id;
+                $item->encryptedUrl = encrypturl($url, $parms); // Create an encrypted URL for each item
+                $url = route('delete-directory');
+                $item->deleteUrl = encrypturl($url, $parms); // Create an encrypted URL for each item
+            }
+
+            // Encrypt URLs for each item
+            foreach ($files as $item) {
+                $url = route('fetch-directory-data');
+                $parms = 'id=' . $item->id;
+                $item->encryptedUrl = encrypturl($url, $parms); // Create an encrypted URL for each item
+                $url = route('delete-directory');
+                $item->deleteUrl = encrypturl($url, $parms); // Create an encrypted URL for each item
+            }
     
             // Ensure folders and files are always arrays
             $parms = "id=".$parent_id;
             $encryptUrl = encrypturl(route('add-folder'),$parms);
             return response()->json([
                 'success' => true,
+                'parent_id'=>$parent_id,
                 'folders' => $folders->isEmpty() ? [] : $folders, // Return empty array if no folders
                 'files' => $files->isEmpty() ? [] : $files, // Return empty array if no files
                 'uploadUrl' => encrypturl(route('save-directory-media'),$parms),  // Example URL for uploading files
@@ -519,6 +539,30 @@ class FileManagerController extends Controller
     }
     
 
+    public function getParentFolder(Request $request){
+        try {
+
+            $parentData = FileManager::where('parent_node', 0)->where('type','folder')->get();
+
+            // Encrypt URLs for each item
+            foreach ($parentData as $item) {
+                $url = route('fetch-directory-data');
+                $parms = 'id=' . $item->id;
+                $item->encryptedUrl = encrypturl($url, $parms); // Create an encrypted URL for each item
+            }
+    
+            return response()->json([
+                'success' => true,
+                'data' => $parentData
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
     
 
     public function deleteDirectory(Request $request) {
@@ -538,7 +582,6 @@ class FileManagerController extends Controller
             $directory_id = $data['id'];
     
             $media = FileManager::find($directory_id);
-    
             if (!$media) {
                 return response()->json([
                     'success' => false,
@@ -549,7 +592,6 @@ class FileManagerController extends Controller
             // If it's a folder, delete all child items
             if ($media->type == "Folder") {
                 $this->deleteChildFiles($directory_id);
-    
                 // Delete the main folder entry
                 $media->delete();
             } else {
@@ -593,106 +635,6 @@ class FileManagerController extends Controller
             $child->delete();
         }
     }
-    
-
-
-   
-    // protected function createFilename(UploadedFile $file) {
-    //     $extension = $file->getClientOriginalExtension();
-    //     $filename = str_replace(".".$extension, "", $file->getClientOriginalName()); 
-
-    //     $filename = "Wizam".rand(1000, 9999)."-".strtolower($filename);
-
-    //     //here you can manipulate with file name e.g. HASHED
-    //     return $filename.".".$extension;
-    // }
-
-    // // Upload MEDIA
-    // public function uploadMedia(Request $request) {
-    //     $receiver = new FileReceiver("file", $request, HandlerFactory::classFromRequest($request));
-    
-    //     // Check if the upload is successful
-    //     if ($receiver->isUploaded() === false) {
-    //         throw new UploadMissingFileException();
-    //     }
-    
-    //     // Receive the file
-    //     $save = $receiver->receive();
-    
-    //     // Check if the upload has finished
-    //     if ($save->isFinished()) {
-    //         return $this->saveFile($save->getFile(), $request);
-    //     }
-    
-    //     // We are in chunk mode, let's send the current progress
-    //     $handler = $save->handler();
-    //     return response()->json([
-    //         "done" => $handler->getPercentageDone(),
-    //         'status' => true,
-    //     ]);
-    // }
-    
-    // protected function saveFile(UploadedFile $file, Request $request) {
-    //     $fileName = $this->createFilename($file);
-    
-    //     // Determine if it's a video or another type of file
-    //     $mimeType = $file->getMimeType();
-    //     $isVideo = strpos($mimeType, 'video') !== false;
-    
-    //     // Set the file path based on the file type
-    //     $filePath = $isVideo ? "filemanager/videos/" : "filemanager/doc/";
-    //     $finalPath = storage_path("app/" . $filePath);
-    
-    //     // Move the uploaded file to the final destination
-    //     $file->move($finalPath, $fileName);
-    
-    //     return response()->json([
-    //         'path' => $filePath,
-    //         'name' => $fileName,
-    //         'mime_type' => $mimeType
-    //     ]);
-    // }
-
-    // public function removeMedia(Request $request) {
-    //     $files = $request->filename; // Assuming you are passing multiple filenames in an array
-    
-    //     if (!is_array($files)) {
-    //         $files = [$files]; // Ensure it's an array
-    //     }
-    
-    //     $deletedFiles = [];
-    //     $failedFiles = [];
-    
-    //     foreach ($files as $file) {
-    //         // Get the extension to determine file type
-    //         $extension = pathinfo($file, PATHINFO_EXTENSION);
-    //         $isVideo = in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'mkv']); // Add more video extensions if needed
-    
-    //         // Set the directory based on the file type
-    //         $finalPath = storage_path("app/");
-    
-    //         // Construct the full file path
-    //         $fullFilePath = $finalPath . $file;
-    
-    //         // Ensure $fullFilePath points to a file and not a directory
-    //         if (is_file($fullFilePath)) {
-    //             // Check if the file exists and attempt to delete it
-    //             if (unlink($fullFilePath)) {
-    //                 $deletedFiles[] = $file;
-    //             } else {
-    //                 $failedFiles[] = $file;
-    //             }
-    //         } else {
-    //             $failedFiles[] = $file; // Add to failed if it's not a file
-    //         }
-    //     }
-    
-    //     return response()->json([
-    //         'status' => count($failedFiles) === 0 ? 'ok' : 'error',
-    //         'deleted_files' => $deletedFiles,
-    //         'failed_files' => $failedFiles,
-    //     ], count($failedFiles) === 0 ? 200 : 403);
-    // }
 
     protected function createFilename(UploadedFile $file) {
         $extension = $file->getClientOriginalExtension();

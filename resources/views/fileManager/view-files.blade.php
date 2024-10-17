@@ -96,8 +96,8 @@
             <div class="2xl:flex-[0_0_79%] lg:flex-[0_0_74%] w-full">
                 <div class="bg-white dark:bg-box-dark rounded-[10px] p-[30px]" id="fileSystem">
                     <h2><i class="uil uil-folder"></i> My Files</h2>
-                    <div class="mt-4 flex items-center justify-center max-sm:flex-col sm:justify-between gap-x-[30px] gap-y-[15px]">
-                        <div class="sm:w-[211px] relative w-full">
+                    <div class="mt-4 flex items-center justify-end max-sm:flex-col sm:justify-end gap-x-[30px] gap-y-[15px]">
+                        {{-- <div class="sm:w-[211px] relative w-full">
                             <span
                                 class="start-5 absolute -translate-y-2/4 leading-[0] top-2/4 text-light dark:text-subtitle-dark text-[14px]">
                                 <i class="uil uil-search"></i>
@@ -105,7 +105,7 @@
                             <input type="search"
                                 class="ps-[50px] h-[40px] rounded-6 border border-normal dark:border-box-dark-up bg-white dark:bg-box-dark-up font-normal shadow-none px-[15px] py-[5px] text-[15px] text-dark dark:text-title-dark outline-none placeholder:text-gray dark:placeholder:text-subtitle-dark w-full search-close-icon:appearance-none search-close-icon:w-[20px] search-close-icon:h-[23px] search-close-icon:bg-[url({{ asset('assets/images/svg/x.svg') }})] search-close-icon:cursor-pointer"
                                 placeholder="Search By name" autocomplete="off">
-                        </div>
+                        </div> --}}
                         <div class="flex items-center gap-x-[15px] gap-y-[5px] bg-inherit">
                             @php
                                 $parms = 'id=' . 0;
@@ -114,10 +114,10 @@
                                 $folderUrl = encrypturl($add_folder,$parms);
                                 $fileUrl = encrypturl($add_file,$parms);
                             @endphp
-                            <button class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" title="file" data-te-toggle="modal" data-te-target="#uploadFile" data-te-ripple-init="" data-te-ripple-color="light" id="upload_directory_file" data-url="{{$fileUrl}}">
+                            <button class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" title="file" data-te-toggle="modal" data-te-target="#uploadFile" data-te-ripple-init="" data-te-ripple-color="light" id="upload_directory_file" data-id="0" data-name="My File" data-url="{{$fileUrl}}">
                                 <i class="flex uil uil-upload"></i>
                             </button>
-                            <button  title="folder" class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" data-te-toggle="modal" data-te-target="#addFolder" data-te-ripple-init="" data-te-ripple-color="light" id="addFolderUrl" data-url="{{$folderUrl}}">
+                            <button  title="folder" class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" data-te-toggle="modal" data-te-target="#addFolder" data-te-ripple-init="" data-te-ripple-color="light" data-id="0" data-name="My File" id="addFolderUrl" data-url="{{$folderUrl}}">
                                 <i class="flex uil uil-folder"></i>
                             </button>
                         </div>
@@ -166,7 +166,7 @@
                                                             </button>
                                                             <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]" aria-labelledby="fileManager-{{ $item->id }}" data-te-dropdown-menu-ref>
                                                                 <li><button class="directory_files flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-id="{{$item->id}}" data-url="{{$encryptUrl}}" data-name="{{ $item->node_name }}"><i class="uil uil-eye text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>View</button></li>
-                                                                <li><button class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-url="{{$deleteUrl}}" data-te-toggle="modal" data-te-target="#deleteModal"  data-type="{{ $item->type}}"  data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Delete</button></li>
+                                                                <li><button class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-url="{{$deleteUrl}}" data-te-toggle="modal" data-te-target="#deleteModal" data-type="{{ $item->type}}" data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Delete</button></li>
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -210,10 +210,10 @@
                                                                 <i class="uil uil-ellipsis-v"></i>
                                                             </button>
                                                             <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]" aria-labelledby="fileManager-{{ $item->id }}" data-te-dropdown-menu-ref>
-                                                                <li><a href="{{ asset('storage/' . $item->source) }}"  class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" download ><i class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Download</a></li>
+                                                                <li><a href="{{ asset('storage/' . $item->source) }}"  class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" download><i class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Download</a></li>
                                                                 <li><button class="previewOption flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-file="{{ asset('storage/' . $item->source) }}"  data-te-toggle="modal" data-te-target="#filePreview" data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-eye text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>View</button></li>
                                                                 <li><button data-file="{{ asset('storage/' . $item->source) }}" class="copyUrl flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]"><i class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Copy Url</button></li>
-                                                                <li><button class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-url="{{$deleteUrl}}" data-te-toggle="modal" data-te-target="#deleteModal"  data-type="{{ $item->type }}"  data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Delete</button></li>
+                                                                <li><button class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" data-url="{{$deleteUrl}}" data-te-toggle="modal" data-te-target="#deleteModal" data-type="{{$item->type}}"  data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Delete</button></li>
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -417,6 +417,86 @@
 
 @endsection
 @push('scripts')
+
+    {{-- Delete Directory --}}
+    <script>
+        $(document).ready(function() {
+            // Function to capitalize the first letter
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            $(document).on('click','.deleteMedia',function(){
+                var itemType = $(this).data('type');
+                var deleteUrl = $(this).data('url');
+                
+                $('#confirmDelete').data('url',deleteUrl); // Store the URL in the confirm button
+                $('#itemType').text(capitalizeFirstLetter(itemType));
+                $('#itemTypeConfirmation').text(capitalizeFirstLetter(itemType));
+
+                // Clear any previous error messages and input values
+                $('#confirmation').val('');
+                $('#deleteError').text('');
+            })
+            
+
+            // Handle confirm button click
+            $('#confirmDelete').on('click', function() {
+                var confirmationInput = $('#confirmation').val().trim();
+                var deleteUrl = $(this).data('url');
+
+                // Validate confirmation input
+                if (confirmationInput !== 'CONFIRM') {
+                    $('#deleteError').text('Please type "CONFIRM" to proceed.');
+                    return;
+                }
+
+                // Check if deleteUrl is valid
+                if (!deleteUrl) {
+                    $('#deleteError').text('Invalid delete URL.');
+                    return;
+                }
+
+                // Make AJAX request
+                $.ajax({
+                    type: 'POST',
+                    url: deleteUrl,
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        deleteUrl: deleteUrl
+                    },
+                    success: function(response) {
+                        const parent_id = $('#addFolderUrl').data('id');
+                        const parent_name = $('#addFolderUrl').data('name');
+
+                        console.log(parent_id);
+                        console.log(parent_name);
+
+                        fetchDirectoryContents(parent_id,parent_name);
+                        // Clear error message
+                        $('#deleteError').text('');
+                        
+                        // Show success message using iziToast
+                        iziToast.success({
+                            title: 'Success',
+                            message: 'Permanently Deleted Successfully',
+                            position: 'topRight',
+                            timeout: 3000 // Optional: duration for the toast
+                        });
+                        $('#closeDeleteModal').trigger('click');
+                    },
+                    error: function(xhr) {
+                        // Display a more user-friendly error message
+                        var errorMessage = xhr.responseJSON && xhr.responseJSON.message 
+                            ? xhr.responseJSON.message 
+                            : 'An error occurred. Please try again.';
+                        
+                        $('#deleteError').text(errorMessage);
+                    }
+                });
+            });
+        });
+    </script>
     {{-- UPLOAD FOLDER --}}
     <script>
         $(document).ready(function () {
@@ -426,6 +506,8 @@
                 // Collect form data
                 var formData = $(this).serialize();
                 const url = $('#addFolderUrl').data('url');
+                const parent_id = $('#addFolderUrl').data('id');
+                const parent_name = $('#addFolderUrl').data('name');
                 // Send AJAX request
                 $.ajax({
                     url: url, // Replace with your form's action URL
@@ -444,6 +526,7 @@
                                 position: 'topRight',
                                 timeout: 3000
                             });
+                            fetchDirectoryContents(parent_id,parent_name);
                             $('#addFolderForm')[0].reset(); // Reset the form fields
                             $('#folderCloseBtn').trigger('click');
                         } else {
@@ -571,9 +654,12 @@
         $(document).ready(function() {
             // Trigger modal and set action URL
             $(document).on('click', '#upload_directory_file', function() {
-                const url = $(this).data('url');
-                console.log(url);
+                const url = $('#upload_directory_file').data('url');
+                const id = $('#upload_directory_file').data('id');
+                const name = $('#upload_directory_file').data('name');
                 $('#submitFiles').attr('data-url', url);
+                $('#submitFiles').attr('data-id', id);
+                $('#submitFiles').attr('data-name', name);
             });
         });
 
@@ -608,7 +694,15 @@
                 });
                 return; // Exit the function if there are no files
             }
-            const storeUrl = $(this).data('url');
+            
+            // const storeUrl = $('#submitFiles').data('url');
+            // const parent_id = $('#submitFiles').data('id');
+            // const parent_name = $('#submitFiles').data('name');
+
+            const storeUrl = $('#upload_directory_file').data('url');
+            const parent_id = $('#upload_directory_file').data('id');
+            const parent_name = $('#upload_directory_file').data('name');
+
             // Proceed to submit the file names to the server
             $.ajax({
                 type: 'POST',
@@ -618,12 +712,15 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    console.log("File names stored successfully:", response);
+                    fetchDirectoryContents(parent_id,parent_name);
+                    $('#submitFiles').removeAttr('data-url');
+                    $('#submitFiles').removeAttr('data-id');
+                    $('#submitFiles').removeAttr('data-name');
                     $('#closeUploadFileModal').trigger('click');
                     // Call the reset function
                     resetDropzoneUI();
                     uploadedFileNames = []; // Clear the file array
-                    $('#MediaDataBox').append(content);
+                    // $('#MediaDataBox').append(content);
                     iziToast.success({
                         title: 'Success',
                         message: "Media Save Successfully",
@@ -665,7 +762,7 @@
     {{-- Preview Modal --}}
     <script>
        $(document).ready(function() {
-            $('.previewOption').on('click', function() {
+            $(document).on('click','.previewOption', function() {
                 const fileUrl = $(this).data('file'); // Get the URL from data-file attribute
                 const fileName = fileUrl.split('/').pop();
                 const fileExtension = fileName.split('.').pop().toLowerCase();
@@ -708,7 +805,7 @@
 
         $(document).ready(function() {
             // Attach click event to the button with class 'copyUrl'
-            $('.copyUrl').on('click', function() {
+            $(document).on('click','.copyUrl', function() {
                 const fileUrl = $(this).data('file'); // Get the URL from the data attribute
                 
                 // Copy to clipboard
@@ -727,251 +824,8 @@
         });
 
     </script>
-
-    {{-- Delete Directory --}}
+    
     <script>
-        $(document).ready(function() {
-            // Function to capitalize the first letter
-            function capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-
-            // Show modal and set confirmation message
-            $('.deleteMedia').on('click', function() {
-                var itemType = $(this).data('type');
-                var deleteUrl = $(this).data('url');
-                
-                $('#confirmDelete').data('url', deleteUrl); // Store the URL in the confirm button
-                $('#itemType').text(capitalizeFirstLetter(itemType));
-                $('#itemTypeConfirmation').text(capitalizeFirstLetter(itemType));
-
-                // Clear any previous error messages and input values
-                $('#confirmation').val('');
-                $('#deleteError').text('');
-            });
-
-            // Handle confirm button click
-            $('#confirmDelete').on('click', function() {
-                var confirmationInput = $('#confirmation').val().trim();
-                var deleteUrl = $(this).data('url'); // Get delete URL from the clicked button
-
-                // Validate confirmation input
-                if (confirmationInput !== 'CONFIRM') {
-                    $('#deleteError').text('Please type "CONFIRM" to proceed.');
-                    return;
-                }
-
-                // Check if deleteUrl is valid
-                if (!deleteUrl) {
-                    $('#deleteError').text('Invalid delete URL.');
-                    return;
-                }
-
-                // Make AJAX request
-                $.ajax({
-                    type: 'POST',
-                    url: deleteUrl,
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        deleteUrl: deleteUrl
-                    },
-                    success: function(response) {
-                        // Clear error message
-                        $('#deleteError').text('');
-                        
-                        // Show success message using iziToast
-                        iziToast.success({
-                            title: 'Success',
-                            message: 'Permanently Deleted Successfully',
-                            position: 'topRight',
-                            timeout: 3000 // Optional: duration for the toast
-                        });
-                        $('#closeDeleteModal').trigger('click');
-                    },
-                    error: function(xhr) {
-                        // Display a more user-friendly error message
-                        var errorMessage = xhr.responseJSON && xhr.responseJSON.message 
-                            ? xhr.responseJSON.message 
-                            : 'An error occurred. Please try again.';
-                        
-                        $('#deleteError').text(errorMessage);
-                    }
-                });
-            });
-        });
-
-    </script>
-
-    {{-- Fetch Directory Data --}}
-    <script>
-        // $(document).ready(function() {
-        //     $(document).on('click', '.directory_files', function() {
-        //         const url = $(this).data('url');
-        //         const name = $(this).data('name');
-        //         // Show loader
-        //         $('#loader').show();
-    
-        //         $.ajax({
-        //             type: 'POST',
-        //             url: url,
-        //             data: {
-        //                 eq: $(this).data('eq'), // Send the required data
-        //                 _token: '{{ csrf_token() }}'
-        //             },
-        //             success: function(response) {
-        //                 console.log(response);
-        //                 $('#loader').hide(); // Hide loader
-        //                 let content = '';
-        //                 if (response.success) {
-        //                     const filter = `<h2><i class="uil uil-folder"></i> My Files <i class="uil uil-arrow"></i> ${name}</h2><div class="mt-4 flex items-center justify-center max-sm:flex-col sm:justify-between gap-x-[30px] gap-y-[15px]">
-        //                        <div class="sm:w-[211px] relative w-full">
-        //                           <span
-        //                              class="start-5 absolute -translate-y-2/4 leading-[0] top-2/4 text-light dark:text-subtitle-dark text-[14px]">
-        //                              <i class="uil uil-search"></i>
-        //                           </span>
-        //                           <input type="search"
-        //                              class="ps-[50px] h-[40px] rounded-6 border border-normal dark:border-box-dark-up bg-white dark:bg-box-dark-up font-normal shadow-none px-[15px] py-[5px] text-[15px] text-dark dark:text-title-dark outline-none placeholder:text-gray dark:placeholder:text-subtitle-dark w-full search-close-icon:appearance-none search-close-icon:w-[20px] search-close-icon:h-[23px] search-close-icon:bg-[url({{ asset('assets/images/svg/x.svg') }})] search-close-icon:cursor-pointer"
-        //                              placeholder="Search By name" autocomplete="off">
-        //                        </div>
-        //                        <div class="flex items-center gap-x-[15px] gap-y-[5px] bg-inherit">
-        //                           <button type="button" data-te-toggle="modal" data-url="${response.uploadUrl}" id="upload_directory_file" data-te-target="#uploadFile" data-te-ripple-init data-te-ripple-color="light" title="upload" data-url=""
-        //                              class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow">
-        //                              <i class="flex uil uil-upload"></i>
-        //                           </button>
-        //                           <button type="button" title="folder" data-url="${response.addFolderUrl}" id="addFolderUrl"
-        //                              class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" data-te-toggle="modal" data-te-target="#addFolder" data-te-ripple-init data-te-ripple-color="light">
-        //                              <i class="flex uil uil-folder"></i>
-        //                           </button>
-        //                           <button type="button" title="delete" data-url="${response.deleteUrl}" id="remove_directory"
-        //                              class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow"
-        //                              data-te-toggle="modal" data-te-target="#deletDirectory" data-te-ripple-init
-        //                              data-te-ripple-color="light">
-        //                              <i class="flex uil uil-trash"></i>
-        //                           </button>
-        //                        </div>
-        //                     </div>`;
-        //                     let folder = '';
-        //                     let file = '';
-    
-        //                     // Loop through folders
-        //                     response.folders.forEach(folderData => {
-        //                         folder += `<div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-        //                             <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-        //                                 <img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/folder.png')}}" alt="${folderData.node_name}">
-        //                                 <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">${folderData.node_name}</h4>
-        //                                 <div  class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-        //                                     <div class="flex items-center" data-te-dropdown-ref>
-        //                                         <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-        //                                             id="fileManager-${folderData.id}" data-te-dropdown-toggle-ref aria-expanded="false">
-        //                                             <i class="uil uil-ellipsis-v"></i>
-        //                                         </button>
-        //                                         <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-        //                                             aria-labelledby="fileManager-${folderData.id}" data-te-dropdown-menu-ref>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     download
-        //                                                 </a>
-        //                                             </li>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     copy
-        //                                                 </a>
-        //                                             </li>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     delete
-        //                                                 </a>
-        //                                             </li>
-        //                                         </ul>
-        //                                     </div>
-        //                                 </div>
-        //                             </div>
-        //                         </div>`;
-        //                     });
-    
-        //                     // Loop through files
-        //                     response.files.forEach(fileData => {
-        //                         file += `<div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-        //                             <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-        //                                 <img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/file.png')}}" alt="${fileData.node_name}">
-        //                                 <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">${fileData.node_name}</h4>
-        //                                 <div  class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
-        //                                     <div class="flex items-center" data-te-dropdown-ref>
-        //                                         <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-        //                                             id="fileManager-${fileData.id}" data-te-dropdown-toggle-ref aria-expanded="false">
-        //                                             <i class="uil uil-ellipsis-v"></i>
-        //                                         </button>
-        //                                         <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
-        //                                             aria-labelledby="fileManager-${fileData.id}" data-te-dropdown-menu-ref>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     download
-        //                                                 </a>
-        //                                             </li>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     copy
-        //                                                 </a>
-        //                                             </li>
-        //                                             <li>
-        //                                                 <a href="#"
-        //                                                     class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-        //                                                     <i
-        //                                                         class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-        //                                                     delete
-        //                                                 </a>
-        //                                             </li>
-        //                                         </ul>
-        //                                     </div>
-        //                                 </div>
-        //                             </div>
-        //                         </div>`;
-        //                     });
-    
-        //                     content = `${filter}
-        //                         <div class="text-[16px] leading-[1.25] font-medium text-dark dark:text-title-dark my-[20px] capitalize">Folders</div>
-        //                         <div class="grid grid-cols-12 sm:gap-[25px] max-sm:gap-y-[25px]" id="FolderDataBox">${folder}</div>
-        //                         <div class="text-[16px] leading-[1.25] font-medium text-dark dark:text-title-dark my-[20px] capitalize">Files</div>
-        //                         <div class="grid grid-cols-12 sm:gap-[25px] max-sm:gap-y-[25px]" id="MediaDataBox">${file}</div>`;
-        //                     $('#fileSystem').html(content);
-        //                 } else {
-        //                     iziToast.error({
-        //                         title: 'Error',
-        //                         message: 'Something Went Wrong',
-        //                         position: 'topRight',
-        //                         timeout: 5000
-        //                     });
-        //                 }
-        //             },
-        //             error: function(xhr) {
-        //                 $('#loader').hide();
-        //                 console.log(xhr.responseText); // Debugging info in console
-        //                 iziToast.error({
-        //                     title: 'Error',
-        //                     message: 'Something Went Wrong',
-        //                     position: 'topRight',
-        //                     timeout: 5000
-        //                 });
-        //             }
-        //         });
-        //     });
-        // });
-
         $(document).ready(function() {
             $(document).on('click', '.directory_files', function() {
                 const id = $(this).data('id');
@@ -981,10 +835,57 @@
             });
         });
     </script>
+    <script>
+        function fetchParentFolders() {
+                $.ajax({
+                    url: "{{ route('get-parent-folder') }}", // Your Laravel route
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            let $list = $('#listItemActive'); // The UL where we'll append the items
+                            $list.html(''); // Clear the current list
 
+                            // Add default 'My Files' folder
+                            $list.append(`
+                                <li class="mb-[15px] mt-[10px] directory_files cursor-pointer" data-name="My File" data-id="0" type="button">
+                                    <span class="text-dark dark:text-title-dark text-[16px] font-medium leading-[20px] px-[15px] mb-[10px]">My Files</span>
+                                </li>
+                            `);
+
+                            // Iterate through the parent folders and append them
+                            response.data.forEach(function(item) {
+                                $list.append(`
+                                    <li class="mb-[10px]" role="presentation">
+                                        <button data-url="${item.encryptedUrl}" data-name="${item.node_name}" data-id="${item.id}"
+                                            class="directory_files w-full flex items-center px-[15px] gap-[15px] rounded-md group text-body dark:text-subtitle-dark m-0 [&.active]:text-primary [&.active>span>i]:text-primary group">
+                                            <span class="text-[16px] text-light-extra dark:text-subtitle-dark group-hover:text-primary">
+                                                <i class="uil uil-folder"></i>
+                                            </span>
+                                            <div class="flex items-center justify-between flex-auto m-0 text-[15px] font-normal group-hover:text-primary capitalize">
+                                                <span>${item.node_name}</span>
+                                            </div>
+                                        </button>
+                                    </li>
+                                `);
+                            });
+                        } else {
+                            console.error('Failed to retrieve folders.');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                    }
+                });
+            }
+    </script>
     <script>
         function fetchDirectoryContents(parentId, name = '') {
-            const url = "{{ route('fetch-directory-data') }}";
+
+            const spinner = `<div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>`;
+            $('#fileSystem').html(spinner);
+            const url = "{{route('fetch-directory-data')}}";
             $('#loader').show();
             $.ajax({
                 type: 'POST',
@@ -994,36 +895,27 @@
                     _token: '{{csrf_token()}}'
                 },
                 success: function(response) {
-                    console.log(response);
                     $('#loader').hide(); // Hide loader
+                    fetchParentFolders();
                     let content = '';
                     if (response.success) {
                         let deleteBtn = ``;
-                        if(parentId != 0){
-                            deleteBtn=`<button type="button" title="delete" data-url="${response.deleteUrl}" id="remove_directory"
-                                class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow"
-                                data-te-toggle="modal" data-te-target="#deletDirectory" data-te-ripple-init
-                                data-te-ripple-color="light">
-                                <i class="flex uil uil-trash"></i>
-                            </button>`;
-                        }
+                        // if(parentId != 0){
+                        //     deleteBtn=`<button type="button" title="delete" data-url="${response.deleteUrl}" id="remove_directory"
+                        //         class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow"
+                        //         data-te-toggle="modal" data-te-target="#deletDirectory" data-te-ripple-init
+                        //         data-te-ripple-color="light">
+                        //         <i class="flex uil uil-trash"></i>
+                        //     </button>`;
+                        // }
 
-                        const filter = `<h2><i class="uil uil-folder"></i> My Files <i class="uil uil-arrow"></i> ${name}</h2><div class="mt-4 flex items-center justify-center max-sm:flex-col sm:justify-between gap-x-[30px] gap-y-[15px]">
-                            <div class="sm:w-[211px] relative w-full">
-                                <span
-                                    class="start-5 absolute -translate-y-2/4 leading-[0] top-2/4 text-light dark:text-subtitle-dark text-[14px]">
-                                    <i class="uil uil-search"></i>
-                                </span>
-                                <input type="search"
-                                    class="ps-[50px] h-[40px] rounded-6 border border-normal dark:border-box-dark-up bg-white dark:bg-box-dark-up font-normal shadow-none px-[15px] py-[5px] text-[15px] text-dark dark:text-title-dark outline-none placeholder:text-gray dark:placeholder:text-subtitle-dark w-full search-close-icon:appearance-none search-close-icon:w-[20px] search-close-icon:h-[23px] search-close-icon:bg-[url({{ asset('assets/images/svg/x.svg') }})] search-close-icon:cursor-pointer"
-                                    placeholder="Search By name" autocomplete="off">
-                            </div>
+                        const filter = `<h2><i class="uil uil-folder"></i> ${name}</h2><div class="mt-4 flex items-center justify-end max-sm:flex-col sm:justify-end gap-x-[30px] gap-y-[15px]">
                             <div class="flex items-center gap-x-[15px] gap-y-[5px] bg-inherit">
-                                <button type="button" data-te-toggle="modal" data-url="${response.uploadUrl}" id="upload_directory_file" data-te-target="#uploadFile" data-te-ripple-init data-te-ripple-color="light" title="upload" data-url=""
+                                <button type="button" data-te-toggle="modal" data-name="${name}" data-id="${response.parent_id}" data-url="${response.uploadUrl}" id="upload_directory_file" data-te-target="#uploadFile" data-te-ripple-init data-te-ripple-color="light" title="${name}"
                                     class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow">
                                     <i class="flex uil uil-upload"></i>
                                 </button>
-                                <button type="button" title="folder" data-url="${response.addFolderUrl}" id="addFolderUrl"
+                                <button type="button" title="${name}" data-name="${name}" data-id="${response.parent_id}" data-url="${response.addFolderUrl}" id="addFolderUrl"
                                     class="min-w-[40px] h-[40px] inline-flex items-center justify-center text-light dark:text-subtitle-dark text-[19px] rounded-full hover:bg-primary/10 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary shadow" data-te-toggle="modal" data-te-target="#addFolder" data-te-ripple-init data-te-ripple-color="light">
                                     <i class="flex uil uil-folder"></i>
                                 </button>
@@ -1038,8 +930,8 @@
                         response.folders.forEach(folderData => {
                             folder += `<div class="col-span-12 2xl:col-span-3 sm:col-span-6">
                                 <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-                                    <img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/folder.png')}}" alt="${folderData.node_name}">
-                                    <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">${folderData.node_name}</h4>
+                                    <img data-name="${folderData.node_name}" data-id="${folderData.id}" data-url="${folderData.encryptedUrl}" class="directory_files cursor-pointer mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/folder.png')}}" alt="${folderData.node_name}">
+                                    <h4 data-name="${folderData.node_name}" data-id="${folderData.id}" data-url="${folderData.encryptedUrl}" class="directory_files cursor-pointer text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">${folderData.node_name}</h4>
                                     <div  class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
                                         <div class="flex items-center" data-te-dropdown-ref>
                                             <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
@@ -1049,28 +941,13 @@
                                             <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
                                                 aria-labelledby="fileManager-${folderData.id}" data-te-dropdown-menu-ref>
                                                 <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        download
-                                                    </a>
+                                                    <button data-name="${folderData.node_name}" data-id="${folderData.id}" data-url="${folderData.encryptedUrl}" class="directory_files flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                        <i class="uil uil-eye text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                        View
+                                                    </button>
                                                 </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
+                                                <li class="deleteMedia" data-url="${folderData.deleteUrl}" data-type="${folderData.type}">
+                                                    <button data-url="${folderData.deleteUrl}" data-type="${folderData.type}" class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]"   data-te-toggle="modal" data-te-target="#deleteModal" data-te-ripple-init data-te-ripple-color="light"><i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Delete</button>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1094,28 +971,30 @@
                                             <ul class="absolute z-[1000] ltr:float-left rtl:float-right hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down [&[data-te-dropdown-show]]:block opacity-100 px-[15px] py-[10px]"
                                                 aria-labelledby="fileManager-${fileData.id}" data-te-dropdown-menu-ref>
                                                 <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                    <a href="{{asset('storage/')}}/${fileData.source}" 
+                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]" download>
                                                         <i
                                                             class="uil uil-download-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
                                                         download
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        copy
-                                                    </a>
+                                                    <button data-file="{{asset('storage/')}}/${fileData.source}" class="previewOption flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]"  data-te-toggle="modal" data-te-target="#filePreview" data-te-ripple-init data-te-ripple-color="light">
+                                                        <i class="uil uil-eye text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                        View
+                                                    </button>
                                                 </li>
                                                 <li>
-                                                    <a href="#"
-                                                        class="flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
-                                                        <i
-                                                            class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
-                                                        delete
-                                                    </a>
+                                                    <button data-file="{{asset('storage/')}}/${fileData.source}" class="copyUrl flex items-center gap-[10px] mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                        <i class="uil uil-copy text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                        Copy Url
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button data-url="${fileData.deleteUrl}" data-te-toggle="modal" data-te-target="#deleteModal" data-type="${fileData.type}" data-te-ripple-init data-te-ripple-color="light" class="deleteMedia flex items-center gap-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-primary text-[14px]">
+                                                        <i class="uil uil-trash-alt text-body dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>
+                                                        Delete
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1152,5 +1031,4 @@
             });
         }
     </script>
-    
 @endpush

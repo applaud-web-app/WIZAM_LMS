@@ -404,7 +404,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/delete-directory', 'deleteDirectory')->name('delete-directory');
 
         Route::post('/fetch-directory', 'fetchDirectoryData')->name('fetch-directory-data');
-
+        Route::get('/get-parent-folder', 'getParentFolder')->name('get-parent-folder');
 
 
         // PARENT DIRECTORY
