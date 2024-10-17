@@ -661,6 +661,7 @@ class SettingController extends Controller
         // Update the whyus record
         $whyus->title = $request->input('title');
         $whyus->extra = json_encode($request->input('points'));
+        $whyus->status = $request->input('status');
         $whyus->save();
     
         // Redirect back with a success message
