@@ -14,6 +14,7 @@ use App\Http\Controllers\admin\ManageLearning;
 use App\Http\Controllers\admin\ManageTest;
 use App\Http\Controllers\admin\FileManagerController;
 use App\Http\Controllers\admin\PaymentController;
+use App\Http\Controllers\admin\PermissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('stripe/webhook', [PaymentController::class, 'handleWebhook'])->name('stripe-webhook');
@@ -404,8 +405,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     });
 
+    // ------- PERMISSION ------- //
+    Route::controller(PermissionController::class)->group(function () {
+        Route::get('/user-role', 'userRole')->name('user-role');
+        Route::post('/edit-role', 'editRole')->name('edit-role');
+        Route::post('/update-role', 'updateRole')->name('update-role');
+    });
+        
 });
-
 
 Route::get('/general-setting', [DashboardController::class, 'generalSetting'])->name('general-setting');
 Route::get('/email-setting', [DashboardController::class, 'emailSetting'])->name('email-setting');
