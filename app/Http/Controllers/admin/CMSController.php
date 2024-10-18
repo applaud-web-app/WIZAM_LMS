@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Faq;
 use App\Models\Blog;
+use App\Models\ExamType;
 use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pages;
