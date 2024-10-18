@@ -66,5 +66,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(GroupUsers::class, 'user_id', 'id');
     }
+
+    public function exams()
+    {
+        return $this->hasMany(AssignedExam::class, 'user_id', 'id');
+    }
     
 }

@@ -19,54 +19,13 @@ class FileManagerController extends Controller
 {
     public function fileManager(){
         $fileManager = FileManager::orderBy('id', 'ASC');
-        // Fetch parent directories
         $parentData = $fileManager->where('parent_node', 0)->get();
-        // Fetch parent folders
         $parentDirectory = FileManager::where(['parent_node' => 0, 'type' => 'folder'])->orderBy('id', 'ASC')->get();
         return view('fileManager.view-files',compact('parentDirectory','parentData'));
     }
 
-    // public function addFolder(Request $request){
-    //     $request->validate([
-    //         'eq' => 'required',
-    //         'folder_name'=> 'required',
-    //     ]);
-
-    //     try {
-    //         $data = decrypturl($request->eq);
-    //         $directory_id = $data['id'];
-
-    //         // THEN  IT"S A PARENT DEIRECTRY
-    //         if($directory_id == 0){
-    //             $fileManager = FileManager::create([
-    //                 'node_name'=>$request->folder_name,
-    //                 'parent_node'=>$directory_id,
-    //                 'type'=>'folder'
-    //             ]);
-    //             return redirect()->back()->with('success','Folder Created  Successfully');
-    //         }
-
-    //         $parentDirectory = FileManager::where(['id' => $directory_id, 'type' => 'directory'])->first();
-    //         if ($parentDirectory) {
-    //             // Fetch child directories
-    //             $childDirectory = FileManager::create([
-    //                 'node_name'=>$request->folder_name,
-    //                 'parent_node'=>$directory_id,
-    //                 'type'=>'folder'
-    //             ]);
-
-    //             return redirect()->back()->with('success','Folder Created  Successfully');
-    //         }
-    //     } catch (\Throwable $th) {
-    //         return redirect()->back()->with('error','Something Went Wrong : '.$th->getMessage());
-    //     }
-
-    //     return redirect()->back()->with('error','Something Went Wrong!!');
-    // }
-
     public function addFolder(Request $request)
     {
-        // Validate the incoming request
         $request->validate([
             'eq' => 'required',
             'folder_name' => 'required',
@@ -76,7 +35,6 @@ class FileManagerController extends Controller
             $data = decrypturl($request->eq);
             $directory_id = $data['id'];
 
-            // Create a folder in the root directory (parent directory)
             if ($directory_id == 0) {
                 $fileManager = FileManager::create([
                     'node_name' => $request->folder_name,
@@ -87,10 +45,8 @@ class FileManagerController extends Controller
                 return response()->json(['success' => true, 'message' => 'Folder created successfully']);
             }
 
-            // Check for a valid parent directory
             $parentDirectory = FileManager::where(['id' => $directory_id])->first();
             if ($parentDirectory) {
-                // Create a child directory under the parent
                 $childDirectory = FileManager::create([
                     'node_name' => $request->folder_name,
                     'parent_node' => $directory_id,
@@ -100,144 +56,12 @@ class FileManagerController extends Controller
                 return response()->json(['success' => true, 'message' => 'Folder created successfully']);
             }
 
-            // If the parent directory is not found
             return response()->json(['success' => false, 'message' => 'Parent directory not found.'], 404);
             
         } catch (\Throwable $th) {
-            // Handle errors
             return response()->json(['success' => false, 'message' => 'Something went wrong: ' . $th->getMessage()], 500);
         }
     }
-    
-    // public function saveDirectoryMedia(Request $request) {
-    //     try {
-    //         // Validate incoming request
-    //         $request->validate([
-    //             'eq' => 'required',
-    //             'fileNames' => 'required|array', // Ensure fileNames is an array
-    //             'fileNames.*' => 'string' // Each file name should be a string
-    //         ]);
-    
-    //         // Decrypt the request parameter
-    //         $data = decrypturl($request->eq);
-    //         $directory_id = $data['id'];
-
-    //         // FOR PARENT FILE
-    //         if($directory_id == 0){
-    //             $createdFiles = []; // To store successfully created file names
-    //             $errors = []; // To collect errors if any
-    
-    //             // Loop through the file names to determine type and store them
-    //             foreach ($request->fileNames as $fileName) {
-    //                 // Get the file extension and base name
-    //                 $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-    //                 $baseName = pathinfo($fileName, PATHINFO_FILENAME); // Get the name without the extension
-    
-    //                 // Determine the type based on the extension
-    //                 // $type = in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'mkv']) ? 'video' : 'document';
-    
-    //                 // Check for existing file names without extension
-    //                 $existingFile = FileManager::where('node_name', $baseName)
-    //                     ->where('parent_node', $directory_id)
-    //                     ->first();
-    
-    //                 if ($existingFile) {
-    //                     $errors[] = "File name '$baseName' already exists in this directory.";
-    //                 } else {
-    //                     // Create the child directory for each file with the name without extension
-    //                     $data =  FileManager::create([
-    //                         'node_name' => $baseName, // Store the base name without extension
-    //                         'parent_node' => $directory_id,
-    //                         'source' => $fileName,
-    //                         'type' => "media"
-    //                     ]);
-    //                     $createdFiles[] = $data; // Track successfully created file names
-    //                 }
-    //             }
-
-    //             // Prepare the response
-    //             if (!empty($errors)) {
-    //                 return response()->json([
-    //                     'status' => 'error',
-    //                     'errors' => $errors,
-    //                 ], 400); // Return errors with a 400 status
-    //             }
-    
-    //             return response()->json([
-    //                 'status' => 'success',
-    //                 'message' => 'Files uploaded successfully',
-    //                 'created_files' => $createdFiles
-    //             ]);
-    //         }
-    
-    //         // Fetch parent directory
-    //         $parentDirectory = FileManager::find($directory_id);
-    //         if ($parentDirectory) {
-    //             $createdFiles = []; // To store successfully created file names
-    //             $errors = []; // To collect errors if any
-    
-    //             // Loop through the file names to determine type and store them
-    //             foreach ($request->fileNames as $fileName) {
-    //                 // Get the file extension and base name
-    //                 $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-    //                 $baseName = pathinfo($fileName, PATHINFO_FILENAME); // Get the name without the extension
-    
-    //                 // Determine the type based on the extension
-    //                 // $type = in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'mkv']) ? 'video' : 'document';
-    
-    //                 // Check for existing file names without extension
-    //                 $existingFile = FileManager::where('node_name', $baseName)
-    //                     ->where('parent_node', $directory_id)
-    //                     ->first();
-    
-    //                 if ($existingFile) {
-    //                     $errors[] = "File name '$baseName' already exists in this directory.";
-    //                 } else {
-    //                     // Create the child directory for each file with the name without extension
-    //                     $data =  FileManager::create([
-    //                         'node_name' => $baseName, // Store the base name without extension
-    //                         'parent_node' => $directory_id,
-    //                         'source' => $fileName,
-    //                         'type' => "media"
-    //                     ]);
-    //                     $createdFiles[] = $data; // Track successfully created file names
-    //                 }
-    //             }
-    
-    //             // Prepare the response
-    //             if (!empty($errors)) {
-    //                 return response()->json([
-    //                     'status' => 'error',
-    //                     'errors' => $errors,
-    //                 ], 400); // Return errors with a 400 status
-    //             }
-    
-    //             return response()->json([
-    //                 'status' => 'success',
-    //                 'message' => 'Files uploaded successfully',
-    //                 'created_files' => $createdFiles
-    //             ]);
-    //         }
-    //     } catch (ValidationException $e) {
-    //         // Return a custom error response for validation failures
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'File not safe due to unexpected error: ' . $e->getMessage(),
-    //             'errors' => $e->validator->errors(), // Include validation errors
-    //         ], 422); // Return a 422 status for unprocessable entity
-    //     } catch (\Throwable $th) {
-    //         // Handle any other unexpected errors
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Something went wrong: ' . $th->getMessage()
-    //         ], 500); // Return error with a 500 status
-    //     }
-    
-    //     return response()->json([
-    //         'status' => 'error',
-    //         'message' => 'Something went wrong!!'
-    //     ], 500);
-    // }
 
     public function saveDirectoryMedia(Request $request)
     {
@@ -273,7 +97,6 @@ class FileManagerController extends Controller
             ], 500); // Return error with a 500 status
         }
     }
-
 
     private function createFiles(array $fileNames, int $directory_id)
     {
@@ -328,8 +151,6 @@ class FileManagerController extends Controller
             'created_files' => $createdFiles
         ];
     }
-    
-
 
     public function addDirectory(Request $request)
     {

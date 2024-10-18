@@ -10,12 +10,14 @@ use App\Models\UserGroup;
 use App\Models\GroupUsers;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Exam;
 use App\Models\Country;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Validation\ValidationException;
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Stripe\StripeClient;
+use App\Models\AssignedExam;
 
 class UserController extends Controller
 {
@@ -442,15 +444,19 @@ class UserController extends Controller
         if (isset($data['id'])) {
             $roles = Role::get();
             $userGroups = UserGroup::where(['is_active' => 1, 'is_deleted' => 0])->get();
+            $examGroup = Exam::where('status',1)->get();
             $country = Country::orderBy('name', 'ASC')->get();
 
             // Get the user with their associated groups
-            $user = User::with('groupUsers')->where('id', $data['id'])->first();
+            $user = User::with('groupUsers','exams')->where('id', $data['id'])->first();
 
             // Extract group_id values for the selected groups
             $groups = $user->groupUsers->pluck('group_id')->toArray();
 
-            return view('manageUsers.users.edit-users', compact('roles', 'userGroups', 'country', 'user', 'groups'));
+            // Extract group_id values for the selected groups
+            $exams = $user->exams->pluck('exam_id')->toArray();
+
+            return view('manageUsers.users.edit-users', compact('roles', 'userGroups', 'country', 'user', 'groups','examGroup','exams'));
         }
 
         return redirect()->route('users')->with('error', 'Something Went Wrong');
@@ -472,7 +478,7 @@ class UserController extends Controller
             'status' => 'required|string|in:1,0',
             'password' => 'nullable|string|min:6|confirmed', // Validate password and confirmation
             'eq' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Begin transaction
@@ -537,6 +543,20 @@ class UserController extends Controller
                 }
             }
 
+
+            // EXAM ASSIGNMENT
+            AssignedExam::where('user_id', $user->id)->delete();
+            if (isset($request->exams)) {
+                foreach ($request->exams as $key => $examId) {
+                    if($key > 0){
+                        AssignedExam::create([
+                            'exam_id' => $examId,
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                }
+            }
+
             // Sync roles
             $user->syncRoles($request->role);
 
@@ -588,4 +608,5 @@ class UserController extends Controller
 
         return back()->with('success', 'Users imported successfully.');
     }
+
 }

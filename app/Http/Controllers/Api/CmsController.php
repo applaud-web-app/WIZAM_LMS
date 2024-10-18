@@ -213,11 +213,10 @@ class CmsController extends Controller
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
-            ->where(['exams.favourite' => 1, 'exams.status' => 1])
+            ->where(['exams.favourite' => 1, 'exams.status' => 1,'exams.is_public' => 1])
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id')
-            ->orderBy('exams.created_at', 'desc') // Order by exam created_at
+            ->orderBy('exams.created_at', 'desc') 
             ->get();
-        
             return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
