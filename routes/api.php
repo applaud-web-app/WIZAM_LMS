@@ -35,7 +35,7 @@ Route::get('site-setting', [CmsController::class, 'siteSetting']);
 Route::get('faq', [CmsController::class, 'faq']);
 
 Route::get('course', [CmsController::class, 'course']);
-Route::get('course-pack/{id}', [CmsController::class, 'coursePackage']);
+Route::get('course-exam-type', [CmsController::class, 'courseExamType']);
 
 Route::get('popular-exams', [CmsController::class, 'popularExams']);
 Route::get('exam/{slug}', [CmsController::class, 'examDetail']);
