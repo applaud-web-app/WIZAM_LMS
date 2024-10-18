@@ -712,6 +712,7 @@ class SettingController extends Controller
             'title' => 'required|max:255',
             'card_title' => 'required|array',
             'card_description' => 'required|array',
+            'card_status' => 'required|array',
             'card_image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate image files
         ]);
 
@@ -733,6 +734,7 @@ class SettingController extends Controller
             $card = [
                 'title' => $title,
                 'description' => $request->input('card_description')[$key],
+                'status' => $request->input('card_status')[$key],
             ];
             
             // Handle image upload
