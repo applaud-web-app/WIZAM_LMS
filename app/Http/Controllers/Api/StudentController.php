@@ -188,6 +188,7 @@ class StudentController extends Controller
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
                         'is_free' => $isFree, // Set as free if it's marked as free or assigned to the user
+                        'assign_exam'=>$assignedExams
                     ];
                 }
 
