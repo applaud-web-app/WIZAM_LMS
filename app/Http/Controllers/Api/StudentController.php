@@ -24,7 +24,6 @@ use App\Models\Plan;
 use Carbon\Carbon;
 use App\Models\Payment;
 use App\Models\BillingSetting;
-use App\Models\AssignedExam;
 
 class StudentController extends Controller
 {
@@ -46,92 +45,14 @@ class StudentController extends Controller
         }
     }
 
-    // public function allExams(Request $request)
-    // {
-    //     try {
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         // Fetch the exam IDs assigned to the current user
-    //         $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
-            
-    //         // Fetch exam type by slug and status
-    //         $examType = ExamType::select('id', 'slug')->where('slug', $request->slug)->where('status', 1)->first();
-
-    //         if ($examType) {
-    //             // Fetch exam data grouped by exam type slug
-    //             $examData = Exam::select(
-    //                 'exam_types.slug as exam_type_slug', // Fetch exam type slug
-    //                 'exams.slug', // Fetch exam slug
-    //                 'exams.title', // Fetch exam title
-    //                 'exams.duration_mode', 
-    //                 'exams.exam_duration', 
-    //                 'exams.point_mode',
-    //                 'exams.point', 
-    //                 'exams.is_free',
-    //                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //             )
-    //             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-    //             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-    //             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-    //             ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
-    //             ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-    //             ->where('exams.status', 1) // Filter by exam status
-    //             ->where('exams.is_public', 1) 
-    //             ->orwhereIn('exams.id', $assignedExams) 
-    //             ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title',  'exams.duration_mode', 
-    //             'exams.exam_duration',   'exams.point_mode','exams.point', 'exams.is_free',) // Group by necessary fields
-    //             ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-    //             ->get();
-
-    //             // Initialize array to store formatted exam data
-    //             $formattedExamData = [];
-    //             foreach ($examData as $exam) {
-    //                 // Format the total time
-    //                 $formattedTime = $this->formatTime($exam->total_time);
-
-    //                 // Group exams by exam type slug
-    //                 if (!isset($formattedExamData[$examType->slug])) {
-    //                     $formattedExamData[$examType->slug] = [];
-    //                 }
-                    
-    //                 $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-    //                 $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
-
-    //                 // Add exam details to the corresponding type slug
-    //                 $formattedExamData[$examType->slug][] = [
-    //                     'title' => $exam->title,
-    //                     'slug' => $exam->slug,
-    //                     'questions' => $exam->total_questions ?? 0,
-    //                     'time' => $time ?? 0,
-    //                     'marks' => $marks ?? 0,
-    //                 ];
-    //             }
-
-    //             // Return the formatted data as JSON
-    //             return response()->json(['status' => true, 'data' => $formattedExamData], 200);
-    //         }
-
-    //         // Return error if exam type not found
-    //         return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
-            
-    //     } catch (\Throwable $th) {
-    //         // Return error response with exception message
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-
     public function allExams(Request $request)
     {
         try {
-            $user = $request->attributes->get('authenticatedUser');
-
-            // Fetch the exam IDs assigned to the current user
-            $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
-            
             // Fetch exam type by slug and status
-            $examType = ExamType::select('id', 'slug')->where('slug', $request->slug)->where('status', 1)->first();
+            $examType = ExamType::select('id', 'slug')
+                ->where('slug', $request->slug)
+                ->where('status', 1)
+                ->first();
 
             if ($examType) {
                 // Fetch exam data grouped by exam type slug
@@ -151,20 +72,17 @@ class StudentController extends Controller
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-                ->where(function($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1) // Public exams
-                        ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
-                })
-                ->where('exams.status', 1) // Filter by exam status
                 ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-                ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title', 'exams.duration_mode', 
-                    'exams.exam_duration', 'exams.point_mode', 'exams.point', 'exams.is_free') // Group by necessary fields
+                ->where('exams.status', 1) // Filter by exam status
+                ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title',  'exams.duration_mode', 
+                'exams.exam_duration',   'exams.point_mode','exams.point', 'exams.is_free',) // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                 ->get();
 
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
+
                 foreach ($examData as $exam) {
                     // Format the total time
                     $formattedTime = $this->formatTime($exam->total_time);
@@ -174,11 +92,11 @@ class StudentController extends Controller
                         $formattedExamData[$examType->slug] = [];
                     }
 
+                    // $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                    // $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
+                    
                     $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-                    $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-
-                    // Check if the exam is assigned to the user
-                    $isFree = $exam->is_free || in_array($exam->id, $assignedExams);
+                    $marks = $exam->point_mode == "manual" ? ($exam->point*$exam->total_questions) : $exam->total_marks;
 
                     // Add exam details to the corresponding type slug
                     $formattedExamData[$examType->slug][] = [
@@ -187,8 +105,6 @@ class StudentController extends Controller
                         'questions' => $exam->total_questions ?? 0,
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
-                        'is_free' => $isFree, // Set as free if it's marked as free or assigned to the user
-                        'assign_exam'=>$assignedExams
                     ];
                 }
 
@@ -198,13 +114,12 @@ class StudentController extends Controller
 
             // Return error if exam type not found
             return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
-
+            
         } catch (\Throwable $th) {
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-
 
     private function formatTime($totalTime)
     {
