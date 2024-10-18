@@ -179,7 +179,7 @@ class CmsController extends Controller
 
     public function popularExams(){
         try {
-            $popularExams = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1])->latest()->take(3)->get();
+            $popularExams = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1,'is_public',1])->latest()->take(3)->get();
             // WHERE IS_FREE IS 0 THEN SHOW PRICE
             return response()->json(['status'=> true,'data' => $popularExams], 201);
         } catch (\Throwable $th) {
