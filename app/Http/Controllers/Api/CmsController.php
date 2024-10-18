@@ -168,8 +168,7 @@ class CmsController extends Controller
     public function coursePackage($id)
     {
         try {
-            // Assuming you have a CoursePackage model representing the table structure
-            $coursePackage = Plan::where('category_id', $id)->where('status', 1)->select('id','name','price_type','duration','price','discount','feature_access','features','popular')->get();
+            $coursePackage = Exam::where('subcategory_id', $id)->where('status',1)->where('is_public',1)->select('title','slug')->get();
             return response()->json(['status' => true, 'data' => $coursePackage], 201);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
