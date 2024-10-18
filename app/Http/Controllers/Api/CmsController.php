@@ -96,7 +96,7 @@ class CmsController extends Controller
 
     public function whyusData() {
         try {
-            $whyus = HomeCms::select('title', 'extra')->where('status', 1)->where('type', 'whyus')->first();
+            $whyus = HomeCms::select('title', 'extra','status')->where('type', 'whyus')->first();
     
             if (!$whyus) {
                 return response()->json(['status' => false, 'error' => 'No data found.'], 404);
