@@ -731,30 +731,31 @@ class SettingController extends Controller
         // Prepare data for card titles, descriptions, and images
         $cards = [];
         foreach ($request->input('card_title') as $key => $title) {
+            // Check if description and status exist, otherwise set default value
+            $description = $request->input('card_description')[$key] ?? ''; // Default to empty string if not set
+            $status = $request->input('card_status')[$key] ?? 0; // Default status to 0 if not set
+
             $card = [
                 'title' => $title,
-                'description' => $request->input('card_description')[$key],
-                'status' => $request->input('card_status')[$key],
+                'description' => $description,
+                'status' => $status,
             ];
-            
+
             // Handle image upload
             if ($request->hasFile("card_image.$key")) {
-
                 $image = $request->file("card_image.$key");
-    
+
                 // Generate a unique filename with the current timestamp
                 $imageName = 'helping_' . time() . '_' . $key . '.' . $image->getClientOriginalExtension();
-    
+
                 // Move the image to the 'public/banners' directory
                 $image->move(public_path('banners'), $imageName);
-    
+
                 // Store the image path in the database (relative to the public directory)
                 $imagePath = $imageName;
-    
+
                 // Save the complete URL in the database
-                $completeImageUrl = env('APP_URL') . '/banners/' . $imagePath; // Create URL based on public path
-                
-                // Save the image URL to the banner
+                $completeImageUrl = env('APP_URL') . '/banners/' . $imagePath;
                 $card['image'] = $completeImageUrl;
             } else {
                 // Keep the existing image if no new one was uploaded
