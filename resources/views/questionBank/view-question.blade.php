@@ -54,7 +54,7 @@
             </div>
             <div class="p-[25px] pt-[15px]">
                 <div>
-                    <table class="min-w-full table-auto" id="question-table">
+                    <table class="min-w-full leading-normal table-auto display" id="question-table">
                     <thead>
                         <tr>
                             <th class="border px-4 py-2">#</th>
