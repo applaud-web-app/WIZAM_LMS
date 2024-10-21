@@ -163,14 +163,15 @@
       // Initialize Summernote
       $('.summernote').summernote({
          height: 150,
-         toolbar: [
-           ['style', ['bold', 'italic', 'underline', 'clear']],
-           ['font', ['fontsize']],
-           ['color', ['color']],
-           ['para', ['ul', 'ol', 'paragraph']],
-           ['insert', ['link', 'picture', 'video']],
-           ['view', ['fullscreen', 'codeview', 'help']]
-         ]
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
       });
 
     

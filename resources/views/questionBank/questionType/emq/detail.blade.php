@@ -167,14 +167,15 @@
     
     $('.summernote').summernote({
         height: 150,
-        toolbar: [
-          ['style', ['bold', 'italic', 'underline', 'clear']],
-          ['font', ['fontsize']],
-          ['color', ['color']],
-          ['para', ['ul', 'ol', 'paragraph']],
-          ['insert', ['link', 'picture', 'video']],
-          ['view', ['fullscreen', 'codeview', 'help']]
-        ]
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
     });
 
     let optionCount = 2;  // Tracks the number of options
@@ -247,6 +248,15 @@
         // Re-initialize summernote for the new option
         $('.summernote').summernote({
             height: 150,
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
            
         });
 
@@ -277,6 +287,15 @@
         // Re-initialize summernote for the new question
         $('.summernote').summernote({
             height: 150,
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
            
         });
 

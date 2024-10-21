@@ -144,6 +144,15 @@
 
          $('.summernote').summernote({
             height: 150,
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
             
          });
          
@@ -185,7 +194,16 @@
   
               // Re-initialize summernote for new fields
               $('.summernote').summernote({
-                  height: 150,
+                height: 150,
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
                
               });
   

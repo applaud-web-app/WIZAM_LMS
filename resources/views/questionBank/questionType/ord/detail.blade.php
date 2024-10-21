@@ -182,7 +182,16 @@
  
           // Re-initialize summernote for new fields
           $('.summernote').summernote({
-             height: 100,
+            height: 100,
+                        onpaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+                        e.preventDefault();
+
+                        setTimeout( function(){
+                            document.execCommand( 'insertText', false, bufferText );
+                        }, 10 );
+                    }
           
           });
  
