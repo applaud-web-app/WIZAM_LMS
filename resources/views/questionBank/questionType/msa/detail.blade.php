@@ -282,9 +282,19 @@
                `;
                $('#optionsContainer').append(newOption);
                $('.summernote').summernote({
-                    height: 150,
-                
-                });
+            height: 150,
+            onpaste: function (e) {
+    var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+
+    e.preventDefault();
+
+    setTimeout( function(){
+        document.execCommand( 'insertText', false, bufferText );
+    }, 10 );
+}
+
+           
+         });
                optionCount++;
            } else {
                alert('You can only add up to 10 options.');
