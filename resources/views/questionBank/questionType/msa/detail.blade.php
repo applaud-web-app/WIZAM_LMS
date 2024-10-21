@@ -246,14 +246,7 @@
        // Initialize Summernote
        $('.summernote').summernote({
             height: 150,
-            toolbar: [
-              ['style', ['bold', 'italic', 'underline', 'clear']],
-              ['font', ['fontsize']],
-              ['color', ['color']],
-              ['para', ['ul', 'ol', 'paragraph']],
-              ['insert', ['link', 'picture', 'video']],
-              ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+           
          });
 
        // Counter for options
@@ -280,14 +273,7 @@
                $('#optionsContainer').append(newOption);
                $('.summernote').summernote({
                     height: 150,
-                    toolbar: [
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                    ]
+                
                 });
                optionCount++;
            } else {

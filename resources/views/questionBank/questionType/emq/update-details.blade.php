@@ -295,14 +295,7 @@
         // Re-initialize summernote for the new option
         $('.summernote').summernote({
             height: 150,
-            toolbar: [
-              ['style', ['bold', 'italic', 'underline', 'clear']],
-              ['font', ['fontsize']],
-              ['color', ['color']],
-              ['para', ['ul', 'ol', 'paragraph']],
-              ['insert', ['link', 'picture', 'video']],
-              ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+           
         });
 
         renumberOptions();
@@ -332,14 +325,7 @@
         // Re-initialize summernote for the new question
         $('.summernote').summernote({
             height: 150,
-            toolbar: [
-              ['style', ['bold', 'italic', 'underline', 'clear']],
-              ['font', ['fontsize']],
-              ['color', ['color']],
-              ['para', ['ul', 'ol', 'paragraph']],
-              ['insert', ['link', 'picture', 'video']],
-              ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+           
         });
 
         renumberQuestions();

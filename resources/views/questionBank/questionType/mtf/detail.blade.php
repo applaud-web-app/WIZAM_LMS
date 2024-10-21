@@ -169,14 +169,7 @@
         // Initialize Summernote for existing fields
         $('.summernote').summernote({
             height: 100,
-            toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['fontsize']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['insert', ['link', 'picture', 'video']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+          
         });
 
         // Function to update the term and definition labels in sequence
@@ -213,14 +206,7 @@
                 if (!$(this).data('initialized')) {
                     $(this).summernote({
                         height: 100,
-                        toolbar: [
-                            ['style', ['bold', 'italic', 'underline', 'clear']],
-                            ['font', ['fontsize']],
-                            ['color', ['color']],
-                            ['para', ['ul', 'ol', 'paragraph']],
-                            ['insert', ['link', 'picture', 'video']],
-                            ['view', ['fullscreen', 'codeview', 'help']]
-                        ]
+               
                     }).data('initialized', true);
                 }
             });

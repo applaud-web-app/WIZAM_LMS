@@ -144,14 +144,7 @@
 
          $('.summernote').summernote({
             height: 150,
-            toolbar: [
-            ['style', ['bold', 'italic', 'underline', 'clear']],
-            ['font', ['fontsize']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['insert', ['link', 'picture', 'video']],
-            ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+            
          });
          
           let optionCount = 2; // Tracks the number of options
@@ -193,14 +186,7 @@
               // Re-initialize summernote for new fields
               $('.summernote').summernote({
                   height: 150,
-                  toolbar: [
-                      ['style', ['bold', 'italic', 'underline', 'clear']],
-                      ['font', ['fontsize']],
-                      ['color', ['color']],
-                      ['para', ['ul', 'ol', 'paragraph']],
-                      ['insert', ['link', 'picture', 'video']],
-                      ['view', ['fullscreen', 'codeview', 'help']]
-                  ]
+               
               });
   
               // Renumber options after adding

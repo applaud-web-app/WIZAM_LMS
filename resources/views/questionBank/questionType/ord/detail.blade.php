@@ -183,14 +183,7 @@
           // Re-initialize summernote for new fields
           $('.summernote').summernote({
              height: 100,
-             toolbar: [
-               ['style', ['bold', 'italic', 'underline', 'clear']],
-               ['font', ['fontsize']],
-               ['color', ['color']],
-               ['para', ['ul', 'ol', 'paragraph']],
-               ['insert', ['link', 'picture', 'video']],
-               ['view', ['fullscreen', 'codeview', 'help']]
-             ]
+          
           });
  
           updateSequenceItems(); // Update the sequence after adding an item

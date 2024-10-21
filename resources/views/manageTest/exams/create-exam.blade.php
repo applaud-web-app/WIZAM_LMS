@@ -234,14 +234,7 @@
     $(document).ready(function() {
         $('.summernote').summernote({
             height: 150,
-            toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['fontsize']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['insert', ['link', 'picture', 'video']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ]
+          
         });
 
         // jQuery Validation for the Add Exam form
