@@ -55,6 +55,10 @@ class StudentController extends Controller
                 ->first();
 
             if ($examType) {
+                
+                // Fetch the exam IDs assigned to the current user
+                $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
+
                 // Fetch exam data grouped by exam type slug
                 $examData = Exam::select(
                     'exam_types.slug as exam_type_slug', // Fetch exam type slug
@@ -72,6 +76,10 @@ class StudentController extends Controller
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+                ->where(function($query) use ($assignedExams) {
+                    $query->where('exams.is_public', 1) // Public exams
+                        ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
+                })
                 ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
                 ->where('exams.status', 1) // Filter by exam status
@@ -79,6 +87,15 @@ class StudentController extends Controller
                 'exams.exam_duration',   'exams.point_mode','exams.point', 'exams.is_free',) // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                 ->get();
+
+                // Adjust 'is_free' for assigned exams
+                $examData->transform(function ($exam) use ($assignedExams) {
+                    // If the exam is assigned to the user, set it to free regardless of its original price
+                    if (in_array($exam->id, $assignedExams)) {
+                        $exam->is_free = 1; // Make assigned exams free
+                    }
+                    return $exam;
+                });
 
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
