@@ -497,6 +497,7 @@ class ExamController extends Controller
                     'marks' => $examResult->student_percentage,
                     'status' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
                     'timeTaken' => $timeTakenInMinutes,
+                    'uuid'=>$examResult->uuid
                 ];
     
                 // Process exam details (Compare user answers with correct answers)
@@ -597,6 +598,7 @@ class ExamController extends Controller
                 $exam = [
                     'title' => $examResult->exam->title,
                     'duration' => $examResult->exam_duration,
+                    'download_report'=> $examResult->exam->download_report,
                 ];
     
                 return response()->json([
