@@ -57,7 +57,7 @@ class StudentController extends Controller
 
             if ($examType) {
                 
-                // Fetch the current authenticated user (assuming $user is passed correctly)
+                // Fetch the current authenticated user
                 $user = $request->attributes->get('authenticatedUser');
 
                 // Fetch the exam IDs assigned to the current user
@@ -80,7 +80,7 @@ class StudentController extends Controller
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-                ->where(function($query) use ($assignedExams) {
+                ->where(function ($query) use ($assignedExams) {
                     $query->where('exams.is_public', 1) // Public exams
                         ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
                 })
@@ -92,9 +92,9 @@ class StudentController extends Controller
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                 ->get();
 
-                // Adjust 'is_free' for assigned exams
+                // Adjust 'is_free' for assigned exams, regardless of public or private
                 $examData->transform(function ($exam) use ($assignedExams) {
-                    // If the exam is assigned to the user, set it to free regardless of its original price
+                    // If the exam is assigned to the user, set it to free regardless of its original price or public status
                     if (in_array($exam->id, $assignedExams)) {
                         $exam->is_free = 1; // Make assigned exams free
                     }
