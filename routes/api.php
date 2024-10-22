@@ -86,6 +86,8 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::post('/finish-exam/{uuid}',[ExamController::class, 'finishExam']);
     Route::get('/exam-result/{uuid}',[ExamController::class, 'examResult']);
 
+    // EXAM REPORT
+    Route::get('/download-exam-report/{uuid}',[ExamController::class, 'downloadExamReport']);
 
     # QUIZ
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
@@ -131,8 +133,6 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/exam-progress',[ExamController::class, 'examProgress']);
     Route::get('/quiz-progress',[QuizController::class, 'quizProgress']);
     Route::get('/pratice-set-progress',[PracticeSetController::class, 'praticeSetProgress']);
-
-    // FINISH EXAM (STUDENT PERCENTAGE/UPDATE TIME)
 
     
     // PRICING PAGE

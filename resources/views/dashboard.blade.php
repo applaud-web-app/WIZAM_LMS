@@ -158,35 +158,47 @@
                {{-- <h4 class="mb-0 text-xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-white white:text-title-white">Quick Links</h4> --}}
                <div class="col-span-12 2xl:col-span-12 bg-primary p-5 rounded">
                   <ul class="mt-4 flex flex-wrap justify-center gap-4">
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        New Quiz Schedule
+                    <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                        <a href="{{route('view-exams')}}">View Exam</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create New Quiz
+                        <a href="{{route('create-exams')}}">Create Exam</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create Practice Set
+                        <a href="{{route('view-quizzes')}}">View Quiz</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        View Quizzes
+                        <a href="{{route('create-quizzes')}}">Create Quiz</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        View Practice Sets
+                        <a href="{{route('view-practice-set')}}">View Practice Set</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create New Question
+                        <a href="{{route('create-practice-set')}}">Create Practice Set</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Import Questions
+                        <a href="{{route('view-question')}}">View Question</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create New Comprehension
+                        <a href="{{route('view-lesson')}}">Lesson Bank</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create New Skill
+                        <a href="{{route('view-video')}}">Video Bank</a>
                      </li>
                      <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        Create New Topic
+                        <a href="{{route('view-category')}}">View Category</a>
+                     </li>
+                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                        <a href="{{route('view-sub-category')}}">Sub Category</a>
+                     </li>
+                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                        <a href="{{route('view-sections')}}">View Section</a>
+                     </li>
+                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                        <a href="{{route('view-skills')}}">View Skills</a>
+                     </li>
+                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                        <a href="{{route('view-topics')}}">View Topics</a>
                      </li>
                   </ul>
                </div>
