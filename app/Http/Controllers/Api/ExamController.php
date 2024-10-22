@@ -618,54 +618,6 @@ class ExamController extends Controller
         }
     }
 
-
-    // public function examAll(Request $request){
-    //     try {
-    //         // Validate the request
-    //         $request->validate(['category' => 'required']);
-
-    //         // Fetch the exam IDs assigned to the current user
-    //         $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
-    
-    //         // Fetch all exam results for the authenticated user where status is complete
-    //         $examData = Exam::select(
-    //             'exam_types.slug as exam_type_slug', 
-    //             'exams.slug', 
-    //             'exams.title', 
-    //             'exams.duration_mode', 
-    //             'exams.exam_duration', 
-    //             'exams.point_mode',
-    //             'exams.point', 
-    //             'exams.is_free', 
-    //             'exams.price', 
-    //             DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //         )
-    //         ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-    //         ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-    //         ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-    //         ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-    //         ->where('exams.status', 1) // Filter by exam status
-    //         ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title','exams.duration_mode', 'exams.exam_duration','exams.point_mode', 'exams.point','exams.is_free', 'exams.price') // Group by necessary fields
-    //         // ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-    //         ->get();
-    
-    //         // Return success JSON response
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => $examData
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         // Return error JSON response
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while fetching the dashboard data.',
-    //             'error' => 'Error logged. :' . $th->getMessage() // For security
-    //         ], 500);
-    //     }
-    // }
-
     public function examAll(Request $request)
     {
         try {
