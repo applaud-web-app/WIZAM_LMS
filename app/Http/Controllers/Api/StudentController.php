@@ -335,7 +335,8 @@ class StudentController extends Controller
                     'totalQuestions' => $examData->total_questions,
                     'duration' => $time,
                     'marks' => $marks,
-                    'description' => $examData->description
+                    'description' => $examData->description,
+                    'is_free'=> $examData->is_free,
                 ]
             ], 200);
         } catch (\Throwable $th) {
