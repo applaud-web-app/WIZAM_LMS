@@ -105,6 +105,7 @@ class StudentController extends Controller
                         'questions' => $exam->total_questions ?? 0,
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
+                        'is_free' => $exam->is_free,
                     ];
                 }
 
