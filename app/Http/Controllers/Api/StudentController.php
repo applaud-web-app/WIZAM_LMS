@@ -24,6 +24,7 @@ use App\Models\Plan;
 use Carbon\Carbon;
 use App\Models\Payment;
 use App\Models\BillingSetting;
+use App\Models\AssignedExam;
 
 class StudentController extends Controller
 {
