@@ -262,7 +262,7 @@ class StudentController extends Controller
         return trim($timeString); // Trim any extra spaces
     }
 
-    public function examDetail(Request $request,$slug)
+    public function examDetail(Request $request, $slug)
     {
         try {
             // Validate incoming request data
@@ -270,8 +270,15 @@ class StudentController extends Controller
                 'category' => 'required|integer',
             ]);
 
+            // Fetch the current authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
+            // Fetch the exam IDs assigned to the current user
+            $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
+
             // Fetch exam details based on the category and slug
             $examData = Exam::select(
+                'exams.id', // Include exam ID for assigned exams check
                 'exam_types.slug as exam_type_slug', 
                 'exams.title',
                 'exams.description',
@@ -291,14 +298,16 @@ class StudentController extends Controller
             ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'sub_categories.id') 
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
+            ->where(function ($query) use ($assignedExams) {
+                $query->where('exams.is_public', 1) // Public exams
+                    ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
+            })
             ->where('exams.subcategory_id', $request->category) 
             ->where('exams.slug', $slug) 
             ->where('exams.status', 1)
-            ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 'sub_categories.name', 'exam_types.name',  'exams.duration_mode', 
-            'exams.exam_duration', 
-            'exams.point_mode',
-            'exams.point', 
-            'exams.is_free',) 
+            ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 
+                    'sub_categories.name', 'exam_types.name', 'exams.duration_mode', 'exams.exam_duration', 
+                    'exams.point_mode', 'exams.point', 'exams.is_free')
             ->havingRaw('COUNT(questions.id) > 0')
             ->first();
             
@@ -307,8 +316,14 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
             }
 
+            // Adjust 'is_free' for assigned exams, regardless of public or private
+            if (in_array($examData->id, $assignedExams)) {
+                $examData->is_free = 1; // Make assigned exams free
+            }
+
+            // Format time and marks
             $time = $examData->duration_mode == "manual" ? $examData->exam_duration : $this->formatTime($examData->total_time);
-            $marks = $examData->point_mode == "manual" ? ($examData->point*$examData->total_questions) : $examData->total_marks;
+            $marks = $examData->point_mode == "manual" ? ($examData->point * $examData->total_questions) : $examData->total_marks;
 
             // Format response to match the structure needed by frontend
             return response()->json([
@@ -318,13 +333,13 @@ class StudentController extends Controller
                     'examType' => $examData->exam_type_name,
                     'syllabus' => $examData->sub_category_name,
                     'totalQuestions' => $examData->total_questions,
-                    'duration' => $time,  // Call formatTime from within the class
+                    'duration' => $time,
                     'marks' => $marks,
                     'description' => $examData->description
                 ]
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'error' => 'Internal Server Error : '.$th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => 'Internal Server Error: '.$th->getMessage()], 500);
         }
     }
 
