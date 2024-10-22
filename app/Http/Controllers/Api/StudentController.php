@@ -57,6 +57,9 @@ class StudentController extends Controller
 
             if ($examType) {
                 
+                // Fetch the current authenticated user (assuming $user is passed correctly)
+                $user = $request->attributes->get('authenticatedUser');
+
                 // Fetch the exam IDs assigned to the current user
                 $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
 
