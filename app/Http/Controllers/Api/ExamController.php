@@ -768,136 +768,199 @@ class ExamController extends Controller
 
 
     // EXAM REPORT
+    // public function downloadExamReport(Request $request, $uuid){
+    //    try {
+    //         // USER RESPONSE
+    //         $user_answer = $request->input('answers');
+    //         $user = $request->attributes->get('authenticatedUser');
+    
+    //         $userDetail = User::where('id',$user->id)->first();
+        
+    //         // Fetch exam result by UUID and user ID
+    //         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->firstOrFail();
+    //         $exam = Exam::with('type','subCategory')->where('id',$examResult->exam_id)->first();
+    //         if (!$examResult) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => "Invalid Exam"
+    //             ]);
+    //         }
+        
+    //         $score = 0;
+    //         $correctAnswer = 0;
+    //         $incorrect = 0;
+    //         $totalMarks = 0;
+    //         $incorrectMarks = 0;
+        
+    //         // Total marks should be fixed in manual mode
+    //         $totalMarks = $examResult->point_type == "manual" ? $examResult->point * count($user_answer) : 0; 
+        
+    //         foreach ($user_answer as $answer) {
+    //             if (!isset($answer['id'])) {
+    //                 $incorrect += 1;
+    //                 continue;
+    //             }
+    //             $question = Question::find($answer['id']);
+    //             if (!$question) {
+    //                 $incorrect += 1;
+    //                 continue;
+    //             }
+        
+    //             // Handle different question types
+    //             $isCorrect = false;
+    
+    //             if (isset($answer['answer'])) {
+    //                 $userAnswer = $answer['answer'];
+    //                 // In default mode, accumulate total possible marks
+    //                 if ($examResult->point_type != "manual") {
+    //                     $totalMarks += $question->default_marks;
+    //                 }
+            
+    //                 // Check correctness based on question type
+    //                 if ($question->type == 'MSA') {
+    //                     $isCorrect = $question->answer == $userAnswer;
+    //                 } elseif ($question->type == 'MMA') {
+    //                     $correctAnswers = json_decode($question->answer, true);
+    //                     sort($correctAnswers);
+    //                     sort($userAnswer);
+    //                     $isCorrect = $userAnswer == $correctAnswers;
+    //                 } elseif ($question->type == 'TOF') {
+    //                     $isCorrect = $userAnswer == $question->answer;
+    //                 } elseif ($question->type == 'SAQ') {
+    //                     $isCorrect = false;
+    //                     if (is_string($userAnswer) && is_array($question->options)) {
+    //                         $answers = json_decode($question->options);
+    //                         foreach ($answers as $option) {
+    //                             // Convert both the option and the user answer to lowercase and trim them
+    //                             $sanitizedOption = strtolower(trim(strip_tags($option)));
+    //                             $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
+    
+    //                             // Check if the sanitized option matches the sanitized user answer
+    //                             if ($sanitizedUserAnswer == $sanitizedOption) {
+    //                                 $isCorrect = true;
+    //                                 break;  // Exit the loop once a match is found
+    //                             }
+    //                         }
+    //                     }
+    //                 } elseif ($question->type == 'FIB') {
+    //                     $correctAnswers = json_decode($question->answer, true);
+    //                     sort($correctAnswers);
+    //                     sort($userAnswer);
+    //                     $isCorrect = $userAnswer == $correctAnswers;
+    //                 } elseif ($question->type == 'MTF') {
+    //                     $correctAnswers = json_decode($question->answer, true);
+    //                     $isCorrect = true; // Assume correct until proven otherwise
+    //                     foreach ($correctAnswers as $key => $value) {
+    //                         if (!isset($userAnswer[$key]) || $userAnswer[$key] != $value) {
+    //                             $isCorrect = false; 
+    //                             break;
+    //                         }
+    //                     }
+    //                 } elseif ($question->type == 'ORD') {
+    //                     $correctAnswers = json_decode($question->answer, true);
+    //                     $isCorrect = $userAnswer == $correctAnswers;
+    //                 } elseif ($question->type == 'EMQ') {
+    //                     $correctAnswers = json_decode($question->answer, true);
+    //                     sort($userAnswer);
+    //                     sort($correctAnswers);
+    //                     $isCorrect = $userAnswer == $correctAnswers;
+    //                 }
+            
+    //                 if ($isCorrect) {
+    //                     $score += $examResult->point_type == "manual" ? $examResult->point : $question->default_marks;
+    //                     $correctAnswer += 1;
+    //                 } else {
+    //                     $incorrect += 1;
+    //                     if (isset($question->default_marks)) {
+    //                         $incorrectMarks += $question->default_marks;
+    //                     }
+    //                 }
+    //             }else{
+    //                 $incorrect += 1;
+    //                 if (isset($question->default_marks)) {
+    //                     $incorrectMarks += $question->default_marks;
+    //                 }
+    //             }
+    //         }
+        
+    //         // Apply negative marking for incorrect answers
+    //         if ($examResult->negative_marking == 1) {
+    //             if ($examResult->negative_marking_type == "fixed") {
+    //                 $score = max(0, $score - $examResult->negative_marking_value * $incorrect);
+    //             } elseif ($examResult->negative_marking_type == "percentage") {
+    //                 $negativeMarks = ($examResult->negative_marking_value / 100) * $incorrectMarks;
+    //                 $score = max(0, $score - $negativeMarks);
+    //             }
+    //         }
+        
+    //         // Calculate the student's percentage AFTER applying negative marking
+    //         $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+        
+    //         // Determine pass or fail
+    //         $studentStatus = ($studentPercentage >= $examResult->pass_percentage) ? 'PASS' : 'FAIL';
+        
+    //         // Update exam result with correct/incorrect answers and student percentage
+    //         $examResult->status = "complete";
+    //         $examResult->updated_at = now();
+    //         $examResult->answers = json_encode($user_answer, true);
+    //         $examResult->incorrect_answer = $incorrect;
+    //         $examResult->correct_answer = $correctAnswer;
+    //         $examResult->student_percentage = round($studentPercentage,2);
+    //         $examResult->save();
+    
+    //         $examInfo = [
+    //             'name'=>$exam->type->name." - ".$exam->subCategory->name,
+    //             'completed_on'=>$examResult->created_at,
+    //             'seesion_id'=>$examResult->uuid,
+    //         ];
+    
+    //         $userInfo = [
+    //             'name'=>$userDetail->name,
+    //             'email'=>$userDetail->email,
+    //         ];
+    
+    //         $studentAnswers = $correctAnswer + $incorrect;
+    
+    //         $resultInfo = [
+    //             'total_question'=>$examResult->total_question,
+    //             'answered'=>$studentAnswers,
+    //             'correct'=>$correctAnswer,
+    //             'wrong'=>$incorrect,
+    //             'pass_percentage'=>$examResult->pass_percentage,
+    //             'final_percentage'=>$studentPercentage,
+    //             'final_score'=>$studentStatus,
+    //             'time_taken'=>$timeTakenInMinutes,
+    //         ];
+    
+        
+           
+    //    } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'An error occurred while fetching the data.',
+    //             'error' => 'Error logged. :' . $th->getMessage() 
+    //         ], 500);
+    //    }
+    // }
+
+
     public function downloadExamReport(Request $request, $uuid){
         try {
             $user = $request->attributes->get('authenticatedUser');
+
             $examResult = ExamResult::with('exam')->where('uuid', $uuid)->where('user_id', $user->id)->first();
             $exam_data = Exam::with('type','subCategory')->where('id',$examResult->exam_id)->first();
             $userDetail = User::where('id',$user->id)->first();
+            
             if ($examResult) {
-                // Build leaderboard
-                $leaderBoard = [];
-                if (isset($examResult->exam) && $examResult->exam->leaderboard == 1) {
-                    $userExam = ExamResult::with('user')
-                        ->where('exam_id', $examResult->exam_id)
-                        ->orderby('student_percentage', 'DESC')
-                        ->take(10)
-                        ->get();
-    
-                    foreach ($userExam as $userData) {
-                        if (isset($userData->user)) {
-                            $leaderBoard[] = [
-                                "username" => $userData->user->name,
-                                "score" => $userData->student_percentage,
-                                "status" => $userData->student_percentage >= $userData->pass_percentage ? "PASS" : "FAIL",
-                            ];
-                        }
-                    }
-                }
-
                 $openTime = Carbon::parse($examResult->created_at);
                 $closeTime = Carbon::parse($examResult->updated_at);
                 $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime),2);
-
-                // Build result
-                $result = [
-                    'correct' => $examResult->correct_answer,
-                    'incorrect' => $examResult->incorrect_answer,
-                    'skipped' => $examResult->total_question - ($examResult->correct_answer + $examResult->incorrect_answer),
-                    'marks' => $examResult->student_percentage,
-                    'status' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $timeTakenInMinutes,
-                    'uuid'=>$examResult->uuid
-                ];
-    
-                // Process exam details (Compare user answers with correct answers)
-                $exam = [];
-                $questionBox = json_decode($examResult->questions);
-                $correct_answers = json_decode($examResult->correct_answers, true);
-                $userAnswers = json_decode($examResult->answers, true);
-
-                foreach ($questionBox as $question) {
-                    // Get the user answer for the current question by matching the IDs
-                    $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
-                    $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
-                    $isCorrect = false;
-
-                    $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
-                    $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
-                
-                     // Ensure correctAnswer is an array when needed
-                     switch ($question->type) {
-                        case 'FIB':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'MSA':
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'MMA':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
-                            sort($user_answ);
-                            sort($correct_answ);
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'TOF':
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'MTF':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
-                            if (is_array($user_answ) && is_array($correct_answ)) {
-                                $isCorrect = true;
-                                foreach ($correct_answ as $key => $value) {
-                                    if (!isset($user_answ[$key]) || $user_answ[$key] != $value) {
-                                        $isCorrect = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                        case 'ORD':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'EMQ':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
-                            $isCorrect = $user_answ == $correct_answ;
-                            break;
-                        case 'SAQ': // string
-                            $correct_answ = $question->options;
-                            // Loop through each option and compare after sanitizing HTML
-                            if (is_string($user_answ) && is_array($question->options)) {
-                                $options = $question->options;
-                                foreach ($options as $option) {
-                                    // Strip HTML tags and extra spaces from both user answer and the option
-                                    $sanitizedUserAnswer = strtolower(trim(strip_tags($user_answ)));
-                                    $sanitizedOption = strtolower(trim(strip_tags($option)));
-
-                                    // Check if the sanitized user answer matches any sanitized option
-                                    if ($sanitizedUserAnswer == $sanitizedOption) {
-                                        $isCorrect = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                    }
-                }
     
                 // FINAL OUTPUT
                 $examInfo = [
                     'name'=>$exam_data->type->name." - ".$exam_data->subCategory->name,
-                    'completed_on'=>$examResult->created_at,
+                    'completed_on'=>date('d-m-y',$examResult->created_at),
                     'seesion_id'=>$examResult->uuid,
                 ];
         
@@ -912,7 +975,7 @@ class ExamController extends Controller
                     'total_question'=>$examResult->total_question,
                     'answered'=>$studentAnswers,
                     'correct'=>$examResult->correct_answer,
-                    'wrong'=>$incorrect,
+                    'wrong'=>$examResult->incorrect_answer,
                     'skipped'=>$examResult->total_question - ($examResult->correct_answer + $examResult->incorrect_answer),
                     'pass_percentage'=>$examResult->pass_percentage,
                     'final_percentage'=>$examResult->student_percentage,
