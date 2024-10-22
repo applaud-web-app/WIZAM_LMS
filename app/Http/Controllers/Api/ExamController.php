@@ -983,6 +983,7 @@ class ExamController extends Controller
             $userInfo = [
                 'name' => $userDetail->name,
                 'email' => $userDetail->email,
+                'number'=> $userDetail->phone_number,
             ];
     
             $studentAnswers = $examResult->correct_answer + $examResult->incorrect_answer;
