@@ -1027,85 +1027,13 @@ class QuizController extends Controller
         }
     }
 
-    // public function quizAll(Request $request){
-    //     try {
-    //         // Validate the request
-    //         $request->validate(['category' => 'required']);
-    
-    //         // Fetch all exam results for the authenticated user where status is complete
-    //         $quizData = Quizze::select(
-    //             'quizzes.slug',
-    //             'quizzes.title',
-    //             'quizzes.description',
-    //             'quizzes.pass_percentage',
-    //             'sub_categories.name as sub_category_name',
-    //             'quiz_types.name as exam_type_name',
-    //             'quizzes.duration_mode', 
-    //             'quizzes.duration', 
-    //             'quizzes.point_mode',
-    //             'quizzes.point', 
-    //             'quizzes.is_free', 
-    //             DB::raw('COUNT(questions.id) as total_questions'),  
-    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  
-    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-    //         )
-    //         ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-    //         ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-    //         ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  
-    //         ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  
-    //         ->where('quizzes.subcategory_id', $request->category)  
-    //         ->where('quizzes.status', 1)  
-    //         ->groupBy(
-    //             'quizzes.slug',
-    //             'quizzes.id',
-    //             'quizzes.title',
-    //             'quizzes.description',
-    //             'quizzes.pass_percentage',
-    //             'sub_categories.name',
-    //             'quiz_types.name',
-    //             'quizzes.duration_mode', 
-    //             'quizzes.duration', 
-    //             'quizzes.point_mode',
-    //             'quizzes.point',
-    //             'quizzes.is_free',
-    //         )
-    //         ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
-    //         ->get();
-    
-    //         // Return success JSON response
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => $quizData
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         // Return error JSON response
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while fetching the dashboard data.',
-    //             'error' => 'Error logged. :' . $th->getMessage() // For security
-    //         ], 500);
-    //     }
-    // }
-
-    public function quizAll(Request $request)
-    {
+    public function quizAll(Request $request){
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
     
-            // Get the authenticated user
-            $user = $request->attributes->get('authenticatedUser');
-    
-            // Check if the user has a subscription
-            $currentDate = now();
-            $subscription = Subscription::with('plans')->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-    
-            // Fetch quizzes based on subscription status
-            $quizQuery = Quizze::select(
+            // Fetch all exam results for the authenticated user where status is complete
+            $quizData = Quizze::select(
                 'quizzes.slug',
                 'quizzes.title',
                 'quizzes.description',
@@ -1139,43 +1067,16 @@ class QuizController extends Controller
                 'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point',
-                'quizzes.is_free'
+                'quizzes.is_free',
             )
-            ->havingRaw('COUNT(questions.id) > 0');  // Ensure quizzes with more than 0 questions
-    
-            // Execute the query and get the quiz data
-            $quizData = $quizQuery->get();
-    
-            // If the user has a subscription, modify the is_free field for all quizzes
-            if ($subscription) {
-                // Iterate over each quiz to set is_free to true for paid quizzes
-                foreach ($quizData as $quiz) {
-                    if ($quiz->is_free == 0) { // If it's a paid quiz
-                        $quiz->is_free = 1; // Set it to free
-                    }
-                }
-            } else {
-                // If the user does not have a subscription, filter for public quizzes only
-                $quizData = $quizData->filter(function ($quiz) {
-                    return $quiz->is_public == 1; // Only keep public quizzes
-                });
-    
-                // Check if there are no quizzes after filtering
-                if ($quizData->isEmpty()) {
-                    return response()->json([
-                        'status' => true,
-                        'data' => [] // No public quizzes available for non-subscribed users
-                    ], 200);
-                }
-            }
+            ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+            ->get();
     
             // Return success JSON response
             return response()->json([
                 'status' => true,
-                'data' => $quizData,
-                'subscription' => $subscription
+                'data' => $quizData
             ], 200);
-            
         } catch (\Throwable $th) {
             // Return error JSON response
             return response()->json([
