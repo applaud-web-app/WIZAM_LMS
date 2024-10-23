@@ -1026,13 +1026,24 @@ class QuizController extends Controller
             ]);
         }
     }
-
-    public function quizAll(Request $request){
+    public function quizAll(Request $request)
+    {
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
     
-            // Fetch all exam results for the authenticated user where status is complete
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // Check if the user has a subscription
+            $currentDate = now();
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+    
+            // Fetch quizzes based on the requested category
             $quizData = Quizze::select(
                 'quizzes.slug',
                 'quizzes.title',
@@ -1067,10 +1078,19 @@ class QuizController extends Controller
                 'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point',
-                'quizzes.is_free',
+                'quizzes.is_free'
             )
             ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
             ->get();
+    
+            // If the user has a subscription, mark paid quizzes as free
+            if ($subscription) {
+                foreach ($quizData as $quiz) {
+                    if ($quiz->is_free == 0) { // If it's a paid quiz
+                        $quiz->is_free = 1; // Set it to free
+                    }
+                }
+            }
     
             // Return success JSON response
             return response()->json([
@@ -1086,7 +1106,6 @@ class QuizController extends Controller
             ], 500);
         }
     }
-    
 
     public function quizProgress(Request $request){
         try {
