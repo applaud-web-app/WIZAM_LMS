@@ -696,6 +696,72 @@ class ExamController extends Controller
     //     }
     // }
 
+    // public function examAll(Request $request)
+    // {
+    //     try {
+    //         // Validate the request
+    //         $request->validate(['category' => 'required']);
+
+    //         // Fetch the current authenticated user
+    //         $user = $request->attributes->get('authenticatedUser');
+
+    //         // Fetch the exam IDs assigned to the current user
+    //         $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
+
+    //         // Fetch all exam data including the assigned exams and making assigned exams free
+    //         $examData = Exam::select(
+    //             'exams.id',
+    //             'exam_types.slug as exam_type_slug',
+    //             'exams.slug',
+    //             'exams.title',
+    //             'exams.duration_mode',
+    //             'exams.exam_duration',
+    //             'exams.point_mode',
+    //             'exams.point',
+    //             'exams.is_free',
+    //             'exams.price',
+    //             DB::raw('COUNT(questions.id) as total_questions'), 
+    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), 
+    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+    //         )
+    //         ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') 
+    //         ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
+    //         ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
+    //         ->where(function ($query) use ($assignedExams) {
+    //             $query->where('exams.is_public', 1)
+    //                 ->orWhereIn('exams.id', $assignedExams); 
+    //         })
+    //         ->where('exams.subcategory_id', $request->category) 
+    //         ->where('exams.status', 1) 
+    //         ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title', 'exams.duration_mode', 
+    //                 'exams.exam_duration', 'exams.point_mode', 'exams.point', 'exams.is_free', 'exams.price') 
+    //         ->havingRaw('COUNT(questions.id) > 0') 
+    //         ->get();
+
+    //         $examData->transform(function ($exam) use ($assignedExams) {
+    //             if (in_array($exam->id, $assignedExams)) {
+    //                 $exam->is_free = 1;
+    //             }
+    //             return $exam;
+    //         });
+
+
+    //         // Return success JSON response
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => $examData
+    //         ], 200);
+            
+    //     } catch (\Throwable $th) {
+    //         // Return error JSON response
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'An error occurred while fetching the exam data.',
+    //             'error' => 'Error logged. :' . $th->getMessage() // For security
+    //         ], 500);
+    //     }
+    // }
+
     public function examAll(Request $request)
     {
         try {
@@ -738,20 +804,60 @@ class ExamController extends Controller
             ->havingRaw('COUNT(questions.id) > 0') 
             ->get();
 
+            // USER SUBSCRIPTION LOGIC
+            $type = "exams"; // Type for feature access check
+            
+            // Get the current date and time
+            $currentDate = now();
+            
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Apply subscription-based conditions to make exams free
+            if ($subscription) {
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $examData->transform(function ($exam) {
+                        $exam->is_free = 1; // Make all exams free for unlimited access
+                        return $exam;
+                    });
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+
+                    // Check if exams are included in the allowed features
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $examData->transform(function ($exam) {
+                            $exam->is_free = 1; // Make exams free as part of allowed features
+                            return $exam;
+                        });
+                    }
+                }
+            }
+
+            // Apply the free logic to assigned exams
             $examData->transform(function ($exam) use ($assignedExams) {
                 if (in_array($exam->id, $assignedExams)) {
-                    $exam->is_free = 1;
+                    $exam->is_free = 1; // Make assigned exams free
                 }
                 return $exam;
             });
-
 
             // Return success JSON response
             return response()->json([
                 'status' => true,
                 'data' => $examData
             ], 200);
-            
+
         } catch (\Throwable $th) {
             // Return error JSON response
             return response()->json([
@@ -761,6 +867,7 @@ class ExamController extends Controller
             ], 500);
         }
     }
+
 
 
     public function examProgress(Request $request){
