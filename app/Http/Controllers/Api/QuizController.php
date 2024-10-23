@@ -1092,10 +1092,10 @@ class QuizController extends Controller
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
-    
+
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-    
+
             // Check if the user has a subscription
             $currentDate = now();
             $subscription = Subscription::with('plans')->where('user_id', $user->id)
@@ -1103,7 +1103,7 @@ class QuizController extends Controller
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
                 ->first();
-    
+
             // Fetch quizzes based on subscription status
             $quizQuery = Quizze::select(
                 'quizzes.slug',
@@ -1142,10 +1142,10 @@ class QuizController extends Controller
                 'quizzes.is_free'
             )
             ->havingRaw('COUNT(questions.id) > 0');  // Ensure quizzes with more than 0 questions
-    
+
             // Execute the query and get the quiz data
             $quizData = $quizQuery->get();
-    
+
             // If the user has a subscription, modify the is_free field for all quizzes
             if ($subscription) {
                 // Iterate over each quiz to set is_free to true for paid quizzes
@@ -1155,14 +1155,21 @@ class QuizController extends Controller
                     }
                 }
             } else {
-                // If the user does not have a subscription, filter for public quizzes only
+                // If the user does not have a subscription, filter out all quizzes
+                // This will result in an empty collection for users without a subscription
                 $quizData = $quizData->filter(function ($quiz) {
-                    if($quiz->is_public == 1){
-                        return $quiz;
-                    }
+                    return $quiz->is_public == 1; // Only keep public quizzes
                 });
+
+                // Check if there are no quizzes after filtering, if not return an empty data array
+                if ($quizData->isEmpty()) {
+                    return response()->json([
+                        'status' => true,
+                        'data' => [] // No quizzes available for non-subscribed users
+                    ], 200);
+                }
             }
-    
+
             // Return success JSON response
             return response()->json([
                 'status' => true,
@@ -1177,7 +1184,8 @@ class QuizController extends Controller
                 'error' => 'Error logged. :' . $th->getMessage() // For security
             ], 500);
         }
-    }    
+    }
+   
 
     public function quizProgress(Request $request){
         try {
