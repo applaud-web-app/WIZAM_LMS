@@ -1147,7 +1147,7 @@ class QuizController extends Controller
             if ($subscription) {
                 // If the user has a subscription, show both public and private quizzes
                 // No additional conditions needed
-                $quizQuery->where('quizzes.is_public', 1);
+                // $quizQuery->where('quizzes.is_public', 1);
             } else {
                 // If the user does not have a subscription, show only public quizzes
                 $quizQuery->where('quizzes.is_public', 1); // Assuming public quizzes are marked as free
