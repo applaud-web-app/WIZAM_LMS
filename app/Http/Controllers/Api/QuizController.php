@@ -1026,15 +1026,16 @@ class QuizController extends Controller
             ]);
         }
     }
+
     public function quizAll(Request $request)
     {
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
-    
+
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-    
+
             // Check if the user has a subscription
             $currentDate = now();
             $subscription = Subscription::with('plans')->where('user_id', $user->id)
@@ -1042,7 +1043,7 @@ class QuizController extends Controller
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
                 ->first();
-    
+
             // Fetch quizzes based on the requested category
             $quizData = Quizze::select(
                 'quizzes.slug',
@@ -1080,11 +1081,11 @@ class QuizController extends Controller
                 'quizzes.point_mode',
                 'quizzes.point',
                 'quizzes.is_free',
-                'quizzes.is_public', 
+                'quizzes.is_public'
             )
             ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
             ->get();
-    
+
             // If the user has a subscription, mark paid quizzes as free
             if ($subscription) {
                 foreach ($quizData as $quiz) {
@@ -1092,13 +1093,13 @@ class QuizController extends Controller
                         $quiz->is_free = 1; // Set it to free
                     }
                 }
-            }else{
+            } else {
                 // If the user does not have a subscription, filter to only show public quizzes
                 $quizData = $quizData->filter(function ($quiz) {
                     return $quiz->is_public == 1; // Only keep public quizzes
                 });
             }
-    
+
             // Return success JSON response
             return response()->json([
                 'status' => true,
