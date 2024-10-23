@@ -1098,7 +1098,7 @@ class QuizController extends Controller
 
             // Check if the user has a subscription
             $currentDate = now();
-            $subscription = Subscription::where('user_id', $user->id)
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)
                 ->where('stripe_status', 'complete')
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
@@ -1139,15 +1139,35 @@ class QuizController extends Controller
                 'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point',
-                'quizzes.is_free',
+                'quizzes.is_free'
             )
             ->havingRaw('COUNT(questions.id) > 0');  // Ensure quizzes with more than 0 questions
 
-            // Apply visibility filter based on subscription
+            // Check for subscription and associated plan
             if ($subscription) {
-                // If the user has a subscription, show both public and private quizzes
-                // No additional conditions needed
-                // $quizQuery->where('quizzes.is_public', 1);
+                // Fetch the plan related to this subscription
+                $plan = $subscription->plans;
+
+                if (!$plan) {
+                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
+                }
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // User has unlimited access, allow the exam
+                    // No additional visibility checks needed
+                } else {
+                    // Fetch the allowed features for this plan
+                    $allowed_features = json_decode($plan->features, true);
+
+                    // Define the type of feature being checked (assuming it's quizzes)
+                    $type = "quizzes"; // Set this to whatever your feature type is
+
+                    // Check if the requested feature type is in the allowed features
+                    if (!in_array($type, $allowed_features)) {
+                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
+                    }
+                }
             } else {
                 // If the user does not have a subscription, show only public quizzes
                 $quizQuery->where('quizzes.is_public', 1); // Assuming public quizzes are marked as free
@@ -1161,7 +1181,7 @@ class QuizController extends Controller
                 'status' => true,
                 'data' => $quizData
             ], 200);
-        
+            
         } catch (\Throwable $th) {
             // Return error JSON response
             return response()->json([
