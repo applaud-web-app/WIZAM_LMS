@@ -1092,10 +1092,10 @@ class QuizController extends Controller
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
-
+    
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-
+    
             // Check if the user has a subscription
             $currentDate = now();
             $subscription = Subscription::with('plans')->where('user_id', $user->id)
@@ -1103,7 +1103,7 @@ class QuizController extends Controller
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
                 ->first();
-
+    
             // Fetch quizzes based on subscription status
             $quizQuery = Quizze::select(
                 'quizzes.slug',
@@ -1142,40 +1142,25 @@ class QuizController extends Controller
                 'quizzes.is_free'
             )
             ->havingRaw('COUNT(questions.id) > 0');  // Ensure quizzes with more than 0 questions
-
-            // Check for subscription and associated plan
+    
+            // Execute the query and get the quiz data
+            $quizData = $quizQuery->get();
+    
+            // If the user has a subscription, modify the is_free field for all quizzes
             if ($subscription) {
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // User has unlimited access, allow the exam
-                    // No additional visibility checks needed
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-
-                    // Define the type of feature being checked (assuming it's quizzes)
-                    $type = "quizzes"; // Set this to whatever your feature type is
-
-                    // Check if the requested feature type is in the allowed features
-                    if (!in_array($type, $allowed_features)) {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
+                // Iterate over each quiz to set is_free to true for paid quizzes
+                foreach ($quizData as $quiz) {
+                    if ($quiz->is_free == 0) { // If it's a paid quiz
+                        $quiz->is_free = 1; // Set it to free
                     }
                 }
             } else {
-                // If the user does not have a subscription, show only public quizzes
-                $quizQuery->where('quizzes.is_public', 1); // Assuming public quizzes are marked as free
+                // If the user does not have a subscription, filter for public quizzes only
+                $quizData = $quizData->filter(function ($quiz) {
+                    return $quiz->is_public == 1; // Only keep public quizzes
+                });
             }
-
-            // Execute the query
-            $quizData = $quizQuery->get();
-
+    
             // Return success JSON response
             return response()->json([
                 'status' => true,
@@ -1190,7 +1175,7 @@ class QuizController extends Controller
                 'error' => 'Error logged. :' . $th->getMessage() // For security
             ], 500);
         }
-    }
+    }    
 
     public function quizProgress(Request $request){
         try {
