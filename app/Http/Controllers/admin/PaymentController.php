@@ -1318,35 +1318,44 @@ class PaymentController extends Controller
       try {
          // Log when the method is called
          Log::info('Handling one-time payment for Payment Intent: ' . $paymentIntent->id);
-         
-         // Check for valid payment intent object
+
+         // Check for valid payment intent object and customer ID
          if (!isset($paymentIntent->customer)) {
                Log::warning('Payment Intent does not contain a customer ID.');
                return;
          }
 
          $customerId = $paymentIntent->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
 
-         if ($user) {
-               // Check for duplicate payment
-               if (!Payment::where('stripe_payment_id', $paymentIntent->id)->exists()) {
-                  // Create the payment entry with subscription_id set to NULL
-                  Payment::create([
-                     'user_id' => $user->id,
-                     'stripe_payment_id' => $paymentIntent->id,
-                     'amount' => $paymentIntent->amount_received / 100, // Convert from cents
-                     'currency' => $paymentIntent->currency,
-                     'status' => $paymentIntent->status,
-                     'subscription_id' => "one-time", // Explicitly set subscription_id to NULL for one-time payments
-                  ]);
-                  Log::info('One-time payment stored successfully for Payment Intent: ' . $paymentIntent->id);
-               } else {
-                  Log::info('Duplicate Payment: ' . $paymentIntent->id);
-               }
-         } else {
+         // Fetch user based on Stripe customer ID
+         $user = User::where('stripe_customer_id', $customerId)->first();
+
+         if (!$user) {
                Log::warning('User not found for Stripe customer ID: ' . $customerId);
+               return;
          }
+
+         // Check for duplicate payment
+         $existingPayment = Payment::where('stripe_payment_id', $paymentIntent->id)->exists();
+
+         if ($existingPayment) {
+               Log::info('Duplicate Payment: ' . $paymentIntent->id);
+               return;
+         }
+
+         // Create the payment entry with subscription_id set to "one-time"
+         Payment::create([
+            'user_id' => $user->id,
+            'stripe_payment_id' => $paymentIntent->id,
+            'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+            'currency' => $paymentIntent->currency,
+            'status' => $paymentIntent->status,
+            'subscription_id' => null, // Set null for one-time payments
+            'plan_id' => $paymentIntent->metadata->plan_id ?? null, // Assume plan_id is in metadata if applicable
+         ]);
+
+         Log::info('One-time payment stored successfully for Payment Intent: ' . $paymentIntent->id);
+         
       } catch (\Exception $e) {
          Log::error('Stripe Webhook Error: Failed to store one-time payment details', [
                'error' => $e->getMessage(),
