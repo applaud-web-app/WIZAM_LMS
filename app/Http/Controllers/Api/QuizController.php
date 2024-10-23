@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Models\Question;
 use App\Models\Subscription;
 use App\Models\Plan;
+use App\Models\AssignedExam;
 
 
 class QuizController extends Controller
