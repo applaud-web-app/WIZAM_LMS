@@ -1056,6 +1056,7 @@ class QuizController extends Controller
                 'quizzes.point_mode',
                 'quizzes.point', 
                 'quizzes.is_free', 
+                'quizzes.is_public', 
                 DB::raw('COUNT(questions.id) as total_questions'),  
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
@@ -1078,7 +1079,8 @@ class QuizController extends Controller
                 'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point',
-                'quizzes.is_free'
+                'quizzes.is_free',
+                'quizzes.is_public', 
             )
             ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
             ->get();
