@@ -1157,7 +1157,9 @@ class QuizController extends Controller
             } else {
                 // If the user does not have a subscription, filter for public quizzes only
                 $quizData = $quizData->filter(function ($quiz) {
-                    return $quiz->is_public == 1; // Only keep public quizzes
+                    if($quiz->is_public == 1){
+                        return $quiz;
+                    }
                 });
             }
     
