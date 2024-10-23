@@ -793,7 +793,6 @@ class StudentController extends Controller
     //     }
     // }
     
-
     public function allQuiz(Request $request)
     {
         try {
@@ -802,25 +801,25 @@ class StudentController extends Controller
                 'category' => 'required',
                 'slug' => 'required'
             ]);
-
+    
             // Fetch quiz type by slug and status
             $quizType = QuizType::select('id')
                 ->where('slug', $request->slug)
                 ->where('status', 1)
                 ->first();
-
+    
             if ($quizType) {
                 // Get the authenticated user
                 $user = $request->attributes->get('authenticatedUser');
                 $currentDate = now();
-
+    
                 // Check if the user has an active subscription
                 $subscription = Subscription::where('user_id', $user->id)
                     ->where('stripe_status', 'complete')
                     ->where('ends_at', '>', $currentDate)
                     ->latest()
                     ->first();
-
+    
                 // Fetch quiz data grouped by type.slug
                 $quizData = Quizze::select(
                         'quizzes.slug as quizSlug',
@@ -845,34 +844,37 @@ class StudentController extends Controller
                     'quizzes.duration', 'quizzes.point_mode', 'quizzes.point', 'quizzes.is_free') // Group by type and quiz details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                     ->get();
-
+    
                 // Initialize array to store formatted quiz data
                 $formattedQuizData = [];
-
+    
                 foreach ($quizData as $quiz) {
                     // Format the total time using the new method
                     $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-
+    
                     // Group quizzes by slug (quiz type)
                     if (!isset($formattedQuizData[$quiz->slug])) {
                         $formattedQuizData[$quiz->slug] = [];
                     }
-
+    
                     // Determine time based on duration mode
                     $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
                     $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-
+    
                     // Handle quiz access based on subscription
-                    if (!$subscription && $quiz->is_free == 0) {
-                        // If the user does not have a subscription and the quiz is not free, skip it
-                        continue;
+                    if (!$subscription) {
+                        // If the user does not have a subscription
+                        if ($quiz->is_free == 0) {
+                            // Skip quizzes that are not free
+                            continue;
+                        }
+                    } else {
+                        // If the user has a subscription, mark paid quizzes as free
+                        if ($quiz->is_free == 0) {
+                            $quiz->is_free = 1; // Change is_free to 1 for subscribed users
+                        }
                     }
-
-                    // If the user has a subscription, mark paid quizzes as free
-                    if ($subscription && $quiz->is_free == 0) {
-                        $quiz->is_free = 1; // Change is_free to 1 for subscribed users
-                    }
-
+    
                     // Add quiz details to the corresponding type slug
                     $formattedQuizData[$quiz->slug][] = [
                         'title' => $quiz->title,
@@ -883,22 +885,23 @@ class StudentController extends Controller
                         'is_free' => $quiz->is_free,
                     ];
                 }
-
+    
                 // Return the formatted data as JSON
                 return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
             }
-
+    
             // Return error if quiz type not found
             return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
             
         } catch (\Throwable $th) {
             // Log the error for debugging
             \Log::error('Error in allQuiz: ', ['error' => $th->getMessage()]);
-
+    
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
+    
 
 
     public function quizDetail(Request $request, $slug)
