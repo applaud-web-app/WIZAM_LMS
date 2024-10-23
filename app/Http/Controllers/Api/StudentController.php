@@ -626,8 +626,7 @@ class StudentController extends Controller
             $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
 
             if ($quizType) {
-                
-                // Fetch quiz data grouped by type.slug 
+                // Fetch quiz data grouped by type.slug
                 $quizData = Quizze::select(
                         'quizzes.slug as quizSlug',
                         'quiz_types.slug', // Fetch type slug
