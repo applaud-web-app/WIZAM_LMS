@@ -409,6 +409,88 @@ class StudentController extends Controller
         return trim($timeString); // Trim any extra spaces
     }
 
+    // public function examDetail(Request $request, $slug)
+    // {
+    //     try {
+    //         // Validate incoming request data
+    //         $request->validate([
+    //             'category' => 'required|integer',
+    //         ]);
+
+    //         // Fetch the current authenticated user
+    //         $user = $request->attributes->get('authenticatedUser');
+
+    //         // Fetch the exam IDs assigned to the current user
+    //         $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
+
+    //         // Fetch exam details based on the category and slug
+    //         $examData = Exam::select(
+    //             'exams.id', // Include exam ID for assigned exams check
+    //             'exam_types.slug as exam_type_slug', 
+    //             'exams.title',
+    //             'exams.description',
+    //             'exams.pass_percentage',
+    //             'sub_categories.name as sub_category_name',
+    //             'exam_types.name as exam_type_name',
+    //             'exams.duration_mode', 
+    //             'exams.exam_duration', 
+    //             'exams.point_mode',
+    //             'exams.point', 
+    //             'exams.is_free',
+    //             DB::raw('COUNT(questions.id) as total_questions'),
+    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), 
+    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+    //         )
+    //         ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') 
+    //         ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'sub_categories.id') 
+    //         ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') 
+    //         ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') 
+    //         ->where(function ($query) use ($assignedExams) {
+    //             $query->where('exams.is_public', 1) // Public exams
+    //                 ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
+    //         })
+    //         ->where('exams.subcategory_id', $request->category) 
+    //         ->where('exams.slug', $slug) 
+    //         ->where('exams.status', 1)
+    //         ->groupBy('exam_types.slug', 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage', 
+    //                 'sub_categories.name', 'exam_types.name', 'exams.duration_mode', 'exams.exam_duration', 
+    //                 'exams.point_mode', 'exams.point', 'exams.is_free')
+    //         ->havingRaw('COUNT(questions.id) > 0')
+    //         ->first();
+            
+    //         // Check if exam data is available
+    //         if (!$examData) {
+    //             return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
+    //         }
+
+    //         // Adjust 'is_free' for assigned exams, regardless of public or private
+    //         if (in_array($examData->id, $assignedExams)) {
+    //             $examData->is_free = 1; // Make assigned exams free
+    //         }
+
+    //         // Format time and marks
+    //         $time = $examData->duration_mode == "manual" ? $examData->exam_duration : $this->formatTime($examData->total_time);
+    //         $marks = $examData->point_mode == "manual" ? ($examData->point * $examData->total_questions) : $examData->total_marks;
+
+    //         // Format response to match the structure needed by frontend
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => [
+    //                 'title' => $examData->title,
+    //                 'examType' => $examData->exam_type_name,
+    //                 'syllabus' => $examData->sub_category_name,
+    //                 'totalQuestions' => $examData->total_questions,
+    //                 'duration' => $time,
+    //                 'marks' => $marks,
+    //                 'description' => $examData->description,
+    //                 'is_free'=> $examData->is_free,
+    //             ]
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: '.$th->getMessage()], 500);
+    //     }
+    // }
+
     public function examDetail(Request $request, $slug)
     {
         try {
@@ -457,10 +539,44 @@ class StudentController extends Controller
                     'exams.point_mode', 'exams.point', 'exams.is_free')
             ->havingRaw('COUNT(questions.id) > 0')
             ->first();
-            
+
             // Check if exam data is available
             if (!$examData) {
                 return response()->json(['status' => false, 'message' => 'Exam not found'], 404);
+            }
+
+            // USER SUBSCRIPTION LOGIC
+            $type = "exams"; // Type for feature access check
+
+            // Get the current date and time
+            $currentDate = now();
+            
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Apply subscription-based conditions to make exams free
+            if ($subscription) {
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE THIS EXAM FREE
+                    $examData->is_free = 1;
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+
+                    // Check if exams are included in the allowed features
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE THIS EXAM FREE
+                        $examData->is_free = 1;
+                    }
+                }
             }
 
             // Adjust 'is_free' for assigned exams, regardless of public or private
@@ -490,6 +606,7 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: '.$th->getMessage()], 500);
         }
     }
+
 
 
     // QUIZ DATA
