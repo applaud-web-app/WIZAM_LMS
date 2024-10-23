@@ -1090,6 +1090,11 @@ class QuizController extends Controller
                         $quiz->is_free = 1; // Set it to free
                     }
                 }
+            }else{
+                // If the user does not have a subscription, filter to only show public quizzes
+                $quizData = $quizData->filter(function ($quiz) {
+                    return $quiz->is_public == 1; // Only keep public quizzes
+                });
             }
     
             // Return success JSON response
