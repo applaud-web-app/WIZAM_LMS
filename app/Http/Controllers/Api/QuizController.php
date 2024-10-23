@@ -1146,6 +1146,12 @@ class QuizController extends Controller
             // Execute the query and get the quiz data
             $quizData = $quizQuery->get();
 
+            return response()->json([
+                'status' => true,
+                'data' => $quizData,
+                'subscription' => $subscription
+            ], 200);
+
             // If the user has a subscription, modify the is_free field for all quizzes
             if ($subscription) {
                 // Iterate over each quiz to set is_free to true for paid quizzes
