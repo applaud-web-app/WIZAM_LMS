@@ -609,6 +609,7 @@ class StudentController extends Controller
 
 
 
+
     // QUIZ DATA
     public function quizType(){
         try {
