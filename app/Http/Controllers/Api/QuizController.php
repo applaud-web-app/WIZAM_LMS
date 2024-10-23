@@ -1147,9 +1147,10 @@ class QuizController extends Controller
             if ($subscription) {
                 // If the user has a subscription, show both public and private quizzes
                 // No additional conditions needed
+                $quizQuery->where('quizzes.is_public', 1);
             } else {
                 // If the user does not have a subscription, show only public quizzes
-                $quizQuery->where('quizzes.is_free', 1); // Assuming public quizzes are marked as free
+                $quizQuery->where('quizzes.is_public', 1); // Assuming public quizzes are marked as free
             }
 
             // Execute the query
@@ -1160,6 +1161,7 @@ class QuizController extends Controller
                 'status' => true,
                 'data' => $quizData
             ], 200);
+        
         } catch (\Throwable $th) {
             // Return error JSON response
             return response()->json([
@@ -1169,7 +1171,6 @@ class QuizController extends Controller
             ], 500);
         }
     }
-
 
     public function quizProgress(Request $request){
         try {
