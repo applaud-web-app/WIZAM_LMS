@@ -623,6 +623,16 @@ class StudentController extends Controller
     public function allQuiz(Request $request)
     {
         try {
+            // Validate the request to ensure category is provided
+            $request->validate(['category' => 'required', 'slug' => 'required']);
+    
+            // Fetch quiz type by slug and status
+            $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
+    
+            if (!$quizType) {
+                return response()->json(['status' => false, 'error' => "Quiz Type Not Found"], 404);
+            }
+    
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
     
@@ -635,84 +645,79 @@ class StudentController extends Controller
                 ->latest()
                 ->first();
     
-            // Fetch quiz type by slug and status
-            $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
+            // Fetch quiz data grouped by quiz type and category
+            $quizData = Quizze::select(
+                'quizzes.slug as quizSlug',
+                'quiz_types.slug', // Fetch type slug
+                'quizzes.title', // Fetch quiz title
+                'quizzes.duration_mode', 
+                'quizzes.duration', 
+                'quizzes.point_mode',
+                'quizzes.point', 
+                'quizzes.is_free', 
+                DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
+            )
+            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
+            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
+            ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
+            ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
+            ->where('quizzes.status', 1) // Filter by quiz status
+            ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
+            'quizzes.duration', 'quizzes.point_mode','quizzes.point',  'quizzes.is_free') // Group by type and quiz details
+            ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
+            ->get(); // Fetch results as a collection
     
-            if ($quizType) {
-                // Fetch quiz data grouped by type.slug
-                $quizData = Quizze::select(
-                        'quizzes.slug as quizSlug',
-                        'quiz_types.slug', // Fetch type slug
-                        'quizzes.title', // Fetch quiz title
-                        'quizzes.duration_mode', 
-                        'quizzes.duration', 
-                        'quizzes.point_mode',
-                        'quizzes.point', 
-                        'quizzes.is_free', 
-                        DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
-                        DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
-                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-                    )
-                    ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
-                    ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
-                    ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
-                    ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
-                    ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-                    ->where('quizzes.status', 1) // Filter by quiz status
-                    ->groupBy('quiz_types.slug', 'quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
-                    'quizzes.duration', 'quizzes.point_mode', 'quizzes.point',  'quizzes.is_free') // Group by type and quiz details
-                    ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
-                    ->get();
-    
-                // Initialize array to store formatted quiz data
-                $formattedQuizData = [];
-    
-                foreach ($quizData as $quiz) {
-                    // Format the total time using the new method
-                    $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-    
-                    // Group quizzes by slug (quiz type)
-                    if (!isset($formattedQuizData[$quiz->slug])) {
-                        $formattedQuizData[$quiz->slug] = [];
-                    }
-    
-                    $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
-                    $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-    
-                    // Handle access based on subscription
-                    if (!$subscription && $quiz->is_free == 0) {
-                        // Skip paid quizzes if the user does not have a subscription
-                        continue;
-                    }
-    
-                    // If the user has a subscription, mark paid quizzes as free
-                    if ($subscription && $quiz->is_free == 0) {
-                        $quiz->is_free = 1;
-                    }
-    
-                    // Add quiz details to the corresponding type slug
-                    $formattedQuizData[$quiz->slug][] = [
-                        'title' => $quiz->title,
-                        'slug' => $quiz->quizSlug,
-                        'questions' => $quiz->total_questions ?? 0,
-                        'time' => $time, // Use the formatted time
-                        'marks' => $marks ?? 0,
-                        'is_free' => $quiz->is_free,
-                    ];
-                }
-    
-                // Return the formatted data as JSON
-                return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
+            // Check if quizData is a collection
+            if (!($quizData instanceof \Illuminate\Support\Collection)) {
+                return response()->json(['status' => false, 'error' => 'No quizzes found or invalid response'], 404);
             }
     
-            // Return error if quiz type not found
-            return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
+            // Initialize array to store formatted quiz data
+            $formattedQuizData = [];
+    
+            foreach ($quizData as $quiz) {
+                // Format the total time using the new method
+                $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
+    
+                // Group quizzes by slug (quiz type)
+                if (!isset($formattedQuizData[$quiz->slug])) {
+                    $formattedQuizData[$quiz->slug] = [];
+                }
+    
+                // If the user has a subscription, mark paid quizzes as free
+                if ($subscription) {
+                    $quiz->is_free = 1; // Set paid quizzes to free for subscribed users
+                }
+    
+                $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
+                $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
+    
+                // Add quiz details to the corresponding type slug
+                $formattedQuizData[$quiz->slug][] = [
+                    'title' => $quiz->title,
+                    'slug' => $quiz->quizSlug,
+                    'questions' => $quiz->total_questions ?? 0,
+                    'time' => $time, // Use the formatted time
+                    'marks' => $marks ?? 0,
+                    'is_free' => $quiz->is_free,
+                ];
+            }
+    
+            // Return the formatted data as JSON
+            return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
     
         } catch (\Throwable $th) {
+            // Log the error
+            \Log::error('Error in allQuiz: ', ['error' => $th->getMessage()]);
+    
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
     
 
 
