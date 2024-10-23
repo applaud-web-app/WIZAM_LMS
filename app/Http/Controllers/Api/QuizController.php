@@ -1027,65 +1027,168 @@ class QuizController extends Controller
         }
     }
 
-    public function quizAll(Request $request){
+    // public function quizAll(Request $request){
+    //     try {
+    //         // Validate the request
+    //         $request->validate(['category' => 'required']);
+    
+    //         // Fetch all exam results for the authenticated user where status is complete
+    //         $quizData = Quizze::select(
+    //             'quizzes.slug',
+    //             'quizzes.title',
+    //             'quizzes.description',
+    //             'quizzes.pass_percentage',
+    //             'sub_categories.name as sub_category_name',
+    //             'quiz_types.name as exam_type_name',
+    //             'quizzes.duration_mode', 
+    //             'quizzes.duration', 
+    //             'quizzes.point_mode',
+    //             'quizzes.point', 
+    //             'quizzes.is_free', 
+    //             DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
+    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
+    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
+    //         )
+    //         ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+    //         ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+    //         ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
+    //         ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
+    //         ->where('quizzes.subcategory_id', $request->category)  // Filter by category
+    //         ->where('quizzes.status', 1)  // Only active quizzes
+    //         ->groupBy(
+    //             'quizzes.slug',
+    //             'quizzes.id',
+    //             'quizzes.title',
+    //             'quizzes.description',
+    //             'quizzes.pass_percentage',
+    //             'sub_categories.name',
+    //             'quiz_types.name',
+    //             'quizzes.duration_mode', 
+    //             'quizzes.duration', 
+    //             'quizzes.point_mode',
+    //             'quizzes.point',
+    //             'quizzes.is_free',
+    //         )
+    //         ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+    //         ->get();
+    
+    //         // Return success JSON response
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => $quizData
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         // Return error JSON response
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'An error occurred while fetching the dashboard data.',
+    //             'error' => 'Error logged. :' . $th->getMessage() // For security
+    //         ], 500);
+    //     }
+    // }
+
+    public function quizAll(Request $request)
+    {
         try {
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
             // Validate the request
             $request->validate(['category' => 'required']);
-    
-            // Fetch all exam results for the authenticated user where status is complete
+
+            // Fetch all quizzes with questions count, marks, etc.
             $quizData = Quizze::select(
-                'quizzes.slug',
-                'quizzes.title',
-                'quizzes.description',
-                'quizzes.pass_percentage',
-                'sub_categories.name as sub_category_name',
-                'quiz_types.name as exam_type_name',
-                'quizzes.duration_mode', 
-                'quizzes.duration', 
-                'quizzes.point_mode',
-                'quizzes.point', 
-                'quizzes.is_free', 
-                DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
-                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
-                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
-            )
-            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
-            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
-            ->where('quizzes.subcategory_id', $request->category)  // Filter by category
-            ->where('quizzes.status', 1)  // Only active quizzes
-            ->groupBy(
-                'quizzes.slug',
-                'quizzes.id',
-                'quizzes.title',
-                'quizzes.description',
-                'quizzes.pass_percentage',
-                'sub_categories.name',
-                'quiz_types.name',
-                'quizzes.duration_mode', 
-                'quizzes.duration', 
-                'quizzes.point_mode',
-                'quizzes.point',
-                'quizzes.is_free',
-            )
-            ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
-            ->get();
-    
+                    'quizzes.id',
+                    'quizzes.slug',
+                    'quizzes.title',
+                    'quizzes.description',
+                    'quizzes.pass_percentage',
+                    'sub_categories.name as sub_category_name',
+                    'quiz_types.name as exam_type_name',
+                    'quizzes.duration_mode', 
+                    'quizzes.duration', 
+                    'quizzes.point_mode',
+                    'quizzes.point', 
+                    'quizzes.is_free', 
+                    DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
+                )
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
+                ->where('quizzes.subcategory_id', $request->category)  // Filter by category
+                ->where('quizzes.status', 1)  // Only active quizzes
+                ->groupBy(
+                    'quizzes.slug',
+                    'quizzes.id',
+                    'quizzes.title',
+                    'quizzes.description',
+                    'quizzes.pass_percentage',
+                    'sub_categories.name',
+                    'quiz_types.name',
+                    'quizzes.duration_mode', 
+                    'quizzes.duration', 
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quizzes.is_free',
+                )
+                ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+                ->get();
+
+            // Check if the user has a subscription
+            $currentDate = now();
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Loop through the quiz data and apply subscription logic
+            foreach ($quizData as $quiz) {
+                if ($quiz->is_free == 0) {
+                    // Quiz is not free, check if it is included in the user's subscription plan
+                    if ($subscription) {
+                        $plan = $subscription->plans;
+
+                        // Check if the subscription plan allows access to quizzes
+                        if ($plan->feature_access != 1) {
+                            // Fetch the allowed features for this plan (e.g., quiz types)
+                            $allowed_features = json_decode($plan->features, true);
+
+                            // Check if the quiz type (or other identifier) is in the allowed features
+                            $type = "quizzes"; // Define the feature type for quiz access
+                            if (!in_array($type, $allowed_features)) {
+                                // Deny access to this quiz
+                                $quiz->access_denied = true;
+                                $quiz->access_message = 'This quiz is not included in your subscription plan.';
+                            }
+                        }
+                    } else {
+                        // No subscription, deny access to paid quizzes
+                        $quiz->access_denied = true;
+                        $quiz->access_message = 'You need a subscription to access this quiz.';
+                    }
+                }
+            }
+
             // Return success JSON response
             return response()->json([
                 'status' => true,
                 'data' => $quizData
             ], 200);
+
         } catch (\Throwable $th) {
             // Return error JSON response
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while fetching the dashboard data.',
+                'message' => 'An error occurred while fetching the quiz data.',
                 'error' => 'Error logged. :' . $th->getMessage() // For security
             ], 500);
         }
     }
+
 
 
     public function quizProgress(Request $request){
