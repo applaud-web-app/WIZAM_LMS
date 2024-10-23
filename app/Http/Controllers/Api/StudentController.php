@@ -620,11 +620,24 @@ class StudentController extends Controller
         }
     }
 
-    public function allQuiz(Request $request){
+    public function allQuiz(Request $request)
+    {
         try {
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // Check if the user has a subscription
+            $currentDate = now();
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+    
             // Fetch quiz type by slug and status
             $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-
+    
             if ($quizType) {
                 // Fetch quiz data grouped by type.slug
                 $quizData = Quizze::select(
@@ -646,26 +659,37 @@ class StudentController extends Controller
                     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
                     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
                     ->where('quizzes.status', 1) // Filter by quiz status
-                    ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
-                    'quizzes.duration', 'quizzes.point_mode','quizzes.point',  'quizzes.is_free', ) // Group by type and quiz details
+                    ->groupBy('quiz_types.slug', 'quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
+                    'quizzes.duration', 'quizzes.point_mode', 'quizzes.point',  'quizzes.is_free') // Group by type and quiz details
                     ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                     ->get();
-
+    
                 // Initialize array to store formatted quiz data
                 $formattedQuizData = [];
-
+    
                 foreach ($quizData as $quiz) {
                     // Format the total time using the new method
                     $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-
-                    // Group quizs by slug (quiz type)
+    
+                    // Group quizzes by slug (quiz type)
                     if (!isset($formattedQuizData[$quiz->slug])) {
                         $formattedQuizData[$quiz->slug] = [];
                     }
-
+    
                     $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
-                    $marks = $quiz->point_mode == "manual" ? ($quiz->point*$quiz->total_questions) : $quiz->total_marks;
-
+                    $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
+    
+                    // Handle access based on subscription
+                    if (!$subscription && $quiz->is_free == 0) {
+                        // Skip paid quizzes if the user does not have a subscription
+                        continue;
+                    }
+    
+                    // If the user has a subscription, mark paid quizzes as free
+                    if ($subscription && $quiz->is_free == 0) {
+                        $quiz->is_free = 1;
+                    }
+    
                     // Add quiz details to the corresponding type slug
                     $formattedQuizData[$quiz->slug][] = [
                         'title' => $quiz->title,
@@ -673,22 +697,23 @@ class StudentController extends Controller
                         'questions' => $quiz->total_questions ?? 0,
                         'time' => $time, // Use the formatted time
                         'marks' => $marks ?? 0,
-                        'is_free'=> $quiz->is_free,
+                        'is_free' => $quiz->is_free,
                     ];
                 }
-
+    
                 // Return the formatted data as JSON
                 return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
             }
-
+    
             // Return error if quiz type not found
             return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
-            
+    
         } catch (\Throwable $th) {
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
 
 
     public function quizDetail(Request $request, $slug)
