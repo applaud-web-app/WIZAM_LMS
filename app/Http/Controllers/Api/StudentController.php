@@ -801,108 +801,105 @@ class StudentController extends Controller
                 'category' => 'required',
                 'slug' => 'required'
             ]);
-    
+
             // Fetch quiz type by slug and status
             $quizType = QuizType::select('id')
                 ->where('slug', $request->slug)
                 ->where('status', 1)
                 ->first();
-    
+
             if ($quizType) {
                 // Get the authenticated user
                 $user = $request->attributes->get('authenticatedUser');
                 $currentDate = now();
-    
+
                 // Check if the user has an active subscription
                 $subscription = Subscription::where('user_id', $user->id)
                     ->where('stripe_status', 'complete')
                     ->where('ends_at', '>', $currentDate)
                     ->latest()
                     ->first();
-    
-                // Fetch quiz data grouped by type.slug
+
+                // Fetch quiz data based on the requested category
                 $quizData = Quizze::select(
-                        'quizzes.slug as quizSlug',
-                        'quiz_types.slug', // Fetch type slug
-                        'quizzes.title', // Fetch quiz title
-                        'quizzes.duration_mode', 
-                        'quizzes.duration', 
-                        'quizzes.point_mode',
-                        'quizzes.point', 
-                        'quizzes.is_free', 
-                        DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
-                        DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
-                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-                    )
-                    ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
-                    ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
-                    ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
-                    ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
-                    ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-                    ->where('quizzes.status', 1) // Filter by quiz status
-                    ->groupBy('quiz_types.slug', 'quizzes.slug', 'quizzes.id', 'quizzes.title', 'quizzes.duration_mode', 
-                    'quizzes.duration', 'quizzes.point_mode', 'quizzes.point', 'quizzes.is_free') // Group by type and quiz details
-                    ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
-                    ->get();
-    
-                // Initialize array to store formatted quiz data
-                $formattedQuizData = [];
-    
-                foreach ($quizData as $quiz) {
-                    // Format the total time using the new method
-                    $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-    
-                    // Group quizzes by slug (quiz type)
-                    if (!isset($formattedQuizData[$quiz->slug])) {
-                        $formattedQuizData[$quiz->slug] = [];
-                    }
-    
-                    // Determine time based on duration mode
-                    $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
-                    $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-    
-                    // Handle quiz access based on subscription
-                    if (!$subscription) {
-                        // If the user does not have a subscription
-                        if ($quiz->is_free == 0) {
-                            // Skip quizzes that are not free
-                            continue;
-                        }
-                    } else {
-                        // If the user has a subscription, mark paid quizzes as free
-                        if ($quiz->is_free == 0) {
-                            $quiz->is_free = 1; // Change is_free to 1 for subscribed users
+                    'quizzes.slug as quizSlug',
+                    'quizzes.title',
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quizzes.is_free',
+                    'quizzes.is_public',
+                    DB::raw('COUNT(questions.id) as total_questions'),
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                )
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
+                ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
+                ->where('quizzes.status', 1) // Filter by quiz status
+                ->groupBy(
+                    'quizzes.slug',
+                    'quizzes.id',
+                    'quizzes.title',
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quizzes.is_free',
+                    'quizzes.is_public'
+                )
+                ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
+                ->get();
+
+                // Process quizzes based on subscription status
+                if ($subscription) {
+                    // If the user has a subscription, mark paid quizzes as free
+                    foreach ($quizData as $quiz) {
+                        if ($quiz->is_free == 0) { // If it's a paid quiz
+                            $quiz->is_free = 1; // Set it to free
                         }
                     }
-    
-                    // Add quiz details to the corresponding type slug
-                    $formattedQuizData[$quiz->slug][] = [
+                } else {
+                    // If the user does not have a subscription, filter to only show public quizzes
+                    $quizData = $quizData->filter(function ($quiz) {
+                        return $quiz->is_public == 1; // Only keep public quizzes
+                    });
+
+                    // Ensure quizData is an array, returning an empty array if no quizzes
+                    if ($quizData->isEmpty()) {
+                        $quizData = collect([]); // Set it as an empty collection to avoid type errors
+                    }
+                }
+
+                // Format quiz data for the response
+                $formattedQuizData = $quizData->map(function ($quiz) {
+                    return [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
-                        'time' => $time, // Use the formatted time
-                        'marks' => $marks ?? 0,
+                        'time' => $quiz->duration_mode == "manual" ? $quiz->duration : $this->formatTime($quiz->total_time),
+                        'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
                         'is_free' => $quiz->is_free,
                     ];
-                }
-    
+                });
+
                 // Return the formatted data as JSON
-                return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
+                return response()->json(['status' => true, 'data' => $formattedQuizData->values()], 200);
             }
-    
+
             // Return error if quiz type not found
             return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
-            
         } catch (\Throwable $th) {
             // Log the error for debugging
             \Log::error('Error in allQuiz: ', ['error' => $th->getMessage()]);
-    
+
             // Return error response with exception message
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
-    
-
 
     public function quizDetail(Request $request, $slug)
     {
