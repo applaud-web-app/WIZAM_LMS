@@ -338,7 +338,7 @@ class AuthController extends Controller
             ]);
 
             // VERIFY NEW EMAIL IS UNIQUE OR NOT
-            $emailVerify = User::where('email', $request->input('email'))->where('id',$user->id)->first();
+            $emailVerify = User::where('email', $request->input('email'))->where('id','!=',$user->id)->first();
             if ($emailVerify) {
                 return response()->json([
                     'status' => false,
