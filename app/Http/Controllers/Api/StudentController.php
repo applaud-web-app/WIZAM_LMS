@@ -1005,8 +1005,6 @@ class StudentController extends Controller
         }
     }
 
-
-
     // PRACTICE SET
     public function practiceSet(Request $request)
     {

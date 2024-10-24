@@ -430,6 +430,10 @@ class PaymentController extends Controller
          return redirect()->route('view-plans')->with('error', 'Failed to create plan in Stripe: ' . $e->getMessage());
       }
 
+      if($validatedData['feature_access'] == 1){
+         $validatedData['features'] = json_encode(["practice","quizzes","lessons","videos","exams"]);
+      }
+
       // Create a new instance of your model and fill it with the validated data
       $data = new Plan();
       $data->category_id = $validatedData['category'] ?? null;
@@ -625,6 +629,10 @@ class PaymentController extends Controller
 
                   // Save the new Stripe price ID
                   $data->stripe_price_id = $price->id;
+               }
+
+               if($validatedData['feature_access'] == 1){
+                  $validatedData['features'] = json_encode(["practice","quizzes","lessons","videos","exams"]);
                }
 
                // Update the plan in the database

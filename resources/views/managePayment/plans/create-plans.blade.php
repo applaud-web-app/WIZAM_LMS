@@ -82,27 +82,27 @@
                                     class="text-red-500">*</span></label>
                             <div class="flex gap-6">
                                 <!-- First Radio (Fixed) -->
-                                <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
+                                {{-- <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
                                     <input
                                         class="relative ltr:float-left rtl:float-right -ms-[1.5rem] me-1 mt-0.5 h-[18px] w-[18px] appearance-none rounded-full border-1 border-solid border-normal before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary"
                                         type="radio" name="price_type" id="price_type_fixed" value="fixed" required checked>
                                     <label class="mt-px inline-block pl-[0.15rem] hover:cursor-pointer"
                                         for="price_type_fixed">Fixed</label>
-                                </div>
+                                </div> --}}
 
                                 <!-- Second Radio (Monthly) -->
                                 <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
                                     <input
                                         class="relative ltr:float-left rtl:float-right -ms-[1.5rem] me-1 mt-0.5 h-[18px] w-[18px] appearance-none rounded-full border-1 border-solid border-normal before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary"
-                                        type="radio" name="price_type" id="price_type_monthly" value="monthly" required>
+                                        type="radio" name="price_type" id="price_type_monthly" value="monthly" checked required>
                                     <label class="mt-px inline-block pl-[0.15rem] hover:cursor-pointer"
                                         for="price_type_monthly">Monthly</label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Duration -->
-                        <div class="col-span-12 hidden" id="durationContainer">
+                        <!-- Duration (hidden)-->
+                        <div class="col-span-12 " id="durationContainer"> 
                             <label for="duration"
                                 class="block text-sm font-medium text-body dark:text-title-dark mb-2">Duration (Months) <span
                                     class="text-red-500">*</span></label>
@@ -402,5 +402,4 @@
         });
     });
     </script>
-    
 @endpush
