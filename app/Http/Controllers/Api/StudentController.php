@@ -901,82 +901,6 @@ class StudentController extends Controller
         }
     }
 
-    // public function quizDetail(Request $request, $slug)
-    // {
-    //     try {
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-
-    //         // Fetch quiz details based on the category and slug, using the same joins as in allQuiz
-    //         $quizData = Quizze::select(
-    //             'quiz_types.slug as exam_type_slug',
-    //             'quizzes.title',
-    //             'quizzes.description',
-    //             'quizzes.pass_percentage',
-    //             'sub_categories.name as sub_category_name',
-    //             'quiz_types.name as exam_type_name',
-    //             'quizzes.duration_mode', 
-    //             'quizzes.duration', 
-    //             'quizzes.point_mode',
-    //             'quizzes.point', 
-    //             'quizzes.is_free', 
-    //             DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
-    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
-    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
-    //         )
-    //         ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-    //         ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-    //         ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
-    //         ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
-    //         ->where('quizzes.subcategory_id', $request->category)  // Filter by category
-    //         ->where('quizzes.slug', $slug)  // Filter by quiz slug
-    //         ->where('quizzes.status', 1)  // Only active quizzes
-    //         ->groupBy(
-    //             'quiz_types.slug',
-    //             'quizzes.id',
-    //             'quizzes.title',
-    //             'quizzes.description',
-    //             'quizzes.pass_percentage',
-    //             'sub_categories.name',
-    //             'quiz_types.name',
-    //             'quizzes.duration_mode', 
-    //             'quizzes.duration', 
-    //             'quizzes.point_mode',
-    //             'quizzes.point', 
-    //             'quizzes.is_free'
-    //         )
-    //         ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
-    //         ->first();
-
-    //         // Check if quiz data is available
-    //         if (!$quizData) {
-    //             return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
-    //         }
-
-    //         $time = $quizData->duration_mode == "manual" ? $quizData->duration : $this->formatTime($quizData->total_time);
-    //         $marks = $quizData->point_mode == "manual" ? ($quizData->point*$quizData->total_questions) : $quizData->total_marks;
-
-    //         // Format response to match the structure needed by frontend
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => [
-    //                 'title' => $quizData->title,
-    //                 'quizType' => $quizData->exam_type_name,
-    //                 'syllabus' => $quizData->sub_category_name,
-    //                 'totalQuestions' => $quizData->total_questions,
-    //                 'duration' => $time,  // Use formatted time as in allQuiz
-    //                 'marks' => $marks,
-    //                 'description' => $quizData->description,
-    //                 'is_free'=>$quizData->is_free,
-    //             ],
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
     public function quizDetail(Request $request, $slug)
     {
         try {
@@ -985,9 +909,22 @@ class StudentController extends Controller
                 'category' => 'required|integer',
             ]);
 
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+            
+            // Check if the user has a subscription
+            $currentDate = now();
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
             // Fetch quiz details based on the category and slug
             $quizData = Quizze::select(
-                'quiz_types.slug as exam_type_slug',
+                'quizzes.id',
+                'quizzes.slug',
                 'quizzes.title',
                 'quizzes.description',
                 'quizzes.pass_percentage',
@@ -998,20 +935,21 @@ class StudentController extends Controller
                 'quizzes.point_mode',
                 'quizzes.point', 
                 'quizzes.is_free', 
+                'quizzes.is_public',
                 DB::raw('COUNT(questions.id) as total_questions'),
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
             ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
             ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') 
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
             ->where('quizzes.subcategory_id', $request->category)
             ->where('quizzes.slug', $slug)
             ->where('quizzes.status', 1)
             ->groupBy(
-                'quiz_types.slug',
                 'quizzes.id',
+                'quizzes.slug',
                 'quizzes.title',
                 'quizzes.description',
                 'quizzes.pass_percentage',
@@ -1020,8 +958,9 @@ class StudentController extends Controller
                 'quizzes.duration_mode', 
                 'quizzes.duration', 
                 'quizzes.point_mode',
-                'quizzes.point', 
-                'quizzes.is_free'
+                'quizzes.point',
+                'quizzes.is_free',
+                'quizzes.is_public'
             )
             ->havingRaw('COUNT(questions.id) > 0')
             ->first();
@@ -1031,23 +970,23 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
             }
 
+            // Handle access to the quiz based on the subscription and quiz's free/public status
+            if ($quizData->is_free == 0) { // If the quiz is paid
+                if (!$subscription && $quizData->is_public == 0) { // If no subscription and quiz is not public
+                    return response()->json(['status' => false, 'message' => 'This quiz is private. Please subscribe or get access.'], 403);
+                }
+            }
+
+            // If the user has a subscription, mark the quiz as free
+            if ($subscription && $quizData->is_free == 0) {
+                $quizData->is_free = 1; // Set it to free for the response
+            }
+
             // Format the time and marks
             $time = $quizData->duration_mode == "manual" ? $quizData->duration : $this->formatTime($quizData->total_time);
             $marks = $quizData->point_mode == "manual" ? ($quizData->point * $quizData->total_questions) : $quizData->total_marks;
 
-            // Check if the quiz is assigned to the user (assumed there's an 'assigned_quizzes' table)
-            $userId = auth()->id();
-            $assignedQuiz = DB::table('assigned_quizzes')
-                ->where('quiz_id', $quizData->id)
-                ->where('user_id', $userId)
-                ->exists();
-
-            // If the quiz is assigned to the user, mark it as free
-            if ($assignedQuiz) {
-                $quizData->is_free = 1;
-            }
-
-            // Format response to match the structure needed by frontend
+            // Return the quiz data
             return response()->json([
                 'status' => true,
                 'data' => [
