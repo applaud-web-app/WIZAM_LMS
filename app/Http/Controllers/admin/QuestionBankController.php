@@ -17,11 +17,21 @@ use Illuminate\Support\Str;
 class QuestionBankController extends Controller
 {
     public function questionTypes(){
+        
+        if (!Auth()->user()->can('question-type')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $questionType = QuestionType::get();
         return view('questionBank.question-type',compact('questionType'));
     }
 
     public function questions(Request $request){
+        
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Question::with('skill','topic')->whereIn('status',[0,1]);
             return DataTables::of($sections)
@@ -75,10 +85,12 @@ class QuestionBankController extends Controller
         return view('questionBank.view-question',compact('questionType'));
     }
 
-    // 
-
     public function createQuestion(Request $request)
     {
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Check if the 'type' parameter is present in the request
         if ($request->has('type')) {
             // Retrieve skill and topic data
@@ -125,6 +137,10 @@ class QuestionBankController extends Controller
 
     public function saveMsaDetails(Request $request)
     {
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -149,6 +165,10 @@ class QuestionBankController extends Controller
     }  
 
     public function saveMmaDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -174,6 +194,10 @@ class QuestionBankController extends Controller
 
     // ORDER & SEQUENCE
     public function saveOrdDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -197,6 +221,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateOrdDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -223,6 +251,10 @@ class QuestionBankController extends Controller
 
     // FILL IN THE BLANK
     public function saveFibDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -248,6 +280,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateFibDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -277,6 +313,10 @@ class QuestionBankController extends Controller
 
     // EXTENDED MUTIPLE QUESTION
     public function saveEmqDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -300,6 +340,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateEmqDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -328,6 +372,10 @@ class QuestionBankController extends Controller
 
     // TRUR AND FALSE
     public function saveTofDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -351,6 +399,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateTofDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -377,6 +429,10 @@ class QuestionBankController extends Controller
 
     // SHORT ANSWER TYPE QUESTION
     public function saveSoqDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -400,6 +456,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateSoqDetails(Request $request , $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -427,6 +487,10 @@ class QuestionBankController extends Controller
 
     // MATCH THE FOLLOWING
     public function saveMtfDetails(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -450,6 +514,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateMtfDetails(Request $request,$id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -475,6 +543,10 @@ class QuestionBankController extends Controller
     // END MATCH THE FOLLOWING
 
     public function updateMmaDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -496,6 +568,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateQuestionDetails($id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $question = Question::where('id',$id)->first();
         if($question){
             $skill = Skill::where('status', 1)->get();
@@ -532,7 +608,10 @@ class QuestionBankController extends Controller
     }  
 
     public function updateQuestionSetting($id){
-        // dd($request->all(),$id);
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $question = Question::where('id',$id)->first();
         if($question){
             $skill = Skill::where('status', 1)->get();
@@ -543,6 +622,10 @@ class QuestionBankController extends Controller
     }
 
     public function deleteQuestion(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -559,6 +642,10 @@ class QuestionBankController extends Controller
     }
 
     public function saveQuestionDetails(Request $request, $id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill' => 'required',
             'question' => 'required',
@@ -582,6 +669,10 @@ class QuestionBankController extends Controller
     }
 
     public function saveQuestionSetting(Request $request,$id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill'=>'required',
             'topic'=>'required',
@@ -616,6 +707,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateQuestionSolution($id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $question = Question::where('id',$id)->first();
         if($question){
             $solution = Solution::where('question_id',$id)->first();
@@ -627,6 +722,10 @@ class QuestionBankController extends Controller
 
     public function saveQuestionSolution(Request $request, $id)
     {
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         try {
             $type = null;
             $source = null;
@@ -659,6 +758,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateQuestionAttachment($id){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $solution = Solution::where('question_id',$id)->first();
         if($solution){
             $comprehension = Comprehensions::where('status',1)->get();
@@ -667,34 +770,12 @@ class QuestionBankController extends Controller
         return redirect()->back()->with('error', 'Please submit solution to continue!');
     }
 
-    // public function saveQuestionAttachment(Request $request, $id){
-       
-    //     $solution = Solution::where('question_id',$id)->first();
-    //     if($solution){
-    //         $solution->attachment_type = null;
-    //         $solution->attachment_source = null;
-    //         if($request->question_attachment == "yes"){
-    //             if($request->attachment_type == "comprehension"){
-    //                 $video_type = null;
-    //                 $source = $request->comprehension_type;
-    //             }else{
-    //                 $video_type = $request->video_type;
-    //                 $source = $request->source_val;
-    //             }
-    //             $solution->attachment_type = $request->attachment_type;
-    //             $solution->attachment_video_type = $video_type;
-    //             $solution->attachment_source = $source;
-    //         }
-    //         $solution->save();
-    //         return redirect()->route('view-question')->with('success', 'Question Updated Successfully');
-    //     }
-    //     return redirect()->back()->with('error', 'Something went wrong!');
-    // }
-
     public function saveQuestionAttachment(Request $request, $id)
     {
-
-        // dd($request->all());
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $validated = $request->validate([
             'question_attachment' => 'required|string',
             'attachment_type' => 'nullable|string',
@@ -746,19 +827,12 @@ class QuestionBankController extends Controller
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
-    
-    // public function createMsaSetting(){
-    //     if (session()->has('quizData')) {
-    //         // Retrieve skill and topic data
-    //         $skill = Skill::where('status', 1)->get();
-    //         $storedQuizData = session('quizData');
-    //         $topic = TOpic::where('status', 1)->get();
-    //         return view('questionBank.questionType.msa.setting',compact('skill','storedQuizData','topic'));
-    //     }
-    //     return redirect()->route('view-question')->with('error','Something Went Wrong');
-    // }
 
     public function saveMsaSetting(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'skill'=>'required',
             'topic'=>'required',
@@ -797,6 +871,10 @@ class QuestionBankController extends Controller
     }
 
     public function createMsaSolution(){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         if (session()->has('quizData') && session()->has('settingData')) {
             return view('questionBank.questionType.msa.solution');
         }
@@ -804,6 +882,10 @@ class QuestionBankController extends Controller
     }
 
     public function saveMsaSolution(Request $request){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $type = null;
         $source = null;
         if($request->filled('youtube_id')){
@@ -838,6 +920,10 @@ class QuestionBankController extends Controller
     }
 
     public function createMsaAttachment(){
+        if (!Auth()->user()->can('question')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         if (session()->has('quizData') && session()->has('settingData') && session()->has('solutionData')) {
             $comprehension = Comprehensions::where('status',1)->get();
             return view('questionBank.questionType.msa.attachment',compact('comprehension'));
@@ -845,12 +931,12 @@ class QuestionBankController extends Controller
         return redirect()->route('view-question')->with('error','Something Went Wrong');
     }
 
-    public function saveMsaAttachment(Request $request){
-        dd($request->all());
-    }
-
     // COMPREHENSION
     public function viewComprehension(Request $request){
+        if (!Auth()->user()->can('comprehension')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Comprehensions::whereIn('status',[0,1])->select(['id', 'title', 'created_at','description','status']);
 
@@ -882,6 +968,10 @@ class QuestionBankController extends Controller
     }
 
     public function addComprehension(Request $request){
+        if (!Auth()->user()->can('comprehension')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'title' => 'required|string|max:255',
@@ -901,6 +991,10 @@ class QuestionBankController extends Controller
     }
 
     public function editComprehension(Request $request){
+        if (!Auth()->user()->can('comprehension')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -923,6 +1017,10 @@ class QuestionBankController extends Controller
     }
 
     public function deleteComprehension(Request $request){
+        if (!Auth()->user()->can('comprehension')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -940,6 +1038,11 @@ class QuestionBankController extends Controller
 
     // FOR LESSON
     public function viewLesson(Request $request){
+        
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Lesson::with('skill','topic')->whereIn('status',[0,1]);
 
@@ -988,12 +1091,22 @@ class QuestionBankController extends Controller
     }
 
     public function addLesson(){
+
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $skill = Skill::where('status',1)->get();
         $topic = Topic::where('status',1)->get();
         return view('questionBank.add-lesson',compact('skill','topic'));
     }
 
     public function storeLesson(Request $request){
+
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'lesson_title' => 'required|min:2',
             'description' => 'required|min:10',
@@ -1038,6 +1151,11 @@ class QuestionBankController extends Controller
     }
 
     public function editLesson(Request $request){
+
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -1051,6 +1169,11 @@ class QuestionBankController extends Controller
     }
 
     public function updateLesson(Request $request){
+
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'lesson_title' => 'required|min:2',
             'description' => 'required|min:10',
@@ -1097,6 +1220,11 @@ class QuestionBankController extends Controller
     }
 
     public function deleteLesson(Request $request){
+
+        if (!Auth()->user()->can('lesson-bank')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -1114,6 +1242,11 @@ class QuestionBankController extends Controller
     
     // VIDEO BANK
     public function viewVideo(Request $request){
+        
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Video::with('skill','topic')->whereIn('status',[0,1]);
 
@@ -1165,12 +1298,20 @@ class QuestionBankController extends Controller
     }
 
     public function createVideo(){
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $skill = Skill::where('status',1)->get();
         $topic = Topic::where('status',1)->get();
         return view('questionBank.add-video',compact('skill','topic'));
     }
 
     public function storeVideo(Request $request){
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'video_title' => 'required|min:2',
             'skill' => 'required',
@@ -1251,6 +1392,10 @@ class QuestionBankController extends Controller
     }
 
     public function editVideo(Request $request){
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -1264,6 +1409,10 @@ class QuestionBankController extends Controller
     }
 
     public function updateVideo(Request $request){
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'video_title' => 'required|min:2',
             'skill' => 'required',
@@ -1354,6 +1503,10 @@ class QuestionBankController extends Controller
     }
 
     public function deleteVideo(Request $request){
+        if (!Auth()->user()->can('video-bank')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);

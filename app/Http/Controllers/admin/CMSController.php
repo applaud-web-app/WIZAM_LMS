@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\DB;
 class CMSController extends Controller
 {
     public function viewFaq(Request $request){
+        
+        if (!Auth()->user()->can('faq')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Faq::whereIn('status',[0,1])->select(['id', 'question', 'answer','status']);
 
@@ -44,6 +49,11 @@ class CMSController extends Controller
     }
 
     public function addFaq(Request $request){
+         
+        if (!Auth()->user()->can('faq')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string|max:2000',
@@ -63,6 +73,11 @@ class CMSController extends Controller
     }
 
     public function editFaq(Request $request){
+        
+        if (!Auth()->user()->can('faq')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string|max:2000',
@@ -83,6 +98,11 @@ class CMSController extends Controller
     }
 
     public function deleteFaq(Request $request){
+        
+        if (!Auth()->user()->can('faq')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -100,6 +120,11 @@ class CMSController extends Controller
 
     // FOR BLOG CATEGORY
     public function viewBlogCategory(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         if ($request->ajax()) {
             $sections = BlogCategory::whereIn('status',[0,1]);
 
@@ -130,6 +155,11 @@ class CMSController extends Controller
     }
 
     public function addBlogCategory(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $request->validate([
             'blog_category' => 'required|string|max:255',
             'status' => 'required|string|in:1,0',
@@ -147,6 +177,11 @@ class CMSController extends Controller
     }
 
     public function editBlogCategory(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $request->validate([
             'blog_category' => 'required|string|max:255',
             'status' => 'required|string|in:1,0',
@@ -165,6 +200,11 @@ class CMSController extends Controller
     }
 
     public function deleteBlogCategory(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $request->validate([
             'eq'=>'required'
         ]);
@@ -189,6 +229,11 @@ class CMSController extends Controller
 
     // FOR BLOG
     public function viewBlog(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         if ($request->ajax()) {
             $sections = Blog::with('category','user')->whereIn('status',[0,1]);
 
@@ -234,12 +279,22 @@ class CMSController extends Controller
     }
 
     public function addBlog(){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $blogCategory = BlogCategory::whereIn('status',[0,1])->get();
         return view('manageCms.blog.add-blog',compact('blogCategory'));
     }
 
     public function storeBlog(Request $request)
     {
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         // Validate the request inputs
         $request->validate([
             'blogTitle' => 'required|string|max:255',
@@ -294,6 +349,11 @@ class CMSController extends Controller
     }
 
     public function editBlog(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $request->validate([
             'eq'=>'required'
         ]);
@@ -306,6 +366,11 @@ class CMSController extends Controller
 
     public function updateBlog(Request $request)
     {
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         // Validate the request inputs
         $request->validate([
             'blogTitle' => 'required|string|max:255',
@@ -369,6 +434,11 @@ class CMSController extends Controller
     }
 
     public function deleteBlog(Request $request){
+        
+        if (!Auth()->user()->can('blog')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+ 
         $request->validate([
             'eq'=>'required'
         ]);
@@ -386,6 +456,11 @@ class CMSController extends Controller
 
     // Dynmaic Pages
     public function viewPages(Request $request){
+        
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Pages::whereIn('status',[0,1]);
 
@@ -416,10 +491,17 @@ class CMSController extends Controller
     }
 
     public function addPage(){
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
         return view('manageCms.pages.add-page');
     }
 
     public function storePage(Request $request){
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the incoming request data
         $request->validate([
             'page_title' => 'required|string|max:255',
@@ -462,6 +544,9 @@ class CMSController extends Controller
     }
 
     public function editPages(Request $request){
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
         $request->validate([
             'eq'=>'required'
         ]);
@@ -475,6 +560,9 @@ class CMSController extends Controller
     }
 
     public function updatePage(Request $request){
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
         $request->validate([
             'page_title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -523,6 +611,9 @@ class CMSController extends Controller
     }
 
     public function deletePage(Request $request){
+        if (!Auth()->user()->can('pages')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
         $request->validate([
             'eq'=>'required'
         ]);

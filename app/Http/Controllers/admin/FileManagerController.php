@@ -14,10 +14,16 @@ use Pion\Laravel\ChunkUpload\Handler\HandlerFactory;
 use Pion\Laravel\ChunkUpload\Receiver\FileReceiver;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class FileManagerController extends Controller
 {
     public function fileManager(){
+
+        if (!Auth()->user()->can('file-manager')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $fileManager = FileManager::orderBy('id', 'ASC');
         $parentData = $fileManager->where('parent_node', 0)->get();
         $parentDirectory = FileManager::where(['parent_node' => 0, 'type' => 'folder'])->orderBy('id', 'ASC')->get();

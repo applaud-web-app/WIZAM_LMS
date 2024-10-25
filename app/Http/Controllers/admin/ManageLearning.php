@@ -19,10 +19,15 @@ use App\Models\Lesson;
 use App\Models\Video;
 use App\Models\PracticeVideo;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ManageLearning extends Controller
 {
     public function practiceSets(Request $request) {
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         if ($request->ajax()) {
             $sections = PracticeSet::with('subCategory','skill') // Ensure the relationship is correct
                 ->withCount('practiceQuestions') // Make sure 'practiceQuestions' is the correct method name
@@ -63,17 +68,22 @@ class ManageLearning extends Controller
         }
         return view('manageLearning.practiceSet.view-practice-set');
     }
-    
-    
 
     public function createPracticeSets(){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $skill = Skill::where('status',1)->get();
         $category = SubCategory::where('status',1)->get();
         return view('manageLearning.practiceSet.create-practice-set',compact('category','skill'));
     }
 
     public function savePracticeSets(Request $request){
-       
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'testTitle' => 'required|string|max:255',
             'subCategory'=>'required',
@@ -110,6 +120,10 @@ class ManageLearning extends Controller
     }
 
     public function practiceSetDetail($id){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $praticeSet = PracticeSet::where('id',$id)->first();
         if($praticeSet){
             $skill = Skill::where('status',1)->get();
@@ -120,7 +134,10 @@ class ManageLearning extends Controller
     }
 
     public function updatePracticeSetDetail(Request $request,$id){
-
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'testTitle' => 'required|string|max:255',
             'subCategory'=>'required',
@@ -154,6 +171,10 @@ class ManageLearning extends Controller
     }
 
     public function practiceSetSetting($id){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $praticeSet = PracticeSet::where('id',$id)->first();
         if($praticeSet){
             return view('manageLearning.practiceSet.setting-practice-set',compact('praticeSet'));
@@ -162,7 +183,10 @@ class ManageLearning extends Controller
     }
 
     public function updatePracticeSetSetting(Request $request,$id){
-   
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'allow_reward' => 'required',
             'reward_popup'=>'required',
@@ -196,8 +220,11 @@ class ManageLearning extends Controller
         return redirect()->back()->with('error','Something Went Wrong');
     }
 
-
     public function practiceSetQuestion($id){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $praticeSet = PracticeSet::where('id',$id)->first();
         if($praticeSet){
             $praticeQuestions = PracticeSetQuestion::where('practice_set_id',$id)->get();
@@ -273,6 +300,7 @@ class ManageLearning extends Controller
     
         return response()->json(['questions' => $questions]);
     }
+
     public function removePracticeSetQuestion(Request $request)
     {
         $request->validate([
@@ -294,6 +322,10 @@ class ManageLearning extends Controller
     }
 
     public function updatePracticeSetQuestion(Request $request,$id){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate the incoming request
         $request->validate([
             'question' => 'required|array'
@@ -322,6 +354,10 @@ class ManageLearning extends Controller
     }
 
     public function deletePracticeSet(Request $request){
+        if (!Auth()->user()->can('pratice-set')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -339,12 +375,21 @@ class ManageLearning extends Controller
 
     // Lessons
     public function configureLessons(){
+        if (!Auth()->user()->can('lesson')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $skill = Skill::where('status',1)->get();
         $subcategory = SubCategory::where('status',1)->get();
         return view('manageLearning.lesson.configure-lessons',compact('skill','subcategory'));
     }
 
     public function saveConfigureLessons(Request $request){
+
+        if (!Auth()->user()->can('lesson')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'subcategory'=>'required',
             'skill'=>'required',
@@ -354,6 +399,10 @@ class ManageLearning extends Controller
     }
 
     public function practiceLessons($subcategoryId,$skillId){
+        if (!Auth()->user()->can('lesson')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $skill = Skill::where('status',1)->where('id',$skillId)->first();
         $subcategory = SubCategory::where('status',1)->where('id',$subcategoryId)->first();
         if (isset($skill) && isset($subcategory)) {
@@ -409,6 +458,10 @@ class ManageLearning extends Controller
     }
 
     public function updatePracticeLessons(Request $request,$subcategoryId,$skillId){
+        if (!Auth()->user()->can('lesson')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'lesson' => 'required|array'
         ]);
@@ -485,6 +538,10 @@ class ManageLearning extends Controller
 
     public function removePracticeLessons(Request $request)
     {
+        if (!Auth()->user()->can('lesson')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate request inputs
         $request->validate([
             'lessonId' => 'required|integer|exists:lessons,id', // Validating the 'lessonId' exists in 'lessons' table
@@ -509,12 +566,20 @@ class ManageLearning extends Controller
 
     // Videos
     public function configureVideos(Request $request){
+        if (!Auth()->user()->can('video')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $skill = Skill::where('status',1)->get();
         $subcategory = SubCategory::where('status',1)->get();
         return view('manageLearning.video.configure-videos',compact('skill','subcategory'));
     }
 
     public function saveConfigureVideos(Request $request){
+        if (!Auth()->user()->can('video')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'subcategory'=>'required',
             'skill'=>'required',
@@ -524,6 +589,10 @@ class ManageLearning extends Controller
     }
 
     public function practiceVideos($subcategoryId,$skillId){
+        if (!Auth()->user()->can('video')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $skill = Skill::where('status',1)->where('id',$skillId)->first();
         $subcategory = SubCategory::where('status',1)->where('id',$subcategoryId)->first();
         if (isset($skill) && isset($subcategory)) {
@@ -579,6 +648,10 @@ class ManageLearning extends Controller
 
     public function updatePracticeVideos(Request $request, $subcategoryId, $skillId)
     {
+        if (!Auth()->user()->can('video')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the request
         $request->validate([
             'videos' => 'required|array' // Assuming you're passing an array of video IDs
@@ -662,6 +735,10 @@ class ManageLearning extends Controller
 
     public function removePracticeVideos(Request $request)
     {
+        if (!Auth()->user()->can('video')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate request inputs
         $request->validate([
             'videoId' => 'required|integer|exists:videos,id', // Validating the 'videoId' exists in 'videos' table

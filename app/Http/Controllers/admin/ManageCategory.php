@@ -17,6 +17,11 @@ use App\Models\Quizze;
 class ManageCategory extends Controller
 {
     public function viewCategory(Request $request){
+        
+        if (!Auth()->user()->can('category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         if ($request->ajax()) {
             $sections = Category::whereIn('status',[0,1])->select(['id', 'name', 'created_at','description','status']);
 
@@ -48,6 +53,11 @@ class ManageCategory extends Controller
     }
 
     public function addCategory(Request $request){
+
+        if (!Auth()->user()->can('category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'category_name' => 'required|string|max:255',
             'category_description' => 'nullable|string|max:1000',
@@ -66,6 +76,11 @@ class ManageCategory extends Controller
     }
 
     public function editCategory(Request $request){
+
+        if (!Auth()->user()->can('category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'category_name' => 'required|string|max:255',
             'category_description' => 'nullable|string|max:1000',
@@ -86,6 +101,11 @@ class ManageCategory extends Controller
     }
 
     public function deleteCategory(Request $request){
+
+        if (!Auth()->user()->can('category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'eq'=>'required'
         ]);
@@ -109,6 +129,11 @@ class ManageCategory extends Controller
 
     // FOR SUBCATEGORY
     public function viewSubCategory(Request $request){
+        
+        if (!Auth()->user()->can('sub-category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         if ($request->ajax()) {
             $sections = SubCategory::with('category')->whereIn('status',[0,1]);
 
@@ -149,6 +174,10 @@ class ManageCategory extends Controller
 
     public function addsubCategory(Request $request)
     {
+        if (!Auth()->user()->can('sub-category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         // Validate the request data
         $request->validate([
             'subcategory_name' => 'required|string|max:255',
@@ -182,9 +211,12 @@ class ManageCategory extends Controller
             return back()->withErrors(['error' => 'Failed to create sub-category: ' . $e->getMessage()]);
         }
     }
-    
 
     public function editsubCategory(Request $request){
+        if (!Auth()->user()->can('sub-category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         $request->validate([
             'subcategory_name' => 'required|string|max:255',
             'parent_category' => 'required|integer',
@@ -222,6 +254,10 @@ class ManageCategory extends Controller
     }
 
     public function deletesubCategory(Request $request) {
+        if (!Auth()->user()->can('sub-category')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         // Validate the request data
         $request->validate([
             'eq' => 'required'
@@ -272,10 +308,14 @@ class ManageCategory extends Controller
     
         return redirect()->back()->with('error', 'Something Went Wrong');
     }
-    
 
     // FOR TAGS
     public function viewTags(Request $request){
+        
+        if (!Auth()->user()->can('tag')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         if ($request->ajax()) {
             $sections = Tags::whereIn('status',[0,1])->select(['id', 'name', 'created_at','status']);
             return DataTables::of($sections)
@@ -306,6 +346,11 @@ class ManageCategory extends Controller
     }
 
     public function addTags(Request $request){
+
+        if (!Auth()->user()->can('tag')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the request data
         $request->validate([
             'tag_name' => 'required|string|max:255',
@@ -321,10 +366,12 @@ class ManageCategory extends Controller
         // Redirect with success message
         return redirect()->route('view-tags')->with('success', 'Tags created successfully.');
     }
-
-
     
     public function editTags(Request $request){
+        if (!Auth()->user()->can('tag')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'tag_name' => 'required|string|max:255',
             'tag_status' => 'required|in:1,0',  // Ensure it's either '1' or '0'
@@ -343,6 +390,10 @@ class ManageCategory extends Controller
     }
 
     public function deleteTags(Request $request){
+        if (!Auth()->user()->can('tag')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);

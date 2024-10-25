@@ -23,12 +23,17 @@ use App\Models\ExamQuestion;
 use App\Models\ExamSchedule;
 use App\Models\UserGroup;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ManageTest extends Controller
 {
     // EXAM TYPE
     public function examTypes(Request $request){
 
+        if (!Auth()->user()->can('exam-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         if ($request->ajax()) {
             $sections = ExamType::whereIn('status',[0,1]);
 
@@ -59,6 +64,10 @@ class ManageTest extends Controller
     }
 
     public function addExamTypes(Request $request){
+        if (!Auth()->user()->can('exam-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'name' => 'required|string|max:255',
@@ -90,6 +99,10 @@ class ManageTest extends Controller
     }
 
     public function editExamTypes(Request $request){
+        if (!Auth()->user()->can('exam-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -122,6 +135,10 @@ class ManageTest extends Controller
     }
     
     public function deleteExamTypes(Request $request){
+        if (!Auth()->user()->can('exam-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -139,6 +156,10 @@ class ManageTest extends Controller
 
     // QUIZZ TYPE
     public function quizTypes(Request $request){
+
+        if (!Auth()->user()->can('quiz-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
 
         if ($request->ajax()) {
             $sections = QuizType::whereIn('status',[0,1]);
@@ -170,6 +191,10 @@ class ManageTest extends Controller
     }
 
     public function addQuizTypes(Request $request){
+        if (!Auth()->user()->can('quiz-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'name' => 'required|string|max:255',
@@ -201,6 +226,10 @@ class ManageTest extends Controller
     }
 
     public function editQuizTypes(Request $request){
+        if (!Auth()->user()->can('quiz-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -232,6 +261,10 @@ class ManageTest extends Controller
     }
     
     public function deleteQuizTypes(Request $request){
+        if (!Auth()->user()->can('quiz-type')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -249,6 +282,11 @@ class ManageTest extends Controller
 
     // QUIZZE
     public function viewQuizzes(Request $request){
+
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Quizze::with('type','subCategory')->whereIn('status',[0,1]);
 
@@ -295,12 +333,20 @@ class ManageTest extends Controller
     }
 
     public function createQuizzes(){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $quizType = QuizType::where('status',1)->get();
         $category = SubCategory::where('status',1)->get();
         return view('manageTest.quizzes.create-quizzes',compact('category','quizType'));
     }
 
     public function saveQuizzes(Request $request){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'testTitle' => 'required|string|max:255',
             'subCategory' => 'required|exists:sub_categories,id',  // assumes categories are stored in the categories table
@@ -335,6 +381,10 @@ class ManageTest extends Controller
     }
 
     public function updateQuizzesDetail(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'testTitle' => 'required|string|max:255',
             'subCategory' => 'required|exists:sub_categories,id',  // assumes categories are stored in the categories table
@@ -371,6 +421,10 @@ class ManageTest extends Controller
     }
 
     public function quizzesSetting($id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $quizSetting = Quizze::where('id',$id)->first();
         if($quizSetting){
             return view('manageTest.quizzes.quizzes-setting',compact('quizSetting'));
@@ -379,6 +433,10 @@ class ManageTest extends Controller
     }
 
     public function updateQuizzesSetting(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate request data
         $request->validate([
             'duration_mode' => 'required|in:automatic,manual',
@@ -427,6 +485,10 @@ class ManageTest extends Controller
     }
 
     public function quizzesQuestion($id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $quizz = Quizze::where('id',$id)->first();
         if($quizz){
             $topic = Topic::where('status',1)->get();
@@ -485,6 +547,10 @@ class ManageTest extends Controller
     }
 
     public function updateQuizzesQuestion(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate the incoming request
         $request->validate([
             'question' => 'required|array'
@@ -537,6 +603,10 @@ class ManageTest extends Controller
     }
 
     public function removeQuizzesQuestion(Request $request){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'questionId' => 'required|integer|exists:questions,id',
             'quiz_id' => 'required|integer|exists:quizzes,id',
@@ -556,6 +626,10 @@ class ManageTest extends Controller
     }
 
     public function deleteQuizzes(Request $request){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -572,6 +646,10 @@ class ManageTest extends Controller
     }
 
     public function quizzesDetail($id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $quiz = Quizze::where('id',$id)->first();
         if($quiz){
             $quizType = QuizType::where('status',1)->get();
@@ -582,6 +660,10 @@ class ManageTest extends Controller
     }
 
     public function quizzesSchedules(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $quiz = Quizze::where('id',$id)->where('status',1)->first();
         if($quiz){
             if ($request->ajax()) {
@@ -630,6 +712,10 @@ class ManageTest extends Controller
     }
 
     public function updateQuizzesSchedules(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate the request data
         $validatedData = $request->validate([
             'scheduleType' => 'required|in:fixed,flexible',
@@ -658,6 +744,10 @@ class ManageTest extends Controller
     }
 
     public function saveQuizzesSchedules(Request $request,$id){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate the request data
         $validatedData = $request->validate([
             'scheduleType' => 'required|in:fixed,flexible',
@@ -686,6 +776,10 @@ class ManageTest extends Controller
     }
 
     public function deleteQuizzesSchedules(Request $request){
+        if (!Auth()->user()->can('quizze')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);
@@ -703,6 +797,10 @@ class ManageTest extends Controller
 
     // Exams
     public function viewExam(Request $request){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Exam::with('type','subCategory')->whereIn('status',[0,1]);
             return DataTables::of($sections)
@@ -748,6 +846,10 @@ class ManageTest extends Controller
     }
 
     public function createExams(){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $examType = ExamType::where('status',1)->get();
         $category = SubCategory::where('status',1)->get();
         return view('manageTest.exams.create-exam',compact('examType','category'));
@@ -755,6 +857,10 @@ class ManageTest extends Controller
 
     public function saveExams(Request $request)
     {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Update validation rules to include 'img_url'
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -819,9 +925,12 @@ class ManageTest extends Controller
         // Redirect with success message
         return redirect()->route('exam-setting', ['id' => $exam->id])->with('success', 'Exam created successfully.');
     }
-
     
     public function examDetail($id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $exam = Exam::where('id',$id)->first();
         if($exam){
             $examType = ExamType::where('status',1)->get();
@@ -833,6 +942,10 @@ class ManageTest extends Controller
 
     public function updateExamDetail(Request $request, $id)
     {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             // 'duration_type' => 'required|in:exam_wise,ques_wise',
@@ -903,6 +1016,10 @@ class ManageTest extends Controller
     }
 
     public function examSetting($id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $examSetting = Exam::where('id',$id)->first();
         if($examSetting){
             return view('manageTest.exams.exam-setting',compact('examSetting'));
@@ -911,6 +1028,10 @@ class ManageTest extends Controller
     }
 
     public function updateExamSetting(Request $request,$id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the incoming request data
         $validatedData = $request->validate([
             'duration_mode' => 'required|in:automatic,manual',
@@ -955,6 +1076,10 @@ class ManageTest extends Controller
 
     public function examSection(Request $request, $id)
     {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Fetch the exam settings
         $examSetting = Exam::find($id);
         
@@ -1013,9 +1138,12 @@ class ManageTest extends Controller
     
         return redirect()->back()->with('error', 'Something Went Wrong');
     }
-    
 
     public function addExamSection(Request $request, $id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the incoming request data
         $validatedData = $request->validate([
             'section_name' => 'required|string|max:255',
@@ -1039,6 +1167,10 @@ class ManageTest extends Controller
     }
 
     public function editExamSection(Request $request){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $validatedData = $request->validate([
             'section_name' => 'required|string|max:255',
             'section_category' => 'required|exists:sections,id',
@@ -1060,6 +1192,10 @@ class ManageTest extends Controller
     }
 
     public function deleteExamSection(Request $request){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'eq'=>'required'
         ]);
@@ -1076,6 +1212,10 @@ class ManageTest extends Controller
     }
 
     public function examQuestions($id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $exam = Exam::where('id',$id)->first();
         $examSection = ExamSection::where('exam_id',$id)->whereIn('status',[1,0])->get();
         if($exam && count($examSection)){
@@ -1135,6 +1275,10 @@ class ManageTest extends Controller
     }
 
     public function updateExamQuestion(Request $request,$id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validate the incoming request
         $request->validate([
             'question' => 'required|array',
@@ -1211,6 +1355,10 @@ class ManageTest extends Controller
     }
 
     public function examSchedules(Request $request, $id){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $exam = Exam::where('id', $id)->where('status', 1)->first(); 
         if ($exam) {
             if ($request->ajax()) {
@@ -1259,7 +1407,10 @@ class ManageTest extends Controller
     }
 
     public function updateExamSchedules(Request $request,$id) {
-       
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         // Validate the request data
         $validatedData = $request->validate([
             'scheduleType' => 'required|in:fixed,flexible,attempts',
@@ -1299,6 +1450,10 @@ class ManageTest extends Controller
     }
     
     public function saveExamSchedules(Request $request, $id) {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
          // Validate the request data
          $validatedData = $request->validate([
             'scheduleType' => 'required|in:fixed,flexible,attempts',
@@ -1338,6 +1493,10 @@ class ManageTest extends Controller
     }
     
     public function deleteExamSchedules(Request $request) {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq' => 'required'
         ]);
@@ -1356,6 +1515,10 @@ class ManageTest extends Controller
     }
 
     public function deleteExam(Request $request){
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq' => 'required'
         ]);

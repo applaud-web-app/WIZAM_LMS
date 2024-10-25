@@ -18,10 +18,11 @@ class ManageSubject extends Controller
 {
     public function viewSections(Request $request){
 
-        // Check if the user has permission to access sections
-        // if (!userHasPermission('sections')) {
-        //     return redirect()->back()->with('error', 'You do not have permission to access the page');
-        // }
+       
+        if (!Auth()->user()->can('section')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+       
         if ($request->ajax()) {
             $sections = Sections::whereIn('status',[0,1])->select(['id', 'name', 'created_at','description','status']);
 
@@ -53,6 +54,11 @@ class ManageSubject extends Controller
     }
 
     public function addSection(Request $request){
+
+        if (!Auth()->user()->can('section')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'section_name' => 'required|string|max:255',
@@ -72,6 +78,11 @@ class ManageSubject extends Controller
     }
 
     public function editSection(Request $request){
+
+        if (!Auth()->user()->can('section')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'section_name' => 'required|string|max:255',
             'section_description' => 'nullable|string|max:1000',
@@ -94,6 +105,11 @@ class ManageSubject extends Controller
     }
 
     public function deleteSection(Request $request){
+
+        if (!Auth()->user()->can('section')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'eq'=>'required'
         ]);
@@ -131,6 +147,10 @@ class ManageSubject extends Controller
 
     // FOR SKILLS 
     public function viewSkills(Request $request){
+
+        if (!Auth()->user()->can('skill')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
 
         if ($request->ajax()) {
             $sections = Skill::with('section')->whereIn('status',[0,1])->select(['id', 'name', 'created_at','section_id','status','description']);
@@ -170,6 +190,11 @@ class ManageSubject extends Controller
     }
 
     public function addSkill(Request $request){
+
+        if (!Auth()->user()->can('skill')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'skill_name' => 'required|string|max:255',
@@ -191,6 +216,11 @@ class ManageSubject extends Controller
     }
 
     public function editSkill(Request $request){
+
+        if (!Auth()->user()->can('skill')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'skill_name' => 'required|string|max:255',
             'skill_section'=>'required',
@@ -214,8 +244,12 @@ class ManageSubject extends Controller
 
     }
 
-
     public function deleteSkill(Request $request){
+
+        if (!Auth()->user()->can('skill')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'eq'=>'required'
         ]);
@@ -266,6 +300,11 @@ class ManageSubject extends Controller
 
     // FOR TOPIC 
     public function viewTopics(Request $request){
+
+        if (!Auth()->user()->can('topic')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         if ($request->ajax()) {
             $sections = Topic::with('skill')->whereIn('status',[0,1])->select(['id', 'name', 'created_at','skill_id','status','description']);
 
@@ -304,6 +343,11 @@ class ManageSubject extends Controller
     }
 
     public function addTopic(Request $request){
+
+        if (!Auth()->user()->can('topic')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         // Validation rules
         $request->validate([
             'topic_name' => 'required|string|max:255',
@@ -324,8 +368,12 @@ class ManageSubject extends Controller
         return redirect()->route('view-topics')->with('success', 'Topic created successfully.');
     }
 
-
     public function editTopic(Request $request){
+
+        if (!Auth()->user()->can('topic')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
         $request->validate([
             'topic_name' => 'required|string|max:255',
             'topic_skill'=>'required',
@@ -349,8 +397,11 @@ class ManageSubject extends Controller
 
     }
 
-
     public function deleteTopic(Request $request){
+        if (!Auth()->user()->can('topic')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
         $request->validate([
             'eq'=>'required'
         ]);

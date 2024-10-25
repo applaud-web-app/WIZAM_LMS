@@ -15,7 +15,7 @@ class PermissionController extends Controller
     {
         if ($request->ajax()) {
             // Fetch roles with their associated permissions
-            $sections = Role::with('permissions')->latest();
+            $sections = Role::with('permissions')->where('status',1)->latest();
             
             return DataTables::of($sections)
                 ->addIndexColumn()
@@ -23,10 +23,13 @@ class PermissionController extends Controller
                 // Action column: edit and delete buttons with encrypted URLs
                 ->addColumn('action', function ($section) {
                     $parms = "id=" . $section->id;
-                    $editUrl = encrypturl(route('edit-role'), $parms);  // Adjust route as per your actual route
+                    $editUrl = encrypturl(route('update-role-permission'), $parms);  // Adjust route as per your actual route
     
+                    // Convert permissions to an array of permission names
+                    $permissions = $section->permissions->pluck('name')->toArray();
+                    $permissionsJson = json_encode($permissions);
                     return '
-                        <button type="button" data-url="' . $editUrl . '" class="editItem cursor-pointer uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                        <button type="button" data-url="' . $editUrl . '" data-permissions=\'' . $permissionsJson . '\' class="editItem cursor-pointer uil uil-edit-alt hover:text-info" data-te-toggle="modal" data-te-target="#editModal" data-te-ripple-init data-te-ripple-color="light"></button>';
                 })
     
                 // Permission column: display permissions with colored badges
@@ -88,5 +91,27 @@ class PermissionController extends Controller
         return response()->json(['success' => true, 'message' => 'Role updated successfully']);
     }
 
+    public function updateRolePermission(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'eq' => 'required', 
+            'permissions' => 'required|array'  // Ensure 'permissions' is an array
+        ]);
+    
+        // Decrypt the 'eq' parameter
+        $data = decrypturl($request->eq);
+        $role_id = $data['id'];
+    
+        // Find the role by ID
+        $role = Role::findOrFail($role_id);
+    
+        // Sync the permissions with the role
+        // Assuming 'permissions' is the relation name in the Role model
+        $role->permissions()->sync($request->permissions); // Use sync to update permissions
+    
+        // Optional: Return a response, e.g., success message or redirect
+        return redirect()->back()->with('success','Permissions updated successfully.');
+    }    
 
 }

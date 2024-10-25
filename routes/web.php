@@ -411,7 +411,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::controller(PermissionController::class)->group(function () {
         Route::get('/user-role', 'userRole')->name('user-role');
         Route::post('/edit-role', 'editRole')->name('edit-role');
-        Route::post('/update-role', 'updateRole')->name('update-role');
+        Route::post('/edit-role', 'editRole')->name('edit-role');
+        Route::post('/update-role-permission', 'updateRolePermission')->name('update-role-permission');
     });
         
 });

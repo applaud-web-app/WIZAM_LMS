@@ -57,9 +57,9 @@
      </button>
     <!-- Edit Modal -->
     <div data-te-modal-init class="fixed p-3 left-0 top-0 z-[1055] hidden h-full w-full overflow-y-auto overflow-x-hidden outline-none" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <form method="POST" action="" data-te-modal-dialog-ref class="pointer-events-none relative w-auto translate-y-[-50px] opacity-0 transition-all duration-300 ease-in-out min-[576px]:mx-auto min-[576px]:mt-7 min-[576px]:max-w-[500px]" id="editFaq">
+        <form method="POST" action="" data-te-modal-dialog-ref class="pointer-events-none relative w-auto translate-y-[-50px] opacity-0 transition-all duration-300 ease-in-out min-[768px]:mx-auto min-[768px]:mt-7 min-[768px]:max-w-[768px]" >
             @csrf
-        <div class="min-[576px]:shadow-[0_0.5rem_1rem_rgba(#000, 0.15)] pointer-events-auto relative flex w-full flex-col rounded-md border-none bg-white bg-clip-padding text-current shadow-lg outline-none dark:bg-neutral-600">
+        <div class="min-[768px]:shadow-[0_0.5rem_1rem_rgba(#000, 0.15)] pointer-events-auto relative flex w-full flex-col rounded-md border-none bg-white bg-clip-padding text-current shadow-lg outline-none dark:bg-neutral-600">
             <div class="flex items-center justify-between flex-shrink-0 p-4 border-b border-opacity-100 rounded-t-md border-regular dark:border-box-dark-up">
                 <!--Modal title-->
                 <h5 class="text-xl font-medium leading-normal text-neutral-800 dark:text-neutral-200" id="faqModalLabel">
@@ -74,16 +74,16 @@
             </div>
     
             <!--Modal body-->
-            <div class="relative flex-auto p-4" data-te-modal-body-ref>
+            <div class="relative flex-auto p-4" data-te-modal-body-ref id="editFaq">
                 @isset($permissions)
                     @foreach ($permissions as $key => $per)
                         <div class="mb-[15px]">
-                            <h3 for="permission" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">{{ucfirst(Str::replace('_', ' ', $key))}}</h3>
+                            <h3 for="permission" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">{{ ucfirst(Str::replace('_', ' ', $key)) }}</h3>
                             <div class="flex flex-wrap">
                                 @foreach ($per as $item)
                                     <div class="mb-[15px] flex bg-primary/10 capitalize px-3 py-2 rounded-[15px] text-primary text-xs mr-1">
-                                        <input type="checkbox" id="permission-{{$item->id}}" name="permissions[]" value="{{$item->id}}">
-                                        <label for="permission-{{$item->id}}" class="ms-2 inline-flex items-center w-[178px] text-sm font-medium capitalize text-body dark:text-title-dark">{{ucfirst(Str::replace('-', ' ', $item->name))}}</label>
+                                        <input type="checkbox" id="{{$item->name}}" name="permissions[]" value="{{$item->id}}">
+                                        <label for="{{$item->name}}" class="ms-2 inline-flex items-center w-[178px] text-sm font-medium capitalize text-body dark:text-title-dark">{{ ucfirst(Str::replace('-', ' ', $item->name)) }}</label>
                                     </div>
                                 @endforeach
                             </div>
@@ -91,7 +91,8 @@
                     @endforeach
                 @endisset
             </div>
-    
+
+
             <!--Modal footer-->
             <div class="flex flex-wrap items-center justify-end flex-shrink-0 gap-2 p-4 border-t-2 border-b border-opacity-100 rounded-b-md border-regular dark:border-box-dark-up">
                 <button type="button" class="ml-1 inline-block rounded bg-section px-6 pb-2 pt-2.5 text-14 font-medium capitalize leading-normal text-dark  transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" data-te-modal-dismiss data-te-ripple-init data-te-ripple-color="light">
@@ -122,68 +123,25 @@
         });
     </script>
   <script>
+
     $(document).on('click', '.editItem', function() {
         const editUrl = $(this).data('url');
-        
-        // AJAX call to get the role and permissions data
-        $.ajax({
-            url: editUrl,
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                let role = response.role;
-                let permissions = response.permissions;
+        const userPermissions = $(this).data('permissions'); 
 
-                // Set role name in the form
-                $('#editFaq input[name="name"]').val(role.name);
-                
-                // Generate permission checkboxes dynamically
-                let permissionHtml = '';
-                permissions.forEach(function(permission) {
-                    let isChecked = role.permissions.some(p => p.id === permission.id) ? 'checked' : '';
-                    permissionHtml += `
-                        <div>
-                            <input type="checkbox" name="permissions[]" value="${permission.id}" ${isChecked}>
-                            <label>${permission.name}</label>
-                        </div>
-                    `;
-                });
+        // Reset checkboxes
+        $('input[type="checkbox"]').prop('checked', false);
 
-                // Insert permission checkboxes into the modal
-                $('#editFaq .permissions-container').html(permissionHtml);
-                
-                // Set form action
-                $('#editFaq').attr('action', '{{ route('update-role') }}');
-            },
-            error: function() {
-                alert('Failed to load role data.');
-            }
+        // Check the checkboxes for the user's permissions
+        userPermissions.forEach(function(permissionId) {
+            console.log(permissionId);
+            $(`#${permissionId}`).prop('checked', true);
         });
+
+        // Optionally, set the form action if you're editing an existing role
+        $('#editModal form').attr('action', editUrl);
     });
+
+
+
   </script>
-  {{-- <script>
-    $('#editFaq').on('submit', function(e) {
-        e.preventDefault();
-        let formData = $(this).serialize(); // Gather all form data
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if(response.success) {
-                    alert(response.message);
-                    location.reload(); // Reload the page to reflect changes
-                } else {
-                    alert('Failed to update role.');
-                }
-            },
-            error: function() {
-                alert('An error occurred while updating the role.');
-            }
-        });
-    });
-
-  </script> --}}
 @endpush
