@@ -64,4 +64,8 @@ class Exam extends Model
         return $this->hasMany(ExamQuestion::class, 'exam_id', 'id');
     }
 
+    public function schedules(){
+        return $this->hasOne(ExamSchedule::class, 'exam_id', 'id');
+    }
+
 }
