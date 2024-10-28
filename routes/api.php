@@ -89,6 +89,12 @@ Route::middleware('checkAuthToken')->group(function () {
     // EXAM REPORT
     Route::get('/download-exam-report/{uuid}',[ExamController::class, 'downloadExamReport']);
 
+    // QUIZ REPORT
+    Route::get('/download-quiz-report/{uuid}',[QuizController::class, 'downloadQuizReport']);
+
+    // PRACTICE SET REPORT
+    Route::get('/download-practice-set-report/{uuid}',[PracticeSetController::class, 'downloadPracticeSetReport']);
+
     # QUIZ
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
     Route::get('/all-quiz', [StudentController::class, 'allQuiz']);

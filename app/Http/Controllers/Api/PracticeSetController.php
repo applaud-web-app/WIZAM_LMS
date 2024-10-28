@@ -943,5 +943,74 @@ class PracticeSetController extends Controller
             ], 500);
         }
     }
+
+    public function downloadPracticeSetReport(Request $request){
+        try {
+            $user = $request->attributes->get('authenticatedUser');
     
+            $examResult = PracticeSetResult::with('pratice')->where('uuid', $uuid)->where('user_id', $user->id)->first();
+    
+            if (!$examResult) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Practice Set result not found for this user.'
+                ], 404);
+            }
+    
+            $exam_data = PracticeSet::with('type', 'subCategory')->where('id', $examResult->practice_sets_id)->first();
+            $userDetail = User::find($user->id);
+    
+            // Ensure $exam_data and relationships are valid
+            if (!$exam_data || !$exam_data->type || !$exam_data->subCategory) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Exam data not properly linked.'
+                ], 500);
+            }
+    
+            $openTime = Carbon::parse($examResult->created_at);
+            $closeTime = Carbon::parse($examResult->updated_at);
+            $timeTakenInMinutes = $openTime->diffInMinutes($closeTime);
+    
+            // FINAL OUTPUT
+            $examInfo = [
+                'name' => $exam_data->title . " - " . $exam_data->subCategory->name,
+                'completed_on' => $examResult->created_at->format('d-m-y'),
+                'session_id' => $examResult->uuid,
+            ];
+    
+            $userInfo = [
+                'name' => $userDetail->name,
+                'email' => $userDetail->email,
+                'number'=> $userDetail->phone_number,
+            ];
+    
+            $studentAnswers = $examResult->correct_answer + $examResult->incorrect_answer;
+    
+            $resultInfo = [
+                'total_question' => $examResult->total_question,
+                'answered' => $studentAnswers,
+                'correct' => $examResult->correct_answer,
+                'wrong' => $examResult->incorrect_answer,
+                'skipped' => $examResult->total_question - $studentAnswers,
+                'pass_percentage' => $examResult->pass_percentage,
+                'final_percentage' => $examResult->student_percentage,
+                'final_score' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
+                'time_taken' => $timeTakenInMinutes,
+            ];
+    
+            return response()->json([
+                'status' => true,
+                'result_info' => $resultInfo,
+                'user_info' => $userInfo,
+                'practice_info' => $examInfo,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong: ' . $th->getMessage(),
+            ]);
+        }
+    }
+
 }
