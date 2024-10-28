@@ -1170,7 +1170,7 @@ class QuizController extends Controller
                 ], 404);
             }
     
-            $exam_data = Quiz::with('type', 'subCategory')->where('id', $examResult->quiz_id)->first();
+            $exam_data = Quizze::with('type', 'subCategory')->where('id', $examResult->quiz_id)->first();
             $userDetail = User::find($user->id);
     
             // Ensure $exam_data and relationships are valid
