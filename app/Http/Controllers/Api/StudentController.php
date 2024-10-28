@@ -54,15 +54,15 @@ class StudentController extends Controller
                 ->withCount([
                     'exams as total_exams' => function ($query) {
                         // Total count of active exams of each type
-                        $query->where('status', 1);
+                        $query>where('is_public', 1)->where('status', 1);
                     },
                     'exams as paid_exams' => function ($query) {
                         // Count of active, paid exams of each type
-                        $query->where('status', 1)->where('is_free', 0);
+                        $query>where('is_public', 1)->where('status', 1)->where('is_free', 0);
                     },
                     'exams as unpaid_exams' => function ($query) {
                         // Count of active, unpaid (free) exams of each type
-                        $query->where('status', 1)->where('is_free', 1);
+                        $query>where('is_public', 1)->where('status', 1)->where('is_free', 1);
                     }
                 ])
                 ->get();
