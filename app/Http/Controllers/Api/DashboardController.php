@@ -208,7 +208,8 @@ class DashboardController extends Controller
                 'average_exam' => $averageScore ?? 0,
                 'exams' => $examData,
                 'quizzes' => $quizData,
-                'resumedExam' => $resumedExam
+                'resumedExam' => $resumedExam,
+                'upcomingExams'=>$upcomingExams
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
