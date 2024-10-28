@@ -944,7 +944,7 @@ class PracticeSetController extends Controller
         }
     }
 
-    public function downloadPracticeSetReport(Request $request){
+    public function downloadPracticeSetReport(Request $request, $uuid){
         try {
             $user = $request->attributes->get('authenticatedUser');
     

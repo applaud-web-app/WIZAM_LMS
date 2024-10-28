@@ -102,9 +102,19 @@ class DashboardController extends Controller
 
             // MANIK
             $current_time = now(); // Get the current date and time
-            $resumedExam = ExamResult::where('end_time', '>', $current_time) // Check for end_time greater than current time
-            ->where('status', 'ongoing') // Status must be ongoing
-            ->get();
+            $examResult = ExamResult::where('end_time', '>', $current_time)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
+            $resumedExam = Exam::select(
+                'exam_types.slug as exam_type_slug', 
+                'exams.slug', 
+                'exams.title', 
+                'exams.duration_mode', 
+                'exams.exam_duration', 
+                'exams.point_mode',
+                'exams.point', 
+                DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
+            )->whereIn('id',$examResult)->get();
     
             // Return success JSON response
             return response()->json([

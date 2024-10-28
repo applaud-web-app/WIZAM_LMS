@@ -1157,7 +1157,7 @@ class QuizController extends Controller
         }
     }
 
-    public function downloadQuizReport(Request $request){
+    public function downloadQuizReport(Request $request, $uuid){
         try {
             $user = $request->attributes->get('authenticatedUser');
     
