@@ -61,6 +61,10 @@ class StudentController extends Controller
                         $query->where('status', 1)->where('is_free', 0);
                     }
                 ])
+                ->withSum(['exams as total_fee' => function ($query) {
+                    // Sum of fees for paid exams (price > 0)
+                    $query->where('status', 1)->where('is_free', 0);
+                }], 'price')
                 ->get();
     
             return response()->json(['status' => true, 'data' => $type], 201);
