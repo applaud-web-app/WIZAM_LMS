@@ -63,7 +63,6 @@ class DashboardController extends Controller
             ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
             ->get();
 
-
             $quizData = Quizze::select(
                 'quiz_types.slug as exam_type_slug',
                 'quizzes.title',
@@ -98,7 +97,7 @@ class DashboardController extends Controller
                 'quizzes.point_mode',
                 'quizzes.point'
             )
-            ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+            ->havingRaw('COUNT(questions.id) > 0')  
             ->get();
     
             // Return success JSON response

@@ -17,4 +17,8 @@ class ExamType extends Model
         'description',
         'status'
     ];
+
+    public function exams() {
+        return $this->hasMany(Exam::class);
+    }
 }

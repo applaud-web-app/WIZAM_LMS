@@ -37,14 +37,39 @@ class StudentController extends Controller
         }
     }
 
-    public function examType(){
+    // public function examType(){
+    //     try {
+    //         $type = ExamType::select('name','slug')->where('status', 1)->get();
+    //         // ALSO COLLECT THE COUNT OF EXAM OF EACH TYPE ALSO PAID EXAM COUNT
+    //         return response()->json(['status'=> true,'data' => $type], 201);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+    //     }
+    // }
+
+    public function examType() {
         try {
-            $type = ExamType::select('name','slug')->where('status', 1)->get();
-            return response()->json(['status'=> true,'data' => $type], 201);
+            $type = ExamType::select('name', 'slug')
+                ->where('status', 1)
+                ->withCount([
+                    'exams as total_exams' => function ($query) {
+                        // Total count of active exams of each type
+                        $query->where('status', 1);
+                    },
+                    'exams as paid_exams' => function ($query) {
+                        // Count of active, paid exams of each type
+                        $query->where('status', 1)->where('is_free', 0);
+                    }
+                ])
+                ->get();
+    
+            return response()->json(['status' => true, 'data' => $type], 201);
+    
         } catch (\Throwable $th) {
-            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
 
     // public function allExams(Request $request)
     // {
