@@ -56,15 +56,15 @@ class StudentController extends Controller
                         // Total count of active exams of each type
                         $query->where('status', 1);
                     },
-                    // 'exams as paid_exams' => function ($query) {
-                    //     // Count of active, paid exams of each type
-                    //     $query->where('status', 1)->where('is_free', 0);
-                    // }
+                    'exams as paid_exams' => function ($query) {
+                        // Count of active, paid exams of each type
+                        $query->where('status', 1)->where('is_free', 0);
+                    },
+                    'exams as unpaid_exams' => function ($query) {
+                        // Count of active, unpaid (free) exams of each type
+                        $query->where('status', 1)->where('is_free', 1);
+                    }
                 ])
-                ->withSum(['exams as total_fee' => function ($query) {
-                    // Sum of fees for paid exams (price > 0)
-                    $query->where('status', 1)->where('is_free', 0);
-                }], 'price')
                 ->get();
     
             return response()->json(['status' => true, 'data' => $type], 201);
