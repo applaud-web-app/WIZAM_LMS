@@ -20,4 +20,9 @@ class ExamSchedule extends Model
         'user_groups',
         'status',
     ];
+
+    public function exam(){
+        return $this->hasOne(Exam::class, 'id', 'exam_id');
+    }
+
 }
