@@ -653,14 +653,34 @@ class StudentController extends Controller
 
 
     // QUIZ DATA
-    public function quizType(){
+    public function quizType(Request $request) {
         try {
-            $type = QuizType::select('name','slug')->where('status', 1)->get();
-            return response()->json(['status'=> true,'data' => $type], 201);
+            $type = QuizType::select('name', 'slug')
+                ->where('status', 1)
+                ->withCount([
+                    'quizzes as total_quizzes' => function ($query) {
+                        // Count active quizzes of each type
+                        $query->where('is_public', 1)->where('status', 1);
+                    },
+                    'quizzes as paid_quizzes' => function ($query) {
+                        // Count active, paid quizzes (is_free = 0)
+                        $query->where('is_public', 1)->where('status', 1)->where('is_free', 0);
+                    },
+                    'quizzes as unpaid_quizzes' => function ($query) {
+                        // Count active, unpaid (free) quizzes (is_free = 1)
+                        $query->where('is_public', 1)->where('status', 1)->where('is_free', 1);
+                    }
+                ])
+                ->get();
+    
+            return response()->json(['status' => true, 'data' => $type], 201);
+    
         } catch (\Throwable $th) {
-            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
+    
 
     // public function allQuiz(Request $request){
     //     try {
