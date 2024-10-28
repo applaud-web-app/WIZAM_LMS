@@ -138,7 +138,7 @@ class DashboardController extends Controller
             ////////// ------ UPCOMING EXAM ------ //////////
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
-            
+
             $upcomingExams = ExamSchedule::with(['exam' => function ($query) {
                     $query->select(
                         'exams.id', 
@@ -171,33 +171,31 @@ class DashboardController extends Controller
                 ->where(function ($query) use ($currentDate, $currentTime) {
                     // Filter by schedule type
                     $query->where(function ($subQuery) use ($currentDate, $currentTime) {
-                        // Fixed: Match start_date and start_time
+                        // Fixed: Start_date is today, and start_time is later today
                         $subQuery->where('schedule_type', 'fixed')
-                                 ->whereDate('start_date', $currentDate)
-                                 ->whereTime('start_time', $currentTime);
+                                ->whereDate('start_date', '=', $currentDate)
+                                ->whereTime('start_time', '>=', $currentTime);
                     })
                     ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
-                        // Flexible: Between start and end times
+                        // Flexible: Current time falls between start and end times
                         $subQuery->where('schedule_type', 'flexible')
-                                 ->whereDate('start_date', '<=', $currentDate)
-                                 ->whereTime('start_time', '<=', $currentTime)
-                                 ->whereDate('end_date', '>=', $currentDate)
-                                 ->whereTime('end_time', '>=', $currentTime);
+                                ->whereDate('start_date', '<=', $currentDate)
+                                ->whereTime('start_time', '<=', $currentTime)
+                                ->whereDate('end_date', '>=', $currentDate)
+                                ->whereTime('end_time', '>=', $currentTime);
                     })
                     ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
-                        // Attempts: Between start and end times with grace period if applicable
+                        // Attempts: Current time falls between start and end with optional grace period
                         $subQuery->where('schedule_type', 'attempts')
-                                 ->whereDate('start_date', '<=', $currentDate)
-                                 ->whereTime('start_time', '<=', $currentTime)
-                                 ->whereDate('end_date', '>=', $currentDate)
-                                 ->whereTime('end_time', '>=', $currentTime)
-                                 ->where(function ($attemptSubQuery) {
-                                     // Include grace period if specified
-                                     $attemptSubQuery->orWhereNotNull('grace_period');
-                                 });
+                                ->whereDate('start_date', '<=', $currentDate)
+                                ->whereTime('start_time', '<=', $currentTime)
+                                ->whereDate('end_date', '>=', $currentDate)
+                                ->whereTime('end_time', '>=', $currentTime)
+                                ->orWhereNotNull('grace_period'); // Include exams with grace_period
                     });
                 })
                 ->get();
+
 
             // Return success JSON response
             return response()->json([
