@@ -17,4 +17,8 @@ class QuizType extends Model
         'description',
         'status'
     ];
+
+    public function quizzes() {
+        return $this->hasMany(Quizze::class);
+    }
 }
