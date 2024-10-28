@@ -99,6 +99,12 @@ class DashboardController extends Controller
             )
             ->havingRaw('COUNT(questions.id) > 0')  
             ->get();
+
+            // MANIK
+            $current_time = now(); // Get the current date and time
+            $resumedExam = ExamResult::where('end_time', '>', $current_time) // Check for end_time greater than current time
+            ->where('status', 'ongoing') // Status must be ongoing
+            ->get();
     
             // Return success JSON response
             return response()->json([
@@ -109,6 +115,7 @@ class DashboardController extends Controller
                 'average_exam' => $averageScore ?? 0,
                 'exams' => $examData,
                 'quizzes' => $quizData,
+                'resumedExam' => $resumedExam
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
