@@ -50,13 +50,10 @@ class StudentController extends Controller
     public function examType(Request $request) {
         try {
             // Fetch the current authenticated user
-            $user = $request->user();
+            $user = $request->attributes->get('authenticatedUser');
     
             // Fetch the exam IDs assigned to the current user
-            $assignedExams = AssignedExam::where('user_id', $user->id)
-                ->pluck('exam_id')
-                ->toArray();
-    
+            $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
             $type = ExamType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
@@ -90,8 +87,6 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-    
-    
 
     // public function allExams(Request $request)
     // {
