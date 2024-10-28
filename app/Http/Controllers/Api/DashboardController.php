@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ExamResult;
+use App\Models\ExamSchedule;
 use App\Models\Exam;
 use App\Models\Quizze;
 use Illuminate\Support\Facades\DB;
