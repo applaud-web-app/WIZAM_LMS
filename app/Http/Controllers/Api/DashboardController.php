@@ -223,6 +223,7 @@ class DashboardController extends Controller
 
             // Fetch the user's active subscription
             $currentDate = now();
+            $type = "exams"; 
             $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
 
             // Fetch the user's active subscription
