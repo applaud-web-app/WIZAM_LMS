@@ -958,11 +958,11 @@ class PracticeSetController extends Controller
                 ], 404);
             }
     
-            $exam_data = PracticeSet::with('type', 'subCategory')->where('id', $examResult->practice_sets_id)->first();
+            $exam_data = PracticeSet::with('subCategory')->where('id', $examResult->practice_sets_id)->first();
             $userDetail = User::find($user->id);
     
             // Ensure $exam_data and relationships are valid
-            if (!$exam_data || !$exam_data->type || !$exam_data->subCategory) {
+            if (!$exam_data || !$exam_data->subCategory) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Exam data not properly linked.'
