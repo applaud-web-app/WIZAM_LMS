@@ -156,6 +156,7 @@ class DashboardController extends Controller
                     $query->where('exams.is_public', 1)
                         ->orWhereIn('exams.id', $assignedExams);
                 })
+                ->where('exams.subcategory_id', $request->category) 
                 ->where(function ($query) use ($currentDate, $currentTime) {
                     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
