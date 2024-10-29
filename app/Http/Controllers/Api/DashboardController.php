@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Question;
 use App\Models\AssignedExam;
+use App\Models\Subscription;
 
 class DashboardController extends Controller
 {
@@ -182,6 +183,7 @@ class DashboardController extends Controller
                 })
                 ->select(
                     'exams.id', 
+                    'exams.is_free',
                     'exams.slug as exam_slug', 
                     'exams.title as exam_name', 
                     'exam_types.slug as exam_type_slug',
@@ -201,6 +203,7 @@ class DashboardController extends Controller
                 )
                 ->groupBy(
                     'exams.id',
+                    'exams.is_free',
                     'exam_types.slug', 
                     'exams.slug', 
                     'exams.title', 
@@ -217,6 +220,43 @@ class DashboardController extends Controller
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
+
+            // Fetch the user's active subscription
+            $currentDate = now();
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
+
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Apply subscription-based conditions to make exams free
+            if ($subscription) {
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $upcomingExams->transform(function ($exam) {
+                        $exam->is_free = 1; // Make all exams free for unlimited access
+                        return $exam;
+                    });
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+                    // Check if exams are included in the allowed features
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $upcomingExams->transform(function ($exam) {
+                            $exam->is_free = 1; // Make exams free as part of allowed features
+                            return $exam;
+                        });
+                    }
+                }
+            }
 
             // Return success JSON response
             return response()->json([
