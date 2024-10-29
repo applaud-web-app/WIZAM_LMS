@@ -142,7 +142,7 @@ class DashboardController extends Controller
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
 
-            $upcomingExams = ExamSchedule::with(['exam' => function ($query) {
+            $upcomingExams = ExamSchedule::with(['exam' => function ($query) use ($assignedExams){
                     $query->select(
                         'exams.id', 
                         'exams.slug as exam_slug', 
