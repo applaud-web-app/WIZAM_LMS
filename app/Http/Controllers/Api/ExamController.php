@@ -285,7 +285,7 @@ class ExamController extends Controller
             ]);
 
             // Fetch the exam IDs assigned to the current user
-            $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
+            $assignedExams = AssignedExam::select('exam_id')->where('user_id',$user->id)->get()->pluck('exam_id')->toArray();
 
             // Fetch the exam along with related questions in one query
             $exam = Exam::with([
@@ -424,7 +424,7 @@ class ExamController extends Controller
             }
 
             // Calculate exam duration and points
-            $duration = (int) ($exam->duration_mode == "manual" && $exam->duration > 0 ? $exam->duration : round($exam->total_time / 60, 2));
+            $duration = (int) ($exam->duration_mode == "manual" ? $exam->duration : round($exam->total_time / 60, 2));
             $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
 
             // Prepare structured response data for questions
