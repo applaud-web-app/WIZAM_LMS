@@ -60,22 +60,19 @@ class StudentController extends Controller
                     'exams as total_exams' => function ($query) use ($assignedExams) {
                         // Count active exams of each type, either public or assigned to the user
                         $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
+                            $subQuery->WhereIn('id', $assignedExams);
                         })->where('status', 1);
                     },
                     'exams as paid_exams' => function ($query) use ($assignedExams) {
                         // Count active, paid exams (is_free = 0) either public or assigned to the user
                         $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
+                            $subQuery->WhereIn('id', $assignedExams);
                         })->where('status', 1)->where('is_free', 0);
                     },
                     'exams as unpaid_exams' => function ($query) use ($assignedExams) {
                         // Count active, unpaid (free) exams (is_free = 1) either public or assigned to the user
                         $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
+                            $subQuery->WhereIn('id', $assignedExams);
                         })->where('status', 1)->where('is_free', 1);
                     }
                 ])
