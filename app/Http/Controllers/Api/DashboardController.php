@@ -210,66 +210,64 @@ class DashboardController extends Controller
 
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
-
-            $upcomingExams = ExamSchedule::with(['exam' => function ($query) use ($assignedExams) {
-                    $query->select(
-                        'exams.id', 
-                        'exams.slug as exam_slug', 
-                        'exams.title as exam_name', 
-                        'exam_types.slug as exam_type_slug',
-                        'exams.duration_mode',
-                        'exams.exam_duration',
-                        'exams.point_mode',
-                        'exams.point', 
-                        DB::raw('COUNT(questions.id) as total_questions'), 
-                        DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-                    )
-                    ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-                    ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-                    ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-                    ->groupBy(
-                        'exam_types.slug', 
-                        'exams.slug', 
-                        'exams.id', 
-                        'exams.title', 
-                        'exams.duration_mode', 
-                        'exams.exam_duration', 
-                        'exams.point_mode', 
-                        'exams.point'
-                    )
-                    ->where('exams.status', 1)
-                    ->where(function ($query) use ($assignedExams) {
-                        $query->where('exams.is_public', 1)
-                            ->orWhereIn('exams.id', $assignedExams); 
+            
+            $upcomingExams = Exam::with(['schedules' => function ($query) use ($currentDate, $currentTime) {
+                    $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('schedule_type', 'fixed')
+                            ->whereDate('start_date', '>', $currentDate);
+                            // Uncomment if time constraint is needed
+                            // ->whereTime('start_time', '>', $currentTime);
                     })
-                    ->havingRaw('COUNT(questions.id) > 0');
+                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('schedule_type', 'flexible')
+                            ->whereDate('start_date', '>', $currentDate)
+                            ->whereDate('end_date', '>', $currentDate);
+                            // Uncomment if time constraint is needed
+                            // ->whereTime('start_time', '>', $currentTime)
+                            // ->whereTime('end_time', '<', $currentTime);
+                    })
+                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('schedule_type', 'attempts')
+                            ->whereDate('start_date', '>', $currentDate);
+                            // Uncomment if time constraint or grace period condition is needed
+                            // ->whereTime('start_time', '>', $currentTime)
+                            // ->whereDate('end_date', '>', $currentDate)
+                            // ->whereTime('end_time', '>', $currentTime)
+                            // ->orWhereNotNull('grace_period');
+                    });
                 }])
-                ->where(function ($query) use ($currentDate, $currentTime) {
-                    $query->where(function ($subQuery) use ($currentDate, $currentTime) {
-                            $subQuery->where('schedule_type', 'fixed')
-                                    ->whereDate('start_date', '>', $currentDate);
-                                    // Uncomment if time constraint is needed
-                                    // ->whereTime('start_time', '>', $currentTime);
-                        })
-                        ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
-                            $subQuery->where('schedule_type', 'flexible')
-                                    ->whereDate('start_date', '>', $currentDate)
-                                    ->whereDate('end_date', '>', $currentDate);
-                                    // Uncomment if time constraint is needed
-                                    // ->whereTime('start_time', '>', $currentTime)
-                                    // ->whereTime('end_time', '<', $currentTime);
-                        })
-                        ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
-                            $subQuery->where('schedule_type', 'attempts')
-                                    ->whereDate('start_date', '>', $currentDate);
-                                    // Uncomment if time constraint or grace period condition is needed
-                                    // ->whereTime('start_time', '>', $currentTime)
-                                    // ->whereDate('end_date', '>', $currentDate)
-                                    // ->whereTime('end_time', '>', $currentTime)
-                                    // ->orWhereNotNull('grace_period');
-                        });
+                ->where('status', 1)
+                ->where(function ($query) use ($assignedExams) {
+                    $query->where('is_public', 1)
+                          ->orWhereIn('id', $assignedExams); 
                 })
+                ->select(
+                    'exams.id', 
+                    'exams.slug as exam_slug', 
+                    'exams.title as exam_name', 
+                    'exam_types.slug as exam_type_slug',
+                    'exams.duration_mode',
+                    'exams.exam_duration',
+                    'exams.point_mode',
+                    'exams.point', 
+                    DB::raw('COUNT(questions.id) as total_questions'), 
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                )
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+                ->groupBy(
+                    'exam_types.slug', 
+                    'exams.slug', 
+                    'exams.id', 
+                    'exams.title', 
+                    'exams.duration_mode', 
+                    'exams.exam_duration', 
+                    'exams.point_mode', 
+                    'exams.point'
+                )
+                ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
 
             // Return success JSON response
