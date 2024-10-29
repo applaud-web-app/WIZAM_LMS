@@ -1147,31 +1147,6 @@ class ExamController extends Controller
                         ->orWhereIn('exams.id', $assignedExams);
                 })
                 ->where('exams.subcategory_id', $request->category)
-                // ->where(function ($query) use ($currentDate, $currentTime) {
-                //     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                //             // Uncomment if time constraint is needed
-                //             // ->whereTime('exam_schedules.start_time', '>', $currentTime);
-                //     })
-                //     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'flexible')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate)
-                //             ->whereDate('exam_schedules.end_date', '>', $currentDate);
-                //             // Uncomment if time constraint is needed
-                //             // ->whereTime('exam_schedules.start_time', '>', $currentTime)
-                //             // ->whereTime('exam_schedules.end_time', '<', $currentTime);
-                //     })
-                //     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'attempts')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                //             // Uncomment if time constraint or grace period condition is needed
-                //             // ->whereTime('exam_schedules.start_time', '>', $currentTime)
-                //             // ->whereDate('exam_schedules.end_date', '>', $currentDate)
-                //             // ->whereTime('exam_schedules.end_time', '>', $currentTime)
-                //             // ->orWhereNotNull('exam_schedules.grace_period');
-                //     });
-                // })
                 ->select(
                     'exams.id', 
                     'exams.is_free',
@@ -1210,6 +1185,7 @@ class ExamController extends Controller
                     'exam_schedules.grace_period'
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
+                ->havingRaw('COUNT(exam_schedules.id) > 0')
                 ->get();
 
             // USER SUBSCRIPTION LOGIC
