@@ -54,30 +54,37 @@ class StudentController extends Controller
     
             // Fetch the exam IDs assigned to the current user
             $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+            
             $type = ExamType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
-                    'exams as total_exams' => function ($query) use ($assignedExams) {
-                        // Count active exams of each type, either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('status', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1);
+                    'exams.schedules as total_exams' => function ($query) use ($assignedExams) {
+                        // Count the total schedules of active exams, either public or assigned to the user
+                        $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
+                            $subQuery->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('is_public', 1)
+                                    ->orWhereIn('id', $assignedExams);
+                            })->where('status', 1);
+                        });
                     },
-                    'exams as paid_exams' => function ($query) use ($assignedExams) {
-                        // Count active, paid exams (is_free = 0) either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('status', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1)->where('is_free', 0);
+                    'exams.schedules as paid_exams' => function ($query) use ($assignedExams) {
+                        // Count the schedules for paid exams (is_free = 0) either public or assigned to the user
+                        $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
+                            $subQuery->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('is_public', 1)
+                                    ->orWhereIn('id', $assignedExams);
+                            })->where('status', 1)->where('is_free', 0);
+                        });
                     },
-                    'exams as unpaid_exams' => function ($query) use ($assignedExams) {
-                        // Count active, unpaid (free) exams (is_free = 1) either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('status', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1)->where('is_free', 1);
-                    }
+                    'exams.schedules as unpaid_exams' => function ($query) use ($assignedExams) {
+                        // Count the schedules for unpaid exams (is_free = 1) either public or assigned to the user
+                        $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
+                            $subQuery->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('is_public', 1)
+                                    ->orWhereIn('id', $assignedExams);
+                            })->where('status', 1)->where('is_free', 1);
+                        });
+                    },
                 ])
                 ->get();
     
@@ -86,7 +93,7 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
-    }
+    }    
 
     // public function allExams(Request $request)
     // {
