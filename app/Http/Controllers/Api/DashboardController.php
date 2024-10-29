@@ -136,6 +136,8 @@ class DashboardController extends Controller
                 ->get();
 
             ////////// ------ UPCOMING EXAM ------ //////////
+
+            $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
 
@@ -168,6 +170,9 @@ class DashboardController extends Controller
                     )
                     ->havingRaw('COUNT(questions.id) > 0'); // Only include exams with more than 0 questions
                 }])
+                ->where(function ($query) use ($assignedExams) {
+                    $query->where('exams.is_public', 1)->orWhereIn('exams.id', $assignedExams); 
+                })
                 ->where(function ($query) use ($currentDate, $currentTime) {
                     // Filter by schedule type
                     $query->where(function ($subQuery) use ($currentDate, $currentTime) {
@@ -194,7 +199,6 @@ class DashboardController extends Controller
                     });
                 })
                 ->get();
-
 
             // Return success JSON response
             return response()->json([
