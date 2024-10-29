@@ -301,7 +301,7 @@ class ExamController extends Controller
                     'exams.slug',
                     'exams.subcategory_id',
                     'exams.status',
-                    'exams.duration_type', // duration_type
+                    'exams.duration_mode', // duration_mode
                     'exams.point_mode', 
                     'exams.exam_duration', // exam_duration
                     'exams.point',
@@ -327,7 +327,7 @@ class ExamController extends Controller
                 ->where('questions.status', 1)
                 ->groupBy(
                     'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
-                    'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
+                    'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_mode',
                     'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
                     'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
                     'exams.negative_marking_type', 'exams.negative_marks','exams.is_free'
@@ -428,7 +428,7 @@ class ExamController extends Controller
             // $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
 
             // Calculate exam duration and points
-            $duration = $exam->duration_type == "manual" ? $exam->exam_duration : round($exam->total_time / 60, 2);
+            $duration = $exam->duration_mode == "manual" ? $exam->exam_duration : round($exam->total_time / 60, 2);
             $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
 
             // Prepare structured response data for questions
