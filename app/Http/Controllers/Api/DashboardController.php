@@ -202,43 +202,44 @@ class DashboardController extends Controller
             //     })
             //     ->get();
 
+            $assignedExams = AssignedExam::select('exam_id')
+            ->where('user_id', $user->id)
+            ->get()
+            ->pluck('exam_id')
+            ->toArray();
+
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
-
-            // Get list of assigned exams for the user
-            $assignedExams = AssignedExam::where('user_id', $user->id)
-                            ->pluck('exam_id')
-                            ->toArray();
-
+            
             $upcomingExams = Exam::with(['schedules' => function ($query) use ($currentDate, $currentTime) {
                     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('schedule_type', 'fixed')
-                                    ->whereDate('start_date', '>', $currentDate);
-                                    // Uncomment if time constraint is needed
-                                    // ->whereTime('start_time', '>', $currentTime);
+                            ->whereDate('start_date', '>', $currentDate);
+                            // Uncomment if time constraint is needed
+                            // ->whereTime('start_time', '>', $currentTime);
                     })
                     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('schedule_type', 'flexible')
-                                    ->whereDate('start_date', '>', $currentDate)
-                                    ->whereDate('end_date', '>', $currentDate);
-                                    // Uncomment if time constraint is needed
-                                    // ->whereTime('start_time', '>', $currentTime)
-                                    // ->whereTime('end_time', '<', $currentTime);
+                            ->whereDate('start_date', '>', $currentDate)
+                            ->whereDate('end_date', '>', $currentDate);
+                            // Uncomment if time constraint is needed
+                            // ->whereTime('start_time', '>', $currentTime)
+                            // ->whereTime('end_time', '<', $currentTime);
                     })
                     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('schedule_type', 'attempts')
-                                    ->whereDate('start_date', '>', $currentDate);
-                                    // Uncomment if time constraint or grace period condition is needed
-                                    // ->whereTime('start_time', '>', $currentTime)
-                                    // ->whereDate('end_date', '>', $currentDate)
-                                    // ->whereTime('end_time', '>', $currentTime)
-                                    // ->orWhereNotNull('grace_period');
+                            ->whereDate('start_date', '>', $currentDate);
+                            // Uncomment if time constraint or grace period condition is needed
+                            // ->whereTime('start_time', '>', $currentTime)
+                            // ->whereDate('end_date', '>', $currentDate)
+                            // ->whereTime('end_time', '>', $currentTime)
+                            // ->orWhereNotNull('grace_period');
                     });
                 }])
                 ->where('exams.status', 1)
                 ->where(function ($query) use ($assignedExams) {
                     $query->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams); 
+                          ->orWhereIn('id', $assignedExams); 
                 })
                 ->select(
                     'exams.id', 
@@ -268,6 +269,7 @@ class DashboardController extends Controller
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
+
             // Return success JSON response
             return response()->json([
                 'status' => true,
