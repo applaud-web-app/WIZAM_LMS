@@ -59,7 +59,7 @@ class StudentController extends Controller
                 ->where('status', 1)
                 ->withCount([
                     'exams.schedules as total_exams' => function ($query) use ($assignedExams) {
-                        // Count the total schedules of active exams, either public or assigned to the user
+                        // Count active exams and their schedules, either public or assigned to the user
                         $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
                             $subQuery->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('is_public', 1)
@@ -68,7 +68,7 @@ class StudentController extends Controller
                         });
                     },
                     'exams.schedules as paid_exams' => function ($query) use ($assignedExams) {
-                        // Count the schedules for paid exams (is_free = 0) either public or assigned to the user
+                        // Count active, paid exams (is_free = 0) and their schedules either public or assigned to the user
                         $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
                             $subQuery->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('is_public', 1)
@@ -77,7 +77,7 @@ class StudentController extends Controller
                         });
                     },
                     'exams.schedules as unpaid_exams' => function ($query) use ($assignedExams) {
-                        // Count the schedules for unpaid exams (is_free = 1) either public or assigned to the user
+                        // Count active, unpaid exams (is_free = 1) and their schedules either public or assigned to the user
                         $query->whereHas('exams', function ($subQuery) use ($assignedExams) {
                             $subQuery->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('is_public', 1)
@@ -93,7 +93,8 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
-    }    
+    }
+    
 
     // public function allExams(Request $request)
     // {
