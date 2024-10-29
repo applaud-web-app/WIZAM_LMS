@@ -173,25 +173,24 @@ class DashboardController extends Controller
                     $query->where(function ($subQuery) use ($currentDate, $currentTime) {
                         // Fixed: Start_date is today, and start_time is later today
                         $subQuery->where('schedule_type', 'fixed')
-                                ->whereDate('start_date', '=', $currentDate)
-                                ->whereTime('start_time', '>=', $currentTime);
+                                ->whereDate('start_date', '>', $currentDate);
                     })
                     ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
                         // Flexible: Current time falls between start and end times
                         $subQuery->where('schedule_type', 'flexible')
-                                ->whereDate('start_date', '<=', $currentDate)
-                                ->whereTime('start_time', '<=', $currentTime)
-                                ->whereDate('end_date', '>=', $currentDate)
-                                ->whereTime('end_time', '>=', $currentTime);
+                                ->whereDate('start_date', '>', $currentDate)
+                                // ->whereTime('start_time', '>', $currentTime)
+                                ->whereDate('end_date', '>', $currentDate);
+                                // ->whereTime('end_time', '<', $currentTime);
                     })
                     ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
                         // Attempts: Current time falls between start and end with optional grace period
                         $subQuery->where('schedule_type', 'attempts')
-                                ->whereDate('start_date', '<=', $currentDate)
-                                ->whereTime('start_time', '<=', $currentTime)
-                                ->whereDate('end_date', '>=', $currentDate)
-                                ->whereTime('end_time', '>=', $currentTime)
-                                ->orWhereNotNull('grace_period'); // Include exams with grace_period
+                                ->whereDate('start_date', '>', $currentDate)
+                                // ->whereTime('start_time', '>', $currentTime)
+                                ->whereDate('end_date', '>', $currentDate);
+                                // ->whereTime('end_time', '>', $currentTime)
+                                // ->orWhereNotNull('grace_period'); // Include exams with grace_period
                     });
                 })
                 ->get();
