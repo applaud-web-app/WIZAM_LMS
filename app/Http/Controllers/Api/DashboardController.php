@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str; 
 use Carbon\Carbon;
 use App\Models\Question;
+use App\Models\AssignedExam;
 
 class DashboardController extends Controller
 {
