@@ -186,9 +186,9 @@ class DashboardController extends Controller
                     ->orWhere(function ($subQuery) use ($currentDate, $currentTime) {
                         // Attempts: Current time falls between start and end with optional grace period
                         $subQuery->where('schedule_type', 'attempts')
-                                ->whereDate('start_date', '>', $currentDate)
+                                ->whereDate('start_date', '>', $currentDate);
                                 // ->whereTime('start_time', '>', $currentTime)
-                                ->whereDate('end_date', '>', $currentDate);
+                                // ->whereDate('end_date', '>', $currentDate);
                                 // ->whereTime('end_time', '>', $currentTime)
                                 // ->orWhereNotNull('grace_period'); // Include exams with grace_period
                     });
