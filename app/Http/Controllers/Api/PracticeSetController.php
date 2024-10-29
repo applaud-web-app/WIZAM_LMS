@@ -788,6 +788,7 @@ class PracticeSetController extends Controller
                     'marks' => $practiceResult->student_percentage,
                     'status' => $practiceResult->student_percentage >= $practiceResult->pass_percentage ? "PASS" : "FAIL",
                     'timeTaken' => $timeTakenInMinutes,
+                    'uuid' => $practiceResult->uuid,
                 ];
     
                 // Process exam details (Compare user answers with correct answers)
@@ -997,7 +998,6 @@ class PracticeSetController extends Controller
                 'final_percentage' => $examResult->student_percentage,
                 'final_score' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
                 'time_taken' => $timeTakenInMinutes,
-                'uuid'=>$examResult->uuid
             ];
     
             return response()->json([
