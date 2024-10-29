@@ -1162,7 +1162,7 @@ class QuizController extends Controller
                 ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  
-                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quiz_id') // Join with schedule table
+                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id') // or the appropriate column
                 ->where('quizzes.subcategory_id', $request->category)  
                 ->where('quizzes.status', 1)  
                 ->groupBy(
