@@ -424,7 +424,11 @@ class ExamController extends Controller
             }
 
             // Calculate exam duration and points
-            $duration = (int) ($exam->duration_mode == "manual" ? $exam->duration : round($exam->total_time / 60, 2));
+            // $duration = (int) ($exam->duration_mode == "manual" ? $exam->duration : round($exam->total_time / 60, 2));
+            // $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
+
+            // Calculate exam duration and points
+            $duration = $exam->duration_type == "manual" ? $exam->exam_duration : round($exam->total_time / 60, 2);
             $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
 
             // Prepare structured response data for questions
