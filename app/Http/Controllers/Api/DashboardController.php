@@ -105,7 +105,7 @@ class DashboardController extends Controller
 
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
-            $examResult = ExamResult::where('end_time', '>', $current_time)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
+            $examResult = ExamResult::where('end_time', '>', $current_time)->where('user_id',$user->id)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
             $resumedExam = Exam::select(
                     'exam_types.slug as exam_type_slug', 
                     'exams.slug', 
