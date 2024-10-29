@@ -222,18 +222,18 @@ class StudentController extends Controller
                 ->where('slug', $request->slug)
                 ->where('status', 1)
                 ->first();
-
+    
             if ($examType) {
                 // Fetch the current authenticated user
                 $user = $request->attributes->get('authenticatedUser');
-
+    
                 // Fetch the exam IDs assigned to the current user
                 $assignedExams = AssignedExam::select('exam_id')
                     ->where('user_id', $user->id)
                     ->get()
                     ->pluck('exam_id')
                     ->toArray();
-
+    
                 // Fetch exam data grouped by exam type slug
                 $examData = Exam::select(
                     'exams.id',
@@ -247,11 +247,14 @@ class StudentController extends Controller
                     'exams.is_free',
                     DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    'exam_schedules.start_time', // Add start time from exam schedules
+                    'exam_schedules.end_time' // Add end time from exam schedules
                 )
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+                ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Join with exam schedules
                 ->where(function ($query) use ($assignedExams) {
                     $query->where('exams.is_public', 1)
                         ->orWhereIn('exams.id', $assignedExams);
@@ -259,18 +262,20 @@ class StudentController extends Controller
                 ->where('exams.exam_type_id', $examType->id)
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
-                ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title', 'exams.duration_mode', 
-                    'exams.exam_duration', 'exams.point_mode', 'exams.point', 'exams.is_free')
+                ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
+                    'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
+                    'exams.point', 'exams.is_free', 'exam_schedules.start_time', 
+                    'exam_schedules.end_time') // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
-
+    
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
-
+    
                 // USER SUBSCRIPTION LOGIC
                 $type = "exams";
                 $currentDate = now();
-
+    
                 // Fetch the user's active subscription
                 $subscription = Subscription::with('plans')
                     ->where('user_id', $user->id)
@@ -278,11 +283,11 @@ class StudentController extends Controller
                     ->where('ends_at', '>', $currentDate)
                     ->latest()
                     ->first();
-
+    
                 // Adjust 'is_free' based on subscription and assigned exams
                 if ($subscription) {
                     $plan = $subscription->plans;
-
+    
                     // Check if the plan allows unlimited access
                     if ($plan->feature_access == 1) {
                         // MAKE ALL EXAMS FREE
@@ -302,7 +307,7 @@ class StudentController extends Controller
                         }
                     }
                 }
-
+    
                 // Apply free logic for assigned exams
                 $examData->transform(function ($exam) use ($assignedExams) {
                     if (in_array($exam->id, $assignedExams)) {
@@ -310,21 +315,21 @@ class StudentController extends Controller
                     }
                     return $exam;
                 });
-
+    
                 foreach ($examData as $exam) {
                     // Format the total time
                     $formattedTime = $this->formatTime($exam->total_time);
-
+    
                     // Group exams by exam type slug
                     if (!isset($formattedExamData[$examType->slug])) {
                         $formattedExamData[$examType->slug] = [];
                     }
-
+    
                     // Format time and marks based on the exam mode
                     $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-
-                    // Add exam details to the corresponding type slug
+    
+                    // Add exam details to the corresponding type slug, including schedule details
                     $formattedExamData[$examType->slug][] = [
                         'title' => $exam->title,
                         'slug' => $exam->slug,
@@ -332,13 +337,17 @@ class StudentController extends Controller
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
+                        'schedule' => [
+                            'start_time' => $exam->start_time,
+                            'end_time' => $exam->end_time,
+                        ],
                     ];
                 }
-
+    
                 // Return the formatted data as JSON
                 return response()->json(['status' => true, 'data' => $formattedExamData], 200);
             }
-
+    
             // Return error if exam type not found
             return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
         } catch (\Throwable $th) {
@@ -346,6 +355,7 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+    
 
 
     private function formatTime($totalTime)
