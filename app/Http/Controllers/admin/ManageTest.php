@@ -706,7 +706,8 @@ class ManageTest extends Controller
                     ->rawColumns(['status','start_date','action','type','end_date'])
                     ->make(true);
             }
-            return view('manageTest.quizzes.quizzes-schedules',compact('id'));
+            $userGroup = UserGroup::where('is_active',1)->get();
+            return view('manageTest.quizzes.quizzes-schedules',compact('id','userGroup'));
         }
         return redirect()->back()->with('error','Make quiz active to schedule');
     }
