@@ -1126,10 +1126,10 @@ class QuizController extends Controller
         try {
             // Validate the request
             $request->validate(['category' => 'required']);
-    
+
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-    
+
             // Check if the user has a subscription
             $currentDate = now();
             $subscription = Subscription::with('plans')->where('user_id', $user->id)
@@ -1137,54 +1137,54 @@ class QuizController extends Controller
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
                 ->first();
-    
-            // Fetch quizzes with schedule details
+
+            // Fetch quizzes with schedules based on the requested category
             $quizData = Quizze::select(
-                'quizzes.slug',
-                'quizzes.title',
-                'quizzes.description',
-                'quizzes.pass_percentage',
-                'sub_categories.name as sub_category_name',
-                'quiz_types.name as exam_type_name',
-                'quizzes.duration_mode',
-                'quizzes.duration',
-                'quizzes.point_mode',
-                'quizzes.point',
-                'quizzes.is_free',
-                'quizzes.is_public',
-                'quiz_schedules.start_time',
-                'quiz_schedules.end_time',
-                DB::raw('COUNT(questions.id) as total_questions'),
-                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-            )
-            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-            ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quiz_id')
-            ->where('quizzes.subcategory_id', $request->category)
-            ->where('quizzes.status', 1)
-            ->groupBy(
-                'quizzes.slug',
-                'quizzes.id',
-                'quizzes.title',
-                'quizzes.description',
-                'quizzes.pass_percentage',
-                'sub_categories.name',
-                'quiz_types.name',
-                'quizzes.duration_mode',
-                'quizzes.duration',
-                'quizzes.point_mode',
-                'quizzes.point',
-                'quizzes.is_free',
-                'quizzes.is_public',
-                'quiz_schedules.start_time',
-                'quiz_schedules.end_time'
-            )
-            ->havingRaw('COUNT(questions.id) > 0')
-            ->get();
-    
+                    'quizzes.slug',
+                    'quizzes.title',
+                    'quizzes.description',
+                    'quizzes.pass_percentage',
+                    'sub_categories.name as sub_category_name',
+                    'quiz_types.name as exam_type_name',
+                    'quizzes.duration_mode', 
+                    'quizzes.duration', 
+                    'quizzes.point_mode',
+                    'quizzes.point', 
+                    'quizzes.is_free', 
+                    'quizzes.is_public', 
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_time',
+                    DB::raw('COUNT(questions.id) as total_questions'),  
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                )
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  
+                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id') 
+                ->where('quizzes.subcategory_id', $request->category)  
+                ->where('quizzes.status', 1)  
+                ->groupBy(
+                    'quizzes.slug',
+                    'quizzes.id',
+                    'quizzes.title',
+                    'quizzes.description',
+                    'quizzes.pass_percentage',
+                    'sub_categories.name',
+                    'quiz_types.name',
+                    'quizzes.duration_mode', 
+                    'quizzes.duration', 
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quizzes.is_free',
+                    'quizzes.is_public',
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_time'
+                )
+                ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+                ->get();
+
             // If the user has a subscription, mark paid quizzes as free
             if ($subscription) {
                 foreach ($quizData as $quiz) {
@@ -1193,18 +1193,18 @@ class QuizController extends Controller
                     }
                 }
             } else {
-                // Filter for public quizzes if no subscription
+                // If the user does not have a subscription, filter to only show public quizzes
                 $quizData = $quizData->filter(function ($quiz) {
-                    return $quiz->is_public == 1;
+                    return $quiz->is_public == 1; // Only keep public quizzes
                 });
-    
-                // Set as empty collection if no quizzes
+
+                // Ensure quizData is an array, returning an empty array if no quizzes
                 if ($quizData->isEmpty()) {
-                    $quizData = collect([]);
+                    $quizData = collect([]); // Set it as an empty collection to avoid type errors
                 }
             }
-    
-            // Return success JSON response with schedule data
+
+            // Return success JSON response
             return response()->json([
                 'status' => true,
                 'data' => $quizData->values() // Ensure we return an indexed array
@@ -1218,7 +1218,6 @@ class QuizController extends Controller
             ], 500);
         }
     }
-    
 
 
     public function quizProgress(Request $request){
