@@ -1103,6 +1103,31 @@ class ExamController extends Controller
                 ->get();
 
             // Fetch the user's active subscription
+            // $subscription = Subscription::with('plans')
+            //     ->where('user_id', $user->id)
+            //     ->where('stripe_status', 'complete')
+            //     ->where('ends_at', '>', $currentDate)
+            //     ->latest()
+            //     ->first();
+
+            // // USER SUBSCRIPTION LOGIC
+            // $isUnlimitedAccess = $subscription && $subscription->plans->feature_access == 1;
+
+            // // Apply free logic for exams based on subscription and assigned exams
+            // $upcomingExams->transform(function ($exam) use ($assignedExams, $isUnlimitedAccess) {
+            //     if ($isUnlimitedAccess || in_array($exam->id, $assignedExams)) {
+            //         $exam->is_free = 1; // Make exams free for unlimited access or assigned exams
+            //     }
+            //     return $exam;
+            // });
+
+
+            // Fetch the user's active subscription
+            $currentDate = now();
+            $type = "exams"; 
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
+
+            // Fetch the user's active subscription
             $subscription = Subscription::with('plans')
                 ->where('user_id', $user->id)
                 ->where('stripe_status', 'complete')
@@ -1110,16 +1135,30 @@ class ExamController extends Controller
                 ->latest()
                 ->first();
 
-            // USER SUBSCRIPTION LOGIC
-            $isUnlimitedAccess = $subscription && $subscription->plans->feature_access == 1;
+            // Apply subscription-based conditions to make exams free
+            if ($subscription) {
+                $plan = $subscription->plans;
 
-            // Apply free logic for exams based on subscription and assigned exams
-            $upcomingExams->transform(function ($exam) use ($assignedExams, $isUnlimitedAccess) {
-                if ($isUnlimitedAccess || in_array($exam->id, $assignedExams)) {
-                    $exam->is_free = 1; // Make exams free for unlimited access or assigned exams
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $upcomingExams->transform(function ($exam) {
+                        $exam->is_free = 1; // Make all exams free for unlimited access
+                        return $exam;
+                    });
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+                    // Check if exams are included in the allowed features
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $upcomingExams->transform(function ($exam) {
+                            $exam->is_free = 1; // Make exams free as part of allowed features
+                            return $exam;
+                        });
+                    }
                 }
-                return $exam;
-            });
+            }
 
             // Return success JSON response with upcoming exams and schedules
             return response()->json([
