@@ -346,12 +346,12 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'schedule' => [
-                            'start_date' => $exam->start_time,
+                            'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
-                            'end_date' => $exam->end_time,
+                            'end_date' => $exam->end_date,
                             'end_time' => $exam->end_time,
-                            'grace_period' => $exam->start_time,
-                            'schedule_type' => $exam->end_time,
+                            'grace_period' => $exam->grace_period,
+                            'schedule_type' => $exam->schedule_type,
                         ],
                     ];
                 }
