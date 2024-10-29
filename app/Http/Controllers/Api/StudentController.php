@@ -248,8 +248,12 @@ class StudentController extends Controller
                     DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
-                    'exam_schedules.start_time', // Add start time from exam schedules
-                    'exam_schedules.end_time' // Add end time from exam schedules
+                    'exam_schedules.schedule_type',
+                    'exam_schedules.start_date',
+                    'exam_schedules.start_time',
+                    'exam_schedules.end_date',
+                    'exam_schedules.end_time',
+                    'exam_schedules.grace_period'
                 )
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
@@ -264,8 +268,12 @@ class StudentController extends Controller
                 ->where('exams.status', 1)
                 ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
                     'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
-                    'exams.point', 'exams.is_free', 'exam_schedules.start_time', 
-                    'exam_schedules.end_time') // Group by necessary fields
+                    'exams.point', 'exams.is_free', 'exam_schedules.schedule_type',
+                    'exam_schedules.start_date',
+                    'exam_schedules.start_time',
+                    'exam_schedules.end_date',
+                    'exam_schedules.end_time',
+                    'exam_schedules.grace_period') // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
     
