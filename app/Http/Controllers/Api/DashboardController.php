@@ -134,12 +134,12 @@ class DashboardController extends Controller
                 return [
                     'slug' => $exam->exam_slug,
                     'title' => $exam->exam_name,
-                    'schedule_type' => $schedule->schedule_type ?? "NA",
-                    'start_date' => $schedule->start_date ?? "NA",
-                    'start_time' => $schedule->start_time ?? "NA",
-                    'end_date' => $schedule->end_date ?? "NA",
-                    'end_time' => $schedule->end_time ?? "NA",
-                    'grace_period' => $schedule->grace_period ?? "NA",
+                    'schedule_type' => $exam->schedule_type ?? "NA",
+                    'start_date' => $exam->start_date ?? "NA",
+                    'start_time' => $exam->start_time ?? "NA",
+                    'end_date' => $exam->end_date ?? "NA",
+                    'end_time' => $exam->end_time ?? "NA",
+                    'grace_period' => $exam->grace_period ?? "NA",
                 ];
             });
 
