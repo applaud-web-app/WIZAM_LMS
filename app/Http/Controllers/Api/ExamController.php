@@ -1107,26 +1107,6 @@ class ExamController extends Controller
                 ->get();
 
             // Fetch the user's active subscription
-            // $subscription = Subscription::with('plans')
-            //     ->where('user_id', $user->id)
-            //     ->where('stripe_status', 'complete')
-            //     ->where('ends_at', '>', $currentDate)
-            //     ->latest()
-            //     ->first();
-
-            // // USER SUBSCRIPTION LOGIC
-            // $isUnlimitedAccess = $subscription && $subscription->plans->feature_access == 1;
-
-            // // Apply free logic for exams based on subscription and assigned exams
-            // $upcomingExams->transform(function ($exam) use ($assignedExams, $isUnlimitedAccess) {
-            //     if ($isUnlimitedAccess || in_array($exam->id, $assignedExams)) {
-            //         $exam->is_free = 1; // Make exams free for unlimited access or assigned exams
-            //     }
-            //     return $exam;
-            // });
-
-
-            // Fetch the user's active subscription
             $currentDate = now();
             $type = "exams"; 
             $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();

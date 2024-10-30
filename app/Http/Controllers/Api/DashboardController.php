@@ -20,6 +20,8 @@ use App\Models\Subscription;
 
 class DashboardController extends Controller
 {
+
+
     public function studentDashboard(Request $request)
     {
         try {
@@ -28,6 +30,120 @@ class DashboardController extends Controller
     
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+
+            // START 
+            // Fetch the exam IDs assigned to the current user
+            $assignedExams = AssignedExam::where('user_id', $user->id)
+            ->pluck('exam_id')
+            ->toArray();
+
+            // Get current date and time for upcoming exam logic
+            $currentDate = now();
+
+            // Fetch upcoming exams with schedules
+            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+            ->where('exams.status', 1)
+            ->where(function ($query) use ($assignedExams) {
+                $query->where('exams.is_public', 1)
+                    ->orWhereIn('exams.id', $assignedExams);
+            })
+            ->where('exams.subcategory_id', $request->category)
+            ->select(
+                'exams.id',
+                'exams.is_free',
+                'exams.slug as exam_slug',
+                'exams.title as exam_name',
+                'exam_types.slug as exam_type_slug',
+                'exams.duration_mode',
+                'exams.exam_duration',
+                'exams.point_mode',
+                'exams.point',
+                DB::raw('COUNT(questions.id) as total_questions'),
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                'exam_schedules.schedule_type',
+                'exam_schedules.start_date',
+                'exam_schedules.start_time',
+                'exam_schedules.end_date',
+                'exam_schedules.end_time',
+                'exam_schedules.grace_period'
+            )
+            ->groupBy(
+                'exams.id',
+                'exams.is_free',
+                'exam_types.slug',
+                'exams.slug',
+                'exams.title',
+                'exams.duration_mode',
+                'exams.exam_duration',
+                'exams.point_mode',
+                'exams.point',
+                'exam_schedules.schedule_type',
+                'exam_schedules.start_date',
+                'exam_schedules.start_time',
+                'exam_schedules.end_date',
+                'exam_schedules.end_time',
+                'exam_schedules.grace_period'
+            )
+            ->havingRaw('COUNT(questions.id) > 0')
+            ->havingRaw('COUNT(exam_schedules.id) > 0')
+            ->get();
+
+            // Fetch the user's active subscription
+            $currentDate = now();
+            $type = "exams"; 
+            $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
+
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+            ->where('user_id', $user->id)
+            ->where('stripe_status', 'complete')
+            ->where('ends_at', '>', $currentDate)
+            ->latest()
+            ->first();
+
+            // Apply subscription-based conditions to make exams free
+            if ($subscription) {
+            $plan = $subscription->plans;
+
+            // Check if the plan allows unlimited access
+            if ($plan->feature_access == 1) {
+                // MAKE ALL EXAMS FREE
+                $upcomingExams->transform(function ($exam) {
+                    $exam->is_free = 1; // Make all exams free for unlimited access
+                    return $exam;
+                });
+            } else {
+                // Get allowed features from the plan
+                $allowed_features = json_decode($plan->features, true);
+                // Check if exams are included in the allowed features
+                if (in_array($type, $allowed_features)) {
+                    // MAKE ALL EXAMS FREE
+                    $upcomingExams->transform(function ($exam) {
+                        $exam->is_free = 1; // Make exams free as part of allowed features
+                        return $exam;
+                    });
+                }
+                }
+            }
+
+            $data = $upcomingExams->map(function ($exam) {
+                return [
+                    'slug' => $exam->exam_slug,
+                    'title' => $exam->exam_name,
+                    'schedule_type' => $schedule->schedule_type ?? "NA",
+                    'start_date' => $schedule->start_date ?? "NA",
+                    'start_time' => $schedule->start_time ?? "NA",
+                    'end_date' => $schedule->end_date ?? "NA",
+                    'end_time' => $schedule->end_time ?? "NA",
+                    'grace_period' => $schedule->grace_period ?? "NA",
+                ];
+            });
+
+            // END
 
             // Fetch all exam results for the authenticated user where status is complete
             $exams = ExamResult::where('user_id', $user->id)->where('status', 'complete')->get();
@@ -270,7 +386,8 @@ class DashboardController extends Controller
                 // 'exams' => $examData,
                 // 'quizzes' => $quizData,
                 'resumedExam' => $resumedExam,
-                'upcomingExams'=>$upcomingExams
+                'upcomingExams'=>$upcomingExams,
+                'calenderExam'=>$data,
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
