@@ -149,14 +149,6 @@ class DashboardController extends Controller
             $currentDate = now();
             $type = "quizzes"; 
             
-            // Get the user's active subscription
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-            
             // Fetch upcoming quizzes with schedules
             $quizData = Quizze::join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
