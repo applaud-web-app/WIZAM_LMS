@@ -41,7 +41,7 @@ class DashboardController extends Controller
             $currentDate = now();
 
             // Fetch upcoming exams with schedules
-            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            $calldenderData = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
@@ -112,7 +112,7 @@ class DashboardController extends Controller
             // Check if the plan allows unlimited access
             if ($plan->feature_access == 1) {
                 // MAKE ALL EXAMS FREE
-                $upcomingExams->transform(function ($exam) {
+                $calldenderData->transform(function ($exam) {
                     $exam->is_free = 1; // Make all exams free for unlimited access
                     return $exam;
                 });
@@ -122,7 +122,7 @@ class DashboardController extends Controller
                 // Check if exams are included in the allowed features
                 if (in_array($type, $allowed_features)) {
                     // MAKE ALL EXAMS FREE
-                    $upcomingExams->transform(function ($exam) {
+                    $calldenderData->transform(function ($exam) {
                         $exam->is_free = 1; // Make exams free as part of allowed features
                         return $exam;
                     });
@@ -130,7 +130,7 @@ class DashboardController extends Controller
                 }
             }
 
-            $data = $upcomingExams->map(function ($exam) {
+            $data = $calldenderData->map(function ($exam) {
                 return [
                     'slug' => $exam->exam_slug,
                     'title' => $exam->exam_name,
@@ -142,8 +142,108 @@ class DashboardController extends Controller
                     'grace_period' => $exam->grace_period ?? "NA",
                 ];
             });
-
             // END
+
+            // QUIZ CALENDER START
+            $currentDate = now();
+            $type = "quizzes"; 
+            
+            // Get the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+            
+            // Fetch upcoming quizzes with schedules
+            $quizData = Quiz::join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->where('quizzes.status', 1)
+                ->where('quizzes.subcategory_id', $request->category)
+                ->where(function ($query) use ($subscription) {
+                    if (!$subscription) {
+                        // Show only public quizzes if there is no subscription
+                        $query->where('quizzes.is_public', 1);
+                    }
+                })
+                ->select(
+                    'quizzes.id',
+                    'quizzes.is_free',
+                    'quizzes.slug as quiz_slug',
+                    'quizzes.title as quiz_name',
+                    'quiz_types.slug as quiz_type_slug',
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_date',
+                    'quiz_schedules.end_time',
+                    'quiz_schedules.grace_period'
+                )
+                ->groupBy(
+                    'quizzes.id',
+                    'quizzes.is_free',
+                    'quiz_types.slug',
+                    'quizzes.slug',
+                    'quizzes.title',
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
+                    'quizzes.point_mode',
+                    'quizzes.point',
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_date',
+                    'quiz_schedules.end_time',
+                    'quiz_schedules.grace_period'
+                )
+                ->get();
+            
+            // Apply subscription-based conditions to make quizzes free
+            if ($subscription) {
+                $plan = $subscription->plans;
+            
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // Make all quizzes free
+                    $quizData->transform(function ($quiz) {
+                        $quiz->is_free = 1;
+                        return $quiz;
+                    });
+                } else {
+                    // Check if quizzes are part of the allowed features
+                    $allowed_features = json_decode($plan->features, true);
+                    if (in_array($type, $allowed_features)) {
+                        // Make all quizzes free if allowed in the features
+                        $quizData->transform(function ($quiz) {
+                            $quiz->is_free = 1;
+                            return $quiz;
+                        });
+                    }
+                }
+            }
+            
+            // Format the data for response
+            $data2 = $quizData->map(function ($quiz) {
+                return [
+                    'slug' => $quiz->quiz_slug,
+                    'title' => $quiz->quiz_name,
+                    'schedule_type' => $quiz->schedule_type ?? "NA",
+                    'start_date' => $quiz->start_date ?? "NA",
+                    'start_time' => $quiz->start_time ?? "NA",
+                    'end_date' => $quiz->end_date ?? "NA",
+                    'end_time' => $quiz->end_time ?? "NA",
+                    'grace_period' => $quiz->grace_period ?? "NA",
+                ];
+            });
+            
+            return $data2;
+
+            // QUIZ CALENDER END
 
             // Fetch all exam results for the authenticated user where status is complete
             $exams = ExamResult::where('user_id', $user->id)->where('status', 'complete')->get();
@@ -388,6 +488,7 @@ class DashboardController extends Controller
                 'resumedExam' => $resumedExam,
                 'upcomingExams'=>$upcomingExams,
                 'calenderExam'=>$data,
+                'calenderQuiz'=>$data2
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
