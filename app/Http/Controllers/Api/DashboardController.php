@@ -158,7 +158,7 @@ class DashboardController extends Controller
                 ->first();
             
             // Fetch upcoming quizzes with schedules
-            $quizData = Quiz::join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+            $quizData = Quizze::join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->where('quizzes.status', 1)
                 ->where('quizzes.subcategory_id', $request->category)
