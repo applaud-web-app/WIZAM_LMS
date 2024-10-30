@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use App\Models\Question;
 use App\Models\AssignedExam;
 use App\Models\Subscription;
+use App\Models\QuizSchedule;
 
 class DashboardController extends Controller
 {
