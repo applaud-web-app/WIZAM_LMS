@@ -241,8 +241,6 @@ class DashboardController extends Controller
                     'grace_period' => $quiz->grace_period ?? "NA",
                 ];
             });
-            
-            return $data2;
 
             // QUIZ CALENDER END
 
