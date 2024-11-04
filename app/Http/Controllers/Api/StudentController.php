@@ -1532,8 +1532,12 @@ class StudentController extends Controller
                 } else {
                     $status = 'Ended';
                 }
-    
+
+                $allFeatures = ["practice","quizzes","lessons","videos","exams"];
+                $features = empty($subscription->features) ? $allFeatures : $subscription->features;
+
                 return [
+                    'features' => $features,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
                     'purchase_date' => $purchaseDate->format('Y-m-d'),
