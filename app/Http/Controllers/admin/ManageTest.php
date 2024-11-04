@@ -728,7 +728,7 @@ class ManageTest extends Controller
             'userGroup'    => 'required|string|max:255',
         ]);
 
-        if($validatedData['scheduleType'] == "Fixed"){
+        if($validatedData['scheduleType'] == "fixed"){
             $validatedData['endDate'] = null;
             $validatedData['endTime'] = null;
         }
@@ -766,7 +766,7 @@ class ManageTest extends Controller
             'userGroup'    => 'required|string|max:255',
         ]);
 
-        if($validatedData['scheduleType'] == "Fixed"){
+        if($validatedData['scheduleType'] == "fixed"){
             $validatedData['endDate'] = null;
             $validatedData['endTime'] = null;
         }
