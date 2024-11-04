@@ -1121,6 +1121,138 @@ class QuizController extends Controller
     //     }
     // }
 
+    // public function quizAll(Request $request)
+    // {
+    //     try {
+    //         // Validate the request
+    //         $request->validate(['category' => 'required']);
+
+    //         // Get the authenticated user
+    //         $user = $request->attributes->get('authenticatedUser');
+
+    //         // Check if the user has a subscription
+    //         $currentDate = now();
+    //         $subscription = Subscription::with('plans')->where('user_id', $user->id)
+    //             ->where('stripe_status', 'complete')
+    //             ->where('ends_at', '>', $currentDate)
+    //             ->latest()
+    //             ->first();
+
+    //         // Fetch quizzes with schedules based on the requested category
+    //         $quizData = Quizze::select(
+    //                 'quizzes.slug',
+    //                 'quizzes.title',
+    //                 'quizzes.description',
+    //                 'quizzes.pass_percentage',
+    //                 'sub_categories.name as sub_category_name',
+    //                 'quiz_types.name as exam_type_name',
+    //                 'quizzes.duration_mode', 
+    //                 'quizzes.duration', 
+    //                 'quizzes.point_mode',
+    //                 'quizzes.point', 
+    //                 'quizzes.is_free', 
+    //                 'quizzes.is_public', 
+    //                 DB::raw('COUNT(questions.id) as total_questions'),  
+    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  
+    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+    //                 'quiz_schedules.schedule_type',
+    //                 'quiz_schedules.start_date',
+    //                 'quiz_schedules.start_time',
+    //                 'quiz_schedules.end_date',
+    //                 'quiz_schedules.end_time',
+    //                 'quiz_schedules.grace_period'
+    //             )
+    //             ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+    //             ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+    //             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  
+    //             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  
+    //             ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id') 
+    //             ->where('quizzes.subcategory_id', $request->category)  
+    //             ->where('quizzes.status', 1)  
+    //             ->groupBy(
+    //                 'quizzes.slug',
+    //                 'quizzes.id',
+    //                 'quizzes.title',
+    //                 'quizzes.description',
+    //                 'quizzes.pass_percentage',
+    //                 'sub_categories.name',
+    //                 'quiz_types.name',
+    //                 'quizzes.duration_mode', 
+    //                 'quizzes.duration', 
+    //                 'quizzes.point_mode',
+    //                 'quizzes.point',
+    //                 'quizzes.is_free',
+    //                 'quizzes.is_public',
+    //                 'quiz_schedules.schedule_type',
+    //                 'quiz_schedules.start_date',
+    //                 'quiz_schedules.start_time',
+    //                 'quiz_schedules.end_date',
+    //                 'quiz_schedules.end_time',
+    //                 'quiz_schedules.grace_period'
+    //             )
+    //             ->havingRaw('COUNT(questions.id) > 0')
+    //             ->havingRaw('COUNT(exam_schedules.id) > 0')
+    //             ->get();
+
+    //         // If the user has a subscription, mark paid quizzes as free
+    //         if ($subscription) {
+    //             foreach ($quizData as $quiz) {
+    //                 if ($quiz->is_free == 0) { // If it's a paid quiz
+    //                     $quiz->is_free = 1; // Set it to free
+    //                 }
+    //             }
+    //         } else {
+    //             // If the user does not have a subscription, filter to only show public quizzes
+    //             $quizData = $quizData->filter(function ($quiz) {
+    //                 return $quiz->is_public == 1; // Only keep public quizzes
+    //             });
+
+    //             // Ensure quizData is an array, returning an empty array if no quizzes
+    //             if ($quizData->isEmpty()) {
+    //                 $quizData = collect([]); // Set it as an empty collection to avoid type errors
+    //             }
+    //         }
+
+    //         // Return success JSON response with upcoming exams and schedules
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => $quizData->map(function ($exam) {
+    //                 return [
+    //                     'id' => $exam->id,
+    //                     'exam_type_slug' => $exam->exam_type_slug,
+    //                     'slug' => $exam->exam_slug,
+    //                     'title' => $exam->exam_name,
+    //                     'duration_mode' => $exam->duration_mode,
+    //                     'exam_duration' => $exam->exam_duration,
+    //                     'point_mode' => $exam->point_mode,
+    //                     'point' => $exam->point,
+    //                     'is_free' => $exam->is_free,
+    //                     'total_questions' => $exam->total_questions,
+    //                     'total_marks' => $exam->total_marks,
+    //                     'total_time' => $exam->total_time,
+    //                     'schedules' => [
+    //                         'schedule_type' => $exam->schedule_type,
+    //                         'start_date' => $exam->start_date,
+    //                         'start_time' => $exam->start_time,
+    //                         'end_date' => $exam->end_date,
+    //                         'end_time' => $exam->end_time,
+    //                         'grace_period' => $exam->grace_period,
+    //                     ],
+    //                 ];
+    //             })
+    //         ], 200);
+
+    //     } catch (\Throwable $th) {
+    //         // Return error JSON response
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'An error occurred while fetching the dashboard data.',
+    //             'error' => 'Error logged. :' . $th->getMessage() // For security
+    //         ], 500);
+    //     }
+    // }
+
+
     public function quizAll(Request $request)
     {
         try {
@@ -1132,7 +1264,8 @@ class QuizController extends Controller
 
             // Check if the user has a subscription
             $currentDate = now();
-            $subscription = Subscription::with('plans')->where('user_id', $user->id)
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
                 ->where('stripe_status', 'complete')
                 ->where('ends_at', '>', $currentDate)
                 ->latest()
@@ -1140,49 +1273,58 @@ class QuizController extends Controller
 
             // Fetch quizzes with schedules based on the requested category
             $quizData = Quizze::select(
+                    'quizzes.id',
                     'quizzes.slug',
                     'quizzes.title',
                     'quizzes.description',
                     'quizzes.pass_percentage',
                     'sub_categories.name as sub_category_name',
                     'quiz_types.name as exam_type_name',
-                    'quizzes.duration_mode', 
-                    'quizzes.duration', 
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
                     'quizzes.point_mode',
-                    'quizzes.point', 
-                    'quizzes.is_free', 
-                    'quizzes.is_public', 
+                    'quizzes.point',
+                    'quizzes.is_free',
+                    'quizzes.is_public',
+                    DB::raw('COUNT(questions.id) as total_questions'),
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
+                    'quiz_schedules.end_date',
                     'quiz_schedules.end_time',
-                    DB::raw('COUNT(questions.id) as total_questions'),  
-                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                    'quiz_schedules.grace_period'
                 )
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  
-                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  
-                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id') 
-                ->where('quizzes.subcategory_id', $request->category)  
-                ->where('quizzes.status', 1)  
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                ->where('quizzes.subcategory_id', $request->category)
+                ->where('quizzes.status', 1)
                 ->groupBy(
-                    'quizzes.slug',
                     'quizzes.id',
+                    'quizzes.slug',
                     'quizzes.title',
                     'quizzes.description',
                     'quizzes.pass_percentage',
                     'sub_categories.name',
                     'quiz_types.name',
-                    'quizzes.duration_mode', 
-                    'quizzes.duration', 
+                    'quizzes.duration_mode',
+                    'quizzes.duration',
                     'quizzes.point_mode',
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
-                    'quiz_schedules.end_time'
+                    'quiz_schedules.end_date',
+                    'quiz_schedules.end_time',
+                    'quiz_schedules.grace_period'
                 )
-                ->havingRaw('COUNT(questions.id) > 0')  // Ensure quizzes with more than 0 questions
+                ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
 
             // If the user has a subscription, mark paid quizzes as free
@@ -1193,32 +1335,49 @@ class QuizController extends Controller
                     }
                 }
             } else {
-                // If the user does not have a subscription, filter to only show public quizzes
+                // Filter to only show public quizzes for non-subscribers
                 $quizData = $quizData->filter(function ($quiz) {
-                    return $quiz->is_public == 1; // Only keep public quizzes
+                    return $quiz->is_public == 1;
                 });
-
-                // Ensure quizData is an array, returning an empty array if no quizzes
-                if ($quizData->isEmpty()) {
-                    $quizData = collect([]); // Set it as an empty collection to avoid type errors
-                }
             }
 
             // Return success JSON response
             return response()->json([
                 'status' => true,
-                'data' => $quizData->values() // Ensure we return an indexed array
+                'data' => $quizData->map(function ($exam) {
+                    return [
+                        'id' => $exam->id,
+                        'exam_type_name' => $exam->exam_type_name,
+                        'slug' => $exam->slug,
+                        'title' => $exam->title,
+                        'duration_mode' => $exam->duration_mode,
+                        'exam_duration' => $exam->duration,
+                        'point_mode' => $exam->point_mode,
+                        'point' => $exam->point,
+                        'is_free' => $exam->is_free,
+                        'total_questions' => $exam->total_questions,
+                        'total_marks' => $exam->total_marks,
+                        'total_time' => $exam->total_time,
+                        'schedules' => [
+                            'schedule_type' => $exam->schedule_type,
+                            'start_date' => $exam->start_date,
+                            'start_time' => $exam->start_time,
+                            'end_date' => $exam->end_date,
+                            'end_time' => $exam->end_time,
+                            'grace_period' => $exam->grace_period,
+                        ],
+                    ];
+                })
             ], 200);
+
         } catch (\Throwable $th) {
-            // Return error JSON response
+            // Return error JSON response with a generic message
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while fetching the dashboard data.',
-                'error' => 'Error logged. :' . $th->getMessage() // For security
+                'message' => 'An error occurred while fetching the quiz data.',
             ], 500);
         }
     }
-
 
     public function quizProgress(Request $request){
         try {
