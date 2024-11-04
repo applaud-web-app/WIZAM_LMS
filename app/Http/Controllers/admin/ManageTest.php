@@ -766,6 +766,11 @@ class ManageTest extends Controller
             'userGroup'    => 'required|string|max:255',
         ]);
 
+        if($validatedData['scheduleType'] == "Fixed"){
+            $validatedData['endDate'] = null;
+            $validatedData['endTime'] = null;
+        }
+
         // Fetch the schedule by its ID
         $schedule = QuizSchedule::where('id',$request->schedule_id)->first();
         $schedule->schedule_type= $validatedData['scheduleType'];
