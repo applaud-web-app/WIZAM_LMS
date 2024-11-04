@@ -667,7 +667,7 @@ class ManageTest extends Controller
         $quiz = Quizze::where('id',$id)->where('status',1)->first();
         if($quiz){
             if ($request->ajax()) {
-                $sections = QuizSchedule::whereIn('status',[0,1]);
+                $sections = QuizSchedule::where('quizzes_id',$id)->whereIn('status',[0,1]);
     
                 return DataTables::of($sections)
                     ->addIndexColumn()
