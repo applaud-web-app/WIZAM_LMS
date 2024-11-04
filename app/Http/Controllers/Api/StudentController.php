@@ -847,7 +847,7 @@ class StudentController extends Controller
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.exam_id')
+                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
                 ->where('quiz_schedules.status', 1)
                 ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
                 ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
