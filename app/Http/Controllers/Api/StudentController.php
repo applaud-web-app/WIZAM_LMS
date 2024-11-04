@@ -1575,7 +1575,7 @@ class StudentController extends Controller
             ->get()
             ->map(function ($payment) {
                 return [
-                    'amount' => $payment->stripe_payment_id,
+                    'payment_id' => $payment->stripe_payment_id,
                     'amount' => $payment->amount,
                     'currency' => $payment->currency,
                     'status' => $payment->status,
