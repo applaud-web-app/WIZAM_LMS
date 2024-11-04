@@ -857,10 +857,16 @@ class ExamController extends Controller
                     ];
                 }
     
+                $examType = ExamType::where('id', $examResult->exam->exam_type_id)->value('name');
+                $is_type = $examType ?? "";
+                
                 $exam = [
-                    'title' => $examResult->exam->title,
-                    'duration' => $examResult->exam_duration,
-                    'download_report'=> $examResult->exam->download_report,
+                    'title' => $examResult->exam->title ?? 'N/A', 
+                    'duration' => $examResult->exam_duration ?? 0, 
+                    'download_report' => $examResult->exam->download_report ?? false, 
+                    'exam_result_date' => $examResult->updated_at ? $examResult->updated_at->format('d-m-Y') : 'N/A',
+                    'exam_result_time' => $examResult->updated_at ? $examResult->updated_at->format('h:i:s') : 'N/A',
+                    'exam_result_type' => $is_type,
                 ];
     
                 return response()->json([
