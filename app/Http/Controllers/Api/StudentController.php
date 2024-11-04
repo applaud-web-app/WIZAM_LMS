@@ -263,6 +263,7 @@ class StudentController extends Controller
                     $query->where('exams.is_public', 1)
                         ->orWhereIn('exams.id', $assignedExams);
                 })
+                ->where('exam_schedules.status', 1)
                 ->where('exams.exam_type_id', $examType->id)
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
@@ -833,6 +834,12 @@ class StudentController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_date',
+                    'quiz_schedules.end_time',
+                    'quiz_schedules.grace_period',
                     DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
@@ -840,6 +847,8 @@ class StudentController extends Controller
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.exam_id')
+                ->where('quiz_schedules.status', 1)
                 ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
                 ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
                 ->where('quizzes.status', 1) // Filter by quiz status
@@ -852,7 +861,13 @@ class StudentController extends Controller
                     'quizzes.point_mode',
                     'quizzes.point',
                     'quizzes.is_free',
-                    'quizzes.is_public'
+                    'quizzes.is_public',
+                    'quiz_schedules.schedule_type',
+                    'quiz_schedules.start_date',
+                    'quiz_schedules.start_time',
+                    'quiz_schedules.end_date',
+                    'quiz_schedules.end_time',
+                    'quiz_schedules.grace_period'
                 )
                 ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                 ->get();
