@@ -1570,11 +1570,12 @@ class StudentController extends Controller
             $currentDate = now();
     
             // Fetch the user's subscriptions with associated plan details
-            $payments = Payment::select('amount', 'currency', 'status', 'created_at')
+            $payments = Payment::select('amount', 'currency', 'status', 'created_at','stripe_payment_id')
             ->where('user_id', $user->id)
             ->get()
             ->map(function ($payment) {
                 return [
+                    'amount' => $payment->stripe_payment_id,
                     'amount' => $payment->amount,
                     'currency' => $payment->currency,
                     'status' => $payment->status,
