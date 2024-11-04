@@ -17,6 +17,7 @@ use App\Models\Question;
 use App\Models\Subscription;
 use App\Models\Plan;
 use App\Models\AssignedExam;
+use App\Models\ExamType;
 
 class ExamController extends Controller
 {
