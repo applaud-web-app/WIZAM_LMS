@@ -727,6 +727,11 @@ class ManageTest extends Controller
             'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
             'userGroup'    => 'required|string|max:255',
         ]);
+
+        if($validatedData['scheduleType'] == "Fixed"){
+            $validatedData['endDate'] = null;
+            $validatedData['endTime'] = null;
+        }
         
         // Fetch the schedule by its ID
         $schedule = QuizSchedule::create([
