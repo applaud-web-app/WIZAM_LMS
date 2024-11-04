@@ -1067,6 +1067,7 @@ class ExamController extends Controller
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.status', 1)
+                ->where('exam_schedules.status', 1)
                 ->where(function ($query) use ($assignedExams) {
                     $query->where('exams.is_public', 1)
                         ->orWhereIn('exams.id', $assignedExams);
