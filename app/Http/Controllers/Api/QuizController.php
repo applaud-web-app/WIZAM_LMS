@@ -16,7 +16,7 @@ use Carbon\Carbon;
 use App\Models\Question;
 use App\Models\Subscription;
 use App\Models\Plan;
-
+use App\Models\QuizType;
 
 class QuizController extends Controller
 {
@@ -1005,10 +1005,17 @@ class QuizController extends Controller
                         'is_correct' => $isCorrect,
                     ];
                 }
-    
+
+                $quizType = QuizType::where('id', $quizResult->quiz->quiz_type_id)->value('name');
+                $is_type = $quizType ?? "";
+
                 $quiz = [
                     'title' => $quizResult->quiz->title,
                     'duration' => $quizResult->exam_duration,
+                    'download_report' => $quizResult->quiz->download_report ?? false, 
+                    'exam_result_date' => $quizResult->updated_at ? $quizResult->updated_at->format('d-m-Y') : 'N/A',
+                    'exam_result_time' => $quizResult->updated_at ? $quizResult->updated_at->format('h:i:s') : 'N/A',
+                    'exam_result_type' => $is_type,
                 ];
     
                 return response()->json([
