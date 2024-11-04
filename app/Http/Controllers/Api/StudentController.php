@@ -1016,6 +1016,14 @@ class StudentController extends Controller
                     'marks' => $marks,
                     'description' => $quizData->description,
                     'is_free' => $quizData->is_free,
+                    'schedule' => [
+                        'start_date' => $quizData->start_date,
+                        'start_time' => $quizData->start_time,
+                        'end_date' => $quizData->end_date,
+                        'end_time' => $quizData->end_time,
+                        'grace_period' => $quizData->grace_period,
+                        'schedule_type' => $quizData->schedule_type,
+                    ],
                 ],
             ], 200);
         } catch (\Throwable $th) {
