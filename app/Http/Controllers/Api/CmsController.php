@@ -196,9 +196,9 @@ class CmsController extends Controller
                 )
                 ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                 ->where([
-                    'favourite' => 1,
-                    'status' => 1,
-                    'is_public' => 1
+                    'exams.favourite' => 1,
+                    'exams.status' => 1,
+                    'exams.is_public' => 1
                 ])
                 ->where('exam_schedules.status', 1)
                 ->latest()
