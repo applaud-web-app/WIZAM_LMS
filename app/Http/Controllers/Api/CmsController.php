@@ -177,13 +177,42 @@ class CmsController extends Controller
         }
     }
 
-    public function popularExams(){
+    public function popularExams()
+    {
         try {
-            $popularExams = Exam::select('img_url','title','description','price','is_free','slug')->where(['favourite'=>1,'status'=>1,'is_public'=>1])->latest()->take(3)->get();
-            // WHERE IS_FREE IS 0 THEN SHOW PRICE
-            return response()->json(['status'=> true,'data' => $popularExams], 201);
+            $popularExams = Exam::select(
+                    'img_url',
+                    'title',
+                    'description',
+                    'price',
+                    'is_free',
+                    'slug',
+                    'exam_schedules.schedule_type',
+                    'exam_schedules.start_date',
+                    'exam_schedules.start_time',
+                    'exam_schedules.end_date',
+                    'exam_schedules.end_time',
+                    'exam_schedules.grace_period'
+                )
+                ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                ->where([
+                    'favourite' => 1,
+                    'status' => 1,
+                    'is_public' => 1
+                ])
+                ->where('exam_schedules.status', 1)
+                ->latest()
+                ->take(3)
+                ->get()
+                ->map(function ($exam) {
+                    // If 'is_free' is 0, show the price; otherwise, set price to null.
+                    $exam->price = $exam->is_free ? null : $exam->price;
+                    return $exam;
+                });
+
+            return response()->json(['status' => true, 'data' => $popularExams], 201);
         } catch (\Throwable $th) {
-            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
 
