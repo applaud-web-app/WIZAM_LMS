@@ -181,12 +181,12 @@ class CmsController extends Controller
     {
         try {
             $popularExams = Exam::select(
-                    'img_url',
-                    'title',
-                    'description',
-                    'price',
-                    'is_free',
-                    'slug',
+                    'exams.img_url',
+                    'exams.title',
+                    'exams.description',
+                    'exams.price',
+                    'exams.is_free',
+                    'exams.slug',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
@@ -201,7 +201,7 @@ class CmsController extends Controller
                     'exams.is_public' => 1
                 ])
                 ->where('exam_schedules.status', 1)
-                ->latest()
+                ->orderBy('exams.created_at','DESC')
                 ->take(3)
                 ->get()
                 ->map(function ($exam) {
