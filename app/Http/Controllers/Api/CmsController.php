@@ -201,6 +201,12 @@ class CmsController extends Controller
                     'exams.is_public' => 1
                 ])
                 ->where('exam_schedules.status', 1)
+                ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug','exam_schedules.schedule_type',
+                'exam_schedules.start_date',
+                'exam_schedules.start_time',
+                'exam_schedules.end_date',
+                'exam_schedules.end_time',
+                'exam_schedules.grace_period')
                 ->orderBy('exams.created_at','DESC')
                 ->take(3)
                 ->get()
