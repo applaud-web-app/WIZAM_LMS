@@ -282,13 +282,15 @@ class CmsController extends Controller
                 'exams.slug', 
                 'exams.exam_duration',
                 'exams.subcategory_id',
+                'sub_categories.name'
             )
+            ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'exam_questions.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.favourite' => 1, 'exams.status' => 1])
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id')
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id', 'sub_categories.name')
             ->orderBy('exams.created_at', 'desc') // Order by exam created_at
             ->where(['exams.slug'=>$slug,'exams.status'=>1])->first();
 
