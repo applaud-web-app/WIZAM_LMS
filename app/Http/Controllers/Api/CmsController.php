@@ -280,7 +280,8 @@ class CmsController extends Controller
                 'exams.price', 
                 'exams.is_free', 
                 'exams.slug', 
-                'exams.exam_duration'
+                'exams.exam_duration',
+                'exams.subcategory_id',
             )
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
