@@ -1310,6 +1310,7 @@ class QuizController extends Controller
                 ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
                 ->where('quizzes.subcategory_id', $request->category)
                 ->where('quizzes.status', 1)
+                ->where('quiz_schedules.status', 1)
                 ->groupBy(
                     'quizzes.id',
                     'quizzes.slug',
