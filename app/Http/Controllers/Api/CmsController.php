@@ -284,7 +284,7 @@ class CmsController extends Controller
                 'exams.subcategory_id',
                 'sub_categories.name'
             )
-            ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'exam_questions.id')
+            ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
