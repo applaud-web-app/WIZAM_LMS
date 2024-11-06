@@ -288,7 +288,7 @@ class CmsController extends Controller
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.favourite' => 1, 'exams.status' => 1])
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration')
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id')
             ->orderBy('exams.created_at', 'desc') // Order by exam created_at
             ->where(['exams.slug'=>$slug,'exams.status'=>1])->first();
 
