@@ -554,7 +554,7 @@ class CmsController extends Controller
                 'metadata' => [
                     'plan_id' => $request->priceId, // Attach plan_id to the session metadata
                 ],
-                'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => env('FRONTEND_URL')."/".$request->successUrl.'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('FRONTEND_URL') . '/failure',
             ]);
     
