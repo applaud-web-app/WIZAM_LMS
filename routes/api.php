@@ -88,6 +88,7 @@ Route::middleware('checkAuthToken')->group(function () {
 
     // SAVE EXAM PROGRESS
     Route::post('/save-answer-progress/{uuid}',[ExamController::class,'saveAnswerProgress']);
+    Route::get('/get-saved-progress',[ExamController::class,'getSavedProgress']);
 
     // EXAM REPORT
     Route::get('/download-exam-report/{uuid}',[ExamController::class, 'downloadExamReport']);
