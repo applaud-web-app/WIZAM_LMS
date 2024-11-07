@@ -1242,7 +1242,8 @@ class ExamController extends Controller
                 'exams.point',
                 // Count all questions (regular ones + EMQ with parent + children)
                 DB::raw('COUNT(questions.id) + SUM(CASE 
-                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.options) END) as total_questions'),            
+                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1  -- Subtract 1 to exclude the parent question
+                ELSE 0 END) - 1 as total_questions'),           
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                 'exam_schedules.schedule_type',
