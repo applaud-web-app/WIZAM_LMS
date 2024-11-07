@@ -1242,7 +1242,7 @@ class ExamController extends Controller
                 'exams.point_mode',
                 'exams.point',
                 // Count all questions (regular ones + EMQ with parent + children)
-                DB::raw('COUNT(questions.id) + SUM(CASE 
+                DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.options) THEN JSON_LENGTH(questions.options) - 1 
                     ELSE 0 
                 END) as total_questions'),     
