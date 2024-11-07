@@ -501,7 +501,9 @@ class ExamController extends Controller
                 if ($question->type == "FIB") {
                     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
                     $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
-                } elseif ($question->type == "EMQ") {
+                } 
+                
+                if($question->type == "EMQ") {
                     // If EMQ, decode question text to access parent and child questions
                     $parentChildQuestions = json_decode($question->question, true);
                     
