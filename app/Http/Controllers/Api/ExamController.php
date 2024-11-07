@@ -1219,7 +1219,6 @@ class ExamController extends Controller
             // ->havingRaw('COUNT(exam_schedules.id) > 0')
             // ->get();
 
-
             $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
@@ -1241,7 +1240,11 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
-                DB::raw('COUNT(questions.id) as total_questions'),  // Default total count for regular questions
+                // Count all questions (regular ones + EMQ with parent + children)
+                DB::raw('COUNT(questions.id) + SUM(CASE 
+                                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1  -- Subtract 1 for the parent question
+                                ELSE 0 
+                            END) as total_questions'),
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                 'exam_schedules.schedule_type',
@@ -1249,12 +1252,7 @@ class ExamController extends Controller
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
-                'exam_schedules.grace_period',
-                // Count the number of child questions for EMQ (if it's in JSON format)
-                DB::raw('SUM(CASE 
-                                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1  -- Subtract 1 to avoid counting the parent
-                                ELSE 0 
-                            END) as emq_child_questions')
+                'exam_schedules.grace_period'
             )
             ->groupBy(
                 'exams.id',
@@ -1276,44 +1274,6 @@ class ExamController extends Controller
             ->havingRaw('COUNT(questions.id) > 0')
             ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
-
-            // $upcomingExams->each(function ($exam) {
-            //     $exam->examQuestions->each(function ($examQuestion) use ($exam) {
-            //         $question = $examQuestion->questions;
-            
-            //         if ($question->type == "EMQ") {
-            //             // Decode JSON to get parent and child questions
-            //             $parentChildQuestions = json_decode($question->question, true);
-                        
-            //             // Initialize the child question count
-            //             $childQuestionCount = count($parentChildQuestions) - 1;  // Subtract 1 for the parent question
-                        
-            //             // Create the question structure for the child questions
-            //             foreach ($parentChildQuestions as $index => $childQuestionText) {
-            //                 if ($index > 0) {  // The first item is the parent, we skip it
-            //                     $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
-            //                     $childQuestionData = [
-            //                         'id' => $question->id . "-$index",  // Unique ID for each child question
-            //                         'type' => 'MSA',  // Treating as MSA, adjust if needed
-            //                         'question' => $QUESTIONNAME,
-            //                     ];
-            //                     $questionsData[] = $childQuestionData;
-            
-            //                     $optionArray = json_decode($question->answer,true);
-            //                     // Add correct answer for each child question
-            //                     $correctAnswers[] = [
-            //                         'id' => $question->id . "-$index",
-            //                         'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
-            //                         'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-            //                     ];
-            //                 }
-            //             }
-            
-            //             // Add the child question count to the exam question (or handle as needed)
-            //             $examQuestion->total_child_questions = $childQuestionCount;
-            //         }
-            //     });
-            // });
 
 
 
