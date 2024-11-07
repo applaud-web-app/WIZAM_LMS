@@ -507,21 +507,25 @@ class ExamController extends Controller
                     
                     // Loop through each child question
                     foreach ($parentChildQuestions as $index => $childQuestionText) {
-                        // Treat the first question as the parent and others as separate child questions
-                        $childQuestionData = [
-                            'id' => $question->id . "-$index",  // Unique ID for each child question
-                            'type' => 'MSA',  // Treating as MSA as per your request
-                            'question' => $index === 0 ? "Parent Question: " . $childQuestionText : $childQuestionText,
-                            'options' => $options
-                        ];
-                        $questionsData[] = $childQuestionData;
+                        if ($index > 0) {
+                            // Treat the first question as the parent and others as separate child questions
+                            $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
+                            $childQuestionData = [
+                                'id' => $question->id . "-$index",  // Unique ID for each child question
+                                'type' => 'MSA',  // Treating as MSA as per your request
+                                'question' => $QUESTIONNAME,
+                                'options' => $options
+                            ];
+                            $questionsData[] = $childQuestionData;
 
-                        // Add correct answer for each child question
-                        $correctAnswers[] = [
-                            'id' => $question->id . "-$index",
-                            'correct_answer' => $question->answer,  // Use the same answer for each child question
-                            'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-                        ];
+                            // Add correct answer for each child question
+                            $correctAnswers[] = [
+                                'id' => $question->id . "-$index",
+                                'correct_answer' => $question->answer,  // Use the same answer for each child question
+                                'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+                            ];
+                        }
+                        
                     }
                 } else {
                     // Standard question processing for non-EMQ types
