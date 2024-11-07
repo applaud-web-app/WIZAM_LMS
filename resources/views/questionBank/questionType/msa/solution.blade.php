@@ -127,7 +127,7 @@
             <!-- hint (Summernote) -->
             <div class="mb-[20px]">
                <label for="hint" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Hint</label>
-               <textarea id="hint" name="hint" rows="4" required class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the solution...">@isset($solution->hint){{$solution->hint}}@endisset</textarea>
+               <textarea id="hint" name="hint" rows="4"  class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter the solution...">@isset($solution->hint){{$solution->hint}}@endisset</textarea>
             </div>
 
             <!-- Buttons -->
