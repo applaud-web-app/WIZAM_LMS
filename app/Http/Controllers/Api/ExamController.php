@@ -1277,44 +1277,43 @@ class ExamController extends Controller
             ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
 
-            $upcomingExams->each(function ($exam) {
-                $exam->examQuestions->each(function ($examQuestion) use ($exam) {
-                    $question = $examQuestion->questions;
+            // $upcomingExams->each(function ($exam) {
+            //     $exam->examQuestions->each(function ($examQuestion) use ($exam) {
+            //         $question = $examQuestion->questions;
             
-                    if ($question->type == "EMQ") {
-                        // Decode JSON to get parent and child questions
-                        $parentChildQuestions = json_decode($question->question, true);
+            //         if ($question->type == "EMQ") {
+            //             // Decode JSON to get parent and child questions
+            //             $parentChildQuestions = json_decode($question->question, true);
                         
-                        // Initialize the child question count
-                        $childQuestionCount = count($parentChildQuestions) - 1;  // Subtract 1 for the parent question
+            //             // Initialize the child question count
+            //             $childQuestionCount = count($parentChildQuestions) - 1;  // Subtract 1 for the parent question
                         
-                        // Create the question structure for the child questions
-                        foreach ($parentChildQuestions as $index => $childQuestionText) {
-                            if ($index > 0) {  // The first item is the parent, we skip it
-                                $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
-                                $childQuestionData = [
-                                    'id' => $question->id . "-$index",  // Unique ID for each child question
-                                    'type' => 'MSA',  // Treating as MSA, adjust if needed
-                                    'question' => $QUESTIONNAME,
-                                    'options' => $options  // Use your options logic here
-                                ];
-                                $questionsData[] = $childQuestionData;
+            //             // Create the question structure for the child questions
+            //             foreach ($parentChildQuestions as $index => $childQuestionText) {
+            //                 if ($index > 0) {  // The first item is the parent, we skip it
+            //                     $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
+            //                     $childQuestionData = [
+            //                         'id' => $question->id . "-$index",  // Unique ID for each child question
+            //                         'type' => 'MSA',  // Treating as MSA, adjust if needed
+            //                         'question' => $QUESTIONNAME,
+            //                     ];
+            //                     $questionsData[] = $childQuestionData;
             
-                                $optionArray = json_decode($question->answer,true);
-                                // Add correct answer for each child question
-                                $correctAnswers[] = [
-                                    'id' => $question->id . "-$index",
-                                    'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
-                                    'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-                                ];
-                            }
-                        }
+            //                     $optionArray = json_decode($question->answer,true);
+            //                     // Add correct answer for each child question
+            //                     $correctAnswers[] = [
+            //                         'id' => $question->id . "-$index",
+            //                         'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
+            //                         'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+            //                     ];
+            //                 }
+            //             }
             
-                        // Add the child question count to the exam question (or handle as needed)
-                        $examQuestion->total_child_questions = $childQuestionCount;
-                    }
-                });
-            });
+            //             // Add the child question count to the exam question (or handle as needed)
+            //             $examQuestion->total_child_questions = $childQuestionCount;
+            //         }
+            //     });
+            // });
 
 
 
