@@ -518,10 +518,11 @@ class ExamController extends Controller
                             ];
                             $questionsData[] = $childQuestionData;
 
+                            $optionArray = json_decode($question->answer,true);
                             // Add correct answer for each child question
                             $correctAnswers[] = [
                                 'id' => $question->id . "-$index",
-                                'correct_answer' => $question->answer,  // Use the same answer for each child question
+                                'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
                                 'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
                             ];
                         }
@@ -632,58 +633,6 @@ class ExamController extends Controller
     
             // Handle different question types
             $isCorrect = false;
-
-            // $userAnswer = $answer['answer'];
-            // // In default mode, accumulate total possible marks
-            // if ($examResult->point_type != "manual") {
-            //     $totalMarks += $question->default_marks;
-            // }
-    
-            // // Check correctness based on question type
-            // if ($question->type == 'MSA') {
-            //     $isCorrect = $question->answer == $userAnswer;
-            // } elseif ($question->type == 'MMA') {
-            //     $correctAnswers = json_decode($question->answer, true);
-            //     sort($correctAnswers);
-            //     sort($userAnswer);
-            //     $isCorrect = $userAnswer == $correctAnswers;
-            // } elseif ($question->type == 'TOF') {
-            //     $isCorrect = $userAnswer == $question->answer;
-            // } elseif ($question->type == 'SAQ') {
-            //     $answers = json_decode($question->options);
-            //     $isCorrect = in_array($userAnswer, $answers);
-            // } elseif ($question->type == 'FIB') {
-            //     $correctAnswers = json_decode($question->answer, true);
-            //     sort($correctAnswers);
-            //     sort($userAnswer);
-            //     $isCorrect = $userAnswer == $correctAnswers;
-            // } elseif ($question->type == 'MTF') {
-            //     $correctAnswers = json_decode($question->answer, true);
-            //     foreach ($correctAnswers as $key => $value) {
-            //         if ($userAnswer[$key] != $value) {
-            //             $isCorrect = false;
-            //             break;
-            //         }
-            //     }
-            //     $isCorrect = true;
-            // } elseif ($question->type == 'ORD') {
-            //     $correctAnswers = json_decode($question->answer, true);
-            //     $isCorrect = $userAnswer == $correctAnswers;
-            // } elseif ($question->type == 'EMQ') {
-            //     $correctAnswers = json_decode($question->answer, true);
-            //     sort($userAnswer);
-            //     sort($correctAnswers);
-            //     $isCorrect = $userAnswer == $correctAnswers;
-            // }
-    
-            // if ($isCorrect) {
-            //     $score += $examResult->point_type == "manual" ? $examResult->point : $question->default_marks;
-            //     $correctAnswer += 1;
-            // } else {
-            //     $incorrect += 1;
-            //     $incorrectMarks += $question->default_marks;
-            // }
-
 
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
