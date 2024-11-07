@@ -47,6 +47,7 @@ class DashboardController extends Controller
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
             ->where('exams.status', 1)
+            ->where('exam_schedules.status', 1) 
             ->where(function ($query) use ($assignedExams) {
                 $query->where('exams.is_public', 1)
                     ->orWhereIn('exams.id', $assignedExams);
@@ -157,6 +158,7 @@ class DashboardController extends Controller
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->where('quizzes.status', 1)
                 ->where('quizzes.subcategory_id', $request->category)
+                ->where('quiz_schedules.status', 1) 
                 ->where(function ($query) use ($subscription) {
                     if (!$subscription) {
                         // Show only public quizzes if there is no subscription
@@ -369,6 +371,7 @@ class DashboardController extends Controller
                     $query->where('exams.is_public', 1)
                         ->orWhereIn('exams.id', $assignedExams);
                 })
+                ->where('exam_schedules.status', 1) 
                 ->where('exams.subcategory_id', $request->category) 
                 ->where(function ($query) use ($currentDate, $currentTime) {
                     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
