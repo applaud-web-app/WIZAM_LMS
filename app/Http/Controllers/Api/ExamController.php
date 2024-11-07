@@ -1167,64 +1167,11 @@ class ExamController extends Controller
             $currentDate = now();
             
             // Fetch upcoming exams with schedules
-            // $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-            // ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-            // ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-            // ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-            // ->where('exams.status', 1)
-            // ->where('exam_schedules.status', 1)
-            // ->where(function ($query) use ($assignedExams) {
-            //     $query->where('exams.is_public', 1)
-            //         ->orWhereIn('exams.id', $assignedExams);
-            // })
-            // ->where('exams.subcategory_id', $request->category)
-            // ->select(
-            //     'exams.id',
-            //     'exams.is_free',
-            //     'exams.slug as exam_slug',
-            //     'exams.title as exam_name',
-            //     'exam_types.slug as exam_type_slug',
-            //     'exams.duration_mode',
-            //     'exams.exam_duration',
-            //     'exams.point_mode',
-            //     'exams.point',
-            //     DB::raw('COUNT(questions.id) as total_questions'),
-            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
-            //     'exam_schedules.schedule_type',
-            //     'exam_schedules.start_date',
-            //     'exam_schedules.start_time',
-            //     'exam_schedules.end_date',
-            //     'exam_schedules.end_time',
-            //     'exam_schedules.grace_period'
-            // )
-            // ->groupBy(
-            //     'exams.id',
-            //     'exams.is_free',
-            //     'exam_types.slug',
-            //     'exams.slug',
-            //     'exams.title',
-            //     'exams.duration_mode',
-            //     'exams.exam_duration',
-            //     'exams.point_mode',
-            //     'exams.point',
-            //     'exam_schedules.schedule_type',
-            //     'exam_schedules.start_date',
-            //     'exam_schedules.start_time',
-            //     'exam_schedules.end_date',
-            //     'exam_schedules.end_time',
-            //     'exam_schedules.grace_period'
-            // )
-            // ->havingRaw('COUNT(questions.id) > 0')
-            // ->havingRaw('COUNT(exam_schedules.id) > 0')
-            // ->get();
-
             $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
             ->where('exams.status', 1)
-            ->where('questions.status', 1)
             ->where('exam_schedules.status', 1)
             ->where(function ($query) use ($assignedExams) {
                 $query->where('exams.is_public', 1)
@@ -1241,11 +1188,10 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
-                // Count all questions (regular ones + EMQ with parent + children)
                 DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                     ELSE 1 
-                END) as total_questions'),     
+                END) as total_questions'),  
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                 'exam_schedules.schedule_type',
@@ -1275,6 +1221,63 @@ class ExamController extends Controller
             ->havingRaw('COUNT(questions.id) > 0')
             ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
+
+            // $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            // ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
+            // ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+            // ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+            // ->where('exams.status', 1)
+            // ->where('questions.status', 1)
+            // ->where('exam_schedules.status', 1)
+            // ->where(function ($query) use ($assignedExams) {
+            //     $query->where('exams.is_public', 1)
+            //         ->orWhereIn('exams.id', $assignedExams);
+            // })
+            // ->where('exams.subcategory_id', $request->category)
+            // ->select(
+            //     'exams.id',
+            //     'exams.is_free',
+            //     'exams.slug as exam_slug',
+            //     'exams.title as exam_name',
+            //     'exam_types.slug as exam_type_slug',
+            //     'exams.duration_mode',
+            //     'exams.exam_duration',
+            //     'exams.point_mode',
+            //     'exams.point',
+            //     // Count all questions (regular ones + EMQ with parent + children)
+            //     DB::raw('SUM(CASE 
+            //         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+            //         ELSE 1 
+            //     END) as total_questions'),     
+            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+            //     'exam_schedules.schedule_type',
+            //     'exam_schedules.start_date',
+            //     'exam_schedules.start_time',
+            //     'exam_schedules.end_date',
+            //     'exam_schedules.end_time',
+            //     'exam_schedules.grace_period'
+            // )
+            // ->groupBy(
+            //     'exams.id',
+            //     'exams.is_free',
+            //     'exam_types.slug',
+            //     'exams.slug',
+            //     'exams.title',
+            //     'exams.duration_mode',
+            //     'exams.exam_duration',
+            //     'exams.point_mode',
+            //     'exams.point',
+            //     'exam_schedules.schedule_type',
+            //     'exam_schedules.start_date',
+            //     'exam_schedules.start_time',
+            //     'exam_schedules.end_date',
+            //     'exam_schedules.end_time',
+            //     'exam_schedules.grace_period'
+            // )
+            // ->havingRaw('COUNT(questions.id) > 0')
+            // ->havingRaw('COUNT(exam_schedules.id) > 0')
+            // ->get();
 
 
 
