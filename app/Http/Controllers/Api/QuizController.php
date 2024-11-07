@@ -460,7 +460,11 @@ class QuizController extends Controller
                 $incorrect += 1;
                 continue;
             }
-            $question = Question::find($answer['id']);
+            
+            // $question = Question::find($answer['id']);
+            $questionId = $answer['id'];
+            $question = Question::find(explode("-", $questionId)[0]);
+            
             if (!$question) {
                 $incorrect += 1;
                 continue;
@@ -519,10 +523,14 @@ class QuizController extends Controller
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($userAnswer);
+                    // sort($correctAnswers);
+                    // $isCorrect = $userAnswer == $correctAnswers;
+
                     $correctAnswers = json_decode($question->answer, true);
-                    sort($userAnswer);
-                    sort($correctAnswers);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    $index = (int)explode("-", $questionId)[1] - 1;
+                    $isCorrect = $userAnswer == $correctAnswers[$index];
                 }
         
                 if ($isCorrect) {
