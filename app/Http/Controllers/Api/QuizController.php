@@ -199,23 +199,69 @@ class QuizController extends Controller
                 if ($question->type == "FIB") {
                     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
                     $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
-                } elseif ($question->type == "EMQ") {
-                    $questionText = json_decode($question->question, true);
+                }
+                
+                // elseif ($question->type == "EMQ") {
+                //     $questionText = json_decode($question->question, true);
+                // }
+
+                if($question->type == "EMQ") {
+                    // If EMQ, decode question text to access parent and child questions
+                    $parentChildQuestions = json_decode($question->question, true);
+                    
+                    // Loop through each child question
+                    foreach ($parentChildQuestions as $index => $childQuestionText) {
+                        if ($index > 0) {
+                            // Treat the first question as the parent and others as separate child questions
+                            $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
+                            $childQuestionData = [
+                                'id' => $question->id . "-$index",  // Unique ID for each child question
+                                'type' => 'MSA',  // Treating as MSA as per your request
+                                'question' => $QUESTIONNAME,
+                                'options' => $options
+                            ];
+                            $questionsData[] = $childQuestionData;
+
+                            $optionArray = json_decode($question->answer,true);
+                            // Add correct answer for each child question
+                            $correctAnswers[] = [
+                                'id' => $question->id . "-$index",
+                                'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
+                                'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
+                            ];
+                        }
+                        
+                    }
+                } else {
+                    // Standard question processing for non-EMQ types
+                    $questionsData[] = [
+                        'id' => $question->id,
+                        'type' => $question->type,
+                        'question' => $questionText,
+                        'options' => $options
+                    ];
+
+                    // Add correct answer info
+                    $correctAnswers[] = [
+                        'id' => $question->id,
+                        'correct_answer' => $question->answer,
+                        'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
+                    ];
                 }
     
-                $questionsData[] = [
-                    'id' => $question->id,
-                    'type' => $question->type,
-                    'question' => $questionText,
-                    'options' => $options
-                ];
+                // $questionsData[] = [
+                //     'id' => $question->id,
+                //     'type' => $question->type,
+                //     'question' => $questionText,
+                //     'options' => $options
+                // ];
 
-                // Add correct answer info
-                $correctAnswers[] = [
-                    'id' => $question->id,
-                    'correct_answer' => $question->answer,  // Use answer field
-                    'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
-                ];
+                // // Add correct answer info
+                // $correctAnswers[] = [
+                //     'id' => $question->id,
+                //     'correct_answer' => $question->answer,  // Use answer field
+                //     'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
+                // ];
             }
     
             // Shuffle questions if enabled
