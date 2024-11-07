@@ -1149,16 +1149,6 @@ class ExamController extends Controller
     // }
 
 
-    function countChildQuestionsFromHTML($html) {
-        // Parse the HTML and count the number of child questions
-        $dom = new \DOMDocument();
-        @$dom->loadHTML($html);
-    
-        // You can count the number of <li> tags or any tag that represents a child question.
-        $questions = $dom->getElementsByTagName('li');  // Assuming <li> is used for child questions
-        return count($questions);
-    }
-
     public function examAll(Request $request)
     {
         try {
@@ -1251,12 +1241,7 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
-                DB::raw('SUM(CASE 
-                                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question)
-                                WHEN questions.type = "EMQ" AND NOT JSON_VALID(questions.question) THEN 
-                                    (SELECT COUNT(*) FROM (SELECT DISTINCT child_question FROM question_parts WHERE question_id = questions.id) AS child_questions)
-                                ELSE 1 
-                            END) as total_questions'),
+                DB::raw('COUNT(questions.id) as total_questions'),  // Default total count for regular questions
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                 'exam_schedules.schedule_type',
@@ -1264,7 +1249,12 @@ class ExamController extends Controller
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
-                'exam_schedules.grace_period'
+                'exam_schedules.grace_period',
+                // Count the number of child questions for EMQ (if it's in JSON format)
+                DB::raw('SUM(CASE 
+                                WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1  -- Subtract 1 to avoid counting the parent
+                                ELSE 0 
+                            END) as emq_child_questions')
             )
             ->groupBy(
                 'exams.id',
@@ -1287,23 +1277,40 @@ class ExamController extends Controller
             ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
 
-            // Now, we process the EMQ child questions
             $upcomingExams->each(function ($exam) {
-                // Check each question in the exam
-                $exam->examQuestions->each(function ($examQuestion) {
+                $exam->examQuestions->each(function ($examQuestion) use ($exam) {
                     $question = $examQuestion->questions;
-
-                    if ($question->type == 'EMQ') {
-                        // If it's an EMQ, count the child questions based on the format
-                        if (json_decode($question->question, true)) {
-                            // If it's in JSON format
-                            $childQuestionCount = count(json_decode($question->question, true));  // Count the child questions in the JSON array
-                        } else {
-                            // If it's in HTML format
-                            $childQuestionCount = countChildQuestionsFromHTML($question->question);  // Parse and count child questions from HTML
+            
+                    if ($question->type == "EMQ") {
+                        // Decode JSON to get parent and child questions
+                        $parentChildQuestions = json_decode($question->question, true);
+                        
+                        // Initialize the child question count
+                        $childQuestionCount = count($parentChildQuestions) - 1;  // Subtract 1 for the parent question
+                        
+                        // Create the question structure for the child questions
+                        foreach ($parentChildQuestions as $index => $childQuestionText) {
+                            if ($index > 0) {  // The first item is the parent, we skip it
+                                $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
+                                $childQuestionData = [
+                                    'id' => $question->id . "-$index",  // Unique ID for each child question
+                                    'type' => 'MSA',  // Treating as MSA, adjust if needed
+                                    'question' => $QUESTIONNAME,
+                                    'options' => $options  // Use your options logic here
+                                ];
+                                $questionsData[] = $childQuestionData;
+            
+                                $optionArray = json_decode($question->answer,true);
+                                // Add correct answer for each child question
+                                $correctAnswers[] = [
+                                    'id' => $question->id . "-$index",
+                                    'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
+                                    'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+                                ];
+                            }
                         }
-
-                        // Assign the child question count to the exam question (or handle it in your logic)
+            
+                        // Add the child question count to the exam question (or handle as needed)
                         $examQuestion->total_child_questions = $childQuestionCount;
                     }
                 });
