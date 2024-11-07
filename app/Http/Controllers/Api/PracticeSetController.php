@@ -442,7 +442,7 @@ class PracticeSetController extends Controller
                     'uuid' => $practiceResult->uuid,
                     'questions' => json_decode($practiceResult->questions),
                     'duration' => $remainingDuration . " mins",
-                    'total_time'=> $practice->exam_duration,
+                    'total_time'=> $practiceResult->exam_duration,
                     'points' => $practiceResult->point
                 ]
             ], 200);
