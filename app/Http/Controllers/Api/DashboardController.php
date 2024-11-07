@@ -62,7 +62,10 @@ class DashboardController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
-                DB::raw('COUNT(questions.id) as total_questions'),
+                DB::raw('SUM(CASE 
+                    WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                    ELSE 1 
+                END) as total_questions'),
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                 'exam_schedules.schedule_type',
@@ -321,7 +324,10 @@ class DashboardController extends Controller
                     'exams.exam_duration', 
                     'exams.point_mode', 
                     'exams.point', 
-                    DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'), // Count total questions for each exam
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
                 )
@@ -405,7 +411,10 @@ class DashboardController extends Controller
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
                     'exam_schedules.grace_period',
-                    DB::raw('COUNT(questions.id) as total_questions'), 
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
