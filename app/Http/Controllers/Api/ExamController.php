@@ -302,9 +302,9 @@ class ExamController extends Controller
                     'exams.slug',
                     'exams.subcategory_id',
                     'exams.status',
-                    'exams.duration_mode', // duration_mode
+                    'exams.duration_mode', 
                     'exams.point_mode', 
-                    'exams.exam_duration', // exam_duration
+                    'exams.exam_duration', 
                     'exams.point',
                     'exams.shuffle_questions',
                     'exams.question_view',
@@ -319,8 +319,8 @@ class ExamController extends Controller
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where(function ($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1) // Public exams
-                        ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
+                    $query->where('exams.is_public', 1) 
+                        ->orWhereIn('exams.id', $assignedExams); 
                 })
                 ->where('exams.slug', $slug)
                 ->where('exams.subcategory_id', $request->category)
@@ -392,7 +392,7 @@ class ExamController extends Controller
                 return response()->json(['status' => false, 'error' => 'Maximum Attempt Reached'], 403);
             }
 
-            // Check for ongoing exam
+            // Check for Ongoing Exam
             $ongoingExam = ExamResult::where('user_id', $user->id)
                 ->where('exam_id', $exam->id)
                 ->where('status', 'ongoing') // Correct the status check
@@ -434,6 +434,52 @@ class ExamController extends Controller
             $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
 
             // Prepare structured response data for questions
+            
+            // $questionsData = [];
+            // $correctAnswers = [];
+            // foreach ($exam->examQuestions as $examQuestion) {
+            //     $question = $examQuestion->questions;
+            //     $options = $question->options ? json_decode($question->options, true) : [];
+
+            //     if ($question->type == "MTF" && !empty($question->answer)) {
+            //         $matchOption = json_decode($question->answer, true);
+            //         shuffle($matchOption);
+            //         $options = array_merge($options, $matchOption);
+            //     }
+
+            //     if ($question->type == "ORD") {
+            //         shuffle($options);
+            //     }
+
+            //     // Customize question display for different types
+            //     $questionText = $question->question;
+            //     if ($question->type == "FIB") {
+            //         $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
+            //         $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
+            //     } elseif ($question->type == "EMQ") {
+            //         $questionText = json_decode($question->question, true);
+            //     }
+
+
+            //     // CHANGE EMQ QUESTION TO MSA (as I SAID YOU )
+            //     if ($question->type == "EMQ") {
+            //     }
+
+            //     $questionsData[] = [
+            //         'id' => $question->id,
+            //         'type' => $question->type,
+            //         'question' => $questionText,
+            //         'options' => $options
+            //     ];
+
+            //     // Add correct answer info
+            //     $correctAnswers[] = [
+            //         'id' => $question->id,
+            //         'correct_answer' => $question->answer,  // Use answer field
+            //         'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+            //     ];
+            // }
+
             $questionsData = [];
             $correctAnswers = [];
             foreach ($exam->examQuestions as $examQuestion) {
@@ -456,22 +502,43 @@ class ExamController extends Controller
                     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
                     $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
                 } elseif ($question->type == "EMQ") {
-                    $questionText = json_decode($question->question, true);
+                    // If EMQ, decode question text to access parent and child questions
+                    $parentChildQuestions = json_decode($question->question, true);
+                    
+                    // Loop through each child question
+                    foreach ($parentChildQuestions as $index => $childQuestionText) {
+                        // Treat the first question as the parent and others as separate child questions
+                        $childQuestionData = [
+                            'id' => $question->id . "-$index",  // Unique ID for each child question
+                            'type' => 'MSA',  // Treating as MSA as per your request
+                            'question' => $index === 0 ? "Parent Question: " . $childQuestionText : $childQuestionText,
+                            'options' => $options
+                        ];
+                        $questionsData[] = $childQuestionData;
+
+                        // Add correct answer for each child question
+                        $correctAnswers[] = [
+                            'id' => $question->id . "-$index",
+                            'correct_answer' => $question->answer,  // Use the same answer for each child question
+                            'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+                        ];
+                    }
+                } else {
+                    // Standard question processing for non-EMQ types
+                    $questionsData[] = [
+                        'id' => $question->id,
+                        'type' => $question->type,
+                        'question' => $questionText,
+                        'options' => $options
+                    ];
+
+                    // Add correct answer info
+                    $correctAnswers[] = [
+                        'id' => $question->id,
+                        'correct_answer' => $question->answer,
+                        'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
+                    ];
                 }
-
-                $questionsData[] = [
-                    'id' => $question->id,
-                    'type' => $question->type,
-                    'question' => $questionText,
-                    'options' => $options
-                ];
-
-                // Add correct answer info
-                $correctAnswers[] = [
-                    'id' => $question->id,
-                    'correct_answer' => $question->answer,  // Use answer field
-                    'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-                ];
             }
 
             // Shuffle questions if enabled
