@@ -1295,7 +1295,11 @@ class QuizController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
-                    DB::raw('COUNT(questions.id) as total_questions'),
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'),
+                    // DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                     'quiz_schedules.schedule_type',
