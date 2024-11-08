@@ -1642,13 +1642,7 @@ class ManageTest extends Controller
         return redirect()->back()->with('error', 'Exam Not Found');
     }
 
-    public function deleteExamResult(Request $request){
-        $request->validate([
-            'eq' => 'required'
-        ]);
-    
-        $data = decrypturl($request->eq);
-        $uuid = $data['id'];
+    public function deleteExamResult($uuid){
         $schedule = ExamResult::where('uuid',$uuid)->first();
         if ($schedule) {
             $schedule->delete();
