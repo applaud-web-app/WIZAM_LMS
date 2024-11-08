@@ -30,15 +30,15 @@
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Avg. Percentage</h3>
-              <p>{{$averagePercentage ?? 0}}</p>
+              <p>{{round($averagePercentage,2) ?? 0}}</p>
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Highest Percentage</h3>
-              <p>{{$highestPercentage ?? 0}}</p>
+              <p>{{round($highestPercentage,2) ?? 0}}</p>
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Lowest Percentage</h3>
-              <p>{{$lowestPercentage ?? 0}}</p>
+              <p>{{round($lowestPercentage,2) ?? 0}}</p>
             </div>
           </div>
         </div>
