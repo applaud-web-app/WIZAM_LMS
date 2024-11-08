@@ -639,97 +639,6 @@ class ExamController extends Controller
 
         // Total marks should be fixed in manual mode
         $totalMarks = $examResult->point_type == "manual" ? $examResult->point * count($user_answer) : 0; 
-    
-        // foreach ($user_answer as $answer) {
-        //     if (!isset($answer['id'])) {
-        //         $incorrect += 1;
-        //         continue;
-        //     }
-        //     // $question = Question::find($answer['id']);
-
-        //     $questionId = $answer['id'];
-        //     $question = Question::find(explode("-", $questionId)[0]);
-
-        //     if (!$question) {
-        //         $incorrect += 1;
-        //         continue;
-        //     }
-    
-        //     // Handle different question types
-        //     $isCorrect = false;
-
-        //     if (isset($answer['answer'])) {
-        //         $userAnswer = $answer['answer'];
-        //         // In default mode, accumulate total possible marks
-        //         if ($examResult->point_type != "manual") {
-        //             $totalMarks += $question->default_marks;
-        //         }
-        
-        //         // Check correctness based on question type
-        //         if ($question->type == 'MSA') {
-        //             $isCorrect = $question->answer == $userAnswer;
-        //         } elseif ($question->type == 'MMA') {
-        //             $correctAnswers = json_decode($question->answer, true);
-        //             sort($correctAnswers);
-        //             sort($userAnswer);
-        //             $isCorrect = $userAnswer == $correctAnswers;
-        //         } elseif ($question->type == 'TOF') {
-        //             $isCorrect = $userAnswer == $question->answer;
-        //         } elseif ($question->type == 'SAQ') {
-        //             $isCorrect = false;
-        //             if (is_string($userAnswer) && is_array($question->options)) {
-        //                 $answers = json_decode($question->options);
-        //                 foreach ($answers as $option) {
-        //                     // Convert both the option and the user answer to lowercase and trim them
-        //                     $sanitizedOption = strtolower(trim(strip_tags($option)));
-        //                     $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
-
-        //                     // Check if the sanitized option matches the sanitized user answer
-        //                     if ($sanitizedUserAnswer == $sanitizedOption) {
-        //                         $isCorrect = true;
-        //                         break;  // Exit the loop once a match is found
-        //                     }
-        //                 }
-        //             }
-        //         } elseif ($question->type == 'FIB') {
-        //             $correctAnswers = json_decode($question->answer, true);
-        //             sort($correctAnswers);
-        //             sort($userAnswer);
-        //             $isCorrect = $userAnswer == $correctAnswers;
-        //         } elseif ($question->type == 'MTF') {
-        //             $correctAnswers = json_decode($question->answer, true);
-        //             $isCorrect = true; // Assume correct until proven otherwise
-        //             foreach ($correctAnswers as $key => $value) {
-        //                 if (!isset($userAnswer[$key]) || $userAnswer[$key] != $value) {
-        //                     $isCorrect = false; 
-        //                     break;
-        //                 }
-        //             }
-        //         } elseif ($question->type == 'ORD') {
-        //             $correctAnswers = json_decode($question->answer, true);
-        //             $isCorrect = $userAnswer == $correctAnswers;
-        //         } elseif ($question->type == 'EMQ') {
-        //             $correctAnswers = json_decode($question->answer, true);
-        //             $index = (int)explode("-", $questionId)[1] - 1;
-        //             $isCorrect = $userAnswer == $correctAnswers[$index];
-        //         }
-        
-        //         if ($isCorrect) {
-        //             $score += $examResult->point_type == "manual" ? $examResult->point : $question->default_marks;
-        //             $correctAnswer += 1;
-        //         } else {
-        //             $incorrect += 1;
-        //             if (isset($question->default_marks)) {
-        //                 $incorrectMarks += $question->default_marks;
-        //             }
-        //         }
-        //     }else{
-        //         $incorrect += 1;
-        //         if (isset($question->default_marks)) {
-        //             $incorrectMarks += $question->default_marks;
-        //         }
-        //     }
-        // }
 
         foreach ($user_answer as $answer) { 
             if (!isset($answer['id'])) {
@@ -847,6 +756,7 @@ class ExamController extends Controller
         // Update exam result with correct/incorrect answers and student percentage
         $examResult->status = "complete";
         $examResult->updated_at = now();
+        $examResult->score = $score;
         $examResult->answers = json_encode($user_answer, true);
         $examResult->incorrect_answer = $incorrect;
         $examResult->correct_answer = $correctAnswer;
