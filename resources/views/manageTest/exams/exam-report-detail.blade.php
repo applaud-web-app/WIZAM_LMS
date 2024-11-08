@@ -92,7 +92,7 @@
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Time Taken</h3>
                 <p> @php
-                    $startTime = strtotime($examResult->start_time);
+                    $startTime = strtotime($examResult->created_at);
                     $endTime = strtotime($examResult->updated_at);
                     $timeTaken = $endTime - $startTime;
         
