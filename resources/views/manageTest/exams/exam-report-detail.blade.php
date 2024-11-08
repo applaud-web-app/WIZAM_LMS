@@ -52,11 +52,11 @@
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
-                    <p>{{$examResult->student_percentage}}/{{$examResult->pass_percentage}}</p>
+                    <p>{{round($examResult->student_percentage,2)}}/{{$examResult->pass_percentage}}</p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">START TIME</h3>
-                    <p>{{date('d/m/Y', strtotime($examResult->start_time)) . ", " . date('H:i:s A', strtotime($examResult->start_time))}}</p>
+                    <p>{{date('d/m/Y', strtotime($examResult->created_at)) . ", " . date('H:i:s A', strtotime($examResult->created_at))}}</p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">END TIME</h3>
