@@ -605,7 +605,7 @@ class ExamController extends Controller
                     'total_time'=> $examResult->exam_duration,
                     'duration' => $remainingDuration . " mins",
                     'points' => $examResult->point,
-                    'saved-answers'=> $ongoingExam->answers,
+                    'saved-answers'=> $examResult->answers,
                     'question_view' => $exam->question_view == 1 ? "enable" : "disable",
                     'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
                 ]
