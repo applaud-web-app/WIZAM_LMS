@@ -418,7 +418,7 @@ class ExamController extends Controller
                             'total_time'=> $ongoingExam->exam_duration,
                             'duration' => $remainingDuration . " mins",
                             'points' => $ongoingExam->point,
-                            'saved-answers'=> $ongoingExam->answers,
+                            'saved-answers'=> json_decode($ongoingExam->answers),
                             'question_view' => $exam->question_view == 1 ? "enable" : "disable",
                             'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
                         ]
@@ -605,7 +605,7 @@ class ExamController extends Controller
                     'total_time'=> $examResult->exam_duration,
                     'duration' => $remainingDuration . " mins",
                     'points' => $examResult->point,
-                    'saved-answers'=> $examResult->answers,
+                    'saved-answers'=> json_decode($examResult->answers),
                     'question_view' => $exam->question_view == 1 ? "enable" : "disable",
                     'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
                 ]
