@@ -616,7 +616,6 @@ class ExamController extends Controller
         }
     }
 
-
     public function finishExam(Request $request, $uuid){
         // USER RESPONSE
         $user_answer = $request->input('answers');

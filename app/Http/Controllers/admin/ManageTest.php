@@ -24,6 +24,7 @@ use App\Models\ExamSchedule;
 use App\Models\UserGroup;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ExamResult;
 
 class ManageTest extends Controller
 {
@@ -819,10 +820,12 @@ class ManageTest extends Controller
                 ->addColumn('action', function ($section) {
                     $parms = "id=".$section->id;
                     $editUrl = route('exam-detail',['id'=>$section->id]);
+                    $editUrl = route('overall-report',['id'=>$section->id]);
                     $deleteUrl = encrypturl(route('delete-exam'),$parms);
                     return '
                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
-                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                        <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('created_at', function($row) {
                     return date('d/m/Y', strtotime($row->created_at));
@@ -1547,5 +1550,110 @@ class ManageTest extends Controller
         return redirect()->back()->with('error', 'Something Went Wrong');
     }
 
+    public function overallReport($id)
+    {
+        // Check for permission
+        if (!auth()->user()->can('exams')) { // Assuming 'exams' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+    
+        // Find the exam with active status
+        $exam = Exam::where('status', 1)->find($id);
+        if ($exam) {
+            // Get all results for the exam
+            $examResult = ExamResult::where('exam_id', $exam->id)->get();
+    
+            // Calculate required data
+            $totalAttempt = $examResult->count();
+            $passedExam = $examResult->where('student_percentage', '>=', $exam->pass_percentage)->count();
+            $failedExam = $examResult->where('student_percentage', '<', $exam->pass_percentage)->count();
+            $averagePercentage = $totalAttempt > 0 ? $examResult->avg('student_percentage') : 0;
+            $highestPercentage = $examResult->max('student_percentage');
+            $lowestPercentage = $examResult->min('student_percentage');
+    
+            // Return the view with all required data
+            return view('manageTest.exams.exam-overall-report', compact(
+                'exam', 'totalAttempt', 'passedExam', 'failedExam', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
+            ));
+        }
+    
+        // Redirect if the exam is not found
+        return redirect()->back()->with('error', 'Exam Not Found');
+    }
+
+
+    public function detailedReport(Request $request, $id)
+    {
+        // Check for permission
+        if (!auth()->user()->can('exams')) { // Assuming 'exams' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        // Find the exam with active status
+        $exam = Exam::where('id', $id)->where('status', 1)->first(); 
+        if ($exam) {
+            if ($request->ajax()) {
+                $sections = ExamResult::with('user')->where('exam_id',$id);
+                return DataTables::of($sections)
+                    ->addIndexColumn()
+                    ->addColumn('action', function ($section) {
+                        $parms = "id=" . $section->uuid;
+                        $viewUrl = route('exam-report-detail',[$section->uuid]);
+                        $deleteUrl = encrypturl(route('delete-exam-schedules'), $parms); // Update route name
+                        return '
+                            <a href="' . $viewUrl . '" class="cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>
+                            <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                    })
+                    ->addColumn('task_taker', function($row) {
+                        if (isset($row->user->name)) {
+                            return $row->user->name;
+                        } else {
+                            return "User";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('completed_on', function($row) {
+                        if ($row->status == "complete") {
+                            return date('d/m/Y', strtotime($row->updated_at)) . ", " . date('H:i:s A', strtotime($row->updated_at));
+                        } else {
+                            return "Resume";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('percenatge', function($row) {
+                        if (isset($row->student_percentage)) {
+                            return $row->student_percentage ?? 0;
+                        } else {
+                            return 0;  // Placeholder text
+                        }
+                    })
+                    ->addColumn('status', function($row) {
+                        // Determine the status color and text based on `status`
+                        $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
+                        $statusText = $row->student_percentage >= $row->pass_percentage ? 'PASS' : 'FAIL';
+                        // Create the status badge HTML
+                        return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                    })
+                    ->rawColumns(['status', 'percenatge', 'completed_on', 'task_taker', 'action'])
+                    ->make(true);
+            }
+            return view('manageTest.exams.detailed-report',compact('exam'));
+        }
+    
+        // Redirect if the exam is not found
+        return redirect()->back()->with('error', 'Exam Not Found');
+    }
+
+    public function examReportDetail($uuid){
+        
+        // Check for permission
+        if (!auth()->user()->can('exams')) { // Assuming 'exams' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        $examResult = ExamResult::with('user','exam')->where('uuid',$uuid)->first();
+        if($examResult){
+            return view('manageTest.exams.exam-report-detail',compact('examResult'));
+        }
+        return redirect()->back()->with('error', 'Exam Result Not Found');
+    }
 
 }

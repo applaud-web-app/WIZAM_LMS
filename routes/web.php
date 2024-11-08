@@ -351,6 +351,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/save-exams', 'saveExams')->name('save-exams');
         Route::get('/delete-exam', 'deleteExam')->name('delete-exam');
 
+
+        Route::get('/overall-report/{id}', 'overallReport')->name('overall-report');
+        Route::get('/detailed-report/{id}', 'detailedReport')->name('detailed-report');
+        Route::get('/exam-report-detail/{uuid}', 'examReportDetail')->name('exam-report-detail');
+
         Route::get('/exam/{id}/detail', 'examDetail')->name('exam-detail');
         Route::post('/exam/{id}/detail', 'updateExamDetail')->name('update-exam-detail');
 
