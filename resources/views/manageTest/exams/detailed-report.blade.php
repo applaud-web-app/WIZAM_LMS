@@ -91,4 +91,21 @@
         });
     });
 </script>
+
+<script>
+    $(document).ready(function(){
+         // When delete item is clicked, store the URL in the confirm button
+         $(document).on('click', '.deleteItem', function(){
+             const delUrl = $(this).data('url');
+             console.log(delUrl);
+             $('#confirmDelete').data('url', delUrl); // Use data method to set the URL
+         });
+ 
+         // When confirm delete is clicked, redirect to the URL
+         $(document).on('click', '#confirmDelete', function(){
+             const delUrl = $(this).data('url'); // Use data method to get the URL
+             window.location.href = delUrl;
+         });
+     });
+</script>
 @endpush
