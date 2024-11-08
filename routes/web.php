@@ -355,6 +355,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/overall-report/{id}', 'overallReport')->name('overall-report');
         Route::get('/detailed-report/{id}', 'detailedReport')->name('detailed-report');
         Route::get('/exam-report-detail/{uuid}', 'examReportDetail')->name('exam-report-detail');
+        Route::get('/delete-exam-result/{uuid}', 'deleteExamResult')->name('delete-exam-result');
 
         Route::get('/exam/{id}/detail', 'examDetail')->name('exam-detail');
         Route::post('/exam/{id}/detail', 'updateExamDetail')->name('update-exam-detail');

@@ -1599,7 +1599,7 @@ class ManageTest extends Controller
                     ->addColumn('action', function ($section) {
                         $parms = "id=" . $section->uuid;
                         $viewUrl = route('exam-report-detail',[$section->uuid]);
-                        $deleteUrl = encrypturl(route('delete-exam-schedules'), $parms); // Update route name
+                        $deleteUrl = encrypturl(route('delete-exam-result'), $parms); // Update route name
                         return '
                             <a href="' . $viewUrl . '" class="cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>
                             <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
@@ -1640,6 +1640,22 @@ class ManageTest extends Controller
     
         // Redirect if the exam is not found
         return redirect()->back()->with('error', 'Exam Not Found');
+    }
+
+    public function deleteExamResult(Request $request){
+        $request->validate([
+            'eq' => 'required'
+        ]);
+    
+        $data = decrypturl($request->eq);
+        $uuid = $data['id'];
+        $schedule = ExamResult::where('uuid',$uuid)->first();
+        if ($schedule) {
+            $schedule->delete();
+            return redirect()->back()->with('success', 'Exam Removed Successfully');
+        }
+        
+        return redirect()->back()->with('error', 'Something Went Wrong');
     }
 
     public function examReportDetail($uuid){
