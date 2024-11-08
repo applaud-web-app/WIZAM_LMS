@@ -1599,7 +1599,7 @@ class ManageTest extends Controller
                     ->addColumn('action', function ($section) {
                         $parms = "id=" . $section->uuid;
                         $viewUrl = route('exam-report-detail',[$section->uuid]);
-                        $deleteUrl = encrypturl(route('delete-exam-result'), $parms); // Update route name
+                        $deleteUrl = route('exam-report-detail',[$section->uuid]); // Update route name
                         return '
                             <a href="' . $viewUrl . '" class="cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>
                             <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
