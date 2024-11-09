@@ -283,6 +283,7 @@ class CmsController extends Controller
                 'exams.exam_duration',
                 'exams.subcategory_id',
                 'sub_categories.name',
+                'exam_schedules.id as schedule_id',
                 'exam_schedules.schedule_type',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
@@ -298,12 +299,14 @@ class CmsController extends Controller
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.favourite' => 1, 'exams.status' => 1])
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id', 'sub_categories.name','exam_schedules.schedule_type',
+                'exam_schedules.id',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
                 'exam_schedules.grace_period')
             ->orderBy('exams.created_at', 'desc') // Order by exam created_at
+            ->where('exam_schedules.status', 1)
             ->where(['exams.slug'=>$slug,'exams.status'=>1])->first();
 
             // Check if the exam exists
