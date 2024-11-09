@@ -317,28 +317,15 @@ class DashboardController extends Controller
 
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
-
-            // Fetch the ongoing exam results for the user
-            $examResults = ExamResult::where('end_time', '>', $current_time)
-                ->where('user_id', $user->id)
-                ->where('status', 'ongoing')
-                ->pluck('schedule_id', 'exam_id');
-            
-            // Specify the schedule ID you want to retrieve (e.g., from user input or a fixed value)
-            $specificScheduleId = $request->schedule_id;
-            
-            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                ->join('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-                ->select(
-                    'exam_types.slug as exam_type_slug',
-                    'exams.slug',
-                    'exams.title',
-                    'exams.duration_mode',
-                    'exams.exam_duration',
-                    'exams.point_mode',
-                    'exams.point',
+            $examResult = ExamResult::where('end_time', '>', $current_time)->where('user_id',$user->id)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
+            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')->select(
+                    'exam_types.slug as exam_type_slug', 
+                    'exams.slug', 
+                    'exams.title', 
+                    'exams.duration_mode', 
+                    'exams.exam_duration', 
+                    'exams.point_mode', 
+                    'exams.point', 
                     'exam_schedules.id as schedule_id',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
@@ -347,43 +334,25 @@ class DashboardController extends Controller
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
                 )
-                ->whereIn('exams.id', $examResults->keys()) // Filter exams by matching IDs from examResult
-                ->where('exam_schedules.id', $specificScheduleId) // Filter by specific schedule ID
-                ->where('exams.subcategory_id', $request->category)
-                ->where('exams.status', 1)
-                ->where('exam_schedules.status', 1)
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+                ->whereIn('exams.id', $examResult) // Filter exams by matching IDs from examResult
+                ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
+                ->where('exams.status', 1) // Filter by exam status
                 ->groupBy(
-                    'exam_types.slug',
-                    'exams.slug',
-                    'exams.id',
-                    'exams.title',
-                    'exams.duration_mode',
-                    'exams.exam_duration',
-                    'exams.point_mode',
-                    'exams.point',
-                    'exam_schedules.id'
-                )
+                    'exam_schedules.id',
+                    'exam_types.slug', 
+                    'exams.slug', 
+                    'exams.id', 
+                    'exams.title', 
+                    'exams.duration_mode', 
+                    'exams.exam_duration', 
+                    'exams.point_mode', 
+                    'exams.point'
+                ) // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-                ->get()
-                ->map(function ($exam) use ($examResults) {
-                    $isResume = $examResults->get($exam->exam_id) == $exam->schedule_id;
-            
-                    return [
-                        'exam_type_slug' => $exam->exam_type_slug,
-                        'slug' => $exam->slug,
-                        'title' => $exam->title,
-                        'duration_mode' => $exam->duration_mode,
-                        'exam_duration' => $exam->exam_duration,
-                        'point_mode' => $exam->point_mode,
-                        'point' => $exam->point,
-                        'schedule_id' => $exam->schedule_id,
-                        'total_questions' => $exam->total_questions,
-                        'total_marks' => $exam->total_marks,
-                        'total_time' => $exam->total_time,
-                        'is_resume' => $isResume,
-                    ];
-                });
-
+                ->get();
 
             ////////// ------ UPCOMING EXAM ------ //////////
 
@@ -395,7 +364,7 @@ class DashboardController extends Controller
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
 
-            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Ensure only exams with schedules are included
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')

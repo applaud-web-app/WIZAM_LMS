@@ -820,12 +820,12 @@ class ManageTest extends Controller
                 ->addColumn('action', function ($section) {
                     $parms = "id=".$section->id;
                     $editUrl = route('exam-detail',['id'=>$section->id]);
-                    $editUrl = route('overall-report',['id'=>$section->id]);
+                    $overall = route('overall-report',['id'=>$section->id]);
                     $deleteUrl = encrypturl(route('delete-exam'),$parms);
                     return '
                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
                         <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>
-                        <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
+                        <a href="'.$overall.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('created_at', function($row) {
                     return date('d/m/Y', strtotime($row->created_at));
