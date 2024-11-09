@@ -283,6 +283,7 @@ class ExamController extends Controller
             // Validate incoming request data
             $request->validate([
                 'category' => 'required|integer',
+                'schedule_id'  => 'required',
             ]);
 
             // Fetch the exam IDs assigned to the current user
@@ -395,6 +396,7 @@ class ExamController extends Controller
             // Check for Ongoing Exam
             $ongoingExam = ExamResult::where('user_id', $user->id)
                 ->where('exam_id', $exam->id)
+                ->where('schedule_id',$request->schedule_id)
                 ->where('status', 'ongoing') // Correct the status check
                 ->latest('created_at')
                 ->first();
@@ -579,6 +581,7 @@ class ExamController extends Controller
                 'uuid' => uniqid(), // Generate unique identifier
                 'subcategory_id' => $exam->subcategory_id,
                 'user_id' => $user->id,
+                'schedule_id'=>$request->schedule_id,
                 'questions' => json_encode($questionsData, true),
                 'correct_answers' => json_encode($correctAnswers, true),
                 'start_time' => $startTime,
