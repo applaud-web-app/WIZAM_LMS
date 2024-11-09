@@ -1141,6 +1141,7 @@ class ExamController extends Controller
                 END) as total_questions'),  
                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                'exam_schedules.id as schedule_id',
                 'exam_schedules.schedule_type',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
@@ -1158,6 +1159,7 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
+                'exam_schedules.id',
                 'exam_schedules.schedule_type',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
@@ -1233,6 +1235,7 @@ class ExamController extends Controller
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
                         'schedules' => [
+                            'schedule_id'=>$exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
