@@ -1212,17 +1212,63 @@ class ExamController extends Controller
                 }
             }
 
-            $current_time = now();
-            $resumedExam = ExamResult::where('end_time', '>', $current_time)->where('user_id', $user->id)
-            ->where('status', 'ongoing')
-            ->pluck('exam_id')
-            ->toArray();
+            // $current_time = now();
+            // $resumedExam = ExamResult::where('end_time', '>', $current_time)->where('user_id', $user->id)
+            // ->where('status', 'ongoing')
+            // ->pluck('exam_id')
+            // ->toArray();
 
+            // // Return success JSON response with upcoming exams and schedules
+            // return response()->json([
+            //     'status' => true,
+            //     'data' => $upcomingExams->map(function ($exam) use($resumedExam){
+            //         $isResume = in_array($exam->id, $resumedExam);
+            //         return [
+            //             'id' => $exam->id,
+            //             'exam_type_slug' => $exam->exam_type_slug,
+            //             'slug' => $exam->exam_slug,
+            //             'title' => $exam->exam_name,
+            //             'duration_mode' => $exam->duration_mode,
+            //             'exam_duration' => $exam->exam_duration,
+            //             'point_mode' => $exam->point_mode,
+            //             'point' => $exam->point,
+            //             'is_free' => $exam->is_free,
+            //             'total_questions' => $exam->total_questions,
+            //             'total_marks' => $exam->total_marks,
+            //             'total_time' => $exam->total_time,
+            //             'is_resume' => $isResume,
+            //             'schedules' => [
+            //                 'schedule_id'=>$exam->schedule_id,
+            //                 'schedule_type' => $exam->schedule_type,
+            //                 'start_date' => $exam->start_date,
+            //                 'start_time' => $exam->start_time,
+            //                 'end_date' => $exam->end_date,
+            //                 'end_time' => $exam->end_time,
+            //                 'grace_period' => $exam->grace_period,
+            //             ],
+            //             'resumedExam'=>json_encode($resumedExam)
+            //         ];
+            //     })
+            // ], 200);
+
+            $current_time = now();
+            // Fetch ongoing exam results
+            $examResults = ExamResult::where('end_time', '>', $current_time)
+                ->where('user_id', $user->id)
+                ->where('status', 'ongoing')
+                ->get();
+            // Create a map for quick lookup
+            $examResultExamScheduleMap = [];
+            foreach ($examResults as $examResult) {
+                $key = $examResult->exam_id . '_' . $examResult->schedule_id;
+                $examResultExamScheduleMap[$key] = true;
+            }
             // Return success JSON response with upcoming exams and schedules
             return response()->json([
                 'status' => true,
-                'data' => $upcomingExams->map(function ($exam) use($resumedExam){
-                    $isResume = in_array($exam->id, $resumedExam);
+                'data' => $upcomingExams->map(function ($exam) use ($examResultExamScheduleMap) {
+                    $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
+                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
                     return [
                         'id' => $exam->id,
                         'exam_type_slug' => $exam->exam_type_slug,
@@ -1238,7 +1284,7 @@ class ExamController extends Controller
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
                         'schedules' => [
-                            'schedule_id'=>$exam->schedule_id,
+                            'schedule_id' => $exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
@@ -1246,7 +1292,6 @@ class ExamController extends Controller
                             'end_time' => $exam->end_time,
                             'grace_period' => $exam->grace_period,
                         ],
-                        'resumedExam'=>json_encode($resumedExam)
                     ];
                 })
             ], 200);
