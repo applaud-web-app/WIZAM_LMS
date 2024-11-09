@@ -318,6 +318,7 @@ class DashboardController extends Controller
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
             $examResult = ExamResult::where('end_time', '>', $current_time)->where('user_id',$user->id)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
+
             $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')->select(
                     'exam_types.slug as exam_type_slug', 
                     'exams.slug', 
@@ -340,6 +341,7 @@ class DashboardController extends Controller
                 ->whereIn('exams.id', $examResult) // Filter exams by matching IDs from examResult
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
                 ->where('exams.status', 1) // Filter by exam status
+                ->where('exam_schedules.status', 1)
                 ->groupBy(
                     'exam_schedules.id',
                     'exam_types.slug', 
@@ -364,7 +366,7 @@ class DashboardController extends Controller
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
 
-            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Ensure only exams with schedules are included
+            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
