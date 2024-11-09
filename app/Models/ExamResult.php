@@ -16,6 +16,8 @@ class ExamResult extends Model
     
     protected $fillable = [
         'exam_id',
+        'schedule_id',
+        'score',
         'point_type',
         'correct_answers',
         'subcategory_id',
