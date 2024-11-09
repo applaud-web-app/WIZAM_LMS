@@ -519,7 +519,7 @@ class DashboardController extends Controller
                 'average_exam' => $averageScore ?? 0,
                 // 'exams' => $examData,
                 // 'quizzes' => $quizData,
-                'resumedExam' => $resumedExam,
+                'resumedExam' => $resumedExams,
                 'upcomingExams'=>$upcomingExams,
                 'calenderExam'=>$data,
                 'calenderQuiz'=>$data2
