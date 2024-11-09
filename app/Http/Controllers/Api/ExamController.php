@@ -1215,7 +1215,7 @@ class ExamController extends Controller
             // Return success JSON response with upcoming exams and schedules
             return response()->json([
                 'status' => true,
-                'data' => $upcomingExams->map(function ($exam) {
+                'data' => $upcomingExams->map(function ($exam) use($resumedExam){
                     $isResume = in_array($exam->id, $resumedExam);
                     return [
                         'id' => $exam->id,
