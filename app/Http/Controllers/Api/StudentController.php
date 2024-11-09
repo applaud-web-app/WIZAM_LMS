@@ -329,10 +329,25 @@ class StudentController extends Controller
                     }
                     return $exam;
                 });
+
+                $current_time = now();
+                // Fetch ongoing exam results
+                $examResults = ExamResult::where('end_time', '>', $current_time)
+                    ->where('user_id', $user->id)
+                    ->where('status', 'ongoing')
+                    ->get();
+                // Create a map for quick lookup
+                $examResultExamScheduleMap = [];
+                foreach ($examResults as $examResult) {
+                    $key = $examResult->exam_id . '_' . $examResult->schedule_id;
+                    $examResultExamScheduleMap[$key] = true;
+                }
     
                 foreach ($examData as $exam) {
                     // Format the total time
                     $formattedTime = $this->formatTime($exam->total_time);
+                    $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
+                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
     
                     // Group exams by exam type slug
                     if (!isset($formattedExamData[$examType->slug])) {
@@ -351,6 +366,7 @@ class StudentController extends Controller
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
+                        'is_resume' =>$isResume,
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,
