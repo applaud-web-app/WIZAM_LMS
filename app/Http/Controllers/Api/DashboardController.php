@@ -318,14 +318,16 @@ class DashboardController extends Controller
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
 
-            // Fetch only exam_id and schedule_id for ongoing exams for the user
+            // Fetch the ongoing exam results for the user
             $examResults = ExamResult::where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
-                ->pluck('schedule_id', 'exam_id'); // Use pluck to retrieve exam_id and schedule_id only
-
-            // Query the exams with the specific conditions
-            $resumedExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                ->pluck('schedule_id', 'exam_id');
+            
+            // Specify the schedule ID you want to retrieve (e.g., from user input or a fixed value)
+            $specificScheduleId = $request->schedule_id;
+            
+            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                 ->join('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
@@ -346,11 +348,11 @@ class DashboardController extends Controller
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
                 )
                 ->whereIn('exams.id', $examResults->keys()) // Filter exams by matching IDs from examResult
+                ->where('exam_schedules.id', $specificScheduleId) // Filter by specific schedule ID
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
                 ->where('exam_schedules.status', 1)
                 ->groupBy(
-                    'exam_schedules.id',
                     'exam_types.slug',
                     'exams.slug',
                     'exams.id',
@@ -358,14 +360,14 @@ class DashboardController extends Controller
                     'exams.duration_mode',
                     'exams.exam_duration',
                     'exams.point_mode',
-                    'exams.point'
+                    'exams.point',
+                    'exam_schedules.id'
                 )
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
                 ->get()
                 ->map(function ($exam) use ($examResults) {
-                    // Check if this exam and schedule exist in the retrieved exam results
                     $isResume = $examResults->get($exam->exam_id) == $exam->schedule_id;
-
+            
                     return [
                         'exam_type_slug' => $exam->exam_type_slug,
                         'slug' => $exam->slug,
@@ -519,7 +521,7 @@ class DashboardController extends Controller
                 'average_exam' => $averageScore ?? 0,
                 // 'exams' => $examData,
                 // 'quizzes' => $quizData,
-                'resumedExam' => $resumedExams,
+                'resumedExam' => $resumedExam,
                 'upcomingExams'=>$upcomingExams,
                 'calenderExam'=>$data,
                 'calenderQuiz'=>$data2
