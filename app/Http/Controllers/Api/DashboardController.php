@@ -368,68 +368,70 @@ class DashboardController extends Controller
                 })
                 ->toArray();
 
-                // Prepare array of pairs (exam_id, schedule_id) for filtering
-                $examSchedulePairs = array_map(function ($examId, $scheduleId) {
-                    return ['exam_schedules.exam_id' => $examId, 'exam_schedules.id' => $scheduleId];
-                }, array_keys($examResult), $examResult);
+            // Retrieve exams along with their details, filtering for specific schedule IDs
+            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                ->select(
+                    'exam_types.slug as exam_type_slug', 
+                    'exams.slug', 
+                    'exams.title', 
+                    'exams.duration_mode', 
+                    'exams.exam_duration', 
+                    'exams.point_mode', 
+                    'exams.point', 
+                    'exam_schedules.id as schedule_id',
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'), // Count total questions for each exam
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
+                )
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+                ->where(function ($query) use ($examResult) {
+                    foreach ($examResult as $examId => $scheduleId) {
+                        $query->orWhere(function ($subQuery) use ($examId, $scheduleId) {
+                            $subQuery->where('exam_schedules.exam_id', $examId)
+                                    ->where('exam_schedules.id', $scheduleId);
+                        });
+                    }
+                })
+                ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
+                ->where('exams.status', 1) // Filter by exam status
+                ->where('exam_schedules.status', 1)
+                ->groupBy(
+                    'exam_schedules.id',
+                    'exam_types.slug', 
+                    'exams.slug', 
+                    'exams.id', 
+                    'exams.title', 
+                    'exams.duration_mode', 
+                    'exams.exam_duration', 
+                    'exams.point_mode', 
+                    'exams.point'
+                ) // Group by necessary fields
+                ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
+                ->get()
+                ->map(function ($exam) use ($examResult) {
+                    // Set is_resume to true if the exam and schedule match in $examResult
+                    $isResume = isset($examResult[$exam->id]) && $examResult[$exam->id] == $exam->schedule_id;
 
-                // Retrieve exams along with their details, filtering for specific schedule IDs
-                $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                    ->select(
-                        'exam_types.slug as exam_type_slug', 
-                        'exams.slug', 
-                        'exams.title', 
-                        'exams.duration_mode', 
-                        'exams.exam_duration', 
-                        'exams.point_mode', 
-                        'exams.point', 
-                        'exam_schedules.id as schedule_id',
-                        DB::raw('SUM(CASE 
-                            WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
-                            ELSE 1 
-                        END) as total_questions'), // Count total questions for each exam
-                        DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-                        DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-                    )
-                    ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-                    ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-                    ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-                    ->whereIn(DB::raw('(exam_schedules.exam_id, exam_schedules.id)'), $examSchedulePairs) // Filter by specific (exam_id, schedule_id) pairs
-                    ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-                    ->where('exams.status', 1) // Filter by exam status
-                    ->where('exam_schedules.status', 1)
-                    ->groupBy(
-                        'exam_schedules.id',
-                        'exam_types.slug', 
-                        'exams.slug', 
-                        'exams.id', 
-                        'exams.title', 
-                        'exams.duration_mode', 
-                        'exams.exam_duration', 
-                        'exams.point_mode', 
-                        'exams.point'
-                    ) // Group by necessary fields
-                    ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-                    ->get()
-                    ->map(function ($exam) use ($examResult) {
-                        // Set is_resume to true if the exam and schedule match in $examResult
-                        $isResume = isset($examResult[$exam->id]) && $examResult[$exam->id] == $exam->schedule_id;
-
-                        return [
-                            'exam_type_slug' => $exam->exam_type_slug,
-                            'slug' => $exam->slug,
-                            'title' => $exam->title,
-                            'duration_mode' => $exam->duration_mode,
-                            'exam_duration' => $exam->exam_duration,
-                            'point_mode' => $exam->point_mode,
-                            'point' => $exam->point,
-                            'schedule_id' => $exam->schedule_id,
-                            'total_questions' => $exam->total_questions,
-                            'total_marks' => $exam->total_marks,
-                            'total_time' => $exam->total_time,
-                            'is_resume' => $isResume,
-                        ];
-                    });
+                    return [
+                        'exam_type_slug' => $exam->exam_type_slug,
+                        'slug' => $exam->slug,
+                        'title' => $exam->title,
+                        'duration_mode' => $exam->duration_mode,
+                        'exam_duration' => $exam->exam_duration,
+                        'point_mode' => $exam->point_mode,
+                        'point' => $exam->point,
+                        'schedule_id' => $exam->schedule_id,
+                        'total_questions' => $exam->total_questions,
+                        'total_marks' => $exam->total_marks,
+                        'total_time' => $exam->total_time,
+                        'is_resume' => $isResume,
+                    ];
+                });
 
             ////////// ------ UPCOMING EXAM ------ //////////
 
