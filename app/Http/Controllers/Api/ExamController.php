@@ -1207,7 +1207,8 @@ class ExamController extends Controller
                 }
             }
 
-            $resumedExam = ExamResult::where('user_id', $user->id)
+            $current_time = now();
+            $resumedExam = ExamResult::where('end_time', '>', $current_time)->where('user_id', $user->id)
             ->where('status', 'ongoing')
             ->pluck('exam_id')
             ->toArray();
