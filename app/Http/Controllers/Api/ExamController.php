@@ -1239,7 +1239,7 @@ class ExamController extends Controller
                             'end_time' => $exam->end_time,
                             'grace_period' => $exam->grace_period,
                         ],
-                        'resumedExam'=>json_decode($resumedExam)
+                        'resumedExam'=>json_encode($resumedExam)
                     ];
                 })
             ], 200);
