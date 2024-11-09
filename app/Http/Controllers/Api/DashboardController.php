@@ -372,7 +372,6 @@ class DashboardController extends Controller
 
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
-
             $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Ensure only exams with schedules are included
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
@@ -419,6 +418,7 @@ class DashboardController extends Controller
                     'exams.exam_duration',
                     'exams.point_mode',
                     'exams.point', 
+                    'exam_schedules.id as schedule_id',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
@@ -442,6 +442,7 @@ class DashboardController extends Controller
                     'exams.exam_duration', 
                     'exams.point_mode', 
                     'exams.point',
+                    'exam_schedules.id',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
