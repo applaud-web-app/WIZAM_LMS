@@ -318,7 +318,7 @@ class DashboardController extends Controller
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
             $examResult = ExamResult::where('end_time', '>', $current_time)->where('user_id',$user->id)->where('status', 'ongoing')->get()->pluck('exam_id')->toArray();
-            $resumedExam = Exam::select(
+            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')->select(
                     'exam_types.slug as exam_type_slug', 
                     'exams.slug', 
                     'exams.title', 
@@ -326,6 +326,7 @@ class DashboardController extends Controller
                     'exams.exam_duration', 
                     'exams.point_mode', 
                     'exams.point', 
+                    'exam_schedules.id as schedule_id',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -340,6 +341,7 @@ class DashboardController extends Controller
                 ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
                 ->where('exams.status', 1) // Filter by exam status
                 ->groupBy(
+                    'exam_schedules.id',
                     'exam_types.slug', 
                     'exams.slug', 
                     'exams.id', 
