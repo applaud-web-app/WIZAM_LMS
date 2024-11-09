@@ -251,6 +251,7 @@ class StudentController extends Controller
                     END) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    'exam_schedules.id as schedule_id',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
@@ -273,6 +274,7 @@ class StudentController extends Controller
                 ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
                     'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
                     'exams.point', 'exams.is_free', 'exam_schedules.schedule_type',
+                    'exam_schedules.id',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
@@ -350,6 +352,7 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'schedule' => [
+                            'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
                             'end_date' => $exam->end_date,
