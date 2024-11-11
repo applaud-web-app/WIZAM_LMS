@@ -63,7 +63,7 @@ class StudentController extends Controller
                 ->where('status', 1)
                 ->withCount([
                     'exams as total_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-                        // Count active exams of each type, either public or assigned to the user, with valid schedules
+                        // Count active exams with valid schedules (including multiple schedules for one exam)
                         $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                             ->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('exams.is_public', 1)
@@ -76,10 +76,11 @@ class StudentController extends Controller
                                     $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
                                         ->whereTime('exam_schedules.start_time', '>=', $currentTime);
                                 });
-                            });
+                            })
+                            ->distinct();  // Ensures each schedule is counted separately
                     },
                     'exams as paid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-                        // Count active, paid exams (is_free = 0) either public or assigned to the user, with valid schedules
+                        // Count active, paid exams (is_free = 0) with valid schedules (including multiple schedules for one exam)
                         $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                             ->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('exams.is_public', 1)
@@ -93,10 +94,11 @@ class StudentController extends Controller
                                     $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
                                         ->whereTime('exam_schedules.start_time', '>=', $currentTime);
                                 });
-                            });
+                            })
+                            ->distinct();  // Ensures each schedule is counted separately
                     },
                     'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-                        // Count active, unpaid (free) exams (is_free = 1) either public or assigned to the user, with valid schedules
+                        // Count active, unpaid (free) exams (is_free = 1) with valid schedules (including multiple schedules for one exam)
                         $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                             ->where(function ($subQuery) use ($assignedExams) {
                                 $subQuery->where('exams.is_public', 1)
@@ -110,10 +112,12 @@ class StudentController extends Controller
                                     $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
                                         ->whereTime('exam_schedules.start_time', '>=', $currentTime);
                                 });
-                            });
+                            })
+                            ->distinct();  // Ensures each schedule is counted separately
                     }
                 ])
                 ->get();
+
     
             return response()->json(['status' => true, 'data' => $type], 201);
     
