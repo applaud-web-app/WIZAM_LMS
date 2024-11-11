@@ -1422,56 +1422,37 @@ class ManageTest extends Controller
         return redirect()->back()->with('error', 'Exam is not published yet.');
     }
 
-    // public function updateExamSchedules(Request $request,$id) {
-    //     if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
-    //         return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
-    //     }
-        
-    //     // Validate the request data
-    //     $validatedData = $request->validate([
-    //         'scheduleType' => 'required|in:fixed,flexible,attempts',
-    //         'startDate'    => 'required|date',
-    //         'startTime'    => 'required|date_format:H:i',
-    //         'endDate'      => 'nullable|date|required_if:scheduleType,flexible',
-    //         'endTime'      => 'nullable|date_format:H:i|required_if:scheduleType,flexible',
-    //         'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
-    //         'attempts'     => 'nullable|integer|min:1', // New validation for attempts
-    //         'userGroup'    => 'required|string|max:255',
-    //         'numAttempts'  => 'nullable|integer|min:0|required_if:scheduleType,attempts',
-    //         'eq' => 'required'
-    //     ]);
-
-    //     $gracePoint =  null;
-    //     if($validatedData['scheduleType'] == "fixed"){
-    //         $gracePoint =  $validatedData['gracePeriod'];
-    //     }else if($validatedData['scheduleType'] == "attempts"){
-    //         $gracePoint =  $validatedData['numAttempts'];
-    //     }
-
-    //     $data = decrypturl($request->eq);
-    //     $scheduleId = $data['id'];
-    //     // Fetch the schedule by its ID
-    //     $schedule = ExamSchedule::findOrFail($scheduleId);
-    //     $schedule->schedule_type = $validatedData['scheduleType'];
-    //     $schedule->start_date    = $validatedData['startDate'];
-    //     $schedule->start_time    = $validatedData['startTime'];
-    //     $schedule->end_date      = isset($validatedData['endDate']) ? $validatedData['endDate'] : null;
-    //     $schedule->end_time      = isset($validatedData['endDate']) ? $validatedData['endTime'] : null;
-    //     $schedule->grace_period  = $gracePoint;
-    //     $schedule->user_groups    = $validatedData['userGroup'];
-    //     $schedule->save();
-    
-    //     // Return a success response
-    //     return redirect()->route('exam-schedules', ['id' => $id])->with('success', 'Exam schedule updated successfully.');
-    // }
-
-    public function updateExamSchedules(Request $request, $id) {
-        if (!Auth()->user()->can('exams')) { // Check permission
+    public function updateExamSchedules(Request $request,$id) {
+        if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
-    
-         // Fetch the schedule by its ID
-        $schedule = ExamSchedule::findOrFail($id);
+        
+        // Validate the request data
+        $validatedData = $request->validate([
+            'scheduleType' => 'required|in:fixed,flexible,attempts',
+            'startDate'    => 'required|date',
+            'startTime'    => 'required|date_format:H:i',
+            'endDate'      => 'nullable|date|required_if:scheduleType,flexible',
+            'endTime'      => 'nullable|date_format:H:i|required_if:scheduleType,flexible',
+            'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
+            'attempts'     => 'nullable|integer|min:1', // New validation for attempts
+            'userGroup'    => 'required|string|max:255',
+            'numAttempts'  => 'nullable|integer|min:0|required_if:scheduleType,attempts',
+            'eq' => 'required'
+        ]);
+
+        $gracePoint =  null;
+        if($validatedData['scheduleType'] == "fixed"){
+            $gracePoint =  $validatedData['gracePeriod'];
+        }else if($validatedData['scheduleType'] == "attempts"){
+            $gracePoint =  $validatedData['numAttempts'];
+        }
+
+        $data = decrypturl($request->eq);
+        $scheduleId = $data['id'];
+        // Fetch the schedule by its ID
+        $schedule = ExamSchedule::findOrFail($scheduleId);
+
 
         // Set up current time and start time for comparison
         $currentTime = Carbon::now();
@@ -1494,42 +1475,101 @@ class ManageTest extends Controller
         if ($isStarted || $isExpired) {
             return redirect()->route('exam-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
         }
-    
-        // Validate the request data
-        $validatedData = $request->validate([
-            'scheduleType' => 'required|in:fixed,flexible,attempts',
-            'startDate'    => 'required|date',
-            'startTime'    => 'required|date_format:H:i',
-            'endDate'      => 'nullable|date|required_if:scheduleType,flexible',
-            'endTime'      => 'nullable|date_format:H:i|required_if:scheduleType,flexible',
-            'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
-            'attempts'     => 'nullable|integer|min:1',
-            'userGroup'    => 'required|string|max:255',
-            'numAttempts'  => 'nullable|integer|min:0|required_if:scheduleType,attempts',
-            'eq' => 'required'
-        ]);
-    
-        // Set grace period or number of attempts based on schedule type
-        $gracePoint = null;
-        if ($validatedData['scheduleType'] == "fixed") {
-            $gracePoint = $validatedData['gracePeriod'];
-        } elseif ($validatedData['scheduleType'] == "attempts") {
-            $gracePoint = $validatedData['numAttempts'];
-        }
-    
-        // Update the schedule with validated data
+
+        
         $schedule->schedule_type = $validatedData['scheduleType'];
         $schedule->start_date    = $validatedData['startDate'];
         $schedule->start_time    = $validatedData['startTime'];
         $schedule->end_date      = isset($validatedData['endDate']) ? $validatedData['endDate'] : null;
         $schedule->end_time      = isset($validatedData['endDate']) ? $validatedData['endTime'] : null;
         $schedule->grace_period  = $gracePoint;
-        $schedule->user_groups   = $validatedData['userGroup'];
+        $schedule->user_groups    = $validatedData['userGroup'];
         $schedule->save();
     
-        // Return success response
+        // Return a success response
         return redirect()->route('exam-schedules', ['id' => $id])->with('success', 'Exam schedule updated successfully.');
     }
+
+    // public function updateExamSchedules(Request $request, $id) {
+
+    //     // Validate the request data
+    //     $validatedData = $request->validate([
+    //     'scheduleType' => 'required|in:fixed,flexible,attempts',
+    //     'startDate'    => 'required|date',
+    //     'startTime'    => 'required|date_format:H:i',
+    //     'endDate'      => 'nullable|date|required_if:scheduleType,flexible',
+    //     'endTime'      => 'nullable|date_format:H:i|required_if:scheduleType,flexible',
+    //     'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
+    //     'attempts'     => 'nullable|integer|min:1',
+    //     'userGroup'    => 'required|string|max:255',
+    //     'numAttempts'  => 'nullable|integer|min:0|required_if:scheduleType,attempts',
+    //     'eq' => 'required'
+    //     ]);
+    
+    //     if (!Auth()->user()->can('exams')) { // Check permission
+    //         return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+    //     }
+    
+    //      // Fetch the schedule by its ID
+    //     $schedule = ExamSchedule::findOrFail($id);
+
+    //     // Set up current time and start time for comparison
+    //     $currentTime = Carbon::now();
+    //     $startDateTime = Carbon::parse($schedule->start_date . ' ' . $schedule->start_time);
+        
+    //     // Debugging: Log the times to inspect
+    //     \Log::info("Current Time: " . $currentTime);
+    //     \Log::info("Scheduled Start Time: " . $startDateTime);
+
+    //     // Check if the exam has started or expired based on schedule type
+    //     $isStarted = $currentTime->greaterThanOrEqualTo($startDateTime);
+
+    //     $endDateTime = null;
+    //     if ($schedule->schedule_type == 'flexible' && $schedule->end_date && $schedule->end_time) {
+    //         $endDateTime = Carbon::parse($schedule->end_date . ' ' . $schedule->end_time);
+    //     }
+    //     $isExpired = $endDateTime && $currentTime->greaterThanOrEqualTo($endDateTime);
+
+    //     // Prevent editing if the schedule has started or expired
+    //     if ($isStarted || $isExpired) {
+    //         return redirect()->route('exam-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
+    //     }
+    
+    //     // Validate the request data
+    //     $validatedData = $request->validate([
+    //         'scheduleType' => 'required|in:fixed,flexible,attempts',
+    //         'startDate'    => 'required|date',
+    //         'startTime'    => 'required|date_format:H:i',
+    //         'endDate'      => 'nullable|date|required_if:scheduleType,flexible',
+    //         'endTime'      => 'nullable|date_format:H:i|required_if:scheduleType,flexible',
+    //         'gracePeriod'  => 'nullable|integer|min:0|required_if:scheduleType,fixed',
+    //         'attempts'     => 'nullable|integer|min:1',
+    //         'userGroup'    => 'required|string|max:255',
+    //         'numAttempts'  => 'nullable|integer|min:0|required_if:scheduleType,attempts',
+    //         'eq' => 'required'
+    //     ]);
+    
+    //     // Set grace period or number of attempts based on schedule type
+    //     $gracePoint = null;
+    //     if ($validatedData['scheduleType'] == "fixed") {
+    //         $gracePoint = $validatedData['gracePeriod'];
+    //     } elseif ($validatedData['scheduleType'] == "attempts") {
+    //         $gracePoint = $validatedData['numAttempts'];
+    //     }
+    
+    //     // Update the schedule with validated data
+    //     $schedule->schedule_type = $validatedData['scheduleType'];
+    //     $schedule->start_date    = $validatedData['startDate'];
+    //     $schedule->start_time    = $validatedData['startTime'];
+    //     $schedule->end_date      = isset($validatedData['endDate']) ? $validatedData['endDate'] : null;
+    //     $schedule->end_time      = isset($validatedData['endDate']) ? $validatedData['endTime'] : null;
+    //     $schedule->grace_period  = $gracePoint;
+    //     $schedule->user_groups   = $validatedData['userGroup'];
+    //     $schedule->save();
+    
+    //     // Return success response
+    //     return redirect()->route('exam-schedules', ['id' => $id])->with('success', 'Exam schedule updated successfully.');
+    // }
     
     public function saveExamSchedules(Request $request, $id) {
         if (!Auth()->user()->can('exams')) { // Assuming 'file-manager' is the required permission
