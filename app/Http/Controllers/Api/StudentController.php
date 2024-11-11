@@ -98,21 +98,21 @@ class StudentController extends Controller
                             ->where('exams.status', 1)
                             ->where('exam_schedules.status', 1)
                             ->where('exams.is_free', 0)
-                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                                // Show both active and upcoming exams
-                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                                    // For upcoming exams
-                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
-                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
-                                })
-                                ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                                    // For active exams
-                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
-                                        ->whereTime('exam_schedules.start_time', '<=', $currentTime)
-                                        ->whereDate('exam_schedules.end_date', '>=', $currentDate)
-                                        ->whereTime('exam_schedules.end_time', '>=', $currentTime);
-                                });
-                            })
+                            // ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                            //     // Show both active and upcoming exams
+                            //     $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For upcoming exams
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                            //     })
+                            //     ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For active exams
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '<=', $currentTime)
+                            //             ->whereDate('exam_schedules.end_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.end_time', '>=', $currentTime);
+                            //     });
+                            // })
                             ->distinct();  // Ensures each schedule is counted separately
                     },
                     'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
@@ -125,21 +125,21 @@ class StudentController extends Controller
                             ->where('exams.status', 1)
                             ->where('exam_schedules.status', 1)
                             ->where('exams.is_free', 1)
-                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                                // Show both active and upcoming exams
-                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                                    // For upcoming exams
-                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
-                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
-                                })
-                                ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                                    // For active exams
-                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
-                                        ->whereTime('exam_schedules.start_time', '<=', $currentTime)
-                                        ->whereDate('exam_schedules.end_date', '>=', $currentDate)
-                                        ->whereTime('exam_schedules.end_time', '>=', $currentTime);
-                                });
-                            })
+                            // ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                            //     // Show both active and upcoming exams
+                            //     $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For upcoming exams
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                            //     })
+                            //     ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For active exams
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '<=', $currentTime)
+                            //             ->whereDate('exam_schedules.end_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.end_time', '>=', $currentTime);
+                            //     });
+                            // })
                             ->distinct();  // Ensures each schedule is counted separately
                     }
                 ])
