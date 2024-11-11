@@ -91,7 +91,7 @@ class UpdateExamResultStatus extends Command
                         case 'TOF':
                             $isCorrect = $userAnswer == $question->answer;
                             break;
-                            case 'SAQ':
+                        case 'SAQ':
                             // Check if userAnswer is an array
                             if (is_array($userAnswer)) {
                                 $isCorrect = false;

@@ -678,7 +678,7 @@ class ExamController extends Controller
                     $isCorrect = $userAnswer == $question->answer;
                 } elseif ($question->type == 'SAQ') {
                     $isCorrect = false;
-                    if (is_string($userAnswer) && is_array($question->options)) {
+                    if (is_string($userAnswer)) {
                         $answers = json_decode($question->options);
                         foreach ($answers as $option) {
                             $sanitizedOption = strtolower(trim(strip_tags($option)));
