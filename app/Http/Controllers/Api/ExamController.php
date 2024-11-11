@@ -690,10 +690,15 @@ class ExamController extends Controller
                         }
                     }
                 } elseif ($question->type == 'FIB') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($correctAnswers);
+                    // sort($userAnswer);
+                    // $isCorrect = $userAnswer == $correctAnswers;
+                    $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
+                    $userAnswer = array_map('strtolower', $userAnswer);
                     sort($correctAnswers);
                     sort($userAnswer);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    $isCorrect = ($userAnswer == $correctAnswers);
                 } elseif ($question->type == 'MTF') {
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = true;

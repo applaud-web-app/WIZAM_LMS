@@ -76,6 +76,11 @@ class UpdateExamResultStatus extends Command
                             break;
                         case 'MMA':
                         case 'FIB':
+                            $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
+                            $userAnswer = array_map('strtolower', $userAnswer);
+                            sort($correctAnswers);
+                            sort($userAnswer);
+                            $isCorrect = ($userAnswer == $correctAnswers);
                         case 'ORD':
                         case 'EMQ':
                             $correctAnswers = json_decode($question->answer, true);
