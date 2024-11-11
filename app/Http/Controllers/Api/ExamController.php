@@ -499,7 +499,7 @@ class ExamController extends Controller
                 }
 
                 if ($question->type == "ORD") {
-                    shuffle($options);
+                    // shuffle($options);
                 }
 
                 // Customize question display for different types
