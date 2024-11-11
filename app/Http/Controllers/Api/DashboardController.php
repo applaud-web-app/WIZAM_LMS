@@ -364,7 +364,6 @@ class DashboardController extends Controller
                 ->get();
 
             ////////// ------ UPCOMING EXAM ------ //////////
-
             $assignedExams = AssignedExam::select('exam_id')
                 ->where('user_id', $user->id)
                 ->pluck('exam_id')

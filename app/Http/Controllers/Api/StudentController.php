@@ -55,29 +55,62 @@ class StudentController extends Controller
     
             // Fetch the exam IDs assigned to the current user
             $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+
+            $currentDate = now()->toDateString();
+            $currentTime = now()->toTimeString();
+
             $type = ExamType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
-                    'exams as total_exams' => function ($query) use ($assignedExams) {
-                        // Count active exams of each type, either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1);
+                    'exams as total_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active exams of each type, either public or assigned to the user, with valid schedules
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                                });
+                            });
                     },
-                    'exams as paid_exams' => function ($query) use ($assignedExams) {
-                        // Count active, paid exams (is_free = 0) either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1)->where('is_free', 0);
+                    'exams as paid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active, paid exams (is_free = 0) either public or assigned to the user, with valid schedules
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            ->where('exams.is_free', 0)
+                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                                });
+                            });
                     },
-                    'exams as unpaid_exams' => function ($query) use ($assignedExams) {
-                        // Count active, unpaid (free) exams (is_free = 1) either public or assigned to the user
-                        $query->where(function ($subQuery) use ($assignedExams) {
-                            $subQuery->where('is_public', 1)
-                                ->orWhereIn('id', $assignedExams);
-                        })->where('status', 1)->where('is_free', 1);
+                    'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active, unpaid (free) exams (is_free = 1) either public or assigned to the user, with valid schedules
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            ->where('exams.is_free', 1)
+                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                                });
+                            });
                     }
                 ])
                 ->get();
