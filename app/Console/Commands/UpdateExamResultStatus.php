@@ -86,8 +86,22 @@ class UpdateExamResultStatus extends Command
                         case 'TOF':
                             $isCorrect = $userAnswer == $question->answer;
                             break;
-                        case 'SAQ':
-                            $isCorrect = in_array(strtolower(trim(strip_tags($userAnswer))), array_map('strtolower', array_map('trim', json_decode($question->options, true))));
+                            case 'SAQ':
+                            // Check if userAnswer is an array
+                            if (is_array($userAnswer)) {
+                                $isCorrect = false;
+                                foreach ($userAnswer as $singleAnswer) {
+                                    $sanitizedUserAnswer = strtolower(trim(strip_tags($singleAnswer)));
+                                    if (in_array($sanitizedUserAnswer, array_map('strtolower', array_map('trim', json_decode($question->options, true))))) {
+                                        $isCorrect = true;
+                                        break; // Exit loop if any answer matches
+                                    }
+                                }
+                            } else {
+                                // Process as a single answer if not an array
+                                $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
+                                $isCorrect = in_array($sanitizedUserAnswer, array_map('strtolower', array_map('trim', json_decode($question->options, true))));
+                            }
                             break;
                         case 'MTF':
                             $correctAnswers = json_decode($question->answer, true);
