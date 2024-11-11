@@ -1649,6 +1649,7 @@ class StudentController extends Controller
     
             // Fetch the user's subscriptions with associated plan details
             $subscriptions = Subscription::select(
+                    'subscriptions.id as subscription_id',
                     'subscriptions.created_at as purchase_date',
                     'subscriptions.ends_at as ends_date',
                     'subscriptions.stripe_status as subscription_status',
@@ -1681,7 +1682,7 @@ class StudentController extends Controller
                 $features = empty($subscription->features) ? $allFeatures : $subscription->features;
 
                 return [
-                    'id' => $subscription->id,
+                    'id' => $subscription->subscription_id,
                     'features' => $features,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
