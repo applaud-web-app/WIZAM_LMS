@@ -30,6 +30,7 @@ class UpdateScheduleStatus extends Command
         $examSchedules = ExamSchedule::where('status', 1)->get();
         foreach ($examSchedules as $schedule) {
             $currentTime = Carbon::now();
+            dd($currentTime);
     
             switch ($schedule->schedule_type) {
                 case 'fixed':
