@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\ExamResult;
+use App\Models\Question;
 
 class UpdateExamResultStatus extends Command
 {
