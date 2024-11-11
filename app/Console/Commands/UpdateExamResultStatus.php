@@ -33,7 +33,7 @@ class UpdateExamResultStatus extends Command
     
         foreach ($examResults as $examResult) {
             // Retrieve stored user answers and user ID
-            $user_answer = json_decode($examResult->answers, true);
+            $user_answer = json_decode($examResult->answers, true) ?? [];
             $user = $examResult->user;
     
             // Initialize scoring and marking variables
