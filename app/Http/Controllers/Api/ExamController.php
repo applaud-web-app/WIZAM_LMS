@@ -314,8 +314,8 @@ class ExamController extends Controller
                     'exams.negative_marking_type',
                     'exams.negative_marks',
                     'exams.is_free',
-                    'exam.restrict_attempts',
-                    'exam.total_attempts',
+                    'exams.restrict_attempts',
+                    'exams.total_attempts',
                     DB::raw('SUM(questions.default_marks) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
@@ -334,8 +334,8 @@ class ExamController extends Controller
                     'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_mode',
                     'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
                     'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
-                    'exams.negative_marking_type', 'exams.negative_marks','exams.is_free','exam.restrict_attempts',
-                    'exam.total_attempts'
+                    'exams.negative_marking_type', 'exams.negative_marks','exams.is_free','exams.restrict_attempts',
+                    'exams.total_attempts'
                 )
                 ->first();
 
