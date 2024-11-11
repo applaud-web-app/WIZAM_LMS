@@ -372,6 +372,7 @@ class DashboardController extends Controller
 
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
+
             $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Ensure only exams with schedules are included
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
@@ -383,21 +384,25 @@ class DashboardController extends Controller
                 })
                 ->where('exam_schedules.status', 1) 
                 ->where('exams.subcategory_id', $request->category) 
-                // ->where(function ($query) use ($currentDate, $currentTime) {
-                //     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                //     })
-                //     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'flexible')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate)
-                //             ->whereDate('exam_schedules.end_date', '>', $currentDate);
-                //     })
-                //     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                //         $scheduleQuery->where('exam_schedules.schedule_type', 'attempts')
-                //             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                //     });
-                // })
+                ->where(function ($query) use ($currentDate, $currentTime) {
+                    $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
+                            ->whereDate('exam_schedules.start_date', '>', $currentDate)
+                            ->whereTime('exam_schedules.start_time', '>', $currentTime);
+                    })
+                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('exam_schedules.schedule_type', 'flexible')
+                            ->whereDate('exam_schedules.start_date', '>', $currentDate)
+                            ->whereDate('exam_schedules.end_date', '>', $currentDate)
+                            ->whereTime('exam_schedules.start_time', '>', $currentTime)
+                            ->whereTime('exam_schedules.end_time', '<', $currentTime);
+                    })
+                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                        $scheduleQuery->where('exam_schedules.schedule_type', 'attempts')
+                            ->whereDate('exam_schedules.start_date', '>', $currentDate)
+                            ->whereTime('exam_schedules.start_time', '>', $currentTime);
+                    });
+                })
                 ->select(
                     'exams.id', 
                     'exams.is_free',
