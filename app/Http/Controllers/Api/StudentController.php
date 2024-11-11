@@ -54,96 +54,96 @@ class StudentController extends Controller
             $user = $request->attributes->get('authenticatedUser');
     
             // Fetch the exam IDs assigned to the current user
-$assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+            $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
 
-$currentDate = now()->toDateString();
-$currentTime = now()->toTimeString();
+            $currentDate = now()->toDateString();
+            $currentTime = now()->toTimeString();
 
-$type = ExamType::select('name', 'slug')
-    ->where('status', 1)
-    ->withCount([
-        'exams as total_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-            // Count active exams with valid schedules (including multiple schedules for one exam)
-            $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                ->where(function ($subQuery) use ($assignedExams) {
-                    $subQuery->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams);
-                })
-                ->where('exams.status', 1)
-                ->where('exam_schedules.status', 1)
-                ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                    // Show both active and upcoming exams
-                    $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For upcoming exams (start date and time in future)
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '>=', $currentTime);
-                    })
-                    ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For active exams (current date and time between start and end)
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '<=', $currentTime)
-                            ->whereDate('exam_schedules.end_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.end_time', '>=', $currentTime);
-                    });
-                })
-                ->distinct();  // Ensures each schedule is counted separately
-        },
-        'exams as paid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-            // Count active, paid exams (is_free = 0) with valid schedules (including multiple schedules for one exam)
-            $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                ->where(function ($subQuery) use ($assignedExams) {
-                    $subQuery->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams);
-                })
-                ->where('exams.status', 1)
-                ->where('exam_schedules.status', 1)
-                ->where('exams.is_free', 0)
-                ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                    // Show both active and upcoming exams
-                    $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For upcoming exams
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '>=', $currentTime);
-                    })
-                    ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For active exams
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '<=', $currentTime)
-                            ->whereDate('exam_schedules.end_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.end_time', '>=', $currentTime);
-                    });
-                })
-                ->distinct();  // Ensures each schedule is counted separately
-        },
-        'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
-            // Count active, unpaid (free) exams (is_free = 1) with valid schedules (including multiple schedules for one exam)
-            $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                ->where(function ($subQuery) use ($assignedExams) {
-                    $subQuery->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams);
-                })
-                ->where('exams.status', 1)
-                ->where('exam_schedules.status', 1)
-                ->where('exams.is_free', 1)
-                ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
-                    // Show both active and upcoming exams
-                    $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For upcoming exams
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '>=', $currentTime);
-                    })
-                    ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
-                        // For active exams
-                        $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
-                            ->whereTime('exam_schedules.start_time', '<=', $currentTime)
-                            ->whereDate('exam_schedules.end_date', '>=', $currentDate)
-                            ->whereTime('exam_schedules.end_time', '>=', $currentTime);
-                    });
-                })
-                ->distinct();  // Ensures each schedule is counted separately
-        }
-    ])
-    ->get();
+            $type = ExamType::select('name', 'slug')
+                ->where('status', 1)
+                ->withCount([
+                    'exams as total_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active exams with valid schedules (including multiple schedules for one exam)
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            // ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                            //     // Show both active and upcoming exams
+                            //     $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For upcoming exams (start date and time in future)
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                            //     })
+                            //     ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                            //         // For active exams (current date and time between start and end)
+                            //         $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
+                            //             ->whereTime('exam_schedules.start_time', '<=', $currentTime)
+                            //             ->whereDate('exam_schedules.end_date', '>=', $currentDate)
+                            //             ->whereTime('exam_schedules.end_time', '>=', $currentTime);
+                            //     });
+                            // })
+                            ->distinct();  // Ensures each schedule is counted separately
+                    },
+                    'exams as paid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active, paid exams (is_free = 0) with valid schedules (including multiple schedules for one exam)
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            ->where('exams.is_free', 0)
+                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                                // Show both active and upcoming exams
+                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    // For upcoming exams
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                                })
+                                ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    // For active exams
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '<=', $currentTime)
+                                        ->whereDate('exam_schedules.end_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.end_time', '>=', $currentTime);
+                                });
+                            })
+                            ->distinct();  // Ensures each schedule is counted separately
+                    },
+                    'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                        // Count active, unpaid (free) exams (is_free = 1) with valid schedules (including multiple schedules for one exam)
+                        $query->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                            ->where(function ($subQuery) use ($assignedExams) {
+                                $subQuery->where('exams.is_public', 1)
+                                    ->orWhereIn('exams.id', $assignedExams);
+                            })
+                            ->where('exams.status', 1)
+                            ->where('exam_schedules.status', 1)
+                            ->where('exams.is_free', 1)
+                            ->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                                // Show both active and upcoming exams
+                                $scheduleQuery->where(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    // For upcoming exams
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '>=', $currentTime);
+                                })
+                                ->orWhere(function ($scheduleSubQuery) use ($currentDate, $currentTime) {
+                                    // For active exams
+                                    $scheduleSubQuery->whereDate('exam_schedules.start_date', '<=', $currentDate)
+                                        ->whereTime('exam_schedules.start_time', '<=', $currentTime)
+                                        ->whereDate('exam_schedules.end_date', '>=', $currentDate)
+                                        ->whereTime('exam_schedules.end_time', '>=', $currentTime);
+                                });
+                            })
+                            ->distinct();  // Ensures each schedule is counted separately
+                    }
+                ])
+                ->get();
 
     
             return response()->json(['status' => true, 'data' => $type], 201);
