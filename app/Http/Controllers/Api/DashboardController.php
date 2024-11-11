@@ -310,30 +310,39 @@ class DashboardController extends Controller
             ->pluck('exam_id')
             ->toArray();
 
-            $currentDate = now()->toDateString();
-            $currentTime = now()->toTimeString();
-            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Ensure only exams with schedules are included
+            // Get the current date and time using Carbon
+            $currentDate = Carbon::now()->toDateString(); // Gets today's date in 'Y-m-d' format
+            $currentTime = Carbon::now()->toTimeString(); // Gets current time in 'H:i:s' format
+
+            $assignedExams = AssignedExam::select('exam_id')
+                ->where('user_id', $user->id)
+                ->pluck('exam_id')
+                ->toArray();
+
+            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.status', 1)
                 ->where(function ($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams);
+                    $query->where('exams.is_public', 1)->orWhereIn('exams.id', $assignedExams);
                 })
-                ->where('exam_schedules.status', 1) 
-                ->where('exams.subcategory_id', $request->category) 
+                ->where('exam_schedules.status', 1)
+                ->where('exams.subcategory_id', $request->category)
                 ->where(function ($query) use ($currentDate, $currentTime) {
-                    $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                    $query->where(function ($scheduleQuery) use ($currentDate) {
+                        // Fixed schedule: check that start date is after the current date
                         $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate);
                     })
-                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                    ->orWhere(function ($scheduleQuery) use ($currentDate) {
+                        // Flexible schedule: check that start and end dates are in the future
                         $scheduleQuery->where('exam_schedules.schedule_type', 'flexible')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate)
                             ->whereDate('exam_schedules.end_date', '>', $currentDate);
                     })
-                    ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
+                    ->orWhere(function ($scheduleQuery) use ($currentDate) {
+                        // Attempt-based schedule: check that start date is after the current date
                         $scheduleQuery->where('exam_schedules.schedule_type', 'attempts')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate);
                     });
