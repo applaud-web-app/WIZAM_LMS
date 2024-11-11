@@ -653,7 +653,7 @@ class ExamController extends Controller
             }
         
             $questionId = $answer['id'];
-            $question = Question::find(explode("-", $questionId)[0]);
+            $question = Question::find($answer['id']);
             
             if (!$question) {
                 $incorrect += 1;
