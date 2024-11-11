@@ -255,65 +255,6 @@ class DashboardController extends Controller
             $passedExamCount = $examStats->passed_count;
             $failedExamCount = $examStats->failed_count;
             $averageScore = $examStats->average_score;
-    
-            // Fetch all exam results for the authenticated user where status is complete
-            // $examData = Exam::select(
-            //     'exam_types.slug as exam_type_slug', 
-            //     'exams.slug', 
-            //     'exams.title', 
-            //     'exams.duration_mode', 
-            //     'exams.exam_duration', 
-            //     'exams.point_mode',
-            //     'exams.point', 
-            //     DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-            // )
-            // ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-            // ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-            // ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-            // ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-            // ->where('exams.status', 1) // Filter by exam status
-            // ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title','exams.duration_mode', 'exams.exam_duration','exams.point_mode', 'exams.point') // Group by necessary fields
-            // ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-            // ->get();
-
-            // $quizData = Quizze::select(
-            //     'quiz_types.slug as exam_type_slug',
-            //     'quizzes.title',
-            //     'quizzes.description',
-            //     'quizzes.pass_percentage',
-            //     'sub_categories.name as sub_category_name',
-            //     'quiz_types.name as exam_type_name',
-            //     'quizzes.duration_mode', 
-            //     'quizzes.duration', 
-            //     'quizzes.point_mode',
-            //     'quizzes.point', 
-            //     DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
-            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
-            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
-            // )
-            // ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-            // ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-            // ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
-            // ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
-            // ->where('quizzes.subcategory_id', $request->category)  // Filter by category
-            // ->where('quizzes.status', 1)  // Only active quizzes
-            // ->groupBy(
-            //     'quiz_types.slug',
-            //     'quizzes.id',
-            //     'quizzes.title',
-            //     'quizzes.description',
-            //     'quizzes.pass_percentage',
-            //     'sub_categories.name',
-            //     'quiz_types.name',
-            //     'quizzes.duration_mode', 
-            //     'quizzes.duration', 
-            //     'quizzes.point_mode',
-            //     'quizzes.point'
-            // )
-            // ->havingRaw('COUNT(questions.id) > 0')  
-            // ->get();
 
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
@@ -364,7 +305,6 @@ class DashboardController extends Controller
                 ->get();
 
             ////////// ------ UPCOMING EXAM ------ //////////
-
             $assignedExams = AssignedExam::select('exam_id')
             ->where('user_id', $user->id)
             ->pluck('exam_id')
@@ -387,25 +327,15 @@ class DashboardController extends Controller
                     $query->where(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('exam_schedules.schedule_type', 'fixed')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                            // Uncomment if time constraint is needed
-                            // ->whereTime('exam_schedules.start_time', '>', $currentTime);
                     })
                     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('exam_schedules.schedule_type', 'flexible')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate)
                             ->whereDate('exam_schedules.end_date', '>', $currentDate);
-                            // Uncomment if time constraint is needed
-                            // ->whereTime('exam_schedules.start_time', '>', $currentTime)
-                            // ->whereTime('exam_schedules.end_time', '<', $currentTime);
                     })
                     ->orWhere(function ($scheduleQuery) use ($currentDate, $currentTime) {
                         $scheduleQuery->where('exam_schedules.schedule_type', 'attempts')
                             ->whereDate('exam_schedules.start_date', '>', $currentDate);
-                            // Uncomment if time constraint or grace period condition is needed
-                            // ->whereTime('exam_schedules.start_time', '>', $currentTime)
-                            // ->whereDate('exam_schedules.end_date', '>', $currentDate)
-                            // ->whereTime('exam_schedules.end_time', '>', $currentTime)
-                            // ->orWhereNotNull('exam_schedules.grace_period');
                     });
                 })
                 ->select(
