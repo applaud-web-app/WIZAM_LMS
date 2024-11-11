@@ -1681,6 +1681,7 @@ class StudentController extends Controller
                 $features = empty($subscription->features) ? $allFeatures : $subscription->features;
 
                 return [
+                    'id' => $subscription->id,
                     'features' => $features,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
@@ -1744,7 +1745,7 @@ class StudentController extends Controller
         }
     }
     
-    public function invoiceDetail(Request $request)
+    public function invoiceDetail(Request $request, $subscriptionId)
     {
         try {
             // Get the authenticated user
@@ -1786,7 +1787,7 @@ class StudentController extends Controller
             )
             ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
             ->where('subscriptions.user_id', $user->id)
-            ->orderBy('subscriptions.created_at', 'desc') // Specify the table for created_at
+            ->orderBy('subscriptions.id', $subscriptionId) // Specify the table for created_at
             ->first();
 
             // Prepare the response data
