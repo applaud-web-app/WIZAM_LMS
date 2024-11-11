@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::command('scheduleStatus:cron')->everyMinute()->appendOutputTo('commond1.txt');
+Schedule::command('updateExamResultStatus:cron')->everyMinute()->appendOutputTo('commond2.txt');
