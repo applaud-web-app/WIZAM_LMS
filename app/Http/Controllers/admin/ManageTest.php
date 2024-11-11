@@ -1376,7 +1376,7 @@ class ManageTest extends Controller
         $exam = Exam::where('id', $id)->where('status', 1)->first(); 
         if ($exam) {
             if ($request->ajax()) {
-                $sections = ExamSchedule::whereIn('status', [0, 1])->where('exam_id',$id); // Change to ExamSchedule model
+                $sections = ExamSchedule::whereIn('status', [0, 1,3])->where('exam_id',$id); // Change to ExamSchedule model
                 return DataTables::of($sections)
                     ->addIndexColumn()
                     ->addColumn('action', function ($section) {
