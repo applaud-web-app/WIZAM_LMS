@@ -1470,20 +1470,26 @@ class ManageTest extends Controller
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
     
-        // Fetch the schedule by its ID
+         // Fetch the schedule by its ID
         $schedule = ExamSchedule::findOrFail($id);
-    
-        // Check if the exam schedule has started or expired
+
+        // Set up current time and start time for comparison
         $currentTime = Carbon::now();
         $startDateTime = Carbon::parse($schedule->start_date . ' ' . $schedule->start_time);
+        
+        // Debugging: Log the times to inspect
+        \Log::info("Current Time: " . $currentTime);
+        \Log::info("Scheduled Start Time: " . $startDateTime);
+
+        // Check if the exam has started or expired based on schedule type
         $isStarted = $currentTime->greaterThanOrEqualTo($startDateTime);
-    
+
         $endDateTime = null;
         if ($schedule->schedule_type == 'flexible' && $schedule->end_date && $schedule->end_time) {
             $endDateTime = Carbon::parse($schedule->end_date . ' ' . $schedule->end_time);
         }
         $isExpired = $endDateTime && $currentTime->greaterThanOrEqualTo($endDateTime);
-    
+
         // Prevent editing if the schedule has started or expired
         if ($isStarted || $isExpired) {
             return redirect()->route('exam-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
