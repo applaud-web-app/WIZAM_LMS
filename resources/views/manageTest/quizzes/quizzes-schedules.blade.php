@@ -473,17 +473,20 @@
 
         // Toggle schedule fields
         function toggleScheduleFields(select) {
-            const scheduleType = select.value;
-            const flexibleFields = $('#flexibleFields');
-            const gracePeriod = $('#gracePerioid');
+         const scheduleType = select.value;
+         const flexibleFields = $('#flexibleFields');
+         const gracePeriod = $('#gracePerioid');
+         const gracePeriodInput = $('#gracePeriod');
 
-            if (scheduleType === 'flexible') {
-                flexibleFields.removeClass('hidden');
-                gracePeriod.addClass('hidden');
-            } else if (scheduleType === 'fixed') {
-                gracePeriod.removeClass('hidden');
-                flexibleFields.addClass('hidden');
-            }
+         if (scheduleType === 'flexible') {
+            flexibleFields.removeClass('hidden');
+            gracePeriod.addClass('hidden');
+            gracePeriodInput.removeAttr('required'); // Remove required for flexible
+         } else if (scheduleType === 'fixed') {
+            gracePeriod.removeClass('hidden');
+            flexibleFields.addClass('hidden');
+            gracePeriodInput.attr('required', 'required'); // Add required for fixed
+         }
         }
 
         // Handle toggle between schedule types
