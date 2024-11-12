@@ -1584,4 +1584,28 @@ class QuizController extends Controller
         }
     }
 
+
+    public function saveQuizAnswerProgress(Request $request, $uuid)
+    {
+        // Fetch the user and user answers
+        $user_answer = $request->input('answers');
+        $user = $request->attributes->get('authenticatedUser');
+        // Find or create an exam result in progress by UUID and user ID
+        $examResult = QuizResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
+        if (!$examResult) {
+            return response()->json([
+                'status' => false,
+                'message' => "Quiz not found"
+            ]);
+        }
+        // Update user answers in progress
+        $examResult->answers = json_encode($user_answer, true);
+        $examResult->updated_at = now();
+        $examResult->save();
+        return response()->json([
+            'status' => true,
+            'message' => 'Answer progress saved successfully',
+        ]);
+    }
+
 }

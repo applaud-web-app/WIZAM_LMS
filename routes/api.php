@@ -92,6 +92,8 @@ Route::middleware('checkAuthToken')->group(function () {
 
     Route::post('/save-practice-set-answer-progress/{uuid}',[PracticeSetController::class,'savePracticeSetAnswerProgress']);
 
+    Route::get('/save-quiz-answer-progress',[QuizController::class,'saveQuizAnswerProgress']);
+
     // EXAM REPORT
     Route::get('/download-exam-report/{uuid}',[ExamController::class, 'downloadExamReport']);
 
