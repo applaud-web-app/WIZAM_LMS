@@ -774,8 +774,40 @@ class ManageTest extends Controller
             $validatedData['endTime'] = null;
         }
 
+
+        $gracePoint =  null;
+        if($validatedData['scheduleType'] == "fixed"){
+            $gracePoint =  $validatedData['gracePeriod'];
+        }else if($validatedData['scheduleType'] == "attempts"){
+            $gracePoint =  $validatedData['numAttempts'];
+        }
+
+        $scheduleId = $request->schedule_id;
         // Fetch the schedule by its ID
-        $schedule = QuizSchedule::where('id',$request->schedule_id)->first();
+        $schedule = QuizSchedule::where('id',$scheduleId)->first();
+
+        // Set up current time and start time for comparison
+        $currentTime = Carbon::now();
+        $startDateTime = Carbon::parse($schedule->start_date . ' ' . $schedule->start_time);
+        
+        // Debugging: Log the times to inspect
+        \Log::info("Current Time: " . $currentTime);
+        \Log::info("Scheduled Start Time: " . $startDateTime);
+
+        // Check if the exam has started or expired based on schedule type
+        $isStarted = $currentTime->greaterThanOrEqualTo($startDateTime);
+
+        $endDateTime = null;
+        if ($schedule->schedule_type == 'flexible' && $schedule->end_date && $schedule->end_time) {
+            $endDateTime = Carbon::parse($schedule->end_date . ' ' . $schedule->end_time);
+        }
+        $isExpired = $endDateTime && $currentTime->greaterThanOrEqualTo($endDateTime);
+
+        // Prevent editing if the schedule has started or expired
+        if ($isStarted || $isExpired) {
+            return redirect()->route('exam-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
+        }
+
         $schedule->schedule_type= $validatedData['scheduleType'];
         $schedule->start_date    = $validatedData['startDate'];
         $schedule->start_time   = $validatedData['startTime'];
