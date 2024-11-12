@@ -1473,6 +1473,7 @@ class QuizController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while fetching the quiz data.',
+                'error' => 'Error logged: ' . $th->getMessage()
             ], 500);
         }
     }
