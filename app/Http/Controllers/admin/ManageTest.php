@@ -1695,27 +1695,30 @@ class ManageTest extends Controller
         if (!auth()->user()->can('exams')) { // Assuming 'exams' is the required permission
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
         }
-    
+
         // Find the exam with active status
         $exam = Exam::where('status', 1)->find($id);
         if ($exam) {
             // Get all results for the exam
             $examResult = ExamResult::where('exam_id', $exam->id)->get();
-    
+
             // Calculate required data
             $totalAttempt = $examResult->count();
-            $passedExam = $examResult->where('student_percentage', '>=', $exam->pass_percentage)->count();
-            $failedExam = $examResult->where('student_percentage', '<', $exam->pass_percentage)->count();
-            $averagePercentage = $totalAttempt > 0 ? $examResult->avg('student_percentage') : 0;
-            $highestPercentage = $examResult->max('student_percentage');
-            $lowestPercentage = $examResult->min('student_percentage');
-    
+            $passPercentage = (float) $exam->pass_percentage; // Cast pass_percentage to float
+
+            $passedExam = $examResult->where('student_percentage', '>=', $passPercentage)->count();
+            $failedExam = $examResult->where('student_percentage', '<', $passPercentage)->count();
+
+            $averagePercentage = $totalAttempt > 0 ? (float) $examResult->avg('student_percentage') : 0;
+            $highestPercentage = (float) $examResult->max('student_percentage');
+            $lowestPercentage = (float) $examResult->min('student_percentage');
+
             // Return the view with all required data
             return view('manageTest.exams.exam-overall-report', compact(
                 'exam', 'totalAttempt', 'passedExam', 'failedExam', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
             ));
         }
-    
+
         // Redirect if the exam is not found
         return redirect()->back()->with('error', 'Exam Not Found');
     }
