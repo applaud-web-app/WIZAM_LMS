@@ -727,20 +727,48 @@ class StudentController extends Controller
     // QUIZ DATA
     public function quizType(Request $request) {
         try {
+            // Fetch the current authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
+            $currentDate = now()->toDateString();
+            $currentTime = now()->toTimeString();
+
             $type = QuizType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
-                    'quizzes as total_quizzes' => function ($query) {
-                        // Count active quizzes of each type
-                        $query->where('is_public', 1)->where('status', 1);
+                    'quizzes as total_quizzes' => function ($query) use ($currentDate, $currentTime) {
+                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                            ->where(function ($subQuery){
+                                $subQuery->where('quizzes.is_public', 1);
+                            })
+                            ->where('quizzes.status', 1)
+                            ->where('quiz_schedules.status', 1)
+                            ->distinct();  
                     },
                     'quizzes as paid_quizzes' => function ($query) {
                         // Count active, paid quizzes (is_free = 0)
                         $query->where('is_public', 1)->where('status', 1)->where('is_free', 0);
                     },
-                    'quizzes as unpaid_quizzes' => function ($query) {
-                        // Count active, unpaid (free) quizzes (is_free = 1)
-                        $query->where('is_public', 1)->where('status', 1)->where('is_free', 1);
+                    function ($query) use ($currentDate, $currentTime) {
+                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                            ->where(function ($subQuery) {
+                                $subQuery->where('quizzes.is_public', 1);
+                            })
+                            ->where('quizzes.status', 1)
+                            ->where('quiz_schedules.status', 1)
+                            ->where('quizzes.is_free', 0)
+                            ->distinct();  
+                    },
+                    'quizzes as unpaid_quizzes' => function ($query) use ($currentDate, $currentTime) {
+                        // Count active, unpaid (free) quizzes (is_free = 1) with valid schedules (including multiple schedules for one exam)
+                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                            ->where(function ($subQuery) {
+                                $subQuery->where('quizzes.is_public', 1);
+                            })
+                            ->where('quizzes.status', 1)
+                            ->where('quiz_schedules.status', 1)
+                            ->where('quizzes.is_free', 1)
+                            ->distinct();  // Ensures each schedule is counted separately
                     }
                 ])
                 ->get();
