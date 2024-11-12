@@ -745,11 +745,7 @@ class StudentController extends Controller
                             ->where('quiz_schedules.status', 1)
                             ->distinct();  
                     },
-                    'quizzes as paid_quizzes' => function ($query) {
-                        // Count active, paid quizzes (is_free = 0)
-                        $query->where('is_public', 1)->where('status', 1)->where('is_free', 0);
-                    },
-                    function ($query) use ($currentDate, $currentTime) {
+                    'quizzes as paid_quizzes' => function ($query) use ($currentDate, $currentTime) {
                         $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
                             ->where(function ($subQuery) {
                                 $subQuery->where('quizzes.is_public', 1);
