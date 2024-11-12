@@ -468,13 +468,13 @@ class StudentController extends Controller
         // Format the time string accordingly
         $timeString = '';
         if ($hours > 0) {
-            $timeString .= $hours . ' hrs ';
+            $timeString .= $hours . ' hr ';
         }
         if ($minutes > 0) {
-            $timeString .= $minutes . ' mins ';
+            $timeString .= $minutes . ' min ';
         }
         if ($seconds > 0) {
-            $timeString .= $seconds . ' secs';
+            $timeString .= $seconds . ' sec';
         }
 
         return trim($timeString); // Trim any extra spaces
