@@ -1123,15 +1123,6 @@ class StudentController extends Controller
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
-            
-            // Check if the user has a subscription
-            $currentDate = now();
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
 
             // Fetch quiz details based on the category and slug
             $quizData = Quizze::select(
@@ -1186,16 +1177,34 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
             }
 
-            // Handle access to the quiz based on the subscription and quiz's free/public status
-            if ($quizData->is_free == 0) { // If the quiz is paid
-                if (!$subscription && $quizData->is_public == 0) { // If no subscription and quiz is not public
-                    return response()->json(['status' => false, 'message' => 'This quiz is private. Please subscribe or get access.'], 403);
-                }
-            }
+            // USER SUBSCRIPTION LOGIC
+            $type = "quizzes";
+            $currentDate = now();
 
-            // If the user has a subscription, mark the quiz as free
-            if ($subscription && $quizData->is_free == 0) {
-                $quizData->is_free = 1; // Set it to free for the response
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Adjust 'is_free' based on subscription and assigned exams
+            if ($subscription) {
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $quizData->is_free = 1;
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $quizData->is_free = 1;
+                    }
+                }
             }
 
             // Format the time and marks
