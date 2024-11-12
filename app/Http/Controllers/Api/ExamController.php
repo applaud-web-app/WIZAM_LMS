@@ -845,7 +845,6 @@ class ExamController extends Controller
                      // Ensure correctAnswer is an array when needed
                      switch ($question->type) {
                         case 'FIB':
-                             // Decode and normalize correct answer array
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
@@ -856,12 +855,12 @@ class ExamController extends Controller
                             // Normalize user answer array
                             $user_answ = array_map(function($item) {
                                 return is_string($item) ? strtolower($item) : $item;
-                            }, $userAnswer);
+                            }, $user_answ);
 
                             // Sort and compare
                             sort($correct_answ);
                             sort($user_answ);
-                            $isCorrect = $user_answ === $correct_answ;
+                            $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
                             $isCorrect = $user_answ == $correct_answ;
