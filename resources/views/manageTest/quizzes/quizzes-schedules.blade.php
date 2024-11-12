@@ -161,7 +161,7 @@
                <label for="gracePeriod" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                   Grace Period (minutes) <span class="text-red-500">*</span>
                </label>
-               <input type="number" id="gracePeriod" name="gracePeriod" required class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter grace period in minutes">
+               <input type="number" id="gracePeriod" name="gracePeriod"  class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter grace period in minutes">
             </div>
 
             <!-- Schedule User Group -->
@@ -428,13 +428,6 @@
                             return $("#scheduleType").val() === 'flexible';
                         }
                     },
-                    gracePeriod: {
-                        required: function() {
-                            return $("#scheduleType").val() === 'fixed';
-                        },
-                        number: true,
-                        min: 1
-                    },
                     userGroup: {
                         required: true
                     }
@@ -445,7 +438,6 @@
                     startTime: "Please enter a valid start time",
                     endDate: "Please select a valid end date for flexible schedules",
                     endTime: "Please enter a valid end time for flexible schedules",
-                    gracePeriod: "Please enter a valid grace period (only for fixed schedules)",
                     userGroup: "Please select a user group"
                 },
                 errorElement: "div",
@@ -473,20 +465,17 @@
 
         // Toggle schedule fields
         function toggleScheduleFields(select) {
-         const scheduleType = select.value;
-         const flexibleFields = $('#flexibleFields');
-         const gracePeriod = $('#gracePerioid');
-         const gracePeriodInput = $('#gracePeriod');
+            const scheduleType = select.value;
+            const flexibleFields = $('#flexibleFields');
+            const gracePeriod = $('#gracePerioid');
 
-         if (scheduleType === 'flexible') {
-            flexibleFields.removeClass('hidden');
-            gracePeriod.addClass('hidden');
-            gracePeriodInput.removeAttr('required'); // Remove required for flexible
-         } else if (scheduleType === 'fixed') {
-            gracePeriod.removeClass('hidden');
-            flexibleFields.addClass('hidden');
-            gracePeriodInput.attr('required', 'required'); // Add required for fixed
-         }
+            if (scheduleType === 'flexible') {
+                flexibleFields.removeClass('hidden');
+                gracePeriod.addClass('hidden');
+            } else if (scheduleType === 'fixed') {
+                gracePeriod.removeClass('hidden');
+                flexibleFields.addClass('hidden');
+            }
         }
 
         // Handle toggle between schedule types
