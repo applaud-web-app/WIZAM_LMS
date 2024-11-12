@@ -1082,7 +1082,7 @@ class StudentController extends Controller
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
-                        'time' => $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration) : $this->formatTime($quiz->total_time),
+                        'time' => $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $this->formatTime($quiz->total_time),
                         'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
                         'is_free' => $quiz->is_free,
                         'is_resume' =>$isResume,
