@@ -1457,6 +1457,7 @@ class QuizController extends Controller
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
                         'schedules' => [
+                            'schedule_id'=> $exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
