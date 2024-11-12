@@ -37,7 +37,7 @@
 
    <aside id="asideBar" class="asidebar dark:bg-box-dark fixed start-0 top-0 z-[1035] h-screen overflow-hidden  xl:!w-[280px] xl:[&.collapsed]:!w-[80px] [&.collapsed]:!w-[250px] xl:[&.TopCollapsed]:!w-[0px] [&.TopCollapsed]:!w-[250px] !transition-all !duration-[0.2s] ease-linear delay-[0s] !w-0 xl:[&.collapsed>.logo-wrapper]:w-[80px]">
       <div class="flex w-[280px] bg-gray-900   dark:border-box-dark-up logo-wrapper items-center h-[71px] dark:bg-box-dark-up max-xl:hidden">
-         <a href="index.html" class="block text-center">
+         <a href="{{route('admin-dashboard')}}" class="block text-center">
             <div class="logo-full">
                <img class="ps-[27px] w-auto h-[45px] object-contain dark:hidden" src="{{asset('assets/images/logos/logo_white.svg')}}" alt="Logo">
                <img class="ps-[27px] w-auto h-[45px] object-contain hidden dark:block" src="{{asset('assets/images/logos/logo_white.svg')}}" alt="Logo">
@@ -433,7 +433,7 @@
                <!-- Navigation Items -->
                <li class="xl:hidden xl:[&.flex]:flex" id="topMenu-logo">
                   <div class="flex md:w-[190px] xs:w-[170px] max-xs:w-[100px] max-md:pe-[30px] max-xs:pe-[15px] border-e border-[#edf2f9] dark:border-box-dark-up logo-wrapper items-center h-[71px] dark:bg-box-dark-up">
-                     <a href="index.html" class="block text-center">
+                     <a href="{{route('admin-dashboard')}}" class="block text-center">
                         <div class="logo-full">
                            <img class="md:ps-[15px] w-auto h-[64px] object-contain dark:hidden" src="{{asset('assets/images/logos/logo-dark.png')}}" alt="Logo">
                            <img class="md:ps-[15px] w-auto h-[64px] object-contain hidden dark:block" src="{{asset('assets/images/logos/logo-white.png')}}" alt="Logo">
@@ -457,7 +457,7 @@
                      <a href="#" class="active">Home Dashboard</a>
                      <ul class="subMenu">
                         <li class="active">
-                           <a href="index.html">Demo 1</a>
+                           <a href="{{route('admin-dashboard')}}">Demo 1</a>
                         </li>
                         <li class="">
                            <a href="demo-two.html">Demo 2</a>

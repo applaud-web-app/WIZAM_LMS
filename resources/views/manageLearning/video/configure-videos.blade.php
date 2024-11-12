@@ -21,7 +21,7 @@
                         <ol class="flex flex-wrap p-0 mb-0 list-none gap-[8px] max-sm:justify-center">
                             <!-- Parent Link -->
                             <li class="inline-flex items-center mb-2">
-                                <a class="text-[14px] font-normal leading-[20px] text-body dark:text-neutral-200 hover:text-warning group" href="index.html">
+                                <a class="text-[14px] font-normal leading-[20px] text-body dark:text-neutral-200 hover:text-warning group" href="{{route('admin-dashboard')}}">
                                     <i class="uil uil-estate text-light dark:text-white/50 me-[8px] text-[16px] group-hover:text-current"></i>Dashboard</a>
                             </li>
                             <!-- Current Page -->

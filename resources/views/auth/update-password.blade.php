@@ -23,7 +23,7 @@
    <main class="relative bg-top bg-no-repeat dark:bg-[#1e2836] bg-contain bg-cyan-50">
       <div class="h-[calc(var(--vh,1vh)_*_100)] w-full flex">
          <div class="flex flex-col justify-center w-full max-w-[520px] px-[30px] mx-auto my-[150px]">
-            <a href="index.html" class="text-center">
+            <a href="{{route('admin-dashboard')}}" class="text-center">
                <img src="{{ asset('assets/images/logos/logo-dark.png')}}" alt="image" class="inline w-auto h-[64px] dark:hidden">
                <img src="{{ asset('assets/images/logos/logo-white.png')}}" alt="image" class="hidden w-auto h-[64px] dark:inline">
             </a>

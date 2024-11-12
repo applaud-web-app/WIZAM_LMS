@@ -39,7 +39,7 @@
 
          <!-- Login form container -->
          <div class="flex flex-col justify-center w-full max-w-[520px] px-[30px] mx-auto my-5">
-            <a href="index.html" class="text-center">
+            <a href="{{route('admin-dashboard')}}" class="text-center">
                <!-- Logo for the light theme -->
                <img src="{{ asset('assets/images/logos/logo-dark.png')}}" alt="image" class="inline w-auto h-[64px] dark:hidden">
                <!-- Logo for the dark theme -->
