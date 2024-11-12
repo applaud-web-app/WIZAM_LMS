@@ -845,15 +845,23 @@ class ExamController extends Controller
                      // Ensure correctAnswer is an array when needed
                      switch ($question->type) {
                         case 'FIB':
+                             // Decode and normalize correct answer array
                             if (is_string($correct_answ)) {
-                                $correct_answ = array_map('strtolower', json_decode($correct_answ, true)); // Decode JSON and convert to lowercase
-                            } else {
-                                $correct_answ = array_map('strtolower', $correct_answ); // Convert array to lowercase if not JSON encoded
+                                $correct_answ = json_decode($correct_answ, true);
                             }
-                            $user_answ = array_map('strtolower', $userAnswer); // Convert user answers to lowercase
+                            $correct_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $correct_answ);
+
+                            // Normalize user answer array
+                            $user_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $userAnswer);
+
+                            // Sort and compare
                             sort($correct_answ);
                             sort($user_answ);
-                            $isCorrect = $user_answ === $correct_answ; // Use strict equality for comparison
+                            $isCorrect = $user_answ === $correct_answ;
                             break;
                         case 'MSA':
                             $isCorrect = $user_answ == $correct_answ;
