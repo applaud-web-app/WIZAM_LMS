@@ -1272,6 +1272,7 @@ class StudentController extends Controller
                     'practice_marks'   => $marks,     // Use data from query result
                     'practice_slug'    => $practiceSet->slug,
                     'is_free' => $practiceSet->is_free,
+                    'category' => $practiceSet->subCategory_id,
                     'is_resume'=>$isResume
                 ];
             }
@@ -1304,6 +1305,7 @@ class StudentController extends Controller
                     'practice_sets.point_mode',
                     'practice_sets.points',
                     'practice_sets.is_free',
+                    'practice_sets.subCategory_id',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -1319,6 +1321,7 @@ class StudentController extends Controller
                 ->where('practice_sets.status', 1)
                 ->groupBy(
                     'practice_sets.id',
+                    'practice_sets.subCategory_id',
                     'practice_sets.title',
                     'practice_sets.description',
                     'sub_categories.name',
@@ -1384,6 +1387,7 @@ class StudentController extends Controller
                     'marks' => $marks,
                     'description' => $practiceSetData->description,
                     'is_free'=> $practiceSetData->is_free,
+                    'category' => $practiceSetData->subCategory_id,
                     'is_resume'=> $isResume,
                 ],
             ], 200);
