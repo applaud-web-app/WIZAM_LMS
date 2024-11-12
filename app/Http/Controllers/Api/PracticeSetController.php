@@ -289,7 +289,7 @@ class PracticeSetController extends Controller
                 // $remainingDuration = max(now()->diffInMinutes($ongoingPractice->end_time), 0);
 
                 // Calculate remaining duration
-                $remainingDuration = now()->diffInMinutes($ongoingExam->end_time);
+                $remainingDuration = now()->diffInMinutes($ongoingPractice->end_time);
 
                 if ($ongoingPractice->end_time->isPast()) {
                     $ongoingPractice->update(['status' => 'complete']);
