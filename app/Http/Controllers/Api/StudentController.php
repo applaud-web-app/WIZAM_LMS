@@ -1283,7 +1283,7 @@ class StudentController extends Controller
 
             // Format time and marks
             $time = $this->formatTime($practiceSetData->total_time);
-            $marks = $practiceSet->point_mode == "manual" ? $practiceSet->points*$practiceSet->total_questions : $practiceSet->total_marks;
+            $marks = $practiceSetData->point_mode == "manual" ? $practiceSetData->points*$practiceSetData->total_questions : $practiceSetData->total_marks;
     
             // Format response to match the structure needed by frontend
             return response()->json([
