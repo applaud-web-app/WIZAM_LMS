@@ -1290,6 +1290,9 @@ class StudentController extends Controller
             $request->validate([
                 'category' => 'required|integer',
             ]);
+
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
     
             // Fetch practice set details based on the category and slug
             $practiceSetData = PracticeSet::select(
@@ -1328,10 +1331,51 @@ class StudentController extends Controller
             if (!$practiceSetData) {
                 return response()->json(['status' => false, 'message' => 'Practice set not found'], 404);
             }
+            
+            $type = "practice";
+            $currentDate = now();
+
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Adjust 'is_free' based on subscription and assigned exams
+            if ($subscription) {
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $practiceSetData->transform(function ($exam) {
+                        $exam->is_free = 1; // Make all exams free for unlimited access
+                        return $exam;
+                    });
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $practiceSetData->transform(function ($exam) {
+                            $exam->is_free = 1; // Make exams free as part of the allowed features
+                            return $exam;
+                        });
+                    }
+                }
+            }
+
+            $current_time = now();
+            // Fetch ongoing exam results
+            $resumepracticeSet = PracticeSetResult::where('end_time', '>', $current_time)->where('user_id', $user->id)->where('status', 'ongoing')->pluck('practice_sets_id')->toArray();
 
             // Format time and marks
             $time = $this->formatTime($practiceSetData->total_time);
             $marks = $practiceSetData->point_mode == "manual" ? $practiceSetData->points*$practiceSetData->total_questions : $practiceSetData->total_marks;
+
+            $isResume = in_array($practiceSetData->id,$resumepracticeSet) ? 1 : 0;
     
             // Format response to match the structure needed by frontend
             return response()->json([
@@ -1343,7 +1387,8 @@ class StudentController extends Controller
                     'duration' => $time,
                     'marks' => $marks,
                     'description' => $practiceSetData->description,
-                    'is_free'=> $practiceSetData->is_free
+                    'is_free'=> $practiceSetData->is_free,
+                    'is_resume'=> $isResume,
                 ],
             ], 200);
         } catch (\Throwable $th) {
