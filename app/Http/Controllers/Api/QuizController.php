@@ -1323,15 +1323,6 @@ class QuizController extends Controller
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
-            // Check if the user has a subscription
-            $currentDate = now();
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-
             // Fetch quizzes with schedules based on the requested category
             $quizData = Quizze::select(
                     'quizzes.id',
@@ -1354,6 +1345,7 @@ class QuizController extends Controller
                     // DB::raw('COUNT(questions.id) as total_questions'),
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    'quiz_schedules.id as schedule_id',
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
@@ -1383,6 +1375,7 @@ class QuizController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'exam_schedules.id',
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
@@ -1393,24 +1386,62 @@ class QuizController extends Controller
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
 
-            // If the user has a subscription, mark paid quizzes as free
+            $type = "quizzes";
+            $currentDate = now();
+
+            // Fetch the user's active subscription
+            $subscription = Subscription::with('plans')
+                ->where('user_id', $user->id)
+                ->where('stripe_status', 'complete')
+                ->where('ends_at', '>', $currentDate)
+                ->latest()
+                ->first();
+
+            // Adjust 'is_free' based on subscription and assigned exams
             if ($subscription) {
-                foreach ($quizData as $quiz) {
-                    if ($quiz->is_free == 0) { // If it's a paid quiz
-                        $quiz->is_free = 1; // Set it to free
+                $plan = $subscription->plans;
+
+                // Check if the plan allows unlimited access
+                if ($plan->feature_access == 1) {
+                    // MAKE ALL EXAMS FREE
+                    $quizData->transform(function ($exam) {
+                        $exam->is_free = 1; // Make all exams free for unlimited access
+                        return $exam;
+                    });
+                } else {
+                    // Get allowed features from the plan
+                    $allowed_features = json_decode($plan->features, true);
+                    if (in_array($type, $allowed_features)) {
+                        // MAKE ALL EXAMS FREE
+                        $quizData->transform(function ($exam) {
+                            $exam->is_free = 1; // Make exams free as part of the allowed features
+                            return $exam;
+                        });
                     }
                 }
-            } else {
-                // Filter to only show public quizzes for non-subscribers
-                $quizData = $quizData->filter(function ($quiz) {
-                    return $quiz->is_public == 1;
-                });
+            }
+
+            $current_time = now();
+            // Fetch ongoing exam results
+            $quizResults = QuizResult::where('end_time', '>', $current_time)
+                ->where('user_id', $user->id)
+                ->where('status', 'ongoing')
+                ->get();
+            // Create a map for quick lookup
+            $quizResultExamScheduleMap = [];
+            foreach ($quizResults as $examResult) {
+                $key = $examResult->quiz_id . '_' . $examResult->schedule_id;
+                $quizResultExamScheduleMap[$key] = true;
             }
 
             // Return success JSON response
             return response()->json([
                 'status' => true,
-                'data' => $quizData->map(function ($exam) {
+                'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap) {
+
+                    $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
+                    $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
+
                     return [
                         'id' => $exam->id,
                         'exam_type_name' => $exam->exam_type_name,
@@ -1424,6 +1455,7 @@ class QuizController extends Controller
                         'total_questions' => $exam->total_questions,
                         'total_marks' => $exam->total_marks,
                         'total_time' => $exam->total_time,
+                        'is_resume' => $isResume,
                         'schedules' => [
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
