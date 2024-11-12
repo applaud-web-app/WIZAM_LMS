@@ -286,7 +286,10 @@ class PracticeSetController extends Controller
                 ->first();
 
             if ($ongoingPractice) {
-                $remainingDuration = max(now()->diffInMinutes($ongoingPractice->end_time), 0);
+                // $remainingDuration = max(now()->diffInMinutes($ongoingPractice->end_time), 0);
+
+                // Calculate remaining duration
+                $remainingDuration = now()->diffInMinutes($ongoingExam->end_time);
 
                 if ($ongoingPractice->end_time->isPast()) {
                     $ongoingPractice->update(['status' => 'complete']);
@@ -297,11 +300,11 @@ class PracticeSetController extends Controller
                         'data' => [
                             'title' => $practice->title,
                             'uuid' => $ongoingPractice->uuid,
-                            'answer' => $ongoingPractice->answer,
                             'questions' => json_decode($ongoingPractice->questions),
                             'total_time'=> $ongoingPractice->exam_duration,
                             'duration' => $remainingDuration . " mins",
                             'points' => $ongoingPractice->points,
+                            'saved_answers'=> $ongoingPractice->answers == null ? [] : json_decode($ongoingPractice->answers),
                         ]
                     ], 200);
                 }
@@ -314,66 +317,8 @@ class PracticeSetController extends Controller
             // Prepare structured response data for questions and correct answers
             $questionsData = [];
             $correctAnswers = [];
-            
+
             foreach ($practice->practiceQuestions as $practiceQuestion) {
-                // $question = $practiceQuestion->questions;
-                // $options = $question->options ? json_decode($question->options, true) : [];
-
-                // $formattedAnswer = null;
-
-                // // Handling each question type and formatting the answer
-                // switch ($question->type) {
-                //     case "MSA":
-                //         $formattedAnswer = (int) $question->answer; // Assuming single answer as an integer index
-                //         break;
-                //     case "MMA":
-                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct indices
-                //         break;
-                //     case "TOF":
-                //         $formattedAnswer = (int) $question->answer; // Assuming True/False as integer (1 or 2)
-                //         break;
-                //     case "SAQ":
-                //         $formattedAnswer = $question->answer; // Assuming answer as string for short answers
-                //         break;
-                //     case "MTF":
-                //         $formattedAnswer = json_decode($question->answer, true); // Key-value pair for matching
-                //         break;
-                //     case "ORD":
-                //         $formattedAnswer = json_decode($question->answer, true); // Array of indices for ordering
-                //         break;
-                //     case "FIB":
-                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct answers for blanks
-                //         break;
-                //     case "EMQ":
-                //         $formattedAnswer = json_decode($question->answer, true); // Array of correct options
-                //         break;
-                // }
-
-                // // Customize question display for different types
-                // $questionText = $question->question;
-                // if ($question->type == "FIB") {
-                //     $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center"></span>', $question->question);
-                //     $options = [is_array(json_decode($question->answer, true)) ? count(json_decode($question->answer, true)) : 0];
-                // } elseif ($question->type == "EMQ") {
-                //     $questionText = json_decode($question->question, true);
-                // }
-
-                // // Add question data
-                // $questionsData[] = [
-                //     'id' => $question->id,
-                //     'type' => $question->type,
-                //     'question' => $questionText,
-                //     'options' => $options
-                // ];
-
-                // // Add correct answer info
-                // $correctAnswers[] = [
-                //     'id' => $question->id,
-                //     'correct_answer' => $formattedAnswer,
-                //     'default_marks' => $practice->point_mode == "manual" ? $practice->points : $question->default_marks
-                // ];
-
-
                 $question = $practiceQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
     
@@ -384,7 +329,7 @@ class PracticeSetController extends Controller
                 }
 
                 if ($question->type == "ORD") {
-                    shuffle($options);
+                    // shuffle($options);
                 }
     
                 // Customize question display for different types
@@ -467,11 +412,10 @@ class PracticeSetController extends Controller
                 'questions' => json_encode($questionsData, true),
                 'correct_answers' => json_encode($correctAnswers, true),
                 'start_time' => $startTime,
-                'allow_point' => $practice->allow_point,
-                'point_mode' => $practice->point_mode,
-                'start_time' => $startTime,
                 'end_time' => $endTime,
                 'exam_duration' => $duration,
+                'allow_point' => $practice->allow_point,
+                'point_mode' => $practice->point_mode,
                 'point' => $points,
                 'total_question' => count($questionsData),
                 'status' => 'ongoing',
@@ -485,9 +429,10 @@ class PracticeSetController extends Controller
                     'title' => $practice->title,
                     'uuid' => $practiceResult->uuid,
                     'questions' => json_decode($practiceResult->questions),
-                    'duration' => $remainingDuration . " mins",
                     'total_time'=> $practiceResult->exam_duration,
-                    'points' => $practiceResult->point
+                    'duration' => $remainingDuration . " mins",
+                    'points' => $practiceResult->point,
+                    'saved_answers'=> $practiceResult->answers == null ? [] : json_decode($practiceResult->answers),
                 ]
             ], 200);
 
@@ -525,7 +470,8 @@ class PracticeSetController extends Controller
         $incorrect = 0;
         $totalMarks = 0;
         $incorrectMarks = 0;
-    
+        $wrongQuestionIds = [];  // Array to hold IDs of wrong questions
+
         // Total marks should be fixed in manual mode
         $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * count($user_answer)  : 0; 
         foreach ($user_answer as $answer) {
@@ -536,7 +482,7 @@ class PracticeSetController extends Controller
 
             // $question = Question::find($answer['id']);
             $questionId = $answer['id'];
-            $question = Question::find(explode("-", $questionId)[0]);
+            $question = Question::find($answer['id']);
 
             if (!$question) {
                 $incorrect += 1;
@@ -564,27 +510,29 @@ class PracticeSetController extends Controller
                 } elseif ($question->type == 'TOF') {
                     $isCorrect = $userAnswer == $question->answer;
                 } elseif ($question->type == 'SAQ') {
-                    // $isCorrect = in_array($userAnswer, $answers);
                     $isCorrect = false;
-                    if (is_string($userAnswer) && is_array($question->options)) {
+                    if (is_string($userAnswer)) {
                         $answers = json_decode($question->options);
                         foreach ($answers as $option) {
-                            // Convert both the option and the user answer to lowercase and trim them
                             $sanitizedOption = strtolower(trim(strip_tags($option)));
                             $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
-
-                            // Check if the sanitized option matches the sanitized user answer
                             if ($sanitizedUserAnswer == $sanitizedOption) {
                                 $isCorrect = true;
-                                break;  // Exit the loop once a match is found
+                                break;
                             }
                         }
                     }
                 } elseif ($question->type == 'FIB') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($correctAnswers);
+                    // sort($userAnswer);
+                    // $isCorrect = $userAnswer == $correctAnswers;
+
+                    $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
+                    $userAnswer = array_map('strtolower', $userAnswer);
                     sort($correctAnswers);
                     sort($userAnswer);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    $isCorrect = ($userAnswer == $correctAnswers);
                 } elseif ($question->type == 'MTF') {
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = true; // Assume correct until proven otherwise
@@ -598,14 +546,22 @@ class PracticeSetController extends Controller
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
-                    $correctAnswers = json_decode($question->answer, true);
-                    sort($userAnswer);
-                    sort($correctAnswers);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($userAnswer);
+                    // sort($correctAnswers);
+                    // $isCorrect = $userAnswer == $correctAnswers;
 
                     // $correctAnswers = json_decode($question->answer, true);
                     // $index = (int)explode("-", $questionId)[1] - 1;
                     // $isCorrect = $userAnswer == $correctAnswers[$index];
+
+                    $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = $userAnswer == $correctAnswers;
+                }
+
+                // Add to wrong question IDs if answer is incorrect
+                if (!$isCorrect) {
+                    $wrongQuestionIds[] = $questionId;  // Collect wrong question IDs
                 }
         
                 if ($isCorrect) {
@@ -618,6 +574,7 @@ class PracticeSetController extends Controller
                     }
                 }
             }else{
+                $wrongQuestionIds[] = $questionId;  
                 $incorrect += 1;
                 if (isset($question->default_marks)) {
                     $incorrectMarks += $question->default_marks;
@@ -626,11 +583,15 @@ class PracticeSetController extends Controller
         }
     
         // Calculate the student's percentage AFTER applying negative marking
-        $studentPercentage = ($practiceSetResult->total_question > 0) ? ($correctAnswer / $practiceSetResult->total_question) * 100 : 0;
+        // $studentPercentage = ($practiceSetResult->total_question > 0) ? ($correctAnswer / $practiceSetResult->total_question) * 100 : 0;
+
+        // Calculate the student's percentage AFTER applying negative marking
+        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
     
         // Update pratice result with correct/incorrect answers and student percentage
         $practiceSetResult->status = "complete";
         $practiceSetResult->updated_at = now();
+        $practiceSetResult->score = $score;
         $practiceSetResult->answers = json_encode($user_answer, true);
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;

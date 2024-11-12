@@ -31,7 +31,8 @@ class PracticeSetResult extends Model
         'incorrect_answer',
         'status',
         'start_time',
-        'end_time'
+        'end_time',
+        'score'
     ];
 
     public function pratice(){
