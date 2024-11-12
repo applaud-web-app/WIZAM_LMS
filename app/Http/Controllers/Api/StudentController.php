@@ -723,8 +723,6 @@ class StudentController extends Controller
     }
 
 
-
-
     // QUIZ DATA
     public function quizType(Request $request) {
         try {
@@ -1283,7 +1281,9 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Practice set not found'], 404);
             }
 
-            $marks = $practiceSetData->point_mode == "manual" ? $practiceSetData->points*$practiceSetData->total_questions : $this->formatTime($practiceSetData->total_time);
+            // Format time and marks
+            $time = $this->formatTime($practiceSetData->total_time);
+            $marks = $practiceSetData->points*$practiceSetData->total_questions;
     
             // Format response to match the structure needed by frontend
             return response()->json([
@@ -1292,7 +1292,7 @@ class StudentController extends Controller
                     'title' => $practiceSetData->title,
                     'syllabus' => $practiceSetData->sub_category_name,
                     'totalQuestions' => $practiceSetData->total_questions,
-                    'duration' => $this->formatTime($practiceSetData->total_time),
+                    'duration' => $time,
                     'marks' => $marks,
                     'description' => $practiceSetData->description,
                     'is_free'=> $practiceSetData->is_free
