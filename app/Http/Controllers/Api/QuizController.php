@@ -1375,7 +1375,7 @@ class QuizController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
-                    'exam_schedules.id',
+                    'quiz_schedules.id',
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
