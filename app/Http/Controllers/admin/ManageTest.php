@@ -700,11 +700,11 @@ class ManageTest extends Controller
                         }
                     })
                     ->addColumn('status', function($row) {
-                        // Determine the status color and text based on `is_active`
-                        $statusColor = $row->status == 1 ? 'success' : 'danger';
-                        $statusText = $row->status == 1 ? 'Active' : 'Inactive';
-                        // Create the status badge HTML
-                        return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                       // Determine the status color and text based on `status`
+                       $statusColor = $row->status == 1 ? 'success' : ($row->status == 3 ? 'danger' : 'warning');
+                       $statusText = $row->status == 1 ? 'Active' : ($row->status == 3 ? 'Expired' : 'Inactive');
+                       // Create the status badge HTML
+                       return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
                     ->rawColumns(['status','start_date','action','type','end_date'])
                     ->make(true);
