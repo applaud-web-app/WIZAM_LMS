@@ -38,6 +38,7 @@ class QuizController extends Controller
             // Validate incoming request data
             $request->validate([
                 'category' => 'required|integer',
+                'schedule_id'  => 'required',
             ]);
     
             // Fetch the quiz along with related questions in one query
@@ -65,6 +66,8 @@ class QuizController extends Controller
                     'quizzes.negative_marking_type',
                     'quizzes.negative_marks',
                     'quizzes.is_free',
+                    'quizzes.restrict_attempts',
+                    'quizzes.total_attempts',
                     DB::raw('SUM(questions.default_marks) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
@@ -79,7 +82,7 @@ class QuizController extends Controller
                     'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
                     'quizzes.point_mode', 'quizzes.duration', 'quizzes.point', 'quizzes.shuffle_questions',
                     'quizzes.question_view', 'quizzes.disable_finish_button', 'quizzes.negative_marking',
-                    'quizzes.negative_marking_type', 'quizzes.negative_marks',  'quizzes.is_free',
+                    'quizzes.negative_marking_type', 'quizzes.negative_marks',  'quizzes.is_free','quizzes.restrict_attempts','quizzes.total_attempts'
                 )
                 ->first();
     
@@ -140,6 +143,7 @@ class QuizController extends Controller
             // Check for ongoing quiz
             $ongoingQuiz = QuizResult::where('user_id', $user->id)
                 ->where('quiz_id', $quiz->id)
+                ->where('schedule_id',$request->schedule_id)
                 ->where('status', 'ongoing') // Correct the status check
                 ->latest('created_at')
                 ->first();
@@ -166,6 +170,7 @@ class QuizController extends Controller
                             'total_time'=> $ongoingQuiz->exam_duration,
                             'duration' => $remainingDuration . " mins",
                             'points' => $ongoingQuiz->point,
+                            'saved_answers'=> $ongoingQuiz->answers == null ? [] : json_decode($ongoingQuiz->answers),
                             'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
                             'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
                         ]
@@ -174,7 +179,7 @@ class QuizController extends Controller
             }
     
             // Calculate quiz duration and points
-            $duration = (int) ($quiz->duration_mode == "manual" && $quiz->duration > 0 ? $quiz->duration : round($quiz->total_time / 60, 2));
+            $duration = (int) ($quiz->duration_mode == "manual"? $quiz->duration : round($quiz->total_time / 60, 2));
             $points = $quiz->point_mode == "manual" ? $quiz->point : $quiz->total_marks;
     
             // Prepare structured response data for questions
@@ -191,7 +196,7 @@ class QuizController extends Controller
                 }
 
                 if ($question->type == "ORD") {
-                    shuffle($options);
+                    // shuffle($options);
                 }
     
                 // Customize question display for different types
@@ -276,6 +281,7 @@ class QuizController extends Controller
                 'uuid' => uniqid(), // Generate unique identifier
                 'subcategory_id' => $quiz->subcategory_id,
                 'user_id' => $user->id,
+                'schedule_id'=>$request->schedule_id,
                 'questions' => json_encode($questionsData,true),
                 'correct_answers' => json_encode($correctAnswers,true),
                 'start_time' => $startTime,
@@ -302,6 +308,7 @@ class QuizController extends Controller
                     'total_time'=> $quizResult->exam_duration,
                     'duration' => $remainingDuration . " mins",
                     'points' => $quizResult->point,
+                    'saved_answers'=> $quizResult->answers == null ? [] : json_decode($quizResult->answers),
                     'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
                     'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
                 ]
@@ -449,6 +456,7 @@ class QuizController extends Controller
         $incorrect = 0;
         $totalMarks = 0;
         $incorrectMarks = 0;
+        $wrongQuestionIds = [];  // Array to hold IDs of wrong questions
     
         // Total marks should be fixed in manual mode
         $totalMarks = $quizResult->point_type == "manual" ? $quizResult->point * count($user_answer) : 0; 
@@ -461,7 +469,7 @@ class QuizController extends Controller
             
             // $question = Question::find($answer['id']);
             $questionId = $answer['id'];
-            $question = Question::find(explode("-", $questionId)[0]);
+            $question = Question::find($answer['id']);
 
             if (!$question) {
                 $incorrect += 1;
@@ -489,14 +497,11 @@ class QuizController extends Controller
                     $isCorrect = $userAnswer == $question->answer;
                 } elseif ($question->type == 'SAQ') {
                     $isCorrect = false;
-                    if (is_string($userAnswer) && is_array($question->options)) {
+                    if (is_string($userAnswer)) {
                         $answers = json_decode($question->options);
                         foreach ($answers as $option) {
-                            // Convert both the option and the user answer to lowercase and trim them
                             $sanitizedOption = strtolower(trim(strip_tags($option)));
                             $sanitizedUserAnswer = strtolower(trim(strip_tags($userAnswer)));
-
-                            // Check if the sanitized option matches the sanitized user answer
                             if ($sanitizedUserAnswer == $sanitizedOption) {
                                 $isCorrect = true;
                                 break;  // Exit the loop once a match is found
@@ -504,10 +509,16 @@ class QuizController extends Controller
                         }
                     }
                 } elseif ($question->type == 'FIB') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($correctAnswers);
+                    // sort($userAnswer);
+                    // $isCorrect = $userAnswer == $correctAnswers;
+
+                    $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
+                    $userAnswer = array_map('strtolower', $userAnswer);
                     sort($correctAnswers);
                     sort($userAnswer);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    $isCorrect = ($userAnswer == $correctAnswers);
                 } elseif ($question->type == 'MTF') {
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = true; // Assume correct until proven otherwise
@@ -521,15 +532,23 @@ class QuizController extends Controller
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
-                    $correctAnswers = json_decode($question->answer, true);
-                    sort($userAnswer);
-                    sort($correctAnswers);
-                    $isCorrect = $userAnswer == $correctAnswers;
+                    // $correctAnswers = json_decode($question->answer, true);
+                    // sort($userAnswer);
+                    // sort($correctAnswers);
+                    // $isCorrect = $userAnswer == $correctAnswers;
 
+                    $correctAnswers = json_decode($question->answer, true);
+                    $isCorrect = $userAnswer == $correctAnswers;
                     // $correctAnswers = json_decode($question->answer, true);
                     // $index = (int)explode("-", $questionId)[1] - 1;
                     // $isCorrect = $userAnswer == $correctAnswers[$index];
                 }
+
+                 // Add to wrong question IDs if answer is incorrect
+                 if (!$isCorrect) {
+                    $wrongQuestionIds[] = $questionId;  // Collect wrong question IDs
+                }
+                
         
                 if ($isCorrect) {
                     $score += $quizResult->point_type == "manual" ? $quizResult->point : $question->default_marks;
@@ -541,6 +560,9 @@ class QuizController extends Controller
                     }
                 }
             }else{
+
+                $wrongQuestionIds[] = $questionId; 
+
                 $incorrect += 1;
                 if (isset($question->default_marks)) {
                     $incorrectMarks += $question->default_marks;
@@ -567,6 +589,7 @@ class QuizController extends Controller
         // Update quiz result with correct/incorrect answers and student percentage
         $quizResult->status = "complete";
         $quizResult->updated_at = now();
+        $quizResult->score = $score;
         $quizResult->answers = json_encode($user_answer, true);
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;
@@ -580,7 +603,8 @@ class QuizController extends Controller
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
             'student_status' => $studentStatus,
-            'student_percentage' => $studentPercentage
+            'student_percentage' => $studentPercentage,
+            'wrong_question_ids' => $wrongQuestionIds  
         ]);
     }
 
@@ -983,9 +1007,31 @@ class QuizController extends Controller
                      // Ensure correctAnswer is an array when needed
                      switch ($question->type) {
                         case 'FIB':
+                            // if (is_string($correct_answ)) {
+                            //     $correct_answ = json_decode($correct_answ, true);
+                            // }
+                            // $isCorrect = $user_answ == $correct_answ;
+                            // break;
+
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
+                            $correct_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $correct_answ);
+
+                            if (is_string($user_answ)) {
+                                $user_answ = json_decode($user_answ, true);
+                            }
+
+                            // Normalize user answer array
+                            $user_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $user_answ);
+
+                            // Sort and compare
+                            sort($correct_answ);
+                            sort($user_answ);
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
