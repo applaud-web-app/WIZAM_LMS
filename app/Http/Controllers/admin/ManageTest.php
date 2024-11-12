@@ -1695,33 +1695,40 @@ class ManageTest extends Controller
         if (!auth()->user()->can('exams')) { // Assuming 'exams' is the required permission
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
         }
-
+    
         // Find the exam with active status
         $exam = Exam::where('status', 1)->find($id);
         if ($exam) {
             // Get all results for the exam
             $examResult = ExamResult::where('exam_id', $exam->id)->get();
-
+    
+            // Filter out non-numeric 'student_percentage' values
+            $examResult = $examResult->filter(function ($result) {
+                return is_numeric($result->student_percentage);
+            });
+    
             // Calculate required data
             $totalAttempt = $examResult->count();
-            $passPercentage = (float) $exam->pass_percentage; // Cast pass_percentage to float
-
+            $passPercentage = (float) $exam->pass_percentage;
+    
             $passedExam = $examResult->where('student_percentage', '>=', $passPercentage)->count();
             $failedExam = $examResult->where('student_percentage', '<', $passPercentage)->count();
-
+            
+            // Ensure all calculations involve numeric types
             $averagePercentage = $totalAttempt > 0 ? (float) $examResult->avg('student_percentage') : 0;
-            $highestPercentage = (float) $examResult->max('student_percentage');
-            $lowestPercentage = (float) $examResult->min('student_percentage');
-
+            $highestPercentage = $totalAttempt > 0 ? (float) $examResult->max('student_percentage') : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) $examResult->min('student_percentage') : 0;
+    
             // Return the view with all required data
             return view('manageTest.exams.exam-overall-report', compact(
                 'exam', 'totalAttempt', 'passedExam', 'failedExam', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
             ));
         }
-
+    
         // Redirect if the exam is not found
         return redirect()->back()->with('error', 'Exam Not Found');
     }
+    
 
 
     public function detailedReport(Request $request, $id)
