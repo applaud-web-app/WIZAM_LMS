@@ -805,7 +805,7 @@ class ManageTest extends Controller
 
         // Prevent editing if the schedule has started or expired
         if ($isStarted || $isExpired) {
-            return redirect()->route('exam-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
+            return redirect()->route('quizzes-schedules', ['id' => $id])->with('error', 'This exam schedule cannot be edited as it has already started or expired.');
         }
 
         $schedule->schedule_type= $validatedData['scheduleType'];
