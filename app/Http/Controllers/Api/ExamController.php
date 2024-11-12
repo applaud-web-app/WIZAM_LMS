@@ -846,9 +846,14 @@ class ExamController extends Controller
                      switch ($question->type) {
                         case 'FIB':
                             if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
+                                $correct_answ = array_map('strtolower', json_decode($correct_answ, true)); // Decode JSON and convert to lowercase
+                            } else {
+                                $correct_answ = array_map('strtolower', $correct_answ); // Convert array to lowercase if not JSON encoded
                             }
-                            $isCorrect = $user_answ == $correct_answ;
+                            $user_answ = array_map('strtolower', $userAnswer); // Convert user answers to lowercase
+                            sort($correct_answ);
+                            sort($user_answ);
+                            $isCorrect = $user_answ === $correct_answ; // Use strict equality for comparison
                             break;
                         case 'MSA':
                             $isCorrect = $user_answ == $correct_answ;
