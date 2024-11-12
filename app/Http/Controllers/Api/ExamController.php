@@ -717,8 +717,8 @@ class ExamController extends Controller
                     // $isCorrect = $userAnswer == $correctAnswers[$index];
 
                     $correctAnswers = json_decode($question->answer, true);
-                    sort($userAnswer);
-                    sort($correctAnswers);
+                    // sort($userAnswer);
+                    // sort($correctAnswers);
                     $isCorrect = $userAnswer == $correctAnswers;
                 }
 
