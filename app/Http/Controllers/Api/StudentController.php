@@ -1350,19 +1350,13 @@ class StudentController extends Controller
                 // Check if the plan allows unlimited access
                 if ($plan->feature_access == 1) {
                     // MAKE ALL EXAMS FREE
-                    $practiceSetData->transform(function ($exam) {
-                        $exam->is_free = 1; // Make all exams free for unlimited access
-                        return $exam;
-                    });
+                    $practiceSetData->is_free = 1;
                 } else {
                     // Get allowed features from the plan
                     $allowed_features = json_decode($plan->features, true);
                     if (in_array($type, $allowed_features)) {
                         // MAKE ALL EXAMS FREE
-                        $practiceSetData->transform(function ($exam) {
-                            $exam->is_free = 1; // Make exams free as part of the allowed features
-                            return $exam;
-                        });
+                        $practiceSetData->is_free = 1;
                     }
                 }
             }
