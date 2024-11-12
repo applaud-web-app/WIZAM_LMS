@@ -1182,6 +1182,7 @@ class StudentController extends Controller
 
             // Fetch practice sets and their related data, including skill name
             $practiceSets = PracticeSet::select(
+                    'practice_sets.id',
                     'practice_sets.title',
                     'practice_sets.slug',
                     'practice_sets.subCategory_id',
@@ -1296,6 +1297,7 @@ class StudentController extends Controller
     
             // Fetch practice set details based on the category and slug
             $practiceSetData = PracticeSet::select(
+                    'practice_sets.id',
                     'practice_sets.title',
                     'practice_sets.description',
                     'sub_categories.name as sub_category_name',
