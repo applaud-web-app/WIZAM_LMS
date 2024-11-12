@@ -792,8 +792,7 @@ class PracticeSetController extends Controller
 
                 $openTime = Carbon::parse($practiceResult->created_at);
                 $closeTime = Carbon::parse($practiceResult->updated_at); 
-    
-                $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime));
+                $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime),2);
 
                 // Build result
                 $result = [
@@ -827,6 +826,22 @@ class PracticeSetController extends Controller
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
+                            $correct_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $correct_answ);
+
+                            if (is_string($user_answ)) {
+                                $user_answ = json_decode($user_answ, true);
+                            }
+
+                            // Normalize user answer array
+                            $user_answ = array_map(function($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $user_answ);
+
+                            // Sort and compare
+                            sort($correct_answ);
+                            sort($user_answ);
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
