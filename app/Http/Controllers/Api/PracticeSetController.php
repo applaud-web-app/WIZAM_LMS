@@ -891,8 +891,8 @@ class PracticeSetController extends Controller
                                 $options = $question->options;
                                 foreach ($options as $option) {
                                     // Strip HTML tags and extra spaces from both user answer and the option
-                                    $sanitizedUserAnswer = trim(strip_tags($user_answ));
-                                    $sanitizedOption = trim(strip_tags($option));
+                                    $sanitizedUserAnswer = strtolower(trim(strip_tags($user_answ)));
+                                    $sanitizedOption = strtolower(trim(strip_tags($option)));
 
                                     // Check if the sanitized user answer matches any sanitized option
                                     if ($sanitizedUserAnswer == $sanitizedOption) {
