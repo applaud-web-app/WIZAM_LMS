@@ -852,6 +852,10 @@ class ExamController extends Controller
                                 return is_string($item) ? strtolower($item) : $item;
                             }, $correct_answ);
 
+                            if (is_string($user_answ)) {
+                                $user_answ = json_decode($user_answ, true);
+                            }
+
                             // Normalize user answer array
                             $user_answ = array_map(function($item) {
                                 return is_string($item) ? strtolower($item) : $item;
