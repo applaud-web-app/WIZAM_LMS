@@ -33,7 +33,9 @@ class QuizResult extends Model
         'incorrect_answer',
         'status',
         'start_time',
-        'end_time'
+        'end_time',
+        'schedule_id',
+        'score'
     ];
 
     public function quiz(){
