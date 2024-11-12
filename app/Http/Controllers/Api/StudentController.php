@@ -969,14 +969,6 @@ class StudentController extends Controller
             if ($quizType) {
                 // Get the authenticated user
                 $user = $request->attributes->get('authenticatedUser');
-                $currentDate = now();
-
-                // Check if the user has an active subscription
-                $subscription = Subscription::where('user_id', $user->id)
-                    ->where('stripe_status', 'complete')
-                    ->where('ends_at', '>', $currentDate)
-                    ->latest()
-                    ->first();
 
                 // Fetch quiz data based on the requested category
                 $quizData = Quizze::select(
@@ -994,6 +986,7 @@ class StudentController extends Controller
                     'quiz_schedules.end_date',
                     'quiz_schedules.end_time',
                     'quiz_schedules.grace_period',
+                    'quiz_schedules.id as schedule_id',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -1019,6 +1012,7 @@ class StudentController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'quiz_schedules.id',
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
@@ -1029,28 +1023,60 @@ class StudentController extends Controller
                 ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
                 ->get();
 
-                // Process quizzes based on subscription status
+                // USER SUBSCRIPTION LOGIC
+                $type = "quizzes";
+                $currentDate = now();
+    
+                // Fetch the user's active subscription
+                $subscription = Subscription::with('plans')
+                    ->where('user_id', $user->id)
+                    ->where('stripe_status', 'complete')
+                    ->where('ends_at', '>', $currentDate)
+                    ->latest()
+                    ->first();
+    
+                // Adjust 'is_free' based on subscription and assigned exams
                 if ($subscription) {
-                    // If the user has a subscription, mark paid quizzes as free
-                    foreach ($quizData as $quiz) {
-                        if ($quiz->is_free == 0) { // If it's a paid quiz
-                            $quiz->is_free = 1; // Set it to free
+                    $plan = $subscription->plans;
+    
+                    // Check if the plan allows unlimited access
+                    if ($plan->feature_access == 1) {
+                        // MAKE ALL EXAMS FREE
+                        $quizData->transform(function ($exam) {
+                            $exam->is_free = 1; // Make all exams free for unlimited access
+                            return $exam;
+                        });
+                    } else {
+                        // Get allowed features from the plan
+                        $allowed_features = json_decode($plan->features, true);
+                        if (in_array($type, $allowed_features)) {
+                            // MAKE ALL EXAMS FREE
+                            $quizData->transform(function ($exam) {
+                                $exam->is_free = 1; // Make exams free as part of the allowed features
+                                return $exam;
+                            });
                         }
-                    }
-                } else {
-                    // If the user does not have a subscription, filter to only show public quizzes
-                    $quizData = $quizData->filter(function ($quiz) {
-                        return $quiz->is_public == 1; // Only keep public quizzes
-                    });
-
-                    // Ensure quizData is an array, returning an empty array if no quizzes
-                    if ($quizData->isEmpty()) {
-                        $quizData = collect([]); // Set it as an empty collection to avoid type errors
                     }
                 }
 
+                $current_time = now();
+                $quizResults = QuizResult::where('end_time', '>', $current_time)
+                    ->where('user_id', $user->id)
+                    ->where('status', 'ongoing')
+                    ->get();
+                // Create a map for quick lookup
+                $quizResultExamScheduleMap = [];
+                foreach ($quizResults as $examResult) {
+                    $key = $examResult->exam_id . '_' . $examResult->schedule_id;
+                    $quizResultExamScheduleMap[$key] = true;
+                }
+
                 // Format quiz data for the response
-                $formattedQuizData = $quizData->map(function ($quiz) {
+                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap){
+
+                    $examScheduleKey = $quiz->id . '_' . $quiz->schedule_id;
+                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
+
                     return [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
@@ -1058,7 +1084,9 @@ class StudentController extends Controller
                         'time' => $quiz->duration_mode == "manual" ? $quiz->duration : $this->formatTime($quiz->total_time),
                         'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
                         'is_free' => $quiz->is_free,
+                        'is_resume' =>$isResume,
                         'schedule' => [
+                            'schedule_id'=>$quiz->schedule_id,
                             'start_date' => $quiz->start_date,
                             'start_time' => $quiz->start_time,
                             'end_date' => $quiz->end_date,
