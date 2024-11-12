@@ -262,7 +262,7 @@
                 <label for="gracePeriod" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
                    Grace Period (minutes) <span class="text-red-500">*</span>
                 </label>
-                <input type="number" id="gracePeriod" name="gracePeriod" required class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter grace period in minutes">
+                <input type="number" id="gracePeriod" name="gracePeriod"  class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter grace period in minutes">
              </div>
  
              <!-- Schedule User Group -->
