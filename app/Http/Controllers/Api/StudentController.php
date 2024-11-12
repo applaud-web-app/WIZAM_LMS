@@ -27,6 +27,7 @@ use App\Models\BillingSetting;
 use App\Models\AssignedExam;
 use App\Models\ExamResult;
 use App\Models\PracticeSetResult;
+use App\Models\QuizResult;
 
 class StudentController extends Controller
 {
