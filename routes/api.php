@@ -160,7 +160,7 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('my-subscription',[StudentController::class,'mySubscription']);
     Route::get('my-payment',[StudentController::class,'myPayment']);
     Route::get('cancel-subscription',[CmsController::class,'cancelSubscription']);
-    Route::get('invoice-detail/{subscription_id}',[StudentController::class,'invoiceDetail']);
+    Route::get('invoice-detail/{payment_id}',[StudentController::class,'invoiceDetail']);
 });
 
 

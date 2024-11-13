@@ -1901,7 +1901,7 @@ class StudentController extends Controller
         }
     }
     
-    public function invoiceDetail(Request $request, $subscriptionId)
+    public function invoiceDetail(Request $request, $paymentId)
     {
         try {
             // Get the authenticated user
@@ -1934,22 +1934,12 @@ class StudentController extends Controller
             ->first();
 
             // Retrieve the most recent subscription for the user
-            $subscription = Subscription::select(
-                'subscriptions.created_at as purchase_date',
-                'subscriptions.ends_at as ends_date',
-                'subscriptions.stripe_status as subscription_status',
-                'plans.name as plan_name',
-                'plans.price as plan_price'
-            )
-            ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
-            ->where('subscriptions.user_id', $user->id)
-            ->where('subscriptions.id', $subscriptionId) // Specify the table for created_at
-            ->first();
+            $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
 
             // Prepare the response data
             $data = [
                 'billing' => $billing,
-                'subscription' => $subscription
+                'payment' => $payment
             ];
 
             // Return the response with status 200
