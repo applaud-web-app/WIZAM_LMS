@@ -22,11 +22,11 @@
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Pass Attempts</h3>
-              <p>{{$passedquiz ?? 0}}</p>
+              <p>{{$passedQuiz ?? 0}}</p>
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Fail Attempts</h3>
-              <p>{{$failedquiz ?? 0}}</p>
+              <p>{{$failedQuiz ?? 0}}</p>
             </div>
             <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
               <h3 class="mb-2">Avg. Percentage</h3>
