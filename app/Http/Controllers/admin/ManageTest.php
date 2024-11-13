@@ -1772,7 +1772,8 @@ class ManageTest extends Controller
                     })
                     ->addColumn('percenatge', function($row) {
                         if (isset($row->student_percentage)) {
-                            return round($row->student_percentage,2) ?? 0;
+                            $studentpercentage = (float) $row->student_percentage ?? 0;
+                            return round($studentpercentage,2) ?? 0;
                         } else {
                             return 0;  // Placeholder text
                         }
@@ -1898,7 +1899,8 @@ class ManageTest extends Controller
                     })
                     ->addColumn('percenatge', function($row) {
                         if (isset($row->student_percentage)) {
-                            return round($row->student_percentage,2) ?? 0;
+                            $studentpercentage = (float) $row->student_percentage ?? 0;
+                            return round($studentpercentage,2) ?? 0;
                         } else {
                             return 0;  // Placeholder text
                         }
