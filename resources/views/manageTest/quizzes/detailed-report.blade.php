@@ -79,7 +79,7 @@
         $('#category-table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('detailed-report',[$quiz->id]) }}",
+            ajax: "{{ route('detailed-quiz-report',[$quiz->id]) }}",
             columns: [
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 { data: 'task_taker', name: 'task_taker' },
