@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ExamResult;
 use Carbon\Carbon;
+use App\Models\QuizResult;
 
 
 class ManageTest extends Controller
@@ -298,10 +299,12 @@ class ManageTest extends Controller
                 ->addColumn('action', function ($section) {
                     $parms = "id=".$section->id;
                     $editUrl = route('quizzes-detail',['id'=>$section->id]);
+                    $overall = route('overall-quiz-report',['id'=>$section->id]);   
                     $deleteUrl = encrypturl(route('delete-quizzes'),$parms);
                     return '
                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
-                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                        <a href="'.$overall.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('created_at', function($row) {
                     return date('d/m/Y', strtotime($row->created_at));
@@ -1813,6 +1816,132 @@ class ManageTest extends Controller
             return view('manageTest.exams.exam-report-detail',compact('examResult'));
         }
         return redirect()->back()->with('error', 'Exam Result Not Found');
+    }
+
+
+    // QUIZ REPORT 
+    public function overallQuizReport($id)
+    {
+        // Check for permission
+        if (!auth()->user()->can('quizze')) { // Assuming 'quizze' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+    
+        // Find the quiz with active status
+        $quiz = Quizze::where('status', 1)->find($id);
+        if ($quiz) {
+            // Get all results for the quiz
+            $quizResult = QuizResult::where('quiz_id', $quiz->id)->get();
+    
+            // Filter out non-numeric 'student_percentage' values
+            $quizResult = $quizResult->filter(function ($result) {
+                return is_numeric($result->student_percentage);
+            });
+    
+            // Calculate required data
+            $totalAttempt = $quizResult->count();
+            $passPercentage = (float) $quiz->pass_percentage;
+    
+            $passedQuiz = $quizResult->where('student_percentage', '>=', $passPercentage)->count();
+            $failedQuiz = $quizResult->where('student_percentage', '<', $passPercentage)->count();
+            
+            // Ensure all calculations involve numeric types
+            $averagePercentage = $totalAttempt > 0 ? (float) $quizResult->avg('student_percentage') : 0;
+            $highestPercentage = $totalAttempt > 0 ? (float) $quizResult->max('student_percentage') : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) $quizResult->min('student_percentage') : 0;
+    
+            // Return the view with all required data
+            return view('manageTest.quizzes.quiz-overall-report', compact(
+                'quiz', 'totalAttempt', 'passedQuiz', 'failedQuiz', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
+            ));
+        }
+    
+        // Redirect if the exam is not found
+        return redirect()->back()->with('error', 'Quiz Not Found');
+    }
+
+    public function detailedQuizReport(Request $request, $id)
+    {
+        // Check for permission
+        if (!auth()->user()->can('quizze')) { // Assuming 'quizze' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        // Find the quiz with active status
+        $quiz = Quizze::where('id', $id)->where('status', 1)->first(); 
+        if ($quiz) {
+            if ($request->ajax()) {
+                $sections = QuizResult::with('user')->where('quiz_id',$id);
+                return DataTables::of($sections)
+                    ->addIndexColumn()
+                    ->addColumn('action', function ($section) {
+                        $parms = "id=" . $section->uuid;
+                        $viewUrl = route('quiz-report-detail',[$section->uuid]);
+                        $deleteUrl = route('delete-quiz-result',[$section->uuid]); // Update route name
+                        return '
+                            <a href="' . $viewUrl . '" class="cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>
+                            <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                    })
+                    ->addColumn('task_taker', function($row) {
+                        if (isset($row->user->name)) {
+                            return $row->user->name;
+                        } else {
+                            return "User";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('completed_on', function($row) {
+                        if ($row->status == "complete") {
+                            return date('d/m/Y', strtotime($row->updated_at)) . ", " . date('H:i:s A', strtotime($row->updated_at));
+                        } else {
+                            return "Resume";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('percenatge', function($row) {
+                        if (isset($row->student_percentage)) {
+                            return round($row->student_percentage,2) ?? 0;
+                        } else {
+                            return 0;  // Placeholder text
+                        }
+                    })
+                    ->addColumn('status', function($row) {
+                        // Determine the status color and text based on `status`
+                        $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
+                        $statusText = $row->student_percentage >= $row->pass_percentage ? 'PASS' : 'FAIL';
+                        // Create the status badge HTML
+                        return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                    })
+                    ->rawColumns(['status', 'percenatge', 'completed_on', 'task_taker', 'action'])
+                    ->make(true);
+            }
+            return view('manageTest.quizzes.detailed-report',compact('quiz'));
+        }
+    
+        // Redirect if the quiz is not found
+        return redirect()->back()->with('error', 'Quiz Not Found');
+    }
+
+    public function deleteQuizResult($uuid){
+        $schedule = QuizResult::where('uuid',$uuid)->first();
+        if ($schedule) {
+            $schedule->delete();
+            return redirect()->back()->with('success', 'Quiz Removed Successfully');
+        }
+        
+        return redirect()->back()->with('error', 'Something Went Wrong');
+    }
+
+    public function quizReportDetail($uuid){
+        
+        // Check for permission
+        if (!auth()->user()->can('quizze')) { // Assuming 'quizze' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        $quizResult = QuizResult::with('user','quiz')->where('uuid',$uuid)->first();
+        if($quizResult){
+            return view('manageTest.quizzes.quiz-report-detail',compact('quizResult'));
+        }
+        return redirect()->back()->with('error', 'Quiz Result Not Found');
     }
 
 }

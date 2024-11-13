@@ -345,6 +345,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/quizzes/{id}/schedules-save', 'saveQuizzesSchedules')->name('save-quizzes-schedules');
         Route::get('/quizzes/schedules-delete', 'deleteQuizzesSchedules')->name('delete-quizzes-schedules');
 
+        Route::get('/overall-quiz-report/{id}', 'overallQuizReport')->name('overall-quiz-report');
+        Route::get('/detailed-quiz-report/{id}', 'detailedQuizReport')->name('detailed-quiz-report');
+        Route::get('/quiz-report-detail/{uuid}', 'quizReportDetail')->name('quiz-report-detail');
+        Route::get('/delete-quiz-result/{uuid}', 'deleteQuizResult')->name('delete-quiz-result');
+
         // ------- EXAMS ------- //
         Route::get('/exams', 'viewExam')->name('view-exams');
         Route::get('/create-exams', 'createExams')->name('create-exams');
