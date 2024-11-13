@@ -37,8 +37,8 @@
                         </tr>
                         <tr class="">
                             <th class="p-2 font-bold border-e">Status:</th>
-                            @php $statusColor = $examResult->student_percentage >= $examResult->pass_percentage ? 'success' : 'danger';@endphp
-                            <td class="ps-[20px] p-2"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{$examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
+                            @php $statusColor = (float) $examResult->student_percentage >= (float) $examResult->pass_percentage ? 'success' : 'danger';@endphp
+                            <td class="ps-[20px] p-2"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -48,11 +48,11 @@
                     <!-- Grid items -->
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">EXAM STATUS</h3>
-                    <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{$examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
-                    <p>{{round($examResult->student_percentage,2)}}/{{$examResult->pass_percentage}}</p>
+                    <p>{{round((float)$examResult->student_percentage,2)}}/{{(float)$examResult->pass_percentage}}</p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">START TIME</h3>
@@ -71,23 +71,23 @@
               <!-- Grid items -->
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Total Question</h3>
-                <p>{{$examResult->total_question ?? 0}}</p>
+                <p>{{(float)$examResult->total_question ?? 0}}</p>
               </div>
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Correct Question</h3>
-                <p>{{$examResult->correct_answer ?? 0}}</p>
+                <p>{{(float)$examResult->correct_answer ?? 0}}</p>
               </div>
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Incorrect Question</h3>
-                <p>{{$examResult->incorrect_answer ?? 0}}</p>
+                <p>{{(float)$examResult->incorrect_answer ?? 0}}</p>
               </div>
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Skipped Question</h3>
-                <p>{{($examResult->total_question - ($examResult->correct_answer+$examResult->incorrect_answer)) ?? 0}}</p>
+                <p>{{((float)$examResult->total_question - ((float)$examResult->correct_answer+(float)$examResult->incorrect_answer)) ?? 0}}</p>
               </div>
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Attemped Question</h3>
-                <p>{{($examResult->correct_answer+$examResult->incorrect_answer) ?? 0}}</p>
+                <p>{{((float)$examResult->correct_answer+(float)$examResult->incorrect_answer) ?? 0}}</p>
               </div>
               <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Time Taken</h3>
