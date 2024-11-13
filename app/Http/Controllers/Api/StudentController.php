@@ -1934,7 +1934,7 @@ class StudentController extends Controller
             ->first();
 
             // Retrieve the most recent subscription for the user
-            $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
+            $payment = Payment::where('user_id', $user->id)->where('stripe_payment_id', $paymentId)->first();
 
             // Prepare the response data
             $data = [
