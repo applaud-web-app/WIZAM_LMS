@@ -642,13 +642,14 @@ class ExamController extends Controller
         $totalMarks = 0;
         $incorrectMarks = 0;
         $wrongQuestionIds = [];  // Array to hold IDs of wrong questions
+        $unanswered = 0;
 
         // Total marks should be fixed in manual mode
         $totalMarks = $examResult->point_type == "manual" ? $examResult->point * count($user_answer) : 0; 
 
         foreach ($user_answer as $answer) { 
             if (!isset($answer['id'])) {
-                $incorrect += 1;
+                $unanswered += 1;
                 continue;
             }
         
@@ -659,7 +660,13 @@ class ExamController extends Controller
                 $incorrect += 1;
                 continue;
             }
-        
+
+            // Check if the answer is empty, which means the question was left unanswered
+            if (empty($answer['answer'])) {
+                $unanswered += 1;
+                continue;
+            }
+            
             $isCorrect = false;
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
@@ -772,6 +779,7 @@ class ExamController extends Controller
         $examResult->incorrect_answer = $incorrect;
         $examResult->correct_answer = $correctAnswer;
         $examResult->student_percentage = round($studentPercentage,2);
+        $examResult->unanswered = $unanswered;
         $examResult->save();
     
         // Return results
@@ -782,7 +790,8 @@ class ExamController extends Controller
             'incorrect_answer' => $incorrect,
             'student_status' => $studentStatus,
             'student_percentage' => $studentPercentage,
-            'wrong_question_ids' => $wrongQuestionIds  
+            'wrong_question_ids' => $wrongQuestionIds,
+            'unanswered' => $unanswered
         ]);
     }
 
@@ -818,12 +827,13 @@ class ExamController extends Controller
 
                 // Build result
                 $result = [
-                    'correct' => $examResult->correct_answer,
-                    'incorrect' => $examResult->incorrect_answer,
-                    'skipped' => $examResult->total_question - ($examResult->correct_answer + $examResult->incorrect_answer),
-                    'marks' => $examResult->student_percentage,
+                    'correct' => $examResult->correct_answer ?? 0,
+                    'incorrect' => $examResult->incorrect_answer ?? 0,
+                    'skipped' => $examResult->unanswered ?? 0,
+                    'marks' => $examResult->student_percentage ?? 0,
                     'status' => $examResult->student_percentage >= $examResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $timeTakenInMinutes,
+                    'timeTaken' => $timeTakenInMinutes ?? 0,
+                    'score' => $examResult->score ?? 0,
                     'uuid'=>$examResult->uuid
                 ];
     
@@ -833,6 +843,10 @@ class ExamController extends Controller
                 $correct_answers = json_decode($examResult->correct_answers, true);
                 $userAnswers = json_decode($examResult->answers, true);
 
+                $correctCount = 0;
+                $incorrectCount = 0;
+                $unansweredCount = 0;
+
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
                     $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
@@ -841,9 +855,12 @@ class ExamController extends Controller
 
                     $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
                     $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
+
+                    // Check if the question is unanswered
+                    $isUnanswered = is_null($user_answ) || (is_array($user_answ) && empty($user_answ));
                 
-                     // Ensure correctAnswer is an array when needed
-                     switch ($question->type) {
+                    // Ensure correctAnswer is an array when needed
+                    switch ($question->type) {
                         case 'FIB':
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
@@ -926,6 +943,14 @@ class ExamController extends Controller
                             break;
                     }
                 
+                    // Increment counters based on answer status
+                    if ($isUnanswered) {
+                        $unansweredCount += 1;
+                    } elseif ($isCorrect) {
+                        $correctCount += 1;
+                    } else {
+                        $incorrectCount += 1;
+                    }
 
                     $examData[] = [
                         'question_id' => $question->id,
@@ -935,6 +960,7 @@ class ExamController extends Controller
                         'correct_answer' => $correct_answ ?? null,
                         'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
+                        'is_unanswered' => $isUnanswered,
                     ];
                 }
     

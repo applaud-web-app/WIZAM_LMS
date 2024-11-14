@@ -457,13 +457,16 @@ class QuizController extends Controller
         $totalMarks = 0;
         $incorrectMarks = 0;
         $wrongQuestionIds = [];  // Array to hold IDs of wrong questions
-    
+        $unanswered = 0;
+
+        // WRONG AND UNanwered are 2 different things -- wrong count will be those where user give the answer and it dont correct while answered are those where user dont give the answer so make this logic 
+
         // Total marks should be fixed in manual mode
         $totalMarks = $quizResult->point_type == "manual" ? $quizResult->point * count($user_answer) : 0; 
     
         foreach ($user_answer as $answer) {
             if (!isset($answer['id'])) {
-                $incorrect += 1;
+                $unanswered += 1;
                 continue;
             }
             
@@ -473,6 +476,12 @@ class QuizController extends Controller
 
             if (!$question) {
                 $incorrect += 1;
+                continue;
+            }
+
+            // Check if the answer is empty, which means the question was left unanswered
+            if (empty($answer['answer'])) {
+                $unanswered += 1;
                 continue;
             }
 
@@ -591,6 +600,7 @@ class QuizController extends Controller
         $quizResult->updated_at = now();
         $quizResult->score = $score;
         $quizResult->answers = json_encode($user_answer, true);
+        $quizResult->unanswered = $unanswered;
         $quizResult->incorrect_answer = $incorrect;
         $quizResult->correct_answer = $correctAnswer;
         $quizResult->student_percentage = round($studentPercentage,2);
@@ -604,7 +614,8 @@ class QuizController extends Controller
             'incorrect_answer' => $incorrect,
             'student_status' => $studentStatus,
             'student_percentage' => $studentPercentage,
-            'wrong_question_ids' => $wrongQuestionIds  
+            'wrong_question_ids' => $wrongQuestionIds,
+            'unanswered' => $unanswered
         ]);
     }
 
@@ -980,12 +991,13 @@ class QuizController extends Controller
 
                 // Build result
                 $result = [
-                    'correct' => $quizResult->correct_answer,
-                    'incorrect' => $quizResult->incorrect_answer,
-                    'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
-                    'marks' => $quizResult->student_percentage,
+                    'correct' => $quizResult->correct_answer ?? 0,
+                    'incorrect' => $quizResult->incorrect_answer ?? 0,
+                    'skipped' => $quizResult->unanswered ?? 0,
+                    'marks' => $quizResult->student_percentage ?? 0,
                     'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $timeTakenInMinutes,
+                    'timeTaken' => $timeTakenInMinutes ?? 0,
+                    'score' => $quizResult->score ?? 0,
                     'uuid' =>$quizResult->uuid
                 ];
     
@@ -994,6 +1006,10 @@ class QuizController extends Controller
                 $questionBox = json_decode($quizResult->questions);
                 $correct_answers = json_decode($quizResult->correct_answers, true);
                 $userAnswers = json_decode($quizResult->answers, true);
+
+                $correctCount = 0;
+                $incorrectCount = 0;
+                $unansweredCount = 0;
 
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
@@ -1004,8 +1020,11 @@ class QuizController extends Controller
                     $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
                     $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
                 
-                     // Ensure correctAnswer is an array when needed
-                     switch ($question->type) {
+                    // Check if the question is unanswered
+                    $isUnanswered = is_null($user_answ) || (is_array($user_answ) && empty($user_answ));
+
+                    // Ensure correctAnswer is an array when needed
+                    switch ($question->type) {
                         case 'FIB':
                             // if (is_string($correct_answ)) {
                             //     $correct_answ = json_decode($correct_answ, true);
@@ -1093,6 +1112,15 @@ class QuizController extends Controller
                             }
                             break;
                     }
+
+                    // Increment counters based on answer status
+                    if ($isUnanswered) {
+                        $unansweredCount += 1;
+                    } elseif ($isCorrect) {
+                        $correctCount += 1;
+                    } else {
+                        $incorrectCount += 1;
+                    }
                 
 
                     $exam[] = [
@@ -1103,6 +1131,7 @@ class QuizController extends Controller
                         'correct_answer' => $correct_answ ?? null,
                         'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
+                        'is_unanswered' => $isUnanswered,
                     ];
                 }
 

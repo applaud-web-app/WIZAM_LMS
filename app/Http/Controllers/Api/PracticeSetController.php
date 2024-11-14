@@ -471,12 +471,13 @@ class PracticeSetController extends Controller
         $totalMarks = 0;
         $incorrectMarks = 0;
         $wrongQuestionIds = [];  // Array to hold IDs of wrong questions
+        $unanswered = 0;
 
         // Total marks should be fixed in manual mode
         $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * count($user_answer)  : 0; 
         foreach ($user_answer as $answer) {
             if (!isset($answer['id'])) {
-                $incorrect += 1;
+                $unanswered += 1;
                 continue;
             }
 
@@ -486,6 +487,12 @@ class PracticeSetController extends Controller
 
             if (!$question) {
                 $incorrect += 1;
+                continue;
+            }
+
+            // Check if the answer is empty, which means the question was left unanswered
+            if (empty($answer['answer'])) {
+                $unanswered += 1;
                 continue;
             }
     
@@ -596,6 +603,7 @@ class PracticeSetController extends Controller
         $practiceSetResult->incorrect_answer = $incorrect;
         $practiceSetResult->correct_answer = $correctAnswer;
         $practiceSetResult->student_percentage = round($studentPercentage,2);
+        $practiceSetResult->unanswered = $unanswered;
         $practiceSetResult->save();
     
         // Return results
@@ -605,6 +613,8 @@ class PracticeSetController extends Controller
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
             'student_percenatge' => $studentPercentage,
+            'wrong_question_ids' => $wrongQuestionIds,
+            'unanswered' => $unanswered
         ]);
     }
 
@@ -796,12 +806,13 @@ class PracticeSetController extends Controller
 
                 // Build result
                 $result = [
-                    'correct' => $practiceResult->correct_answer,
-                    'incorrect' => $practiceResult->incorrect_answer,
-                    'skipped' => $practiceResult->total_question - ($practiceResult->correct_answer + $practiceResult->incorrect_answer),
-                    'marks' => $practiceResult->student_percentage,
+                    'correct' => $practiceResult->correct_answer ?? 0,
+                    'incorrect' => $practiceResult->incorrect_answer ?? 0,
+                    'skipped' => $practiceResult->unanswered ?? 0,
+                    'marks' => $practiceResult->student_percentage ?? 0,
                     'status' => $practiceResult->student_percentage >= $practiceResult->pass_percentage ? "PASS" : "FAIL",
-                    'timeTaken' => $timeTakenInMinutes,
+                    'timeTaken' => $timeTakenInMinutes ?? 0,
+                    'score' => $practiceResult->score ?? 0,
                     'uuid' => $practiceResult->uuid,
                 ];
     
@@ -811,6 +822,10 @@ class PracticeSetController extends Controller
                 $correct_answers = json_decode($practiceResult->correct_answers, true);
                 $userAnswers = json_decode($practiceResult->answers, true);
 
+                $correctCount = 0;
+                $incorrectCount = 0;
+                $unansweredCount = 0;
+
                 foreach ($questionBox as $question) {
                     // Get the user answer for the current question by matching the IDs
                     $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
@@ -819,6 +834,9 @@ class PracticeSetController extends Controller
                     
                     $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
                     $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
+
+                    // Check if the question is unanswered
+                    $isUnanswered = is_null($user_answ) || (is_array($user_answ) && empty($user_answ));
                 
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
@@ -903,6 +921,15 @@ class PracticeSetController extends Controller
                             }
                             break;
                     }
+
+                    // Increment counters based on answer status
+                    if ($isUnanswered) {
+                        $unansweredCount += 1;
+                    } elseif ($isCorrect) {
+                        $correctCount += 1;
+                    } else {
+                        $incorrectCount += 1;
+                    }
                 
 
                     $exam[] = [
@@ -913,6 +940,7 @@ class PracticeSetController extends Controller
                         'correct_answer' => $correct_answ ?? null,
                         'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
                         'is_correct' => $isCorrect,
+                        'is_unanswered' => $isUnanswered,
                     ];
                 }
     
