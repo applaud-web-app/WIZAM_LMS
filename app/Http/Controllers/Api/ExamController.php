@@ -661,6 +661,11 @@ class ExamController extends Controller
                 continue;
             }
 
+            // FOR TOTAL MARKS MARKS
+            if ($examResult->point_type != "manual") {
+                $totalMarks += $question->default_marks;
+            }
+
             // Check if the answer is empty, which means the question was left unanswered
             if (empty($answer['answer'])) {
                 $unanswered += 1;
@@ -670,10 +675,6 @@ class ExamController extends Controller
             $isCorrect = false;
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
-                if ($examResult->point_type != "manual") {
-                    $totalMarks += $question->default_marks;
-                }
-        
                 if ($question->type == 'MSA') {
                     $isCorrect = $question->answer == $userAnswer;
                 } elseif ($question->type == 'MMA') {
@@ -747,7 +748,6 @@ class ExamController extends Controller
             } else {
 
                 $wrongQuestionIds[] = $questionId;  
-
                 $incorrect += 1;
                 if (isset($question->default_marks)) {
                     $incorrectMarks += $question->default_marks;
@@ -786,6 +786,7 @@ class ExamController extends Controller
         return response()->json([
             'status' => true,
             'score' => $score,
+            'totalMarks'=>$totalMarks,
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
             'student_status' => $studentStatus,
