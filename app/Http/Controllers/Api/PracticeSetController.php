@@ -474,7 +474,7 @@ class PracticeSetController extends Controller
         $unanswered = 0;
 
         // Total marks should be fixed in manual mode
-        $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * count($user_answer)  : 0; 
+        $totalMarks = $practiceSetResult->point_type == "manual" ? $practiceSetResult->point * $practiceSetResult->total_question  : 0; 
         foreach ($user_answer as $answer) {
             if (!isset($answer['id'])) {
                 $unanswered += 1;
@@ -488,6 +488,11 @@ class PracticeSetController extends Controller
             if (!$question) {
                 $incorrect += 1;
                 continue;
+            }
+
+            // FOR TOTAL MARKS MARKS
+            if ($practiceSetResult->point_type != "manual") {
+                $totalMarks += $question->default_marks;
             }
 
             // Check if the answer is empty, which means the question was left unanswered

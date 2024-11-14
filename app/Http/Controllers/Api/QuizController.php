@@ -462,7 +462,7 @@ class QuizController extends Controller
         // WRONG AND UNanwered are 2 different things -- wrong count will be those where user give the answer and it dont correct while answered are those where user dont give the answer so make this logic 
 
         // Total marks should be fixed in manual mode
-        $totalMarks = $quizResult->point_type == "manual" ? $quizResult->point * count($user_answer) : 0; 
+        $totalMarks = $quizResult->point_type == "manual" ? $quizResult->point * $quizResult->total_question : 0; 
     
         foreach ($user_answer as $answer) {
             if (!isset($answer['id'])) {
@@ -478,6 +478,12 @@ class QuizController extends Controller
                 $incorrect += 1;
                 continue;
             }
+
+            // FOR TOTAL MARKS MARKS
+            if ($quizResult->point_type != "manual") {
+                $totalMarks += $question->default_marks;
+            }
+
 
             // Check if the answer is empty, which means the question was left unanswered
             if (empty($answer['answer'])) {
