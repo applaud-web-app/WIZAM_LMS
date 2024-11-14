@@ -645,7 +645,7 @@ class ExamController extends Controller
         $unanswered = 0;
 
         // Total marks should be fixed in manual mode
-        $totalMarks = $examResult->point_type == "manual" ? $examResult->point * count($user_answer) : 0; 
+        $totalMarks = $examResult->point_type == "manual" ? $examResult->point * $examResult->total_question : 0; 
 
         foreach ($user_answer as $answer) { 
             if (!isset($answer['id'])) {
@@ -766,7 +766,7 @@ class ExamController extends Controller
         }
     
         // Calculate the student's percentage AFTER applying negative marking
-        $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
+        $studentPercentage = $totalMarks > 0 ? ($score / $totalMarks) * 100 : 0;
     
         // Determine pass or fail
         $studentStatus = ($studentPercentage >= $examResult->pass_percentage) ? 'PASS' : 'FAIL';
