@@ -430,6 +430,8 @@ class DashboardController extends Controller
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
+                    'exams.restrict_attempts',
+                    'exams.total_attempts',
                     'exam_schedules.grace_period',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
@@ -449,6 +451,8 @@ class DashboardController extends Controller
                     'exams.point_mode', 
                     'exams.point',
                     'exam_schedules.id',
+                    'exams.restrict_attempts',
+                    'exams.total_attempts',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
