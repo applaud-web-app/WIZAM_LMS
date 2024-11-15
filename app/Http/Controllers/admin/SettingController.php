@@ -882,6 +882,25 @@ class SettingController extends Controller
         return view('setting.aboutpage-setting',compact('mission','vision','values','strategy','operate','bestData'));
     }
 
+    public function aboutPage(){
+        $about = HomeCms::where('type', 'aboutPage')->first();
+        return view('setting.aboutpage',compact('about'));
+    }
+
+    public function storeAboutPage(Request $request){
+        $request->validate([
+            'content' => 'required',
+        ]);
+
+        // Find the existing mission entry or create a new one
+        $aboutPage = HomeCms::where('type', 'aboutPage')->first() ?: new HomeCms(['type' => 'aboutPage']);
+        // Update fields
+        $aboutPage->description = $request->content;
+        $aboutPage->save();
+
+        return redirect()->back()->with('success', 'About Page saved successfully!');
+    }
+
     public function updateVerifiedText(Request $request){
         $request->validate([
             'verified_text' => 'required|max:255',

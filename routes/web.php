@@ -187,6 +187,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-verified-text','updateVerifiedText')->name('update-verified-text');
 
         // ------- ABOUT PAGE ------- //
+        
+        Route::get('/about-page', 'aboutPage')->name('about-page');
+        Route::post('/store-about-page', 'storeAboutPage')->name('store-about-page');
+
         Route::get('/about-settings', 'aboutSetting')->name('about-settings');
         Route::post('/update-mission', 'updateMission')->name('update-mission');
         Route::post('/update-vision', 'updateVision')->name('update-vision');
