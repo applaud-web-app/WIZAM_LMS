@@ -703,7 +703,7 @@ class ExamController extends Controller
                     // sort($userAnswer);
                     // $isCorrect = $userAnswer == $correctAnswers;
                     $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
-                    $userAnswer = array_map('strtolower', $userAnswer);
+                    $userAnswer = $userAnswer != null ? array_map('strtolower', $userAnswer) : [];
                     sort($correctAnswers);
                     sort($userAnswer);
                     $isCorrect = ($userAnswer == $correctAnswers);
