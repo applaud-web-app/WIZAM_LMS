@@ -43,6 +43,17 @@ class CmsController extends Controller
         }
     }
 
+    public function aboutPage(){
+        try {
+            $about = HomeCms::select('description')->where('type','aboutPage')->first();
+            // Return a successful response with the fetched data
+            return response()->json(['status' => true, 'data' => $about], 200); // Use 200 for a successful response
+        } catch (\Throwable $th) {
+            // Return a JSON response with error details if an exception occurs
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
     // HOME PAGE SECTIONS
     public function banners(){
         try {

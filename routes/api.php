@@ -56,6 +56,7 @@ Route::post('contact-us', [CmsController::class, 'contactUs']);
 
 // ABOUT PAGE 
 Route::get('about', [CmsController::class, 'about']);
+Route::get('about-page', [CmsController::class, 'aboutPage']);
 
 
 
