@@ -42,54 +42,51 @@
         </div>
         <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
             <div class="col-span-12 md:col-span-12">
-                <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
-                    <div class="p-[25px]">
-                        <form action="{{ route('update-site-seo') }}" method="POST" enctype="multipart/form-data" id="addSetting">
-                            @csrf
-                            {{-- Loop through each page and generate SEO fields --}}
-                            @php
-                                $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
-                            @endphp
-                            @foreach ($pages as $page)
-                                <div class="mt-4 mb-[30px]">
-                                    <h2 class="text-lg font-bold mb-[15px]">- - - {{ ucfirst( $page) }} Page - - -</h2>
-                                    <div class="mb-[15px]">
-                                        <label for="{{ $page }}_seo_title" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                            {{ ucfirst($page) }} SEO Title <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="text" id="{{ $page }}_seo_title" name="{{ $page }}_seo_title" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Title" value="{{ $seo[$page]['title'] ?? '' }}">
-                                    </div>
-                                    <div class="mb-[15px]">
-                                        <label for="{{ $page }}_seo_keyword" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                            {{ ucfirst($page) }} SEO Keyword <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="text" id="{{ $page }}_seo_keyword" name="{{ $page }}_seo_keyword" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Keyword" value="{{ $seo[$page]['keyword'] ?? '' }}">
-                                    </div>
-                                    <div class="mb-[15px]">
-                                        <label for="{{ $page }}_seo_description" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                            {{ ucfirst($page) }} SEO Description <span class="text-red-500">*</span>
-                                        </label>
-                                        <textarea id="{{ $page }}_seo_description" name="{{ $page }}_seo_description" rows="3" class="summernote rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[100px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Description">{{ $seo[$page]['description'] ?? '' }}</textarea>
-                                    </div>
-                                    <div class="mb-[15px]">
-                                        <label for="{{ $page }}_og_image" class="mb-2 inline-block text-neutral-500 dark:text-neutral-400">
-                                            {{ ucfirst($page) }} OG Image <span class="text-red-500">*</span>
-                                        </label>
-                                        <input id="{{ $page }}_og_image" name="{{ $page }}_og_image" type="file" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white" />
-                                        @if (isset($seo[$page]['image']))
-                                            <img src="{{ $seo[$page]['image'] }}" height="100px" width="200px" alt="">
-                                        @endif
-                                    </div>
+                <form action="{{ route('update-site-seo') }}" method="POST" enctype="multipart/form-data" id="addSetting">
+                    @csrf
+                    {{-- Loop through each page and generate SEO fields --}}
+                    @php
+                        $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
+                    @endphp
+                    @foreach ($pages as $page)
+                        <div class="mt-4 mb-[30px] bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
+                            <div class="p-[25px]">
+                                <h2 class="text-lg font-bold mb-[15px]">- - - {{ ucfirst( $page) }} Page - - -</h2>
+                                <div class="mb-[15px]">
+                                    <label for="{{ $page }}_seo_title" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                        {{ ucfirst($page) }} SEO Title <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="{{ $page }}_seo_title" name="{{ $page }}_seo_title" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Title" value="{{ $seo[$page]['title'] ?? '' }}">
                                 </div>
-                            @endforeach
-                        
-                            <div class="mb-[15px]">
-                                <button type="submit" class="bg-primary text-white py-[12px] px-[20px] rounded-4">Submit</button>
+                                <div class="mb-[15px]">
+                                    <label for="{{ $page }}_seo_keyword" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                        {{ ucfirst($page) }} SEO Keyword <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="{{ $page }}_seo_keyword" name="{{ $page }}_seo_keyword" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Keyword" value="{{ $seo[$page]['keyword'] ?? '' }}">
+                                </div>
+                                <div class="mb-[15px]">
+                                    <label for="{{ $page }}_seo_description" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                        {{ ucfirst($page) }} SEO Description <span class="text-red-500">*</span>
+                                    </label>
+                                    <textarea id="{{ $page }}_seo_description" name="{{ $page }}_seo_description" rows="3" class="summernote rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[100px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="SEO Description">{{ $seo[$page]['description'] ?? '' }}</textarea>
+                                </div>
+                                <div class="mb-[15px]">
+                                    <label for="{{ $page }}_og_image" class="mb-2 inline-block text-neutral-500 dark:text-neutral-400">
+                                        {{ ucfirst($page) }} OG Image <span class="text-red-500">*</span>
+                                    </label>
+                                    <input id="{{ $page }}_og_image" name="{{ $page }}_og_image" type="file" class="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid  bg-transparent bg-clip-padding px-3 py-[0.32rem]  font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white" />
+                                    @if (isset($seo[$page]['image']))
+                                        <img src="{{ $seo[$page]['image'] }}" height="100px" width="200px" alt="">
+                                    @endif
+                                </div>
                             </div>
-                        </form>
-                        
+                        </div>
+                    @endforeach
+                
+                    <div class="mb-[15px]">
+                        <button type="submit" class="bg-primary text-white py-[12px] px-[20px] rounded-4">Submit</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </section>

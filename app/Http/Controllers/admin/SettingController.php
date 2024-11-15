@@ -1189,13 +1189,14 @@ class SettingController extends Controller
     public function siteSeo(){
         $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
         $seo = [];
-
+    
         foreach ($pages as $page) {
             $data = HomeCms::where('type', "{$page}_seo")->first();
+    
             $seo[$page] = [
                 'title' => $data->title ?? '',
                 'description' => $data->description ?? '',
-                'keyword' => json_decode($data->extra, true)['keyword'] ?? '',
+                'keyword' => $data ? (json_decode($data->extra, true)['keyword'] ?? '') : '',
                 'image' => $data->image ?? ''
             ];
         }
