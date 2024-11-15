@@ -176,6 +176,48 @@
             </div>
         </div>
 
+        {{-- VERIFIED TEXT --}}
+        <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
+            <div class="col-span-12 md:col-span-12">
+                <div
+                    class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative">
+                    <div class="p-[25px]">
+                        <form action="{{ route('update-verified-text') }}" method="POST" autocomplete="off"
+                            enctype="multipart/form-data" id="addSetting">
+                            @csrf
+                            <h1 class="mb-4 text-xl"><b>Verified Text</b></h1>
+                            <div class="mb-[15px]">
+                                <label for="verified_image"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Image <span class="text-red-500">*</span>
+                                </label>
+                                @isset($verified->image)
+                                    <img src="{{$verified->image}}" height="100px" width="200px" alt="">
+                                @endisset
+                                <div class="flex flex-col flex-1">
+                                    <input type="file" id="verified_image" name="verified_image" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter Image" value="{{ old('verified', $verified->title ?? '') }}" required>
+                                </div>
+                            </div>
+                            <div class="mb-[15px]">
+                                <label for="verified_text"
+                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Text <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex flex-col flex-1">
+                                    <input type="text" id="verified_text" name="verified_text" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter Verified Text" value="{{ old('verified', $verified->title ?? '') }}" required>
+                                </div>
+                            </div>
+                            <div class="mb-[15px]">
+                                <button type="submit"
+                                    class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- EXAMS --}}
         <div class="grid grid-cols-12 gap-[25px] mb-[30px]">
             <div class="col-span-12 md:col-span-12">

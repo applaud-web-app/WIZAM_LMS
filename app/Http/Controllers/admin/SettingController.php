@@ -544,7 +544,8 @@ class SettingController extends Controller
         $resource = HomeCms::where('type', 'resource')->first();
         $getStarted = HomeCms::where('type', 'started')->first();
         $youtube = HomeCms::where('type', 'youtube')->first();
-        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq','resource','getStarted','youtube'));
+        $verified = HomeCms::where('type','verified')->first();
+        return view('setting.homepage-setting',compact('banners','exam','help','whyus','faq','resource','getStarted','youtube','verified'));
     }
 
     public function updateGetstarted(Request $request){
@@ -879,6 +880,32 @@ class SettingController extends Controller
         $operate = HomeCms::where('type', 'operate')->first();
         $bestData = HomeCms::where('type', 'bestData')->first();
         return view('setting.aboutpage-setting',compact('mission','vision','values','strategy','operate','bestData'));
+    }
+
+    public function updateVerifiedText(Request $request){
+        $request->validate([
+            'verified_text' => 'required|max:255',
+            'verified_image' => 'required',
+        ]);
+
+        // Find the existing mission entry or create a new one
+        $verified = HomeCms::where('type', 'verified')->first() ?: new HomeCms(['type' => 'verified']);
+        
+        // Update fields
+        $verified->title = $request->verified_text;
+        if ($request->hasFile('verified_image')) {
+            $image = $request->file('verified_image');
+            // Generate a unique filename with the current timestamp
+            $imageName = 'image_' . time() . '.' . $image->getClientOriginalExtension();
+            // Move the image to the 'public/setting' directory
+            $image->move(public_path('setting'), $imageName);
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
+            $verified->image = $imagePath;
+        }
+        $verified->save();
+
+        return redirect()->back()->with('success', 'Verified Text saved successfully!');
     }
 
     public function updateYoutubeVideo(Request $request){
