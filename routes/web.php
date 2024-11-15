@@ -51,6 +51,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/edit-user-details', 'updateUserDetails')->name('edit-user-details');
         Route::get('/delete-user-data', 'deleteUserData')->name('delete-user-data');
 
+        // STUDENT MANAGER
+        Route::get('/student-manager', 'studentManager')->name('student-manager');
+        Route::get('/add-student', 'addStudent')->name('add-student');
+        Route::post('/store-student-details', 'storeStudentDetails')->name('store-student-details');
+        Route::get('/edit-student-details', 'editStudentdetails')->name('edit-student-details');
+        Route::post('/edit-student-details', 'updateStudentdetails')->name('edit-student-details');
+        Route::get('/delete-student-data', 'deleteStudentData')->name('delete-student-data');
+
         // ------- USER IMPORT ------- //
         Route::get('/import-users', 'showImportForm')->name('import-users');
         Route::post('/import-users', 'importUser')->name('import-users');
@@ -285,9 +293,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::controller(ManageLearning::class)->group(function () {
 
         Route::get('/overall-practice-set-report/{id}', 'overallPracticeSetReport')->name('overall-practice-set-report');
-        // Route::get('/detailed-quiz-report/{id}', 'detailedQuizReport')->name('detailed-quiz-report');
-        // Route::get('/quiz-report-detail/{uuid}', 'quizReportDetail')->name('quiz-report-detail');
-        // Route::get('/delete-quiz-result/{uuid}', 'deleteQuizResult')->name('delete-quiz-result');
+        Route::get('/detailed-practice-report/{id}', 'detailedPracticeReport')->name('detailed-practice-report');
+        Route::get('/practice-report-detail/{uuid}', 'practiceReportDetail')->name('practice-report-detail');
+        Route::get('/delete-practice-result/{uuid}', 'deletePracticeResult')->name('delete-practice-result');
 
         // ------- PRACTICE SET ------- //
         Route::get('/practice-sets', 'practiceSets')->name('view-practice-set');

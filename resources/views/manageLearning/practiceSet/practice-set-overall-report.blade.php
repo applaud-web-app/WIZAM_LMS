@@ -1,14 +1,14 @@
 @extends('layouts.master')
 
-@section('title', 'Add quiz')
+@section('title', 'Add practice')
 
 @section('content')
 
 <section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
     <div class="flex justify-between items-center mb-[30px]">
-        <h2><b>{{$quiz->title}} - Overall Report</b></h2>
-        <a href="{{route('detailed-quiz-report',[$quiz->id])}}" class="capitalize bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-title-dark text-[14px] leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px] transition duration-300 ease-in-out">Detailed Report</a>
+        <h2><b>{{$practice->title}} - Overall Report</b></h2>
+        <a href="{{route('detailed-practice-report',[$practice->id])}}" class="capitalize bg-primary hover:bg-primary-hbr border-solid border-1 border-primary text-white dark:text-title-dark text-[14px] leading-[22px] inline-flex items-center justify-center rounded-[4px] px-[20px] h-[44px] transition duration-300 ease-in-out">Detailed Report</a>
     </div>
 
     <div class="m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
@@ -79,8 +79,8 @@
           
         });
 
-        // jQuery Validation for the Add quiz form
-        $("#addquizForm").validate({
+        // jQuery Validation for the Add practice form
+        $("#addpracticeForm").validate({
             rules: {
                 title: {
                     required: true,
@@ -89,9 +89,9 @@
                 duration_type: {
                     required: true,
                 },
-                quiz_duration: {
+                practice_duration: {
                     required: function(element) {
-                        return $("#duration_type").val() == 'quiz_wise';
+                        return $("#duration_type").val() == 'practice_wise';
                     },
                     number: true,
                     min: 1,
@@ -99,7 +99,7 @@
                 sub_category: {
                     required: true,
                 },
-                quiz_type: {
+                practice_type: {
                     required: true,
                 },
                 is_free: {
@@ -127,25 +127,25 @@
             },
             messages: {
                 title: {
-                    required: "Please enter an quiz title.",
+                    required: "Please enter an practice title.",
                     maxlength: "The title cannot exceed 255 characters."
                 },
                 duration_type: {
                     required: "Please select a duration type.",
                 },
-                quiz_duration: {
-                    required: "Please enter the quiz duration.",
+                practice_duration: {
+                    required: "Please enter the practice duration.",
                     number: "Please enter a valid number.",
                     min: "Duration must be at least 1 minute.",
                 },
                 sub_category: {
                     required: "Please select a subcategory.",
                 },
-                quiz_type: {
-                    required: "Please select an quiz type.",
+                practice_type: {
+                    required: "Please select an practice type.",
                 },
                 is_free: {
-                    required: "Please specify if the quiz is free or paid.",
+                    required: "Please specify if the practice is free or paid.",
                 },
                 price: {
                     required: "Please enter a price.",
@@ -162,7 +162,7 @@
                     required: "Please select the visibility option.",
                 },
                 favorite: {
-                    required: "Please specify if the quiz is a favorite.",
+                    required: "Please specify if the practice is a favorite.",
                 }
             },
             errorPlacement: function (error, element) {
@@ -187,24 +187,24 @@
         });
     });
 
-    // Toggle quiz Duration input visibility based on Duration Type selection
-    function togglequizDurationInput(select) {
-        var quizDurationInput = document.getElementById('quiz_duration_input');
-        if (select.value === 'quiz_wise') {
-            quizDurationInput.style.display = 'block';
-            $("#quiz_duration").rules("add", {
+    // Toggle practice Duration input visibility based on Duration Type selection
+    function togglepracticeDurationInput(select) {
+        var practiceDurationInput = document.getElementById('practice_duration_input');
+        if (select.value === 'practice_wise') {
+            practiceDurationInput.style.display = 'block';
+            $("#practice_duration").rules("add", {
                 required: true,
                 number: true,
                 min: 1,
                 messages: {
-                    required: "Please enter the quiz duration.",
+                    required: "Please enter the practice duration.",
                     number: "Please enter a valid number.",
                     min: "Duration must be at least 1 minute.",
                 }
             });
         } else {
-            quizDurationInput.style.display = 'none';
-            $("#quiz_duration").rules("remove");
+            practiceDurationInput.style.display = 'none';
+            $("#practice_duration").rules("remove");
         }
     }
 

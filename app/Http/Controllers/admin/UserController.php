@@ -217,6 +217,318 @@ class UserController extends Controller
     }
 
 
+    // MANAGE STUDENT
+    public function studentManager(Request $request){
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
+        if ($request->ajax()) {
+            // Fetch data for DataTables
+            $data = User::role('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('status', function($row) {
+                    // Determine the status color and text based on `is_active`
+                    $statusColor = $row->status == 1 ? 'success' : 'danger';
+                    $statusText = $row->status == 1 ? 'Active' : 'Inactive';
+                    // Create the status badge HTML
+                    return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                })
+                ->addColumn('role', function($row) {
+                    return isset($row->roles) && $row->roles->isNotEmpty() 
+                    ? ucfirst($row->roles->first()->name) 
+                    : 'No Role';                
+                })
+                ->addColumn('dob', function($row) {
+                    return date('d/m/Y', strtotime($row->dob));
+                })
+                ->addColumn('country', function($row) {
+                    return isset($row->countries) ? $row->countries->name : 'No Country';
+                })
+                ->addColumn('action', function($row) {
+                    $parms = "id=".$row->id;
+                    $editUrl = encrypturl(route('edit-student-details'),$parms);
+                    $deleteUrl = encrypturl(route('delete-student-data'),$parms);
+
+                    // Customize action buttons as needed
+                    return '<div class="text-light dark:text-subtitle-dark text-[19px] flex items-center justify-start p-0 m-0 gap-[20px]">
+                            <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
+                            <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
+                        </div>';
+                })
+                ->rawColumns(['status', 'role', 'dob','country','action'])
+                ->make(true);
+        }
+
+        // Load the view when not an AJAX request
+        return view('manageUsers.users.view-student');
+    }
+
+    public function addStudent(){
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+
+        $roles = Role::get();
+        $userGroups = UserGroup::where(['is_active'=>1,'is_deleted'=>0])->get();
+        $country = Country::orderBy('name','ASC')->get();
+        return view('manageUsers.users.add-students',compact('roles','userGroups','country'));
+    }
+
+    public function storeStudentDetails(Request $request){
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
+        // Validate the request data
+        $request->validate([
+            'full_name' => 'required|string|min:3',
+            'dob' => 'required|date',
+            'nationality' => 'required|string',
+            'phone' => 'nullable|string',
+            'email' => 'required|email|unique:users,email',
+            'groups' => 'required|array',
+            'password' => 'required|string|min:8|confirmed',
+            'status' => 'required|string|in:1,0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        // Begin transaction
+        \DB::beginTransaction();
+
+        try {
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('users'), $imageName); 
+                $imageUrl = env('APP_URL') . '/users/' . $imageName; 
+            } else {
+                $imageUrl = env('APP_URL') . '/users/' . "default.png";
+            }
+
+            // Create the user
+            $user = User::create([
+                'title' => $request->title ?? null,
+                'image' => $imageUrl,
+                'name' => $request->full_name,
+                'dob' => $request->dob,
+                'country' => $request->nationality,
+                'phone_number' => $request->phone,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'status' => $request->status,
+            ]);
+
+            // Create Stripe customer
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $stripeCustomer = $stripe->customers->create([
+                'email' => $request->email,
+                'name' => $request->full_name,
+                'phone' => $request->phone,
+                'metadata' => [
+                    'user_id' => $user->id,
+                ],
+            ]);
+
+            // Update user with stripe_customer_id
+            $user->update([
+                'stripe_customer_id' => $stripeCustomer->id, // Add stripe_customer_id to user
+            ]);
+
+            // Attach groups to the user
+            foreach ($request->groups as $key => $groupId) {
+                if($key > 0){
+                    GroupUsers::create([
+                        'group_id' => $groupId,
+                        'user_id' => $user->id,
+                    ]);
+                }
+            }
+
+            // Assign roles
+            $user->assignRole("student");
+
+            // Commit transaction
+            \DB::commit();
+
+            // Redirect with success message
+            return redirect()->route('student-manager')->with('success', 'Student created successfully.');
+
+        } catch (\Throwable $th) {
+            // Rollback transaction on failure
+            \DB::rollback();
+
+            // Redirect with error message
+            return redirect()->route('add-student')->with('error', $th->getMessage());
+        }
+    }
+
+    public function editStudentdetails(Request $request)
+    {
+        
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
+        $data = decrypturl($request->eq);
+        if (isset($data['id'])) {
+            $roles = Role::get();
+            $userGroups = UserGroup::where(['is_active' => 1, 'is_deleted' => 0])->get();
+            $examGroup = Exam::where('status',1)->get();
+            $country = Country::orderBy('name', 'ASC')->get();
+
+            // Get the user with their associated groups
+            $user = User::with('groupUsers','exams')->where('id', $data['id'])->first();
+
+            // Extract group_id values for the selected groups
+            $groups = $user->groupUsers->pluck('group_id')->toArray();
+
+            // Extract group_id values for the selected groups
+            $exams = $user->exams->pluck('exam_id')->toArray();
+
+            return view('manageUsers.users.edit-student', compact('roles', 'userGroups', 'country', 'user', 'groups','examGroup','exams'));
+        }
+
+        return redirect()->route('users')->with('error', 'Something Went Wrong');
+    }
+
+    public function updateStudentdetails(Request $request)
+    {
+        
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
+        // Validate the request data
+        $request->validate([
+            'full_name' => 'required|string|min:3',
+            'dob' => 'required|date',
+            'nationality' => 'required|string',
+            'phone' => 'nullable|string',
+            'email' => 'required|email',
+            'groups' => 'required|array',
+            // 'email_verified' => 'required|string|in:yes,no',
+            'status' => 'required|string|in:1,0',
+            'password' => 'nullable|string|min:6|confirmed', // Validate password and confirmation
+            'eq' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Begin transaction
+        \DB::beginTransaction();
+
+        try {
+            $data = decrypturl($request->eq);
+            $userId = $data['id'];
+
+            // VERIFY EMAIL IS UNIQUE OR NOT
+            $emailVerify = User::where('email',$request->email)->where('id','!=',$userId)->first();
+            if($emailVerify){
+                return redirect()->back()->with('error',"This email already exist");
+            }
+
+            // Fetch the user
+            $user = User::findOrFail($userId);
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                
+                // Store the image directly in the public folder
+                $image->move(public_path('users'), $imageName); 
+                
+                // Construct the full URL to the uploaded image
+                $imageUrl = env('APP_URL') . '/users/' . $imageName; 
+            } else {
+                $imageUrl = $user->image;
+            }
+
+            // Update user details
+            $user->update([
+                'title' => $request->title ?? null,
+                'image' => $imageUrl,
+                'name' => $request->full_name,
+                'dob' => $request->dob,
+                'country' => $request->nationality,
+                'phone_number' => $request->phone,
+                'email' => $request->email,
+                // 'email_verified_at' => $request->email_verified === 'yes' ? now() : null,
+                'status' => $request->status,
+            ]);
+
+            // Update password only if provided
+            if ($request->filled('password')) {
+                $user->update([
+                    'password' => Hash::make($request->password),
+                ]);
+            }
+
+            // Sync user groups by deleting existing and inserting new ones
+            GroupUsers::where('user_id', $user->id)->delete();
+
+            foreach ($request->groups as $key => $groupId) {
+                if($key > 0){
+                    GroupUsers::create([
+                        'group_id' => $groupId,
+                        'user_id' => $user->id,
+                    ]);
+                }
+            }
+
+            // EXAM ASSIGNMENT
+            AssignedExam::where('user_id', $user->id)->delete();
+            if (isset($request->exams)) {
+                foreach ($request->exams as $key => $examId) {
+                    if($key > 0){
+                        AssignedExam::create([
+                            'exam_id' => $examId,
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                }
+            }
+
+            // Sync roles
+            $user->syncRoles('student');
+            // Commit transaction
+            \DB::commit();
+
+            // Redirect with success message
+            return redirect()->route('student-manager')->with('success', 'Student updated successfully.');
+
+        } catch (\Throwable $th) {
+            // Rollback transaction on failure
+            \DB::rollback();
+
+            // Redirect with error message
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
+
+    public function deleteStudentData(Request $request){
+        
+        if (!Auth()->user()->can('user')) { 
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+        }
+        
+        $request->validate([
+            'eq'=>'required'
+        ]);
+
+        $data = decrypturl($request->eq);
+        $userId = $data['id'];
+        $user = User::where('id',$userId)->first();
+        if($user){
+            $user->status = 2; // Delete
+            $user->save();
+            return redirect()->back()->with('success','Student Deleted Successfully');
+        }
+        return redirect()->back()->with('error','Something Went Wrong');
+    }
+    
     // USERS //
     public function viewUsers(Request $request){
 
@@ -226,7 +538,7 @@ class UserController extends Controller
 
         if ($request->ajax()) {
             // Fetch data for DataTables
-            $data = User::where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
+            $data = User::withoutRole('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('status', function($row) {

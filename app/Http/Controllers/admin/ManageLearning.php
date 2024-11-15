@@ -20,6 +20,7 @@ use App\Models\Video;
 use App\Models\PracticeVideo;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PracticeSetResult;
 
 class ManageLearning extends Controller
 {
@@ -39,9 +40,11 @@ class ManageLearning extends Controller
                     $parms = "id=".$section->id;
                     $editUrl = route('practice-set-detail',['id'=>$section->id]);
                     $deleteUrl = encrypturl(route('delete-practice-sets'),$parms);
+                    $overall = route('overall-practice-set-report',['id'=>$section->id]);
                     return '
                         <a href="'.$editUrl.'" class="cursor-pointer edit-task-title uil uil-edit-alt hover:text-info" ></a>
-                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                        <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                        <a href="'.$overall.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('question', function($row) {
                     return $row->practice_questions_count;
@@ -760,5 +763,133 @@ class ManageLearning extends Controller
             return response()->json(['error' => 'Failed to remove video. ' . $e->getMessage()], 500);
         }
     }
+
+    public function overallPracticeSetReport($id)
+    {
+        // Check for permission
+        if (!auth()->user()->can('pratice-set')) { // Assuming 'quizze' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
     
+        // Find the quiz with active status
+        $practice = PracticeSet::where('status', 1)->find($id);
+        if ($practice) {
+            // Get all results for the praticeset
+            $praticesetResult = PracticeSetResult::where('practice_sets_id', $practice->id)->get();
+    
+            // Filter out non-numeric 'student_percentage' values
+            $praticesetResult = $praticesetResult->filter(function ($result) {
+                return is_numeric($result->student_percentage);
+            });
+    
+            // Calculate required data
+            $totalAttempt = $praticesetResult->count();
+            $passPercentage = 60;
+    
+            $passedpractice = $praticesetResult->where('student_percentage', '>=', $passPercentage)->count();
+            $failedpractice = $praticesetResult->where('student_percentage', '<', $passPercentage)->count();
+            
+            // Ensure all calculations involve numeric types
+            $averagePercentage = $totalAttempt > 0 ? (float) $praticesetResult->avg('student_percentage') : 0;
+            $highestPercentage = $totalAttempt > 0 ? (float) $praticesetResult->max('student_percentage') : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) $praticesetResult->min('student_percentage') : 0;
+
+            // Score
+            $averageScore = $totalAttempt > 0 ? (float) $praticesetResult->avg('score') : 0;
+            $highestScore = $totalAttempt > 0 ? (float) $praticesetResult->max('score') : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) $praticesetResult->min('score') : 0;
+    
+            // Return the view with all required data
+            return view('manageLearning.practiceSet.practice-set-overall-report', compact(
+                'practice', 'totalAttempt', 'passedpractice', 'failedpractice', 'averagePercentage', 'highestPercentage', 'lowestPercentage','averageScore','highestScore','lowestScore'
+            ));
+        }
+    
+        // Redirect if the exam is not found
+        return redirect()->back()->with('error', 'Practice Not Found');
+    }
+    
+    public function detailedPracticeReport(Request $request ,$id){
+        // Check for permission
+        if (!auth()->user()->can('pratice-set')) { // Assuming 'practice' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        // Find the practice with active status
+        $practice = PracticeSet::where('id', $id)->where('status', 1)->first(); 
+        if ($practice) {
+            if ($request->ajax()) {
+                $sections = PracticeSetResult::with('user')->where('practice_sets_id',$id);
+                return DataTables::of($sections)
+                    ->addIndexColumn()
+                    ->addColumn('action', function ($section) {
+                        $parms = "id=" . $section->uuid;
+                        $viewUrl = route('practice-report-detail',[$section->uuid]);
+                        $deleteUrl = route('delete-practice-result',[$section->uuid]); // Update route name
+                        return '
+                            <a href="' . $viewUrl . '" class="cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>
+                            <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
+                    })
+                    ->addColumn('task_taker', function($row) {
+                        if (isset($row->user->name)) {
+                            return $row->user->name;
+                        } else {
+                            return "User";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('completed_on', function($row) {
+                        if ($row->status == "complete") {
+                            return date('d/m/Y', strtotime($row->updated_at)) . ", " . date('H:i:s A', strtotime($row->updated_at));
+                        } else {
+                            return "Resume";  // Placeholder text
+                        }
+                    })
+                    ->addColumn('percenatge', function($row) {
+                        if (isset($row->student_percentage)) {
+                            $studentpercentage = (float) $row->student_percentage ?? 0;
+                            return round($studentpercentage,2) ?? 0;
+                        } else {
+                            return 0;  // Placeholder text
+                        }
+                    })
+                    ->addColumn('status', function($row) {
+                        // Determine the status color and text based on `status`
+                        $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
+                        $statusText = $row->student_percentage >= $row->pass_percentage ? 'PASS' : 'FAIL';
+                        // Create the status badge HTML
+                        return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                    })
+                    ->rawColumns(['status', 'percenatge', 'completed_on', 'task_taker', 'action'])
+                    ->make(true);
+            }
+            return view('manageLearning.practiceSet.practice-detailed-report',compact('practice'));
+        }
+    
+        // Redirect if the practice is not found
+        return redirect()->back()->with('error', 'Practice Not Found');
+    }
+
+    public function practiceReportDetail($uuid){
+         // Check for permission
+         if (!auth()->user()->can('pratice-set')) { // Assuming 'practice' is the required permission
+            return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        $practiceResult = PracticeSetResult::with('user','pratice')->where('uuid',$uuid)->first();
+        if($practiceResult){
+            return view('manageLearning.practiceSet.practice-report-detail',compact('practiceResult'));
+        }
+        return redirect()->back()->with('error', 'Practice Result Not Found');
+    }
+
+    public function deletePracticeResult($uuid){
+        $schedule = PracticeSetResult::where('uuid',$uuid)->first();
+        if ($schedule) {
+            $schedule->delete();
+            return redirect()->back()->with('success', 'Practice Removed Successfully');
+        }
+        
+        return redirect()->back()->with('error', 'Something Went Wrong');
+    }
+
 }

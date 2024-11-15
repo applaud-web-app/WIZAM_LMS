@@ -1721,10 +1721,15 @@ class ManageTest extends Controller
             $averagePercentage = $totalAttempt > 0 ? (float) $examResult->avg('student_percentage') : 0;
             $highestPercentage = $totalAttempt > 0 ? (float) $examResult->max('student_percentage') : 0;
             $lowestPercentage = $totalAttempt > 0 ? (float) $examResult->min('student_percentage') : 0;
-    
+
+            // FOR SCORE
+            $averageScore = $totalAttempt > 0 ? (float) $examResult->avg('score') : 0;
+            $highestScore = $totalAttempt > 0 ? (float) $examResult->max('score') : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) $examResult->min('score') : 0;
+
             // Return the view with all required data
             return view('manageTest.exams.exam-overall-report', compact(
-                'exam', 'totalAttempt', 'passedExam', 'failedExam', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
+                'exam', 'totalAttempt', 'passedExam', 'failedExam', 'averagePercentage', 'highestPercentage', 'lowestPercentage','averageScore','highestScore','lowestScore'
             ));
         }
     
@@ -1850,10 +1855,15 @@ class ManageTest extends Controller
             $averagePercentage = $totalAttempt > 0 ? (float) $quizResult->avg('student_percentage') : 0;
             $highestPercentage = $totalAttempt > 0 ? (float) $quizResult->max('student_percentage') : 0;
             $lowestPercentage = $totalAttempt > 0 ? (float) $quizResult->min('student_percentage') : 0;
+
+            // SCORE
+            $averageScore = $totalAttempt > 0 ? (float) $quizResult->avg('score') : 0;
+            $highestScore = $totalAttempt > 0 ? (float) $quizResult->max('score') : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) $quizResult->min('score') : 0;
     
             // Return the view with all required data
             return view('manageTest.quizzes.quiz-overall-report', compact(
-                'quiz', 'totalAttempt', 'passedQuiz', 'failedQuiz', 'averagePercentage', 'highestPercentage', 'lowestPercentage'
+                'quiz', 'totalAttempt', 'passedQuiz', 'failedQuiz', 'averagePercentage', 'highestPercentage', 'lowestPercentage','lowestScore','highestScore','averageScore'
             ));
         }
     
