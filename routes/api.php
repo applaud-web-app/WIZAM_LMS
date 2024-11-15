@@ -60,7 +60,7 @@ Route::get('about-page', [CmsController::class, 'aboutPage']);
 
 
 Route::get('/contact-form', [CmsController::class, 'contactForm']);
-
+Route::get('/site-seo', [CmsController::class, 'siteSeo']);
 
 // API Route
 // Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);

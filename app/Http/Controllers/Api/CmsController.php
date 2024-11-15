@@ -712,7 +712,35 @@ class CmsController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-    
-    
+
+    public function siteSeo()
+    {
+        try {
+            // Define the pages you want to fetch
+            $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
+            
+            // Fetch all SEO data for the given pages in a single query
+            $seoData = HomeCms::whereIn('type', array_map(fn($page) => "{$page}_seo", $pages))->get()->keyBy('type');
+            
+            // Prepare the response data
+            $seo = [];
+            foreach ($pages as $page) {
+                $type = "{$page}_seo";
+                $data = $seoData[$type] ?? null;
+                
+                $seo[$page] = [
+                    'title' => $data->title ?? '',
+                    'description' => $data->description ?? '',
+                    'keyword' => $data ? (json_decode($data->extra, true)['keyword'] ?? '') : '',
+                    'image' => $data->image ?? ''
+                ];
+            }
+            
+            return response()->json(['status' => true, 'data' => $seo], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
 
 }
