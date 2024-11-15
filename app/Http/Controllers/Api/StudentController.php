@@ -436,7 +436,7 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'is_resume' =>$isResume,
-                        'total_attempts' =>$exam->total_attempts ?? 0,
+                        'total_attempts' =>$exam->total_attempts ?? "",
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,

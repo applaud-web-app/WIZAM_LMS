@@ -1195,6 +1195,7 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
+                'exams.total_attempts',
                 DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                     ELSE 1 
@@ -1215,6 +1216,7 @@ class ExamController extends Controller
                 'exam_types.slug',
                 'exams.slug',
                 'exams.title',
+                'exams.total_attempts',
                 'exams.duration_mode',
                 'exams.exam_duration',
                 'exams.point_mode',
@@ -1340,6 +1342,7 @@ class ExamController extends Controller
                         'total_marks' => $exam->total_marks,
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
+                        'total_attempts'=>$exam->total_attempts ?? "",
                         'schedules' => [
                             'schedule_id' => $exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
