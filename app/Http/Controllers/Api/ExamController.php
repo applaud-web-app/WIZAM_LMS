@@ -625,6 +625,7 @@ class ExamController extends Controller
     public function finishExam(Request $request, $uuid){
         // USER RESPONSE
         $user_answer = $request->input('answers');
+        $userIp = $request->ip() ?? null; 
         $user = $request->attributes->get('authenticatedUser');
     
         // Fetch exam result by UUID and user ID
@@ -772,6 +773,7 @@ class ExamController extends Controller
         $studentStatus = ($studentPercentage >= $examResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update exam result with correct/incorrect answers and student percentage
+        $examResult->userIp = $userIp;
         $examResult->status = "complete";
         $examResult->updated_at = now();
         $examResult->score = $score;
