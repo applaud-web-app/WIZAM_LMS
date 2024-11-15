@@ -14,14 +14,14 @@ class Enquiry extends Model
         'email',
         'phone',
         'study_mode',
-        'course_id', // Adjust according to your actual foreign key name
+        'course', // Adjust according to your actual foreign key name
         'hear_by',
         'message',
         'accept_condition',
         'contact_me'
     ];
 
-    public function course(){
-        return $this->belongsTo(SubCategory::class, 'course_id', 'id');
-    }
+    // public function course(){
+    //     return $this->belongsTo(SubCategory::class, 'course_id', 'id');
+    // }
 }

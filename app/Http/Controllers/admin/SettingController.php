@@ -1088,7 +1088,7 @@ class SettingController extends Controller
                 })
                 ->addColumn('course', function($row) {
                     if(isset($row->course)){
-                        return $row->course->name;
+                        return $row->course;
                     }
                     return "----";
                 })
