@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Add practice')
+@section('title', 'Add PRACTISE')
 
 @section('content')
 
@@ -47,7 +47,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                     <!-- Grid items -->
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">practice STATUS</h3>
+                    <h3 class="mb-2">PRACTISE STATUS</h3>
                     <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$practiceResult->student_percentage >= (float)$practiceResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
