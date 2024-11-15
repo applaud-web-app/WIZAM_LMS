@@ -8,7 +8,7 @@
                 <div
                     class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-center items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
                     <!-- Title -->
-                    <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">General Settings</h4>
+                    <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">Site SEO Settings</h4>
                     <!-- Breadcrumb Navigation -->
                     <div class="flex flex-wrap justify-center">
                         <nav>
@@ -32,8 +32,7 @@
                                 <li class="inline-flex items-center before:content-[''] before:w-1 before:h-1 before:ltr:float-left rtl:float-right before:bg-light-extra before:me-[7px] before:pe-0 before:rounded-[50%]"
                                     aria-current="page">
                                     <span
-                                        class="text-[14px] font-normal leading-[20px] flex items-center capitalize text-light dark:text-subtitle-dark">General
-                                        Settings</span>
+                                        class="text-[14px] font-normal leading-[20px] flex items-center capitalize text-light dark:text-subtitle-dark">Site SEO Settings</span>
                                 </li>
                             </ol>
                         </nav>
@@ -47,8 +46,6 @@
                     <div class="p-[25px]">
                         <form action="{{ route('update-site-seo') }}" method="POST" enctype="multipart/form-data" id="addSetting">
                             @csrf
-                            <h1>Site SEO Settings</h1>
-                        
                             {{-- Loop through each page and generate SEO fields --}}
                             @php
                                 $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
