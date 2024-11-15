@@ -187,15 +187,14 @@
                             @csrf
                             <h1 class="mb-4 text-xl"><b>Verified Text</b></h1>
                             <div class="mb-[15px]">
-                                <label for="verified_image"
-                                    class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                    Image <span class="text-red-500">*</span>
+                                <label for="verified_image" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                    Image 
                                 </label>
                                 @isset($verified->image)
                                     <img src="{{$verified->image}}" height="100px" width="200px" alt="">
                                 @endisset
                                 <div class="flex flex-col flex-1">
-                                    <input type="file" id="verified_image" name="verified_image" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter Image" value="{{ old('verified', $verified->title ?? '') }}" required>
+                                    <input type="file" id="verified_image" name="verified_image" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Enter Image" value="{{ old('verified', $verified->title ?? '') }}" >
                                 </div>
                             </div>
                             <div class="mb-[15px]">

@@ -885,7 +885,6 @@ class SettingController extends Controller
     public function updateVerifiedText(Request $request){
         $request->validate([
             'verified_text' => 'required|max:255',
-            'verified_image' => 'required',
         ]);
 
         // Find the existing mission entry or create a new one
