@@ -854,8 +854,8 @@ class ManageLearning extends Controller
                     })
                     ->addColumn('status', function($row) {
                         // Determine the status color and text based on `status`
-                        $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
-                        $statusText = $row->student_percentage >= $row->pass_percentage ? 'PASS' : 'FAIL';
+                        $statusColor = $row->student_percentage >= 60 ? 'success' : 'danger';
+                        $statusText = $row->student_percentage >= 60 ? 'PASS' : 'FAIL';
                         // Create the status badge HTML
                         return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
