@@ -895,6 +895,7 @@ class SettingController extends Controller
         // Find the existing mission entry or create a new one
         $aboutPage = HomeCms::where('type', 'aboutPage')->first() ?: new HomeCms(['type' => 'aboutPage']);
         // Update fields
+        $aboutPage->title = "About Page";
         $aboutPage->description = $request->content;
         $aboutPage->save();
 
