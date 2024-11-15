@@ -877,7 +877,8 @@ class ManageLearning extends Controller
 
         $practiceResult = PracticeSetResult::with('user','pratice')->where('uuid',$uuid)->first();
         if($practiceResult){
-            return view('manageLearning.practiceSet.practice-report-detail',compact('practiceResult'));
+            $passPercentage = 60;
+            return view('manageLearning.practiceSet.practice-report-detail',compact('practiceResult','passPercentage'));
         }
         return redirect()->back()->with('error', 'Practice Result Not Found');
     }

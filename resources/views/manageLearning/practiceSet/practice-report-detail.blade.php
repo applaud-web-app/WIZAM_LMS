@@ -37,8 +37,8 @@
                         </tr>
                         <tr class="">
                             <th class="p-2 font-bold border-e">Status:</th>
-                            @php $statusColor = (float) $practiceResult->student_percentage >= (float) $practiceResult->pass_percentage ? 'success' : 'danger';@endphp
-                            <td class="ps-[20px] p-2"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$practiceResult->student_percentage >= (float)$practiceResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
+                            @php $statusColor = (float) $practiceResult->student_percentage >= (float) $passPercentage ? 'success' : 'danger';@endphp
+                            <td class="ps-[20px] p-2"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$practiceResult->student_percentage >= (float)$passPercentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -48,11 +48,11 @@
                     <!-- Grid items -->
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PRACTISE STATUS</h3>
-                    <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$practiceResult->student_percentage >= (float)$practiceResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$practiceResult->student_percentage >= (float)$passPercentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
-                    <p>{{round((float)$practiceResult->student_percentage,2)}}/{{(float)$practiceResult->pass_percentage}}</p>
+                    <p>{{round((float)$practiceResult->student_percentage,2)}}/{{(float)$passPercentage}}</p>
                     </div>
                     <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">START TIME</h3>
