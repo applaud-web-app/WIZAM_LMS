@@ -1074,7 +1074,7 @@ class SettingController extends Controller
 
     public function enquiry(Request $request){
         if ($request->ajax()) {
-            $sections = Enquiry::with('course')->latest();
+            $sections = Enquiry::latest();
 
             return DataTables::of($sections)
                 ->addIndexColumn()
