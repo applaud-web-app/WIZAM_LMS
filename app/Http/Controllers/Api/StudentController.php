@@ -325,6 +325,7 @@ class StudentController extends Controller
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
+                    'exams.restrict_attempts',
                     'exam_schedules.grace_period'
                 )
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
@@ -348,7 +349,8 @@ class StudentController extends Controller
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
                     'exam_schedules.grace_period',
-                    'exams.total_attempts',) // Group by necessary fields
+                    'exams.total_attempts',
+                    'exams.restrict_attempts') // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
     
@@ -426,7 +428,8 @@ class StudentController extends Controller
                     // Format time and marks based on the exam mode
                     $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-    
+                    $attempt = $exam->total_attempts ?? "";
+                    
                     // Add exam details to the corresponding type slug, including schedule details
                     $formattedExamData[$examType->slug][] = [
                         'title' => $exam->title,
@@ -436,7 +439,7 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'is_resume' =>$isResume,
-                        'total_attempts' =>$exam->total_attempts ?? "",
+                        'total_attempts' => $exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,

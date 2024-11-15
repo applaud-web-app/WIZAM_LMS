@@ -1195,6 +1195,7 @@ class ExamController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
+                'exams.restrict_attempts',
                 'exams.total_attempts',
                 DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
@@ -1219,6 +1220,7 @@ class ExamController extends Controller
                 'exams.total_attempts',
                 'exams.duration_mode',
                 'exams.exam_duration',
+                'exams.restrict_attempts',
                 'exams.point_mode',
                 'exams.point',
                 'exam_schedules.id',
@@ -1328,6 +1330,7 @@ class ExamController extends Controller
                 'data' => $upcomingExams->map(function ($exam) use ($examResultExamScheduleMap) {
                     $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
                     $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+                    $attempt = $exam->total_attempts ?? "";
                     return [
                         'id' => $exam->id,
                         'exam_type_slug' => $exam->exam_type_slug,
@@ -1342,7 +1345,7 @@ class ExamController extends Controller
                         'total_marks' => $exam->total_marks,
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
-                        'total_attempts'=>$exam->total_attempts ?? "",
+                        'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedules' => [
                             'schedule_id' => $exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
