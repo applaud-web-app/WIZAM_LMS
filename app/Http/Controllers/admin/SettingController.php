@@ -712,6 +712,7 @@ class SettingController extends Controller
             'title' => 'required|max:255',
             'card_title' => 'required|array',
             'card_description' => 'required|array',
+            'card_short_description' => 'required|array',
             'card_status' => 'required|array',
             'card_image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate image files
         ]);
@@ -733,11 +734,13 @@ class SettingController extends Controller
         foreach ($request->input('card_title') as $key => $title) {
             // Check if description and status exist, otherwise set default value
             $description = $request->input('card_description')[$key] ?? ''; // Default to empty string if not set
+            $short_description = $request->input('card_short_description')[$key] ?? ''; // Default to empty string if not set
             $status = $request->input('card_status')[$key] ?? 0; // Default status to 0 if not set
 
             $card = [
                 'title' => $title,
                 'description' => $description,
+                'short_description' => $short_description,
                 'status' => $status,
             ];
 

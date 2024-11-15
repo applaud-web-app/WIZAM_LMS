@@ -286,6 +286,15 @@
                                             <input type="text" name="card_title[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Card Title" value="{{ old('card_title.' . $i, optional(json_decode($help->extra ?? null))[$i]->title ?? '') }}" required>
                                         </div>
                                     </div>
+
+                                    <div class="mb-[15px]">
+                                        <label for="card_title[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
+                                            Card Short Description <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-col flex-1">
+                                            <textarea name="card_short_description[]" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" placeholder="Your Card Short Description" required>{{ old('short_description.' . $i, optional(json_decode($help->extra ?? null))[$i]->short_description ?? '') }}</textarea>
+                                        </div>
+                                    </div>
                         
                                     <div class="mb-[15px]">
                                         <label for="card_description[]" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
