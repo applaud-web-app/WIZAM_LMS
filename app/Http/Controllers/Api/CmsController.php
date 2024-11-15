@@ -664,13 +664,13 @@ class CmsController extends Controller
                 $response = [
                     'title' => $contactPage->title ?? '',
                     'contact_details' => [
-                        'address' => $extraData['contact_details']['address'] ?? '',
-                        'phone' => $extraData['contact_details']['phone'] ?? '',
-                        'email' => $extraData['contact_details']['email'] ?? '',
+                        'address' => $extraData['address'] ?? '',
+                        'phone' => $extraData['phone'] ?? '',
+                        'email' => $extraData['email'] ?? '',
                     ],
                     'direction_data' => [
                         'direction_title' => $contactPage->button_text ?? '',
-                        'directions' => $extraData['direction_data']['directions'] ?? [],
+                        'directions' => $extraData['directions'] ?? [],
                     ],
                 ];
             } else {
