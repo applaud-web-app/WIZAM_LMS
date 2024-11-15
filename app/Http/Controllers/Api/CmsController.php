@@ -395,7 +395,7 @@ class CmsController extends Controller
             'email' => 'required|string|email|max:255',
             'phone' => 'nullable|string|max:255',
             'study_mode' => 'nullable|string|max:255',
-            'course' => 'nullable|exists:sub_categories,id', // Ensure that 'course' exists in 'subcategory' table
+            'course' => 'nullable', // Ensure that 'course' exists in 'subcategory' table
             'hear_by' => 'nullable|string|max:255',
             'message' => 'nullable|string|max:1000',
             'accept_condition' => 'required|accepted', // Ensure that the checkbox is checked
@@ -418,7 +418,7 @@ class CmsController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'study_mode' => $request->study_mode,
-                'course_id' => $request->course,
+                'course' => $request->course,
                 'hear_by' => $request->hear_by,
                 'message' => $request->message,
                 'accept_condition' => $request->accept_condition,
