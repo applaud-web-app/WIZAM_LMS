@@ -80,7 +80,7 @@ class CmsController extends Controller
     public function helpData() {
         try {
             $helpData = HomeCms::select('title', 'extra')->where('status', 1)->where('type', 'help')->first();
-    
+            $verification = HomeCms::select('title', 'image')->where('status', 1)->where('type', 'verified')->first();
             if (!$helpData) {
                 return response()->json(['status' => false, 'error' => 'No data found.'], 404);
             }
@@ -88,7 +88,7 @@ class CmsController extends Controller
             $data['title'] = $helpData->title;
             $data['data'] = isset($helpData->extra) ? json_decode($helpData->extra, true) : null;
     
-            return response()->json(['status' => true, 'data' => $data], 200);
+            return response()->json(['status' => true, 'data' => $data,'verification'=>$verification], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }

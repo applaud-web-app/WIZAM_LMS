@@ -184,6 +184,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-get-started', 'updateGetstarted')->name('update-get-started');
         Route::get('/enquiry', 'enquiry')->name('enquiry');
         Route::get('/delete-enquiry', 'deleteEnquiry')->name('delete-enquiry');
+        Route::post('/update-verified-text','updateVerifiedText')->name('update-verified-text');
 
         // ------- ABOUT PAGE ------- //
         Route::get('/about-settings', 'aboutSetting')->name('about-settings');
@@ -273,6 +274,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     // ------- MANAGE LEARNING ------- //
     Route::controller(ManageLearning::class)->group(function () {
+
+        Route::get('/overall-practice-set-report/{id}', 'overallPracticeSetReport')->name('overall-practice-set-report');
+        // Route::get('/detailed-quiz-report/{id}', 'detailedQuizReport')->name('detailed-quiz-report');
+        // Route::get('/quiz-report-detail/{uuid}', 'quizReportDetail')->name('quiz-report-detail');
+        // Route::get('/delete-quiz-result/{uuid}', 'deleteQuizResult')->name('delete-quiz-result');
 
         // ------- PRACTICE SET ------- //
         Route::get('/practice-sets', 'practiceSets')->name('view-practice-set');
