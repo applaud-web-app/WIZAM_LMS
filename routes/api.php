@@ -59,6 +59,8 @@ Route::get('about', [CmsController::class, 'about']);
 Route::get('about-page', [CmsController::class, 'aboutPage']);
 
 
+Route::get('/contact-form', [CmsController::class, 'contactForm']);
+
 
 // API Route
 // Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);

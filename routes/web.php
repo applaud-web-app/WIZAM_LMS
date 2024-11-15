@@ -199,6 +199,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-operate', 'updateOperate')->name('update-operate');
         Route::post('/update-best-data', 'updateBestData')->name('update-best-data');
 
+        // Contact Us Page
+        Route::get('/contact-setting', 'contactSetting')->name('contact-setting');
+        Route::post('/update-contact', 'updateContact')->name('update-contact');
+        Route::post('/enquiry-form', 'enquiryForm')->name('enquiry-form');
+
     });
 
     // ------- QUESTION BANK ------- //

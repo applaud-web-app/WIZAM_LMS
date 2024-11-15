@@ -649,6 +649,69 @@ class CmsController extends Controller
             ], 500);
         }
     }
+
+
+    public function contactForm()
+    {
+        try {
+            // Fetch contact page data
+            $contactPage = HomeCms::where('type', 'contactPage')->first();
+            $response = [];
+    
+            if ($contactPage) {
+                $extraData = json_decode($contactPage->extra, true) ?? [];
+    
+                $response = [
+                    'title' => $contactPage->title ?? '',
+                    'contact_details' => [
+                        'address' => $extraData['contact_details']['address'] ?? '',
+                        'phone' => $extraData['contact_details']['phone'] ?? '',
+                        'email' => $extraData['contact_details']['email'] ?? '',
+                    ],
+                    'direction_data' => [
+                        'direction_title' => $contactPage->button_text ?? '',
+                        'directions' => $extraData['direction_data']['directions'] ?? [],
+                    ],
+                ];
+            } else {
+                // Handle missing contact page data
+                $response = [
+                    'title' => '',
+                    'contact_details' => [
+                        'address' => '',
+                        'phone' => '',
+                        'email' => '',
+                    ],
+                    'direction_data' => [
+                        'direction_title' => '',
+                        'directions' => [],
+                    ],
+                ];
+            }
+    
+            // Fetch enquiry form data
+            $enquiryForm = HomeCms::where('type', 'enquiryForm')->first();
+            $formData = $enquiryForm ? json_decode($enquiryForm->extra, true) : null;
+    
+            // Ensure form data is an array or null
+            $formData = is_array($formData) ? $formData : null;
+    
+            // Combine both sets of data into a response
+            $data = [
+                'contact' => $response,
+                'form' => $formData,
+            ];
+    
+            // Return a successful response with the fetched data
+            return response()->json(['status' => true, 'data' => $data], 200);
+        } catch (\Throwable $th) {
+            // Log the exception (if a logging system is in place)
+            \Log::error('Error in contactForm: ' . $th->getMessage());
+    
+            // Return a JSON response with error details
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
     
     
 

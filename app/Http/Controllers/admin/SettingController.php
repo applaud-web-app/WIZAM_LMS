@@ -1114,5 +1114,75 @@ class SettingController extends Controller
         return redirect()->back()->with('error','Something Went Wrong');
     }
 
+    public function contactSetting()
+    {
+        $contactPage = HomeCms::where('type', 'contactPage')->first();
+        $enquiryForm = HomeCms::where('type', 'enquiryForm')->first();
+        $formData = $enquiryForm ? json_decode($enquiryForm->extra, true) : null;
+
+        return view('setting.contactPage', compact('contactPage', 'formData'));
+    }
+
+    public function updateContact(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'direction_title'=>'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'directions' => 'array',
+            'directions.*' => 'string|max:1000',
+        ]);
+
+        $contact = HomeCms::where('type', 'contactPage')->first() ?: new HomeCms(['type' => 'contactPage']);
+
+        $contact->fill([
+            'title' => $request->input('title'),
+            'button_text'=> $request->input('direction_title'),
+            'description' => $request->input('address'),
+            'extra' => json_encode([
+                'phone' => $request->input('phone'),
+                'email' => $request->input('email'),
+                'directions' => $request->input('directions'),
+            ]),
+            'status' => 1,
+        ]);
+
+        $contact->save();
+
+        return redirect()->back()->with('success', 'Contact details saved successfully!');
+    }
+
+    public function enquiryForm(Request $request){
+        $request->validate([
+           'title' => 'required|string|max:255',
+            'name_placeholer' => 'required|string|max:255',
+            'email_placeholder' => 'required|string|max:255',
+            'phone_placeholer' => 'required|string|max:255',
+            'study_mode' => 'nullable|array',
+            'courses' => 'nullable|array',
+            'hear_by' => 'nullable|array',
+            'message_placeholder' => 'required|string|max:255',
+            'checkbox_placeholder' => 'required|string|max:255',
+        ]);
+
+        $form = HomeCms::where('type', 'enquiryForm')->first() ?: new HomeCms(['type' => 'enquiryForm']);
+        $form->title = "Enquiry Form";
+        $form->extra = json_encode([
+            'title' => $request->title,
+            'name_placeholder' => $request->name_placeholer,
+            'email_placeholder' => $request->email_placeholder,
+            'phone_placeholder' => $request->phone_placeholer,
+            'study_mode' => $request->study_mode,
+            'courses' => $request->courses,
+            'hear_by' => $request->hear_by,
+            'message_placeholder' => $request->message_placeholder,
+            'checkbox_placeholder' => $request->checkbox_placeholder,
+        ]);
+        $form->save();
+
+        return redirect()->back()->with('success', 'Enquiry Form saved successfully!');
+    }
 
 }
