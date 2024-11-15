@@ -212,6 +212,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/update-contact', 'updateContact')->name('update-contact');
         Route::post('/enquiry-form', 'enquiryForm')->name('enquiry-form');
 
+        // SITE SEO
+        Route::get('/site-seo', 'siteSeo')->name('site-seo');
+        Route::post('/update-site-seo', 'updateSiteSeo')->name('update-site-seo');
+
     });
 
     // ------- QUESTION BANK ------- //

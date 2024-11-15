@@ -1185,4 +1185,63 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Enquiry Form saved successfully!');
     }
 
+    // SEO SITE
+    public function siteSeo(){
+        $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
+        $seo = [];
+
+        foreach ($pages as $page) {
+            $data = HomeCms::where('type', "{$page}_seo")->first();
+            $seo[$page] = [
+                'title' => $data->title ?? '',
+                'description' => $data->description ?? '',
+                'keyword' => json_decode($data->extra, true)['keyword'] ?? '',
+                'image' => $data->image ?? ''
+            ];
+        }
+
+        return view('setting.siteseo-setting', compact('seo'));
+    } 
+
+    public function updateSiteSeo(Request $request)
+    {
+        // Define the list of pages
+        $pages = ['home', 'about', 'contact', 'exams', 'pricing', 'resources', 'faq'];
+
+        foreach ($pages as $page) {
+            // Validate fields dynamically for each page
+            $validated = $request->validate([
+                "{$page}_seo_title" => 'required|string|max:255',
+                "{$page}_seo_keyword" => 'required|string|max:255',
+                "{$page}_seo_description" => 'required|string|max:500',
+                "{$page}_og_image" => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            // Fetch or create the SEO data for the specific page
+            $seo = HomeCms::firstOrNew(['type' => "{$page}_seo"]);
+
+            // Update fields
+            $seo->title = $validated["{$page}_seo_title"];
+            $seo->description = $validated["{$page}_seo_description"];
+            $seo->extra = json_encode([
+                'keyword' => $validated["{$page}_seo_keyword"]
+            ]);
+
+            // Handle file upload
+            if ($request->hasFile("{$page}_og_image")) {
+                $image = $request->file("{$page}_og_image");
+                $imageName = "{$page}_seo_" . time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('uploads/seo'), $imageName);
+                $seo->image = env('APP_URL') . '/uploads/seo/' . $imageName;
+            }
+
+            // Save the SEO data
+            $seo->save();
+        }
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'All SEO settings updated successfully!');
+    }
+
+
 }
