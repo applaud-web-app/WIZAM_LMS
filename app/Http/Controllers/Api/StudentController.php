@@ -429,7 +429,7 @@ class StudentController extends Controller
                     $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                     $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
                     $attempt = $exam->total_attempts ?? "";
-                    
+
                     // Add exam details to the corresponding type slug, including schedule details
                     $formattedExamData[$examType->slug][] = [
                         'title' => $exam->title,
@@ -994,6 +994,8 @@ class StudentController extends Controller
                     'quiz_schedules.end_time',
                     'quiz_schedules.grace_period',
                     'quiz_schedules.id as schedule_id',
+                    'quizzes.restrict_attempts',
+                    'quizzes.total_attempts',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -1025,6 +1027,8 @@ class StudentController extends Controller
                     'quiz_schedules.start_time',
                     'quiz_schedules.end_date',
                     'quiz_schedules.end_time',
+                    'quizzes.restrict_attempts',
+                    'quizzes.total_attempts',
                     'quiz_schedules.grace_period'
                 )
                 ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
@@ -1083,7 +1087,7 @@ class StudentController extends Controller
 
                     $examScheduleKey = $quiz->id . '_' . $quiz->schedule_id;
                     $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
-
+                    $attempt = $quiz->total_attempts ?? "";
                     return [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
@@ -1092,6 +1096,7 @@ class StudentController extends Controller
                         'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
                         'is_free' => $quiz->is_free,
                         'is_resume' =>$isResume,
+                        'total_attempts'=>$quiz->restrict_attempts == 0 ? "" : $attempt,
                         'schedule' => [
                             'schedule_id'=>$quiz->schedule_id,
                             'start_date' => $quiz->start_date,

@@ -1419,6 +1419,8 @@ class QuizController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'quizzes.restrict_attempts',
+                    'quizzes.total_attempts',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -1456,6 +1458,8 @@ class QuizController extends Controller
                     'quizzes.point',
                     'quizzes.is_free',
                     'quizzes.is_public',
+                    'quizzes.restrict_attempts',
+                    'quizzes.total_attempts',
                     'quiz_schedules.id',
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
@@ -1522,7 +1526,7 @@ class QuizController extends Controller
 
                     $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
                     $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
-
+                    $attempt = $exam->total_attempts ?? "";
                     return [
                         'id' => $exam->id,
                         'exam_type_name' => $exam->exam_type_name,
@@ -1537,6 +1541,7 @@ class QuizController extends Controller
                         'total_marks' => $exam->total_marks,
                         'total_time' => $exam->total_time,
                         'is_resume' => $isResume,
+                        'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedules' => [
                             'schedule_id'=> $exam->schedule_id,
                             'schedule_type' => $exam->schedule_type,
