@@ -664,7 +664,7 @@ class CmsController extends Controller
                 $response = [
                     'title' => $contactPage->title ?? '',
                     'contact_details' => [
-                        'address' => $extraData['address'] ?? '',
+                        'address' => $contactPage->description ?? '',
                         'phone' => $extraData['phone'] ?? '',
                         'email' => $extraData['email'] ?? '',
                     ],
