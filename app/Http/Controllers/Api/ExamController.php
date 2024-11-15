@@ -863,25 +863,31 @@ class ExamController extends Controller
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
                         case 'FIB':
+                            // Decode `correct_answ` if it's a JSON string
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
-                            $correct_answ = array_map(function($item) {
-                                return is_string($item) ? strtolower($item) : $item;
-                            }, $correct_answ);
 
+                            // Ensure `correct_answ` is an array and normalize elements to lowercase
+                            $correct_answ = is_array($correct_answ) ? array_map(function ($item) {
+                                return is_string($item) ? strtolower($item) : $item;
+                            }, $correct_answ) : [];
+
+                            // Decode `user_answ` if it's a JSON string
                             if (is_string($user_answ)) {
                                 $user_answ = json_decode($user_answ, true);
                             }
 
-                            // Normalize user answer array
-                            $user_answ = array_map(function($item) {
+                            // Normalize `user_answ` or default to an empty array
+                            $user_answ = $user_answ != null && is_array($user_answ) ? array_map(function ($item) {
                                 return is_string($item) ? strtolower($item) : $item;
-                            }, $user_answ);
+                            }, $user_answ) : [];
 
-                            // Sort and compare
+                            // Sort both arrays to ensure consistent comparison
                             sort($correct_answ);
                             sort($user_answ);
+
+                            // Compare the sorted arrays
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
