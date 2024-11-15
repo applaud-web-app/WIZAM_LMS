@@ -312,6 +312,7 @@ class StudentController extends Controller
                     'exams.point_mode',
                     'exams.point',
                     'exams.is_free',
+                    'exams.total_attempts',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -346,7 +347,8 @@ class StudentController extends Controller
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
-                    'exam_schedules.grace_period') // Group by necessary fields
+                    'exam_schedules.grace_period',
+                    'exams.total_attempts',) // Group by necessary fields
                 ->havingRaw('COUNT(questions.id) > 0')
                 ->get();
     
@@ -434,6 +436,7 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'is_resume' =>$isResume,
+                        'total_attempts' =>$exam->total_attempts ?? 0,
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,
