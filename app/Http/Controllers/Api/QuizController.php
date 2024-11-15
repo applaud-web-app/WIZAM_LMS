@@ -440,6 +440,7 @@ class QuizController extends Controller
     {
         // USER RESPONSE
         $user_answer = $request->input('answers');
+        $userIp = $request->ip() ?? null; 
         $user = $request->attributes->get('authenticatedUser');
     
         // Fetch quiz result by UUID and user ID
@@ -602,6 +603,7 @@ class QuizController extends Controller
         $studentStatus = ($studentPercentage >= $quizResult->pass_percentage) ? 'PASS' : 'FAIL';
     
         // Update quiz result with correct/incorrect answers and student percentage
+        $quizResult->userIp = $userIp;
         $quizResult->status = "complete";
         $quizResult->updated_at = now();
         $quizResult->score = $score;

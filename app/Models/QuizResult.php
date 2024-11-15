@@ -35,7 +35,8 @@ class QuizResult extends Model
         'start_time',
         'end_time',
         'schedule_id',
-        'score'
+        'score',
+        'userIp'
     ];
 
     public function quiz(){

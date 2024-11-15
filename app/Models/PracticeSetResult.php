@@ -32,7 +32,8 @@ class PracticeSetResult extends Model
         'status',
         'start_time',
         'end_time',
-        'score'
+        'score',
+        'userIp'
     ];
 
     public function pratice(){

@@ -454,6 +454,7 @@ class PracticeSetController extends Controller
     public function finishPracticeSet(Request $request,$uuid){
         // USER RESPONSE
         $user_answer = $request->input('answers');
+        $userIp = $request->ip() ?? null; 
         $user = $request->attributes->get('authenticatedUser');
     
         // Fetch pratice result by UUID and user ID
@@ -601,6 +602,7 @@ class PracticeSetController extends Controller
         $studentPercentage = ($totalMarks > 0) ? ($score / $totalMarks) * 100 : 0;
     
         // Update pratice result with correct/incorrect answers and student percentage
+        $practiceSetResult->userIp = $userIp;
         $practiceSetResult->status = "complete";
         $practiceSetResult->updated_at = now();
         $practiceSetResult->score = $score;
