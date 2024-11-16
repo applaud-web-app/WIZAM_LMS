@@ -453,8 +453,9 @@ class CmsController extends Controller
             // }
     
             // Fetch the user from the database
-            $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
+            $userID = null;
             if($user){
+                $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
                 $userID = $user->stripe_customer_id;
             }
     
