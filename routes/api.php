@@ -62,6 +62,9 @@ Route::get('about-page', [CmsController::class, 'aboutPage']);
 Route::get('/contact-form', [CmsController::class, 'contactForm']);
 Route::get('/site-seo', [CmsController::class, 'siteSeo']);
 
+
+Route::get('pricing',[CmsController::class, 'pricing']);
+
 // API Route
 // Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);
 // Route::middleware(['checkAuthToken'])->get('/profile', [AuthController::class, 'profile']);
@@ -91,7 +94,10 @@ Route::middleware('checkAuthToken')->group(function () {
 
     // SAVE EXAM PROGRESS
     Route::post('/save-answer-progress/{uuid}',[ExamController::class,'saveAnswerProgress']);
-    Route::get('/get-saved-progress',[ExamController::class,'getSavedProgress']);
+    Route::get('/get-saved-progress/{uuid}', [ExamController::class, 'getSavedProgress']); 
+
+
+
 
     Route::post('/save-practice-set-answer-progress/{uuid}',[PracticeSetController::class,'savePracticeSetAnswerProgress']);
 
@@ -153,7 +159,6 @@ Route::middleware('checkAuthToken')->group(function () {
 
     
     // PRICING PAGE
-    Route::get('pricing',[CmsController::class, 'pricing']);
     Route::post('create-checkout-session',[CmsController::class, 'createCheckoutSession']);
 
     // CHECK USER SUBSCRIPTION

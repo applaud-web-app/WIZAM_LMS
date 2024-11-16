@@ -445,15 +445,18 @@ class CmsController extends Controller
             $user = $request->attributes->get('authenticatedUser');
             
             // Check if the user is authenticated
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not authenticated',
-                ], 401);
-            }
+            // if (!$user) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'User not authenticated',
+            //     ], 401);
+            // }
     
             // Fetch the user from the database
             $user = User::findOrFail($user->id); // Automatically throws 404 if user not found
+            if($user){
+                $userID = $user->stripe_customer_id;
+            }
     
             // Fetch pricing plans with sub-category information
             $pricing = Plan::join('sub_categories', 'plans.category_id', '=', 'sub_categories.id') 
@@ -479,7 +482,7 @@ class CmsController extends Controller
             // Prepare response data
             $data = [
                 'pricing' => $pricing,
-                'customer_id' => $user->stripe_customer_id ?? null
+                'customer_id' => $userID ?? null
             ];
     
             // Return response with data

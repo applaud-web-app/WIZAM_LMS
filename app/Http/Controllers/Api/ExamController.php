@@ -1655,11 +1655,48 @@ class ExamController extends Controller
     }
     
 
+    // public function saveAnswerProgress(Request $request, $uuid)
+    // {
+    //     // Fetch the user and user answers
+    //     $user_answer = $request->input('answers');
+    //     $user = $request->attributes->get('authenticatedUser');
+    //     // Find or create an exam result in progress by UUID and user ID
+    //     $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
+    //     if (!$examResult) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => "Exam not found"
+    //         ]);
+    //     }
+    //     // Update user answers in progress
+    //     $examResult->answers = json_encode($user_answer, true);
+    //     $examResult->updated_at = now();
+    //     $examResult->save();
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Answer progress saved successfully',
+    //     ]);
+    // }
+
+    // public function getSavedProgress($uuid)
+    // {
+    //     $user = request()->attributes->get('authenticatedUser');
+    //     $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
+    //     if (!$examResult) {
+    //         return response()->json(['status' => false, 'message' => 'Exam not found']);
+    //     }
+    //     return response()->json(['status' => true, 'answers' => $examResult->answers]);
+    // }
+
+
     public function saveAnswerProgress(Request $request, $uuid)
     {
         // Fetch the user and user answers
-        $user_answer = $request->input('answers');
+        $user_answers = $request->input('answers');
+        $status_data = $request->input('status_data'); // New field for status details
+        $initial_shuffled_options = $request->input('initialShuffledOptions'); // New field for initial shuffled options
         $user = $request->attributes->get('authenticatedUser');
+
         // Find or create an exam result in progress by UUID and user ID
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
         if (!$examResult) {
@@ -1668,24 +1705,42 @@ class ExamController extends Controller
                 'message' => "Exam not found"
             ]);
         }
-        // Update user answers in progress
-        $examResult->answers = json_encode($user_answer, true);
+
+        // Update user answers and status details in progress
+        $examResult->answers = json_encode($user_answers, true);
+        $examResult->status_data = json_encode($status_data, true); // Save statuses
+        $examResult->initial_shuffled_options = json_encode($initial_shuffled_options, true); // Save initial shuffled options
         $examResult->updated_at = now();
         $examResult->save();
+
         return response()->json([
             'status' => true,
             'message' => 'Answer progress saved successfully',
         ]);
     }
 
-    public function getSavedProgress($uuid)
+    public function getSavedProgress(Request $request, $uuid)
     {
-        $user = request()->attributes->get('authenticatedUser');
+        $user = $request->attributes->get('authenticatedUser');
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
+
         if (!$examResult) {
-            return response()->json(['status' => false, 'message' => 'Exam not found']);
+            return response()->json([
+                'status' => false,
+                'message' => "Exam not found"
+            ]);
         }
-        return response()->json(['status' => true, 'answers' => $examResult->answers]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Progress retrieved successfully',
+            'data' => [
+                'answers' => json_decode($examResult->answers, true),
+                'status_data' => json_decode($examResult->status_data, true),
+                'initialShuffledOptions' => json_decode($examResult->initial_shuffled_options, true),
+            ],
+        ]);
     }
+
 
 }
