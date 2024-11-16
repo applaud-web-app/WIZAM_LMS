@@ -1655,45 +1655,12 @@ class ExamController extends Controller
     }
     
 
-    // public function saveAnswerProgress(Request $request, $uuid)
-    // {
-    //     // Fetch the user and user answers
-    //     $user_answer = $request->input('answers');
-    //     $user = $request->attributes->get('authenticatedUser');
-    //     // Find or create an exam result in progress by UUID and user ID
-    //     $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
-    //     if (!$examResult) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => "Exam not found"
-    //         ]);
-    //     }
-    //     // Update user answers in progress
-    //     $examResult->answers = json_encode($user_answer, true);
-    //     $examResult->updated_at = now();
-    //     $examResult->save();
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Answer progress saved successfully',
-    //     ]);
-    // }
-
-    // public function getSavedProgress($uuid)
-    // {
-    //     $user = request()->attributes->get('authenticatedUser');
-    //     $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
-    //     if (!$examResult) {
-    //         return response()->json(['status' => false, 'message' => 'Exam not found']);
-    //     }
-    //     return response()->json(['status' => true, 'answers' => $examResult->answers]);
-    // }
-
     public function saveAnswerProgress(Request $request, $uuid)
     {
-        $progressData = $request->input('progressData');
+        // Fetch the user and user answers
+        $user_answer = $request->input('answers');
         $user = $request->attributes->get('authenticatedUser');
-
-        // Find the exam result by UUID and user ID
+        // Find or create an exam result in progress by UUID and user ID
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
         if (!$examResult) {
             return response()->json([
@@ -1701,19 +1668,10 @@ class ExamController extends Controller
                 'message' => "Exam not found"
             ]);
         }
-
-        // Extract answers from progressData and store them in the 'answers' column
-        if (isset($progressData['answers'])) {
-            $examResult->answers = json_encode($progressData['answers'], true);
-        }
-
-        // Remove 'answers' from progressData and store the rest in 'status_data' column
-        unset($progressData['answers']);
-        $examResult->status_data = json_encode($progressData, true);
-
+        // Update user answers in progress
+        $examResult->answers = json_encode($user_answer, true);
         $examResult->updated_at = now();
         $examResult->save();
-
         return response()->json([
             'status' => true,
             'message' => 'Answer progress saved successfully',
@@ -1727,28 +1685,7 @@ class ExamController extends Controller
         if (!$examResult) {
             return response()->json(['status' => false, 'message' => 'Exam not found']);
         }
-    
-        $answers = json_decode($examResult->answers, true);
-        $statusData = json_decode($examResult->status_data, true);
-    
-        return response()->json([
-            'status' => true,
-            'answers' => $answers,
-            'statusData' => $statusData,
-        ]);
+        return response()->json(['status' => true, 'answers' => $examResult->answers]);
     }
-
-    public function clearAnswerProgress($uuid)
-    {
-        $user = request()->attributes->get('authenticatedUser');
-        $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
-        if ($examResult) {
-            $examResult->status_data = null;
-            $examResult->updated_at = now();
-            $examResult->save();
-        }
-        return response()->json(['status' => true, 'message' => 'Progress cleared']);
-    }
-
 
 }

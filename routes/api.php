@@ -93,14 +93,8 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/exam-result/{uuid}',[ExamController::class, 'examResult']);
 
     // SAVE EXAM PROGRESS
-    // Route::post('/save-answer-progress/{uuid}',[ExamController::class,'saveAnswerProgress']);
-    // Route::get('/get-saved-progress/{uuid}', [ExamController::class, 'getSavedProgress']); 
-
-    Route::post('/save-answer-progress/{uuid}', [ExamController::class, 'saveAnswerProgress']);
-    Route::get('/get-saved-progress/{uuid}', [ExamController::class, 'getSavedProgress']);
-    Route::post('/clear-answer-progress/{uuid}', [ExamController::class, 'clearAnswerProgress']);
-
-
+    Route::post('/save-answer-progress/{uuid}',[ExamController::class,'saveAnswerProgress']);
+    Route::get('/get-saved-progress', [ExamController::class, 'getSavedProgress']); 
 
 
     Route::post('/save-practice-set-answer-progress/{uuid}',[PracticeSetController::class,'savePracticeSetAnswerProgress']);
