@@ -718,7 +718,7 @@ class ExamController extends Controller
                         }
                     }
                 } elseif ($question->type == 'ORD') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    $correctAnswers = json_decode($question->options, true); // UPDATED
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
                     // $correctAnswers = json_decode($question->answer, true);
@@ -921,9 +921,7 @@ class ExamController extends Controller
                             }
                             break;
                         case 'ORD':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
+                            $correct_answ = $question->options;
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'EMQ':
