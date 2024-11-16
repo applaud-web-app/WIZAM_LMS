@@ -1688,16 +1688,12 @@ class ExamController extends Controller
     //     return response()->json(['status' => true, 'answers' => $examResult->answers]);
     // }
 
-
     public function saveAnswerProgress(Request $request, $uuid)
     {
-        // Fetch the user and user answers
-        $user_answers = $request->input('answers');
-        $status_data = $request->input('status_data'); // New field for status details
-        $initial_shuffled_options = $request->input('initialShuffledOptions'); // New field for initial shuffled options
+        $progressData = $request->input('progressData');
         $user = $request->attributes->get('authenticatedUser');
 
-        // Find or create an exam result in progress by UUID and user ID
+        // Find the exam result by UUID and user ID
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
         if (!$examResult) {
             return response()->json([
@@ -1706,10 +1702,15 @@ class ExamController extends Controller
             ]);
         }
 
-        // Update user answers and status details in progress
-        $examResult->answers = json_encode($user_answers, true);
-        $examResult->status_data = json_encode($status_data, true); // Save statuses
-        $examResult->initial_shuffled_options = json_encode($initial_shuffled_options, true); // Save initial shuffled options
+        // Extract answers from progressData and store them in the 'answers' column
+        if (isset($progressData['answers'])) {
+            $examResult->answers = json_encode($progressData['answers'], true);
+        }
+
+        // Remove 'answers' from progressData and store the rest in 'status_data' column
+        unset($progressData['answers']);
+        $examResult->status_data = json_encode($progressData, true);
+
         $examResult->updated_at = now();
         $examResult->save();
 
@@ -1719,27 +1720,34 @@ class ExamController extends Controller
         ]);
     }
 
-    public function getSavedProgress(Request $request, $uuid)
+    public function getSavedProgress($uuid)
     {
-        $user = $request->attributes->get('authenticatedUser');
+        $user = request()->attributes->get('authenticatedUser');
         $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
-
         if (!$examResult) {
-            return response()->json([
-                'status' => false,
-                'message' => "Exam not found"
-            ]);
+            return response()->json(['status' => false, 'message' => 'Exam not found']);
         }
-
+    
+        $answers = json_decode($examResult->answers, true);
+        $statusData = json_decode($examResult->status_data, true);
+    
         return response()->json([
             'status' => true,
-            'message' => 'Progress retrieved successfully',
-            'data' => [
-                'answers' => json_decode($examResult->answers, true),
-                'status_data' => json_decode($examResult->status_data, true),
-                'initialShuffledOptions' => json_decode($examResult->initial_shuffled_options, true),
-            ],
+            'answers' => $answers,
+            'statusData' => $statusData,
         ]);
+    }
+
+    public function clearAnswerProgress($uuid)
+    {
+        $user = request()->attributes->get('authenticatedUser');
+        $examResult = ExamResult::where('uuid', $uuid)->where('user_id', $user->id)->first();
+        if ($examResult) {
+            $examResult->status_data = null;
+            $examResult->updated_at = now();
+            $examResult->save();
+        }
+        return response()->json(['status' => true, 'message' => 'Progress cleared']);
     }
 
 
