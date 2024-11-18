@@ -19,6 +19,7 @@
                         <th>#</th>
                         <th>Task Taker</th>
                         <th>Completed On</th>
+                        <th>Score</th>
                         <th>Percentage</th>
                         <th>IP Address</th>
                         <th>Status</th>
@@ -85,6 +86,7 @@
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 { data: 'task_taker', name: 'task_taker' },
                 { data: 'completed_on', name: 'completed_on' },
+                { data: 'score', name: 'score' },
                 { data: 'percenatge', name: 'percenatge' },
                 { data: 'ipadddress', name: 'ipadddress' },
                 { data: 'status', name: 'status' },

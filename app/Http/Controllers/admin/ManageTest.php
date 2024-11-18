@@ -1768,6 +1768,9 @@ class ManageTest extends Controller
                             return "User";  // Placeholder text
                         }
                     })
+                    ->addColumn('score', function($row) {
+                        return $row->score ?? 0;
+                    })
                     ->addColumn('completed_on', function($row) {
                         if ($row->status == "complete") {
                             return date('d/m/Y', strtotime($row->updated_at)) . ", " . date('H:i:s A', strtotime($row->updated_at));
@@ -1793,7 +1796,7 @@ class ManageTest extends Controller
                         // Create the status badge HTML
                         return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
-                    ->rawColumns(['status', 'percenatge','ipadddress', 'completed_on', 'task_taker', 'action'])
+                    ->rawColumns(['status', 'percenatge','ipadddress','score', 'completed_on', 'task_taker', 'action'])
                     ->make(true);
             }
             return view('manageTest.exams.detailed-report',compact('exam'));

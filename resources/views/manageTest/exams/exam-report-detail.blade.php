@@ -38,7 +38,7 @@
                         <tr class="hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Status:</th>
                             @php $statusColor = (float) $examResult->student_percentage >= (float) $examResult->pass_percentage ? 'success' : 'danger';@endphp
-                            <td class="ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
+                            <td class="ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -58,7 +58,7 @@
                     <!-- Grid items -->
                     <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 hover:text-white py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">EXAM STATUS</h3>
-                    <p><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-{{$statusColor}}'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <p><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
                     <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">SCORE</h3>
