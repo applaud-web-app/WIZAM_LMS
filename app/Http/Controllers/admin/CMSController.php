@@ -405,7 +405,7 @@ class CMSController extends Controller
         $blog->category_id = $request->input('blogCategory');
         $blog->short_description = $request->input('shortDescription');
         $blog->content = $request->input('blogContent');
-        
+        $blog->user = $request->input('authorName');
     
         // Generate a new slug from the blog title
         $slug = Str::slug($request->input('blogTitle'));
