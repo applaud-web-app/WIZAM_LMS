@@ -1783,6 +1783,9 @@ class ManageTest extends Controller
                             return 0;  // Placeholder text
                         }
                     })
+                    ->addColumn('ipadddress', function($row) {
+                        return $row->userIp ?? 'N/A';
+                    })
                     ->addColumn('status', function($row) {
                         // Determine the status color and text based on `status`
                         $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
@@ -1790,7 +1793,7 @@ class ManageTest extends Controller
                         // Create the status badge HTML
                         return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
-                    ->rawColumns(['status', 'percenatge', 'completed_on', 'task_taker', 'action'])
+                    ->rawColumns(['status', 'percenatge','ipadddress', 'completed_on', 'task_taker', 'action'])
                     ->make(true);
             }
             return view('manageTest.exams.detailed-report',compact('exam'));
@@ -1915,6 +1918,9 @@ class ManageTest extends Controller
                             return 0;  // Placeholder text
                         }
                     })
+                    ->addColumn('ipadddress', function($row) {
+                        return $row->userIp ?? 'N/A';
+                    })
                     ->addColumn('status', function($row) {
                         // Determine the status color and text based on `status`
                         $statusColor = $row->student_percentage >= $row->pass_percentage ? 'success' : 'danger';
@@ -1922,7 +1928,7 @@ class ManageTest extends Controller
                         // Create the status badge HTML
                         return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                     })
-                    ->rawColumns(['status', 'percenatge', 'completed_on', 'task_taker', 'action'])
+                    ->rawColumns(['status', 'percenatge', 'ipadddress','completed_on', 'task_taker', 'action'])
                     ->make(true);
             }
             return view('manageTest.quizzes.detailed-report',compact('quiz'));

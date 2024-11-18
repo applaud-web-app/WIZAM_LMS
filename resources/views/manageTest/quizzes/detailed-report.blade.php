@@ -20,6 +20,7 @@
                         <th>Task Taker</th>
                         <th>Completed On</th>
                         <th>Percentage</th>
+                        <th>IP Address</th>
                         <th>Status</th>
                         <th>Actions</th>
                      </tr>
@@ -85,6 +86,7 @@
                 { data: 'task_taker', name: 'task_taker' },
                 { data: 'completed_on', name: 'completed_on' },
                 { data: 'percenatge', name: 'percenatge' },
+                { data: 'ipadddress', name: 'ipadddress' },
                 { data: 'status', name: 'status' },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ]
