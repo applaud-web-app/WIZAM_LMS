@@ -466,6 +466,46 @@ class PaymentController extends Controller
       }
    }
 
+   protected function updateSubscriptionRecord($user, $invoice)
+   {
+      try {
+         // Mark the existing subscription as expired
+         $activeSubscription = Subscription::where('user_id', $user->id)
+               ->where('stripe_status', 'active')
+               ->orWhere('stripe_status', 'trialing')
+               ->first();
+
+         if ($activeSubscription) {
+               $activeSubscription->update([
+                  'stripe_status' => 'expired',
+                  'ends_at' => now(), // Mark the current time as the end time
+               ]);
+
+               Log::info('Marked existing subscription as expired: ' . $activeSubscription->stripe_id);
+         }
+
+         // Create a new subscription record
+         $newSubscription = Subscription::create([
+               'user_id' => $user->id,
+               'stripe_id' => $invoice->subscription,
+               'stripe_status' => $invoice->status,
+               'stripe_price' => $invoice->lines->data[0]->price->id ?? null,
+               'quantity' => $invoice->lines->data[0]->quantity ?? 1,
+               'trial_ends_at' => $invoice->lines->data[0]->plan->trial_period_days
+                  ? now()->addDays($invoice->lines->data[0]->plan->trial_period_days)
+                  : null,
+               'ends_at' => \Carbon\Carbon::createFromTimestamp($invoice->lines->data[0]->period->end ?? time()),
+         ]);
+
+         Log::info('Created new subscription record: ' . $newSubscription->stripe_id);
+      } catch (\Exception $e) {
+         Log::error('Error updating subscription records', [
+               'error' => $e->getMessage(),
+               'invoice' => $invoice,
+         ]);
+      }
+   }
+
    protected function storeSubscriptionPaymentDetails($invoice)
    {
       try {
@@ -510,6 +550,9 @@ class PaymentController extends Controller
                ]);
 
                Log::info('Payment stored successfully for invoice: ' . $invoice->id);
+
+               // Handle subscription record
+               $this->updateSubscriptionRecord($user, $invoice);
          } else {
                Log::warning('Invoice amount_paid is zero for invoice: ' . $invoice->id);
          }
