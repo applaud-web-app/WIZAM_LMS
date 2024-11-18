@@ -81,7 +81,7 @@
                     class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
                     <h2
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                        performance Overview
+                        Score Overview
                     </h2>
                     <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
                         data-te-dropdown-ref>
@@ -89,38 +89,10 @@
                             id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
                             <i class="uil uil-ellipsis-h"></i>
                         </button>
-                        <ul class="absolute z-[1000] ltr:float-left rtl:float-right m-0 hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down  [&[data-te-dropdown-show]]:block"
-                            aria-labelledby="salesReport" data-te-dropdown-menu-ref>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up gap-[6px]"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-print"></i> printer </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-book-alt"></i> pdf </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-file-info-alt"></i> google sheet </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-multiply"></i> Excel (XLSX) </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-file"></i> CSV </a>
-                            </li>
-                        </ul>
                     </div>
                 </div>
                 <div class="px-[25px] md:pb-[25px]">
-                    <div class="performanceOver"></div>
+                    <div class="performanceOver2"></div>
                 </div>
             </div>
             <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
@@ -128,7 +100,7 @@
                     class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
                     <h2
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                        Sales Overview
+                        Exam Overview
                     </h2>
                     <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
                         data-te-dropdown-ref>
@@ -136,34 +108,6 @@
                             id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
                             <i class="uil uil-ellipsis-h"></i>
                         </button>
-                        <ul class="absolute z-[1000] ltr:float-left rtl:float-right m-0 hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down  [&[data-te-dropdown-show]]:block"
-                            aria-labelledby="salesReport" data-te-dropdown-menu-ref>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up gap-[6px]"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-print"></i> printer </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-book-alt"></i> pdf </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-file-info-alt"></i> google sheet </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-multiply"></i> Excel (XLSX) </a>
-                            </li>
-                            <li>
-                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
-                                    href="#" data-te-dropdown-item-ref>
-                                    <i class="uil uil-file"></i> CSV </a>
-                            </li>
-                        </ul>
                     </div>
                 </div>
                 <div class="px-[25px] md:pb-[25px]">
@@ -208,7 +152,44 @@
 {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
+<script>
+    // Function to render the donut chart
+    function donutChart2(selector) {
+        // Check if the element exists
+        if (document.querySelectorAll(selector).length > 0) {
+            // Create a new ApexChart
+            const options = {
+                series: [90, 80, 70], // Values for the chart
+                labels: ["Target", "Completed", "In Progress"], // Labels for each value
+                chart: {
+                    type: 'donut', // Chart type
+                    height: 350 // Chart height
+                },
+                colors: ["#8231D3", "#00AAFF", "#FA8B0C"], // Custom colors
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 300
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
 
+            // Initialize and render the chart
+            const chart = new ApexCharts(document.querySelector(selector), options);
+            chart.render();
+        }
+    }
+
+    // Call the function after the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        donutChart2(".performanceOver2"); // Pass the CSS selector for the donut chart container
+    });
+</script>
 <script>
     $(document).ready(function() {
         $('.summernote').summernote({
