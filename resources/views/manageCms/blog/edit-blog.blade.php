@@ -46,6 +46,12 @@
                <input type="text" id="blogTitle" name="blogTitle" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" value="@isset($blog->title) {{$blog->title}} @endisset" placeholder="Enter blog title">
             </div>
 
+            <!-- Author Name -->
+            <div class="mb-[20px]">
+               <label for="authorName" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Author Name <span class="text-red-500">*</span></label>
+               <input type="text" id="authorName" name="authorName" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter Author Name" value="@isset($blog->user) {{$blog->user}} @endisset">
+            </div>
+
             <!-- Category -->
             <div class="mb-[20px]">
                <label for="blogCategory" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Category <span class="text-red-500">*</span></label>

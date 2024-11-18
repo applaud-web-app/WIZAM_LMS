@@ -258,10 +258,7 @@ class CMSController extends Controller
                     return "<img src='".$row->image."' class='img-fluid' height='200px' />";
                 })
                 ->addColumn('author', function($row) {
-                    if(isset($row->user)){
-                        return $row->user->name;
-                    }
-                    return "----";
+                    return $row->user;
                 })
                 ->addColumn('category', function($row) {
                     if(isset($row->category)){
@@ -301,6 +298,7 @@ class CMSController extends Controller
             'blogCategory' => 'required',
             'shortDescription' => 'required|string|max:500',
             'blogContent' => 'required|string',
+            'authorName' => 'required',
             'blogImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
         ]);
 
@@ -320,8 +318,6 @@ class CMSController extends Controller
             $imagePath = $imageName;
         }
 
-        $userId = Auth::id();
-
         // Generate a slug from the blog title
         $slug = Str::slug($request->input('blogTitle'));
 
@@ -336,7 +332,7 @@ class CMSController extends Controller
         // Save the blog data to the database
         Blog::create([
             'title' => $request->input('blogTitle'),
-            'user_id'=> $userId,
+            'user'=> $authorName,
             'category_id' => $request->input('blogCategory'),
             'short_description' => $request->input('shortDescription'),
             'content' => $request->input('blogContent'), // Save summernote content
@@ -377,6 +373,7 @@ class CMSController extends Controller
             'blogCategory' => 'required',
             'shortDescription' => 'required|string|max:500',
             'blogContent' => 'required|string',
+            'authorName' => 'required',
             'blogImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
             'eq' => 'required',
         ]);
