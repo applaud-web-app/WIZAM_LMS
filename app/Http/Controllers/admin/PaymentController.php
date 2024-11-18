@@ -469,35 +469,55 @@ class PaymentController extends Controller
    protected function storeSubscriptionPaymentDetails($invoice)
    {
       try {
+         Log::info('Processing invoice.payment_succeeded event', [
+               'invoice_id' => $invoice->id,
+               'customer_id' => $invoice->customer,
+               'subscription_id' => $invoice->subscription,
+         ]);
+
+         // Retrieve customer ID from the invoice
          $customerId = $invoice->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
-         if ($user) {
-               // Check for duplicate payment
-               if (!Payment::where('stripe_payment_id', $invoice->id)->exists()) {
-                  // Create the payment entry with subscription_id
-                  if($invoice->amount_paid > 0){
-                     Payment::create([
-                        'user_id' => $user->id,
-                        'stripe_payment_id' => $invoice->id,
-                        'amount' => $invoice->amount_paid / 100, // Convert from cents
-                        'currency' => $invoice->currency,
-                        'status' => $invoice->status,
-                        'subscription_id' => $invoice->subscription, // Set subscription_id for recurring payments
-                     ]);
-                  }
-               } else {
-                  Log::info('Duplicate Payment: ' . $invoice->id);
-               }
-         } else {
+
+         // Find the user based on the Stripe customer ID
+         $user = User::where('stripe_customer_id', $customerId)->first();
+
+         if (!$user) {
                Log::warning('User not found for Stripe customer ID: ' . $customerId);
+               return;
+         }
+
+         // Check for duplicate payment entries
+         $existingPayment = Payment::where('stripe_payment_id', $invoice->id)->exists();
+
+         if ($existingPayment) {
+               Log::info('Duplicate payment detected. Payment already exists for invoice: ' . $invoice->id);
+               return;
+         }
+
+         // Ensure the invoice has a valid payment
+         if ($invoice->amount_paid > 0) {
+               // Insert the payment into the database
+               Payment::create([
+                  'user_id' => $user->id,
+                  'stripe_payment_id' => $invoice->id,
+                  'amount' => $invoice->amount_paid / 100, // Convert cents to dollars
+                  'currency' => $invoice->currency,
+                  'status' => $invoice->status,
+                  'subscription_id' => $invoice->subscription, // Attach subscription ID
+               ]);
+
+               Log::info('Payment stored successfully for invoice: ' . $invoice->id);
+         } else {
+               Log::warning('Invoice amount_paid is zero for invoice: ' . $invoice->id);
          }
       } catch (\Exception $e) {
-         Log::error('Stripe Webhook Error: Failed to store subscription payment details', [
+         Log::error('Error storing subscription payment details', [
                'error' => $e->getMessage(),
-               'invoice' => $invoice
+               'invoice' => $invoice,
          ]);
       }
    }
+
    protected function storeSubscriptionDetails($subscription)
    {
       try {
