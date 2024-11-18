@@ -141,9 +141,10 @@ class QuizController extends Controller
             }
     
             // Check for ongoing quiz
+            $scheduleId = $request->schedule_id === "undefined" ? 0 : $request->schedule_id;
             $ongoingQuiz = QuizResult::where('user_id', $user->id)
                 ->where('quiz_id', $quiz->id)
-                ->where('schedule_id',$request->schedule_id)
+                ->where('schedule_id',$scheduleId)
                 ->where('status', 'ongoing') // Correct the status check
                 ->latest('created_at')
                 ->first();
@@ -281,7 +282,7 @@ class QuizController extends Controller
                 'uuid' => uniqid(), // Generate unique identifier
                 'subcategory_id' => $quiz->subcategory_id,
                 'user_id' => $user->id,
-                'schedule_id'=>$request->schedule_id,
+                'schedule_id'=>$request->schedule_id === "undefined" ? 0 : $request->schedule_id,
                 'questions' => json_encode($questionsData,true),
                 'correct_answers' => json_encode($correctAnswers,true),
                 'start_time' => $startTime,
