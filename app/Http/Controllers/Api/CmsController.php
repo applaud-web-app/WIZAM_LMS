@@ -191,29 +191,42 @@ class CmsController extends Controller
     public function popularExams()
     {
         try {
-
             $popularExams = Exam::select(
-                'exams.img_url',
-                'exams.title',
-                'exams.description',
-                'exams.price',
-                'exams.is_free',
-                'exams.slug'
-            )
-            ->where([
-                'exams.favourite' => 1,
-                'exams.status' => 1,
-                'exams.is_public' => 1
-            ])
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug')
-            ->orderBy('exams.created_at','DESC')
-            ->take(3)
-            ->get()
-            ->map(function ($exam) {
-                // If 'is_free' is 0, show the price; otherwise, set price to null.
-                $exam->price = $exam->is_free ? null : $exam->price;
-                return $exam;
-            });
+                    'exams.img_url',
+                    'exams.title',
+                    'exams.description',
+                    'exams.price',
+                    'exams.is_free',
+                    'exams.slug',
+                    // 'exam_schedules.schedule_type',
+                    // 'exam_schedules.start_date',
+                    // 'exam_schedules.start_time',
+                    // 'exam_schedules.end_date',
+                    // 'exam_schedules.end_time',
+                    // 'exam_schedules.grace_period'
+                )
+                // ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                ->where([
+                    'exams.favourite' => 1,
+                    'exams.status' => 1,
+                    'exams.is_public' => 1
+                ])
+                // ->where('exam_schedules.status', 1)
+                ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug')
+                // 'exam_schedules.schedule_type',
+                // 'exam_schedules.start_date',
+                // 'exam_schedules.start_time',
+                // 'exam_schedules.end_date',
+                // 'exam_schedules.end_time',
+                // 'exam_schedules.grace_period'
+                ->orderBy('exams.created_at','DESC')
+                ->take(3)
+                ->get()
+                ->map(function ($exam) {
+                    // If 'is_free' is 0, show the price; otherwise, set price to null.
+                    $exam->price = $exam->is_free ? null : $exam->price;
+                    return $exam;
+                });
 
             return response()->json(['status' => true, 'data' => $popularExams], 201);
         } catch (\Throwable $th) {
@@ -242,27 +255,29 @@ class CmsController extends Controller
                 'exams.exam_duration',
                 'exams.exam_type_id',
                 'exams.subcategory_id',
-                'exam_schedules.schedule_type',
-                'exam_schedules.start_date',
-                'exam_schedules.start_time',
-                'exam_schedules.end_date',
-                'exam_schedules.end_time',
-                'exam_schedules.grace_period'
-            )->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                // 'exam_schedules.schedule_type',
+                // 'exam_schedules.start_date',
+                // 'exam_schedules.start_time',
+                // 'exam_schedules.end_date',
+                // 'exam_schedules.end_time',
+                // 'exam_schedules.grace_period'
+            )
+            // ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.favourite' => 1, 'exams.status' => 1,'exams.is_public' => 1])
-            ->where('exam_schedules.status', 1)
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id','exam_schedules.schedule_type',
-                    'exam_schedules.start_date',
-                    'exam_schedules.start_time',
-                    'exam_schedules.end_date',
-                    'exam_schedules.end_time',
-                    'exam_schedules.grace_period')
+            // ->where('exam_schedules.status', 1)
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id',)
+            // 'exam_schedules.schedule_type',
+            // 'exam_schedules.start_date',
+            // 'exam_schedules.start_time',
+            // 'exam_schedules.end_date',
+            // 'exam_schedules.end_time',
+            // 'exam_schedules.grace_period'
             ->orderBy('exams.created_at', 'desc') 
-            ->havingRaw('COUNT(exam_schedules.id) > 0')
+            // ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
             return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
@@ -282,30 +297,31 @@ class CmsController extends Controller
                 'exams.exam_duration',
                 'exams.subcategory_id',
                 'sub_categories.name',
-                'exam_schedules.id as schedule_id',
-                'exam_schedules.schedule_type',
-                'exam_schedules.start_date',
-                'exam_schedules.start_time',
-                'exam_schedules.end_date',
-                'exam_schedules.end_time',
-                'exam_schedules.grace_period'
+                // 'exam_schedules.id as schedule_id',
+                // 'exam_schedules.schedule_type',
+                // 'exam_schedules.start_date',
+                // 'exam_schedules.start_time',
+                // 'exam_schedules.end_date',
+                // 'exam_schedules.end_time',
+                // 'exam_schedules.grace_period'
             )
-            ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            // ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('sub_categories', 'exams.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.favourite' => 1, 'exams.status' => 1])
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id', 'sub_categories.name','exam_schedules.schedule_type',
-                'exam_schedules.id',
-                'exam_schedules.start_date',
-                'exam_schedules.start_time',
-                'exam_schedules.end_date',
-                'exam_schedules.end_time',
-                'exam_schedules.grace_period')
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration',  'exams.subcategory_id', 'sub_categories.name')
+                // 'exam_schedules.schedule_type',
+                // 'exam_schedules.id',
+                // 'exam_schedules.start_date',
+                // 'exam_schedules.start_time',
+                // 'exam_schedules.end_date',
+                // 'exam_schedules.end_time',
+                // 'exam_schedules.grace_period'
             ->orderBy('exams.created_at', 'desc') // Order by exam created_at
-            ->where('exam_schedules.status', 1)
+            // ->where('exam_schedules.status', 1)
             ->where(['exams.slug'=>$slug,'exams.status'=>1])->first();
 
             // Check if the exam exists
