@@ -159,13 +159,13 @@
         if (document.querySelectorAll(selector).length > 0) {
             // Create a new ApexChart
             const options = {
-                series: [90, 80, 70], // Values for the chart
-                labels: ["Target", "Completed", "In Progress"], // Labels for each value
+                series: [{{(float)$examResult->correct_answer ?? 0}}, {{(float)$examResult->incorrect_answer ?? 0}}, {{((float)$examResult->total_question - ((float)$examResult->correct_answer+(float)$examResult->incorrect_answer)) ?? 0}}], // Values for the chart
+                labels: ["Correct", "Incorrect", "Skipped"], // Labels for each value
                 chart: {
                     type: 'donut', // Chart type
                     height: 350 // Chart height
                 },
-                colors: ["#8231D3", "#00AAFF", "#FA8B0C"], // Custom colors
+                colors: ["#8231D3", "#ff000", "#FA8B0C"], // Custom colors
                 responsive: [{
                     breakpoint: 480,
                     options: {
