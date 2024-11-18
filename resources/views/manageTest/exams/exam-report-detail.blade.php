@@ -192,7 +192,7 @@
                 xaxis: {
                     categories: ['Percentage', 'Total Percentage'], // Labels for the x-axis
                     title: {
-                        text: 'Category'
+                        text: 'Student'
                     }
                 },
                 yaxis: {
