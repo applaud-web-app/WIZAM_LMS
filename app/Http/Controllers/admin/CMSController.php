@@ -235,7 +235,7 @@ class CMSController extends Controller
         }
  
         if ($request->ajax()) {
-            $sections = Blog::with('category','user')->whereIn('status',[0,1]);
+            $sections = Blog::with('category')->whereIn('status',[0,1]);
 
             return DataTables::of($sections)
                 ->addIndexColumn()
