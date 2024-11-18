@@ -165,7 +165,7 @@
                     type: 'donut', // Chart type
                     height: 350 // Chart height
                 },
-                colors: ["#8231D3", "#ff000", "#FA8B0C"], // Custom colors
+                colors: ["#8231D3", "#ff0000", "#FA8B0C"], // Custom colors
                 responsive: [{
                     breakpoint: 480,
                     options: {
