@@ -56,21 +56,21 @@
             <div class="">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                     <!-- Grid items -->
-                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 hover:text-white py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">EXAM STATUS</h3>
-                    <p><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                    <h3 class="mb-2 text-xl">EXAM STATUS</h3>
+                    <p class="text-[18px]"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
-                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">SCORE</h3>
-                    <p>{{round((float)$examResult->score,2)}}/{{(float)$examResult->point}}</p>
+                    <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                    <h3 class="mb-2 text-xl">SCORE</h3>
+                    <p class="text-[18px]">{{round((float)$examResult->score,2)}}/{{(float)$examResult->point}}</p>
                     </div>
-                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">PERCENTAGE</h3>
-                    <p>{{round((float)$examResult->student_percentage,2)}}/{{(float)$examResult->pass_percentage}}</p>
+                    <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                    <h3 class="mb-2 text-xl">PERCENTAGE</h3>
+                    <p class="text-[18px]">{{round((float)$examResult->student_percentage,2)}}/{{(float)$examResult->pass_percentage}}</p>
                     </div>
-                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">TIME TAKEN</h3>
-                    <p>{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
+                    <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                    <h3 class="mb-2 text-xl">TIME TAKEN</h3>
+                    <p class="text-[18px]">{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
                     </div>
                 </div>
             </div>
@@ -79,29 +79,29 @@
           <div class="p-[0px] mt-[30px]">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
               <!-- Grid items -->
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Total Question</h3>
-                <p>{{(float)$examResult->total_question ?? 0}}</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Total Question</h3>
+                <p class="text-[18px]">{{(float)$examResult->total_question ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Correct Question</h3>
-                <p>{{(float)$examResult->correct_answer ?? 0}}</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Correct Question</h3>
+                <p class="text-[18px]">{{(float)$examResult->correct_answer ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Incorrect Question</h3>
-                <p>{{(float)$examResult->incorrect_answer ?? 0}}</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Incorrect Question</h3>
+                <p class="text-[18px]">{{(float)$examResult->incorrect_answer ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Skipped Question</h3>
-                <p>{{((float)$examResult->total_question - ((float)$examResult->correct_answer+(float)$examResult->incorrect_answer)) ?? 0}}</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Skipped Question</h3>
+                <p class="text-[18px]">{{((float)$examResult->total_question - ((float)$examResult->correct_answer+(float)$examResult->incorrect_answer)) ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Attemped Question</h3>
-                <p>{{((float)$examResult->correct_answer+(float)$examResult->incorrect_answer) ?? 0}}</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Attemped Question</h3>
+                <p class="text-[18px]">{{((float)$examResult->correct_answer+(float)$examResult->incorrect_answer) ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                <h3 class="mb-2">Time Taken</h3>
-                <p>{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
+              <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
+                <h3 class="mb-2 text-xl">Time Taken</h3>
+                <p class="text-[18px]">{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
               </div>
             </div>
           </div>
