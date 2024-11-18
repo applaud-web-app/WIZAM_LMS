@@ -397,9 +397,10 @@ class ExamController extends Controller
             }
 
             // Check for Ongoing Exam
+            $scheduleId = $request->schedule_id ?? 0;
             $ongoingExam = ExamResult::where('user_id', $user->id)
                 ->where('exam_id', $exam->id)
-                ->where('schedule_id',$request->schedule_id)
+                ->where('schedule_id',$scheduleId)
                 ->where('status', 'ongoing') // Correct the status check
                 ->latest('created_at')
                 ->first();
@@ -584,7 +585,7 @@ class ExamController extends Controller
                 'uuid' => uniqid(), // Generate unique identifier
                 'subcategory_id' => $exam->subcategory_id,
                 'user_id' => $user->id,
-                'schedule_id'=>$request->schedule_id,
+                'schedule_id'=>$request->schedule_id ?? 0,
                 'questions' => json_encode($questionsData, true),
                 'correct_answers' => json_encode($correctAnswers, true),
                 'start_time' => $startTime,
