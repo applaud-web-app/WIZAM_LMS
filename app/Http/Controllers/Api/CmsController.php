@@ -198,27 +198,14 @@ class CmsController extends Controller
                 'exams.description',
                 'exams.price',
                 'exams.is_free',
-                'exams.slug',
-                'exam_schedules.schedule_type',
-                'exam_schedules.start_date',
-                'exam_schedules.start_time',
-                'exam_schedules.end_date',
-                'exam_schedules.end_time',
-                'exam_schedules.grace_period'
+                'exams.slug'
             )
-            ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->where([
                 'exams.favourite' => 1,
                 'exams.status' => 1,
                 'exams.is_public' => 1
             ])
-            ->orwhere('exam_schedules.status', 1)
-            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug','exam_schedules.schedule_type',
-            'exam_schedules.start_date',
-            'exam_schedules.start_time',
-            'exam_schedules.end_date',
-            'exam_schedules.end_time',
-            'exam_schedules.grace_period')
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug')
             ->orderBy('exams.created_at','DESC')
             ->take(3)
             ->get()
