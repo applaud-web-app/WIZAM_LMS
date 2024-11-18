@@ -50,15 +50,15 @@
                     <h3 class="mb-2">EXAM STATUS</h3>
                     <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
                     <p>{{round((float)$examResult->student_percentage,2)}}/{{(float)$examResult->pass_percentage}}</p>
                     </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">START TIME</h3>
                     <p>{{date('d/m/Y', strtotime($examResult->created_at)) . ", " . date('H:i:s A', strtotime($examResult->created_at))}}</p>
                     </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">END TIME</h3>
                     <p>{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</p>
                     </div>
