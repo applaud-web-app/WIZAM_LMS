@@ -62,10 +62,7 @@
                     </div>
                     <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">SCORE</h3>
-                    @php
-                        $totalPoint = $examResult->point_type == "automatic" ? $examResult->point * $examResult->total_question :  $examResult->point;
-                    @endphp
-                    <p>{{round((float)$examResult->score,2)}}/{{(float)$totalPoint}}</p>
+                    <p>{{round((float)$examResult->score,2)}}/{{(float)$examResult->point}}</p>
                     </div>
                     <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
