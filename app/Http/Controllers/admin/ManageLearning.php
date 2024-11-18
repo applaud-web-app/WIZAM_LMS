@@ -790,14 +790,14 @@ class ManageLearning extends Controller
             $failedpractice = $praticesetResult->where('student_percentage', '<', $passPercentage)->count();
             
             // Ensure all calculations involve numeric types
-            $averagePercentage = $totalAttempt > 0 ? (float) $praticesetResult->avg('student_percentage') : 0;
-            $highestPercentage = $totalAttempt > 0 ? (float) $praticesetResult->max('student_percentage') : 0;
-            $lowestPercentage = $totalAttempt > 0 ? (float) $praticesetResult->min('student_percentage') : 0;
+            $averagePercentage = $totalAttempt > 0 ? (float) ($praticesetResult->avg('student_percentage') ?? 0) : 0;
+            $highestPercentage = $totalAttempt > 0 ? (float) ($praticesetResult->max('student_percentage') ?? 0) : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) ($praticesetResult->min('student_percentage') ?? 0) : 0;
 
             // Score
-            $averageScore = $totalAttempt > 0 ? (float) $praticesetResult->avg('score') : 0;
-            $highestScore = $totalAttempt > 0 ? (float) $praticesetResult->max('score') : 0;
-            $lowestScore = $totalAttempt > 0 ? (float) $praticesetResult->min('score') : 0;
+            $averageScore = $totalAttempt > 0 ? (float) ($praticesetResult->avg('score') ?? 0) : 0;
+            $highestScore = $totalAttempt > 0 ? (float) ($praticesetResult->max('score') ?? 0) : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) ($praticesetResult->min('score') ?? 0) : 0;
     
             // Return the view with all required data
             return view('manageLearning.practiceSet.practice-set-overall-report', compact(

@@ -1718,14 +1718,14 @@ class ManageTest extends Controller
             $failedExam = $examResult->where('student_percentage', '<', $passPercentage)->count();
             
             // Ensure all calculations involve numeric types
-            $averagePercentage = $totalAttempt > 0 ? (float) $examResult->avg('student_percentage') : 0;
-            $highestPercentage = $totalAttempt > 0 ? (float) $examResult->max('student_percentage') : 0;
-            $lowestPercentage = $totalAttempt > 0 ? (float) $examResult->min('student_percentage') : 0;
+            $averagePercentage = $totalAttempt > 0 ? (float) ($examResult->avg('student_percentage') ?? 0) : 0;
+            $highestPercentage = $totalAttempt > 0 ? (float) ($examResult->max('student_percentage') ?? 0) : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) ($examResult->min('student_percentage') ?? 0) : 0;
 
             // FOR SCORE
-            $averageScore = $totalAttempt > 0 ? (float) $examResult->avg('score') : 0;
-            $highestScore = $totalAttempt > 0 ? (float) $examResult->max('score') : 0;
-            $lowestScore = $totalAttempt > 0 ? (float) $examResult->min('score') : 0;
+            $averageScore = $totalAttempt > 0 ? (float) ($examResult->avg('score') ?? 0) : 0;
+            $highestScore = $totalAttempt > 0 ? (float) ($examResult->max('score') ?? 0) : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) ($examResult->min('score') ?? 0) : 0;
 
             // Return the view with all required data
             return view('manageTest.exams.exam-overall-report', compact(
@@ -1855,14 +1855,14 @@ class ManageTest extends Controller
             $failedQuiz = $quizResult->where('student_percentage', '<', $passPercentage)->count();
             
             // Ensure all calculations involve numeric types
-            $averagePercentage = $totalAttempt > 0 ? (float) $quizResult->avg('student_percentage') : 0;
-            $highestPercentage = $totalAttempt > 0 ? (float) $quizResult->max('student_percentage') : 0;
-            $lowestPercentage = $totalAttempt > 0 ? (float) $quizResult->min('student_percentage') : 0;
+            $averagePercentage = $totalAttempt > 0 ? (float) ($quizResult->avg('student_percentage') ?? 0) : 0;
+            $highestPercentage = $totalAttempt > 0 ? (float) ($quizResult->max('student_percentage') ?? 0) : 0;
+            $lowestPercentage = $totalAttempt > 0 ? (float) ($quizResult->min('student_percentage') ?? 0) : 0;
 
             // SCORE
-            $averageScore = $totalAttempt > 0 ? (float) $quizResult->avg('score') : 0;
-            $highestScore = $totalAttempt > 0 ? (float) $quizResult->max('score') : 0;
-            $lowestScore = $totalAttempt > 0 ? (float) $quizResult->min('score') : 0;
+            $averageScore = $totalAttempt > 0 ? (float) ($quizResult->avg('score') ?? 0) : 0;
+            $highestScore = $totalAttempt > 0 ? (float) ($quizResult->max('score') ?? 0) : 0;
+            $lowestScore = $totalAttempt > 0 ? (float) ($quizResult->min('score') ?? 0) : 0;
     
             // Return the view with all required data
             return view('manageTest.quizzes.quiz-overall-report', compact(
