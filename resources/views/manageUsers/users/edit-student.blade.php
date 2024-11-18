@@ -80,20 +80,20 @@
                         <!-- Date of Birth -->
                         <div class="col-span-12 md:col-span-6">
                             <label for="dob" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                Date of Birth <span class="text-red-500">*</span>
+                                Date of Birth 
                             </label>
                             <div class="flex flex-col flex-1">
-                                <input type="date" id="dob" name="dob" value="{{$user->dob}}" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" required>
+                                <input type="date" id="dob" name="dob" value="{{$user->dob}}" class="rounded-4 border-normal border-1 text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] min-h-[50px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark w-full focus:ring-primary focus:border-primary" >
                             </div>
                         </div>
 
                         <!-- Nationality -->
                         <div class="col-span-12 md:col-span-6">
                             <label for="nationality" class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
-                                Nationality <span class="text-red-500">*</span>
+                                Nationality 
                             </label>
                             <div class="flex flex-col flex-1">
-                                <select id="nationality" name="nationality" class="py-[13px] px-[20px] w-full capitalize rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-light dark:text-subtitle-dark outline-none focus:ring-primary focus:border-primary" required>
+                                <select id="nationality" name="nationality" class="py-[13px] px-[20px] w-full capitalize rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-light dark:text-subtitle-dark outline-none focus:ring-primary focus:border-primary" >
                                     <option selected disabled>Select Nationality</option>
                                     @isset($country)
                                         @foreach ($country as $item)
@@ -248,13 +248,6 @@
                 },
                 phone : {
                     required: true,
-                },
-                dob: {
-                    required: true,
-                    date: true
-                },
-                nationality: {
-                    required: true
                 },
                 email: {
                     required: true,

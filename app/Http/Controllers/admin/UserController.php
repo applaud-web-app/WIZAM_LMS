@@ -241,7 +241,7 @@ class UserController extends Controller
                     : 'No Role';                
                 })
                 ->addColumn('dob', function($row) {
-                    return date('d/m/Y', strtotime($row->dob));
+                    return $row->dob ? date('d/m/Y', strtotime($row->dob)) : 'NA';
                 })
                 ->addColumn('country', function($row) {
                     return isset($row->countries) ? $row->countries->name : 'No Country';
@@ -284,8 +284,8 @@ class UserController extends Controller
         // Validate the request data
         $request->validate([
             'full_name' => 'required|string|min:3',
-            'dob' => 'required|date',
-            'nationality' => 'required|string',
+            // 'dob' => 'required|date',
+            // 'nationality' => 'required|string',
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:users,email',
             'groups' => 'required|array',
@@ -313,7 +313,7 @@ class UserController extends Controller
                 'title' => $request->title ?? null,
                 'image' => $imageUrl,
                 'name' => $request->full_name,
-                'dob' => $request->dob,
+                'dob' => $request->dob ? $request->dob : null,
                 'country' => $request->nationality,
                 'phone_number' => $request->phone,
                 'email' => $request->email,
@@ -404,8 +404,8 @@ class UserController extends Controller
         // Validate the request data
         $request->validate([
             'full_name' => 'required|string|min:3',
-            'dob' => 'required|date',
-            'nationality' => 'required|string',
+            // 'dob' => 'required|date',
+            // 'nationality' => 'required|string',
             'phone' => 'nullable|string',
             'email' => 'required|email',
             'groups' => 'required|array',
@@ -451,7 +451,7 @@ class UserController extends Controller
                 'title' => $request->title ?? null,
                 'image' => $imageUrl,
                 'name' => $request->full_name,
-                'dob' => $request->dob,
+                'dob' => $request->dob ? $request->dob : null,
                 'country' => $request->nationality,
                 'phone_number' => $request->phone,
                 'email' => $request->email,
@@ -554,7 +554,7 @@ class UserController extends Controller
                     : 'No Role';                
                 })
                 ->addColumn('dob', function($row) {
-                    return date('d/m/Y', strtotime($row->dob));
+                    return $row->dob ? date('d/m/Y', strtotime($row->dob)) : 'NA';
                 })
                 ->addColumn('country', function($row) {
                     return isset($row->countries) ? $row->countries->name : 'No Country';
@@ -578,7 +578,6 @@ class UserController extends Controller
         return view('manageUsers.users.view-users');
     }
 
-
     public function addUsers(){
         if (!Auth()->user()->can('user')) { 
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
@@ -592,7 +591,6 @@ class UserController extends Controller
 
     public function storeUserDetails(Request $request)
     {
-
         if (!Auth()->user()->can('user')) { 
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
@@ -600,8 +598,8 @@ class UserController extends Controller
         // Validate the request data
         $request->validate([
             'full_name' => 'required|string|min:3',
-            'dob' => 'required|date',
-            'nationality' => 'required|string',
+            // 'dob' => 'required|date',
+            // 'nationality' => 'required|string',
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string',
@@ -630,7 +628,7 @@ class UserController extends Controller
                 'title' => $request->title ?? null,
                 'image' => $imageUrl,
                 'name' => $request->full_name,
-                'dob' => $request->dob,
+                'dob' => $request->dob ? $request->dob : null,
                 'country' => $request->nationality,
                 'phone_number' => $request->phone,
                 'email' => $request->email,
@@ -723,8 +721,8 @@ class UserController extends Controller
         // Validate the request data
         $request->validate([
             'full_name' => 'required|string|min:3',
-            'dob' => 'required|date',
-            'nationality' => 'required|string',
+            // 'dob' => 'required|date',
+            // 'nationality' => 'required|string',
             'phone' => 'nullable|string',
             'email' => 'required|email',
             'role' => 'required|string',
@@ -771,7 +769,7 @@ class UserController extends Controller
                 'title' => $request->title ?? null,
                 'image' => $imageUrl,
                 'name' => $request->full_name,
-                'dob' => $request->dob,
+                'dob' => $request->dob ? $request->dob : null,
                 'country' => $request->nationality,
                 'phone_number' => $request->phone,
                 'email' => $request->email,

@@ -75,6 +75,102 @@
                 </div>
             </div>
         </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 mt-[30px]">
+            <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
+                <div
+                    class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
+                    <h2
+                        class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
+                        performance Overview
+                    </h2>
+                    <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
+                        data-te-dropdown-ref>
+                        <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
+                            id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
+                            <i class="uil uil-ellipsis-h"></i>
+                        </button>
+                        <ul class="absolute z-[1000] ltr:float-left rtl:float-right m-0 hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down  [&[data-te-dropdown-show]]:block"
+                            aria-labelledby="salesReport" data-te-dropdown-menu-ref>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up gap-[6px]"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-print"></i> printer </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-book-alt"></i> pdf </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-file-info-alt"></i> google sheet </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-multiply"></i> Excel (XLSX) </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-file"></i> CSV </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="px-[25px] md:pb-[25px]">
+                    <div class="performanceOver"></div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
+                <div
+                    class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
+                    <h2
+                        class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
+                        Sales Overview
+                    </h2>
+                    <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
+                        data-te-dropdown-ref>
+                        <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
+                            id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
+                            <i class="uil uil-ellipsis-h"></i>
+                        </button>
+                        <ul class="absolute z-[1000] ltr:float-left rtl:float-right m-0 hidden min-w-max list-none overflow-hidden rounded-lg border-none bg-white bg-clip-padding text-left text-base shadow-lg dark:shadow-boxLargeDark dark:bg-box-dark-down  [&[data-te-dropdown-show]]:block"
+                            aria-labelledby="salesReport" data-te-dropdown-menu-ref>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up gap-[6px]"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-print"></i> printer </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-book-alt"></i> pdf </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-file-info-alt"></i> google sheet </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-multiply"></i> Excel (XLSX) </a>
+                            </li>
+                            <li>
+                                <a class="block w-full px-4 py-2 text-sm font-normal capitalize bg-transparent whitespace-nowrap text-neutral-700 hover:bg-primary/10 hover:text-primary dark:hover:text-title-dark active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-subtitle-dark dark:hover:bg-box-dark-up"
+                                    href="#" data-te-dropdown-item-ref>
+                                    <i class="uil uil-file"></i> CSV </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="px-[25px] md:pb-[25px]">
+                    <div class="salesOverviewElement"></div>
+                </div>
+            </div>
+        </div>
         <!-- Add Exam Form -->
           <div class="p-[0px] mt-[30px]">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
