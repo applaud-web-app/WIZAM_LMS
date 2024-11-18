@@ -201,7 +201,7 @@
                 },
                 series: [{
                     name: 'Scores',
-                    data: [{{round((float)$examResult->score,2)}}, {{round((float)$examResult->point,2)}}] // Data for the bars
+                    data: [{{round((float)$examResult->student_percentage,2)}}, {{round((float)$examResult->pass_percentage,2)}}] // Data for the bars
                 }],
                 xaxis: {
                     categories: ['Score', 'Total Score'], // Labels for the x-axis
