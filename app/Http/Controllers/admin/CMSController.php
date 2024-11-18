@@ -332,7 +332,7 @@ class CMSController extends Controller
         // Save the blog data to the database
         Blog::create([
             'title' => $request->input('blogTitle'),
-            'user'=> $authorName,
+            'user'=> $$request->input('authorName'),
             'category_id' => $request->input('blogCategory'),
             'short_description' => $request->input('shortDescription'),
             'content' => $request->input('blogContent'), // Save summernote content
