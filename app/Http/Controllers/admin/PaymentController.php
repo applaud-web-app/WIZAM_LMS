@@ -469,10 +469,11 @@ class PaymentController extends Controller
    protected function storeSubscriptionPaymentDetails($invoice)
    {
       try {
+         
          Log::info('Processing invoice.payment_succeeded event', [
-               'invoice_id' => $invoice->id,
-               'customer_id' => $invoice->customer,
-               'subscription_id' => $invoice->subscription,
+            'invoice_id' => $invoice->id,
+            'customer_id' => $invoice->customer,
+            'subscription_id' => $invoice->subscription,
          ]);
 
          // Retrieve customer ID from the invoice
@@ -494,7 +495,7 @@ class PaymentController extends Controller
                return;
          }
 
-         // Ensure the invoice has a valid payment
+         // Validate invoice amounts
          if ($invoice->amount_paid > 0) {
                // Insert the payment into the database
                Payment::create([
@@ -504,6 +505,8 @@ class PaymentController extends Controller
                   'currency' => $invoice->currency,
                   'status' => $invoice->status,
                   'subscription_id' => $invoice->subscription, // Attach subscription ID
+                  'description' => $invoice->lines->data[0]->description ?? 'Subscription Payment',
+                  'plan_id' => $invoice->lines->data[0]->price->id ?? null, // Fetch price ID if available
                ]);
 
                Log::info('Payment stored successfully for invoice: ' . $invoice->id);
