@@ -16,51 +16,61 @@
 
     <div class="m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full mt-[30px]">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-            <div class="bg-white border-1 rounded-lg px-[30px] py-[20px]">
+            <div class="bg-white border-1 rounded-md px-[30px] py-[20px]">
                 <table class="w-full text-left border">
                     <tbody>
-                        <tr class="border-b">
+                        <tr class="border-b hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Test Taker:</th>
                             <td class="ps-[20px] p-2">{{$examResult->user->name}}</td>
                         </tr>
-                        <tr class="border-b">
+                        <tr class="border-b hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Email:</th>
                             <td class="ps-[20px] p-2">{{$examResult->user->email}}</td>
                         </tr>
-                        <tr class="border-b">
+                        <tr class="border-b hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Phone Number:</th>
                             <td class="ps-[20px] p-2">{{$examResult->user->phone_number}}</td>
                         </tr>
-                        <tr class="border-b">
+                        <tr class="border-b hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Completion:</th>
                             <td class="ps-[20px] p-2">{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</td>
                         </tr>
-                        <tr class="">
+                        <tr class="hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Status:</th>
                             @php $statusColor = (float) $examResult->student_percentage >= (float) $examResult->pass_percentage ? 'success' : 'danger';@endphp
-                            <td class="ps-[20px] p-2"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
+                            <td class="ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
                     </tbody>
                 </table>
-            </div>            
+            </div>  
+            @php
+                $startTime = strtotime($examResult->created_at);
+                $endTime = strtotime($examResult->updated_at);
+                $timeTaken = $endTime - $startTime;
+    
+                // Calculate hours, minutes, and seconds
+                $hours = floor($timeTaken / 3600);
+                $minutes = floor(($timeTaken % 3600) / 60);
+                $seconds = $timeTaken % 60;
+            @endphp          
             <div class="">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                     <!-- Grid items -->
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 hover:text-white py-[30px] px-[15px] text-center">
+                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 hover:text-white py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">EXAM STATUS</h3>
-                    <p><span class=' capitalize font-medium inline-flex items-center justify-center min-h-[24px]  text-{{$statusColor}} '>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <p><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-{{$statusColor}}'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <h3 class="mb-2">SCORE</h3>
+                    <p>{{round((float)$examResult->score,2)}}/{{(float)$examResult->score}}</p>
+                    </div>
+                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                     <h3 class="mb-2">PERCENTAGE</h3>
                     <p>{{round((float)$examResult->student_percentage,2)}}/{{(float)$examResult->pass_percentage}}</p>
                     </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">START TIME</h3>
-                    <p>{{date('d/m/Y', strtotime($examResult->created_at)) . ", " . date('H:i:s A', strtotime($examResult->created_at))}}</p>
-                    </div>
-                    <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
-                    <h3 class="mb-2">END TIME</h3>
-                    <p>{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</p>
+                    <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+                    <h3 class="mb-2">TIME TAKEN</h3>
+                    <p>{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
                     </div>
                 </div>
             </div>
@@ -69,40 +79,29 @@
           <div class="p-[0px] mt-[30px]">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
               <!-- Grid items -->
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Total Question</h3>
                 <p>{{(float)$examResult->total_question ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Correct Question</h3>
                 <p>{{(float)$examResult->correct_answer ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Incorrect Question</h3>
                 <p>{{(float)$examResult->incorrect_answer ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Skipped Question</h3>
                 <p>{{((float)$examResult->total_question - ((float)$examResult->correct_answer+(float)$examResult->incorrect_answer)) ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Attemped Question</h3>
                 <p>{{((float)$examResult->correct_answer+(float)$examResult->incorrect_answer) ?? 0}}</p>
               </div>
-              <div class="bg-white border-1 rounded-lg transition duration-300 ease-in-out hover:bg-green-500 dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
+              <div class="bg-white border-1 rounded-md transition duration-300 ease-in-out hover:bg-primary hover:text-white dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center">
                 <h3 class="mb-2">Time Taken</h3>
-                <p> @php
-                    $startTime = strtotime($examResult->created_at);
-                    $endTime = strtotime($examResult->updated_at);
-                    $timeTaken = $endTime - $startTime;
-        
-                    // Calculate hours, minutes, and seconds
-                    $hours = floor($timeTaken / 3600);
-                    $minutes = floor(($timeTaken % 3600) / 60);
-                    $seconds = $timeTaken % 60;
-                @endphp
-        
-                {{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
+                <p>{{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
               </div>
             </div>
           </div>
