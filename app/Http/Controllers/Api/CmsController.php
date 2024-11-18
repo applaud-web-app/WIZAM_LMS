@@ -205,7 +205,7 @@ class CmsController extends Controller
                     'exam_schedules.end_time',
                     'exam_schedules.grace_period'
                 )
-                ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+                ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
                 ->where([
                     'exams.favourite' => 1,
                     'exams.status' => 1,
