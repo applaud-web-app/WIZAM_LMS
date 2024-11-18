@@ -191,41 +191,42 @@ class CmsController extends Controller
     public function popularExams()
     {
         try {
+
             $popularExams = Exam::select(
-                    'exams.img_url',
-                    'exams.title',
-                    'exams.description',
-                    'exams.price',
-                    'exams.is_free',
-                    'exams.slug',
-                    'exam_schedules.schedule_type',
-                    'exam_schedules.start_date',
-                    'exam_schedules.start_time',
-                    'exam_schedules.end_date',
-                    'exam_schedules.end_time',
-                    'exam_schedules.grace_period'
-                )
-                ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-                ->where([
-                    'exams.favourite' => 1,
-                    'exams.status' => 1,
-                    'exams.is_public' => 1
-                ])
-                ->where('exam_schedules.status', 1)
-                ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug','exam_schedules.schedule_type',
+                'exams.img_url',
+                'exams.title',
+                'exams.description',
+                'exams.price',
+                'exams.is_free',
+                'exams.slug',
+                'exam_schedules.schedule_type',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
-                'exam_schedules.grace_period')
-                ->orderBy('exams.created_at','DESC')
-                ->take(3)
-                ->get()
-                ->map(function ($exam) {
-                    // If 'is_free' is 0, show the price; otherwise, set price to null.
-                    $exam->price = $exam->is_free ? null : $exam->price;
-                    return $exam;
-                });
+                'exam_schedules.grace_period'
+            )
+            ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            ->where([
+                'exams.favourite' => 1,
+                'exams.status' => 1,
+                'exams.is_public' => 1
+            ])
+            ->orwhere('exam_schedules.status', 1)
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug','exam_schedules.schedule_type',
+            'exam_schedules.start_date',
+            'exam_schedules.start_time',
+            'exam_schedules.end_date',
+            'exam_schedules.end_time',
+            'exam_schedules.grace_period')
+            ->orderBy('exams.created_at','DESC')
+            ->take(3)
+            ->get()
+            ->map(function ($exam) {
+                // If 'is_free' is 0, show the price; otherwise, set price to null.
+                $exam->price = $exam->is_free ? null : $exam->price;
+                return $exam;
+            });
 
             return response()->json(['status' => true, 'data' => $popularExams], 201);
         } catch (\Throwable $th) {
