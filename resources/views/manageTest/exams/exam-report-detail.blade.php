@@ -20,25 +20,25 @@
                 <table class="w-full text-left border">
                     <tbody>
                         <tr class="border-b hover:bg-primary hover:text-white">
-                            <th class="p-2 font-bold border-e">Test Taker:</th>
-                            <td class="ps-[20px] p-2">{{$examResult->user->name}}</td>
+                            <th class="p-2 text-xl border-e">Test Taker:</th>
+                            <td class="text-[18px] ps-[20px] p-2">{{$examResult->user->name}}</td>
                         </tr>
                         <tr class="border-b hover:bg-primary hover:text-white">
-                            <th class="p-2 font-bold border-e">Email:</th>
-                            <td class="ps-[20px] p-2">{{$examResult->user->email}}</td>
+                            <th class="p-2 text-xl border-e">Email:</th>
+                            <td class="text-[18px] ps-[20px] p-2">{{$examResult->user->email}}</td>
                         </tr>
                         <tr class="border-b hover:bg-primary hover:text-white">
-                            <th class="p-2 font-bold border-e">Phone Number:</th>
-                            <td class="ps-[20px] p-2">{{$examResult->user->phone_number}}</td>
+                            <th class="p-2 text-xl border-e">Phone Number:</th>
+                            <td class="text-[18px] ps-[20px] p-2">{{$examResult->user->phone_number}}</td>
                         </tr>
                         <tr class="border-b hover:bg-primary hover:text-white">
-                            <th class="p-2 font-bold border-e">Completion:</th>
-                            <td class="ps-[20px] p-2">{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</td>
+                            <th class="p-2 text-xl border-e">Completion:</th>
+                            <td class="text-[18px] ps-[20px] p-2">{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</td>
                         </tr>
                         <tr class="hover:bg-primary hover:text-white">
                             <th class="p-2 font-bold border-e">Status:</th>
                             @php $statusColor = (float) $examResult->student_percentage >= (float) $examResult->pass_percentage ? 'success' : 'danger';@endphp
-                            <td class="ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px] text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
+                            <td class="text-[18px] ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px]'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -58,7 +58,7 @@
                     <!-- Grid items -->
                     <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
                     <h3 class="mb-2 text-xl">EXAM STATUS</h3>
-                    <p class="text-[18px]"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
+                    <p class="text-[18px]"><span class='capitalize font-medium inline-flex items-center justify-center min-h-[24px] hover:text-white'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></p>
                     </div>
                     <div class="bg-white border-1 rounded-sm transition duration-300 ease-in-out hover:bg-primary dark:bg-gray-700 dark:hover:bg-green-600 py-[30px] px-[15px] text-center hover:text-white">
                     <h3 class="mb-2 text-xl">SCORE</h3>
