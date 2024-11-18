@@ -789,15 +789,32 @@ class ManageLearning extends Controller
             $passedpractice = $praticesetResult->where('student_percentage', '>=', $passPercentage)->count();
             $failedpractice = $praticesetResult->where('student_percentage', '<', $passPercentage)->count();
             
-            // Ensure all calculations involve numeric types
-            $averagePercentage = $totalAttempt > 0 ? (float) ($praticesetResult->avg('student_percentage') ?? 0) : 0;
-            $highestPercentage = $totalAttempt > 0 ? (float) ($praticesetResult->max('student_percentage') ?? 0) : 0;
-            $lowestPercentage = $totalAttempt > 0 ? (float) ($praticesetResult->min('student_percentage') ?? 0) : 0;
+            // Percentages
+            $averagePercentage = $totalAttempt > 0 && is_numeric($praticesetResult->avg('student_percentage')) 
+            ? (float) $praticesetResult->avg('student_percentage') 
+            : 0;
 
-            // Score
-            $averageScore = $totalAttempt > 0 ? (float) ($praticesetResult->avg('score') ?? 0) : 0;
-            $highestScore = $totalAttempt > 0 ? (float) ($praticesetResult->max('score') ?? 0) : 0;
-            $lowestScore = $totalAttempt > 0 ? (float) ($praticesetResult->min('score') ?? 0) : 0;
+            $highestPercentage = $totalAttempt > 0 && is_numeric($praticesetResult->max('student_percentage')) 
+            ? (float) $praticesetResult->max('student_percentage') 
+            : 0;
+
+            $lowestPercentage = $totalAttempt > 0 && is_numeric($praticesetResult->min('student_percentage')) 
+            ? (float) $praticesetResult->min('student_percentage') 
+            : 0;
+
+            // Scores
+            $averageScore = $totalAttempt > 0 && is_numeric($praticesetResult->avg('score')) 
+            ? (float) $praticesetResult->avg('score') 
+            : 0;
+
+            $highestScore = $totalAttempt > 0 && is_numeric($praticesetResult->max('score')) 
+            ? (float) $praticesetResult->max('score') 
+            : 0;
+
+            $lowestScore = $totalAttempt > 0 && is_numeric($praticesetResult->min('score')) 
+            ? (float) $praticesetResult->min('score') 
+            : 0;
+
     
             // Return the view with all required data
             return view('manageLearning.practiceSet.practice-set-overall-report', compact(
