@@ -81,7 +81,7 @@
                     class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
                     <h2
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                        Score Overview
+                        Exam Overview
                     </h2>
                     <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
                         data-te-dropdown-ref>
@@ -100,7 +100,7 @@
                     class="px-[25px] text-dark dark:text-title-dark font-medium text-[17px] flex flex-wrap items-center justify-between max-sm:flex-col max-sm:h-auto">
                     <h2
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
-                        Exam Overview
+                        Score Overview
                     </h2>
                     <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
                         data-te-dropdown-ref>
@@ -111,7 +111,7 @@
                     </div>
                 </div>
                 <div class="px-[25px] md:pb-[25px]">
-                    <div class="salesOverviewElement"></div>
+                    <div class="score-overview-chart"></div>
                 </div>
             </div>
         </div>
@@ -188,6 +188,58 @@
     // Call the function after the DOM is fully loaded
     document.addEventListener("DOMContentLoaded", function() {
         donutChart2(".performanceOver2"); // Pass the CSS selector for the donut chart container
+    });
+</script>
+<script>
+    function scoreOverview(selector, score, totalScore) {
+        // Ensure the container exists
+        if (document.querySelectorAll(selector).length > 0) {
+            const options = {
+                chart: {
+                    type: 'bar', // Type of chart: bar
+                    height: 350, // Chart height
+                },
+                series: [{
+                    name: 'Scores',
+                    data: [{{round((float)$examResult->score,2)}}, {{round((float)$examResult->point,2)}}] // Data for the bars
+                }],
+                xaxis: {
+                    categories: ['Score', 'Total Score'], // Labels for the x-axis
+                    title: {
+                        text: 'Category'
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Points'
+                    },
+                    min: 0, // Start from 0
+                    max: Math.max(score, totalScore) + 10 // Add some padding above the highest value
+                },
+                colors: ['#00AAFF', '#FA8B0C'], // Bar colors
+                dataLabels: {
+                    enabled: true // Show values on the bars
+                },
+                title: {
+                    text: 'Score Overview',
+                    align: 'center'
+                },
+            };
+
+            // Render the chart
+            const chart = new ApexCharts(document.querySelector(selector), options);
+            chart.render();
+        }
+    }
+
+    // Call the function after the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        // Example scores: replace with dynamic data as needed
+        const actualScore = 85; // Example actual score
+        const totalPossibleScore = 100; // Example total score
+
+        // Call the function with the selector, actual score, and total score
+        scoreOverview(".score-overview-chart", actualScore, totalPossibleScore);
     });
 </script>
 <script>
