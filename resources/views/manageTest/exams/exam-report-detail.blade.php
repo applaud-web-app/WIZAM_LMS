@@ -83,13 +83,6 @@
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
                         Exam Overview
                     </h2>
-                    <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
-                        data-te-dropdown-ref>
-                        <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                            id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
-                            <i class="uil uil-ellipsis-h"></i>
-                        </button>
-                    </div>
                 </div>
                 <div class="px-[25px] md:pb-[25px]">
                     <div class="performanceOver2"></div>
@@ -102,13 +95,6 @@
                         class="mb-0 inline-flex items-center py-[16px] max-sm:pb-[5px] overflow-hidden whitespace-nowrap text-ellipsis text-[18px] font-semibold text-dark dark:text-title-dark capitalize">
                         Percentage Overview
                     </h2>
-                    <div class="sm:py-[16px] flex items-center gap-[15px] max-xs:flex-wrap max-xs:justify-center "
-                        data-te-dropdown-ref>
-                        <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
-                            id="salesReport" data-te-dropdown-toggle-ref aria-expanded="false">
-                            <i class="uil uil-ellipsis-h"></i>
-                        </button>
-                    </div>
                 </div>
                 <div class="px-[25px] md:pb-[25px]">
                     <div class="score-overview-chart"></div>
