@@ -36,7 +36,7 @@
                             <td class="text-[18px] ps-[20px] p-2">{{date('d/m/Y', strtotime($examResult->updated_at)) . ", " . date('H:i:s A', strtotime($examResult->updated_at))}}</td>
                         </tr>
                         <tr class="hover:bg-primary hover:text-white">
-                            <th class="p-2 font-bold border-e">Status:</th>
+                            <th class="p-2 text-xl border-e">Status:</th>
                             @php $statusColor = (float) $examResult->student_percentage >= (float) $examResult->pass_percentage ? 'success' : 'danger';@endphp
                             <td class="text-[18px] ps-[20px] p-2"><span class='hover:text-white capitalize font-medium inline-flex items-center justify-center min-h-[24px]'>{{(float)$examResult->student_percentage >= (float)$examResult->pass_percentage ? "PASS" : "FAIL"}}</span></td>
                         </tr>
