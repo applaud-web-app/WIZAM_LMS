@@ -302,17 +302,90 @@ class StudentController extends Controller
                     ->toArray();
     
                 // Fetch exam data grouped by exam type slug
-                $examData = Exam::select(
+                // $examData = Exam::select(
+                //     'exams.id',
+                //     'exam_types.slug as exam_type_slug',
+                //     'exams.slug',
+                //     'exams.title',
+                //     'exams.duration_mode',
+                //     'exams.exam_duration',
+                //     'exams.point_mode',
+                //     'exams.point',
+                //     'exams.is_free',
+                //     'exams.total_attempts',
+                //     DB::raw('SUM(CASE 
+                //         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                //         ELSE 1 
+                //     END) as total_questions'),
+                //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                //     'exam_schedules.id as schedule_id',
+                //     'exam_schedules.schedule_type',
+                //     'exam_schedules.start_date',
+                //     'exam_schedules.start_time',
+                //     'exam_schedules.end_date',
+                //     'exam_schedules.end_time',
+                //     'exams.restrict_attempts',
+                //     'exam_schedules.grace_period'
+                //     )
+                //     ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
+                //     ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+                //     ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+                //     ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Join with exam schedules
+                //     ->where(function ($query) use ($assignedExams) {
+                //         $query->where('exams.is_public', 1)
+                //             ->orWhereIn('exams.id', $assignedExams);
+                //     })
+                //     ->where('exam_schedules.status', 1)
+                //     ->where('exams.exam_type_id', $examType->id)
+                // ->where('exams.exam_type_id', $examType->id)
+                //     ->where('exams.subcategory_id', $request->category)
+                //     ->where('exams.status', 1)
+                //     ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
+                //         'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
+                //         'exams.point', 'exams.is_free', 'exam_schedules.schedule_type',
+                //         'exam_schedules.id',
+                //         'exam_schedules.start_date',
+                //         'exam_schedules.start_time',
+                //         'exam_schedules.end_date',
+                //         'exam_schedules.end_time',
+                //         'exam_schedules.grace_period',
+                //         'exams.total_attempts',
+                //         'exams.restrict_attempts') // Group by necessary fields
+                //     ->havingRaw('COUNT(questions.id) > 0')
+                // ->get();
+
+                $examData = Exam::leftJoin('exam_schedules', function ($join) {
+                    $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                        ->where('exam_schedules.status', 1);
+                })
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
+                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
+                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
+                ->where('exams.status', 1)
+                ->where(function ($query) use ($assignedExams) {
+                    $query->where('exams.is_public', 1) // Public exams
+                        ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
+                })
+                ->where('exams.exam_type_id', $examType->id)
+                ->where('exams.subcategory_id', $request->category)
+                ->where(function ($query) {
+                    $query->where('exams.is_public', 1) // Public exams
+                        ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
+                })
+                ->select(
                     'exams.id',
+                    'exams.is_free',
+                    'exams.slug as exam_slug',
+                    'exams.title as exam_name',
                     'exam_types.slug as exam_type_slug',
-                    'exams.slug',
-                    'exams.title',
                     'exams.duration_mode',
                     'exams.exam_duration',
                     'exams.point_mode',
                     'exams.point',
-                    'exams.is_free',
+                    'exams.restrict_attempts',
                     'exams.total_attempts',
+                    'exams.is_public',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -325,33 +398,30 @@ class StudentController extends Controller
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
-                    'exams.restrict_attempts',
                     'exam_schedules.grace_period'
                 )
-                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-                ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-                ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-                ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Join with exam schedules
-                ->where(function ($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1)
-                        ->orWhereIn('exams.id', $assignedExams);
-                })
-                ->where('exam_schedules.status', 1)
-                ->where('exams.exam_type_id', $examType->id)
-                ->where('exams.subcategory_id', $request->category)
-                ->where('exams.status', 1)
-                ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
-                    'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
-                    'exams.point', 'exams.is_free', 'exam_schedules.schedule_type',
+                ->groupBy(
+                    'exams.id',
+                    'exams.is_free',
+                    'exam_types.slug',
+                    'exams.slug',
+                    'exams.title',
+                    'exams.total_attempts',
+                    'exams.duration_mode',
+                    'exams.exam_duration',
+                    'exams.restrict_attempts',
+                    'exams.point_mode',
+                    'exams.is_public',
+                    'exams.point',
                     'exam_schedules.id',
+                    'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
                     'exam_schedules.end_time',
-                    'exam_schedules.grace_period',
-                    'exams.total_attempts',
-                    'exams.restrict_attempts') // Group by necessary fields
-                ->havingRaw('COUNT(questions.id) > 0')
+                    'exam_schedules.grace_period'
+                )
+                ->havingRaw('COUNT(questions.id) > 0') // Only include exams with questions
                 ->get();
     
                 // Initialize array to store formatted exam data
