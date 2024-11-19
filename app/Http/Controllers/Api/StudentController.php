@@ -509,6 +509,7 @@ class StudentController extends Controller
                         'marks' => $marks ?? 0,
                         'is_free' => $exam->is_free,
                         'is_resume' =>$isResume,
+                        'is_public' =>$exam->is_public,
                         'total_attempts' => $exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
