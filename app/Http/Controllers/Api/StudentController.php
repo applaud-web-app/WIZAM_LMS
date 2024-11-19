@@ -478,7 +478,7 @@ class StudentController extends Controller
                     $userAttempt = ExamResult::where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
 
                     $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
-                    if($userAttempt >= $totalAttempts){
+                    if($userAttempt >= $totalAttempts  && $exam->restrict_attempts == 1){
                         continue;
                     }
 
