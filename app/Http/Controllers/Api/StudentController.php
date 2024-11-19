@@ -454,8 +454,15 @@ class StudentController extends Controller
                 foreach ($examData as $exam) {
                     // Format the total time
                     $formattedTime = $this->formatTime($exam->total_time);
-                    $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
+
+                    // Public exam logic
+                    $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
                     $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+
+                    // If the exam is public and doesn't have a schedule, check for its record in resume state
+                    if ($exam->is_public === 1 && !$exam->schedule_id) {
+                        $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
+                    }
     
                     // Group exams by exam type slug
                     if (!isset($formattedExamData[$examType->slug])) {
