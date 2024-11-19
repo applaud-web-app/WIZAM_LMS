@@ -585,6 +585,7 @@ class SettingController extends Controller
         // Validate the request input
         $request->validate([
             'title' => 'required|max:300',
+            'image'=>'required',
             'button_text' => 'required',
             'button_link' => 'required',
         ]);
@@ -600,7 +601,7 @@ class SettingController extends Controller
 
         // Update the resource record
         $resource->title = $request->input('title');
-
+        $resource->image = $request->input('image');
         // Update button text and link, convert to JSON
         $resource->button_text = $request->input('button_text');
         $resource->button_link = $request->input('button_link');
