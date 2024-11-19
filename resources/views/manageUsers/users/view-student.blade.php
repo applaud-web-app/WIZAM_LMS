@@ -58,6 +58,7 @@
                                 <th>DOB</th>
                                 <th>Country</th>
                                 <th>Role</th>
+                                <th>Registration Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -123,6 +124,7 @@
                  {data: 'dob', name: 'dob'},
                  {data: 'country', name: 'country'},
                  {data: 'role', name: 'role'},
+                 {data: 'created_date', name: 'created_date'},
                  {data: 'status', name: 'status', orderable: false},
                  {data: 'action', name: 'action', orderable: false, searchable: false}
              ],

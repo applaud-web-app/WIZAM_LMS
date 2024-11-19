@@ -246,6 +246,9 @@ class UserController extends Controller
                 ->addColumn('country', function($row) {
                     return isset($row->countries) ? $row->countries->name : 'No Country';
                 })
+                ->addColumn('created_date', function($row) {
+                    return isset($row->created_at) ? date('d/m/Y', strtotime($row->created_at)) : 'N/A';
+                })
                 ->addColumn('action', function($row) {
                     $parms = "id=".$row->id;
                     $editUrl = encrypturl(route('edit-student-details'),$parms);
@@ -257,7 +260,7 @@ class UserController extends Controller
                             <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
                         </div>';
                 })
-                ->rawColumns(['status', 'role', 'dob','country','action'])
+                ->rawColumns(['status', 'role', 'dob','country','action','created_date'])
                 ->make(true);
         }
 
