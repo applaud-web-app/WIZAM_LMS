@@ -5,9 +5,10 @@ namespace App\Http\Controllers\admin;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Role;
-use App\Models\Permission;
 use Illuminate\Support\Str; 
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
 
 class PermissionController extends Controller
 {
