@@ -1346,6 +1346,13 @@ class ExamController extends Controller
                     if ($exam->is_public === 1 && !$exam->schedule_id) {
                         $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
                     }
+
+                    $scheduleId = $exam->schedule_id ?? 0;
+                    $userAttempt = ExamResult::where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
+                    $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
+                    if($userAttempt >= $totalAttempts){
+                        return false;
+                    }
                     
                     $attempt = $exam->total_attempts ?? "";
                     return [
