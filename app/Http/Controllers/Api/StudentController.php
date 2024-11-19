@@ -376,8 +376,8 @@ class StudentController extends Controller
                 ->select(
                     'exams.id',
                     'exams.is_free',
-                    'exams.slug as exam_slug',
-                    'exams.title as exam_name',
+                    'exams.slug as slug',
+                    'exams.title as title',
                     'exam_types.slug as exam_type_slug',
                     'exams.duration_mode',
                     'exams.exam_duration',
