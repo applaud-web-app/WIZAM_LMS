@@ -1387,6 +1387,27 @@ class ExamController extends Controller
         }
     }
 
+    private function formatTime($totalTime)
+    {
+        // Convert total seconds into hours, minutes, and seconds
+        $hours = floor($totalTime / 3600);
+        $minutes = floor(($totalTime % 3600) / 60);
+        $seconds = $totalTime % 60;
+
+        // Format the time string accordingly
+        $timeString = '';
+        if ($hours > 0) {
+            $timeString .= $hours . ' hr ';
+        }
+        if ($minutes > 0) {
+            $timeString .= $minutes . ' min ';
+        }
+        if ($seconds > 0) {
+            $timeString .= $seconds . ' sec';
+        }
+
+        return trim($timeString); // Trim any extra spaces
+    }
 
     public function examProgress(Request $request){
         try {
