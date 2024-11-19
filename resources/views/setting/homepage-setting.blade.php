@@ -511,7 +511,7 @@
                         <form action="{{ route('update-resource') }}" method="POST" autocomplete="off"
                             enctype="multipart/form-data" id="addSetting">
                             @csrf
-                            <h1 class="mb-4 text-xl"><b>Resource Section</b></h1>
+                            <h1 class="mb-4 text-xl"><b>Knowledge Hub Section</b></h1>
                             <div class="mb-[15px]">
                                 <label for="title"
                                     class="inline-flex items-center w-[178px] mb-[10px] text-sm font-medium capitalize text-body dark:text-title-dark">
