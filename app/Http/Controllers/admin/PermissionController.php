@@ -107,10 +107,11 @@ class PermissionController extends Controller
     
         // Find the role by ID
         $role = Role::findOrFail($role_id);
+        $permission = Permission::whereIn('id',$request->permissions)->pluck('name')->toArray();
 
         // Sync the permissions with the role
         // Assuming 'permissions' is the relation name in the Role model
-        $role->syncPermissions($request->permissions); // Use sync to update permissions
+        $role->syncPermissions($permission); // Use sync to update permissions
     
         // Optional: Return a response, e.g., success message or redirect
         return redirect()->back()->with('success','Permissions updated successfully.');
