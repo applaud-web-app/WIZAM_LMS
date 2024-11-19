@@ -77,27 +77,18 @@ class PermissionController extends Controller
         // Validate the incoming request to ensure 'id' is present and is a valid integer
         $request->validate([
             'id' => 'required|integer|exists:roles,id', 
-            'name' => 'required|string|max:255', // Validate 'name' to ensure it is not empty
-            'permissions' => 'required|array', // Ensure 'permissions' is an array
+            'permissions' => 'required'
         ]);
 
-        // Find the role by ID
         $role = Role::findOrFail($request->id);
-
-        // Update the role name
         $role->name = $request->name;
+        
+        // Update role permissions
+        $role->permissions()->sync($request->permissions); // Assuming 'permissions' is an array of permission IDs
 
-        // Sync the permissions with the role
-        $role->permissions()->sync($request->permissions);
-
-        // Save the updated role (optional, as `sync` does not require calling save)
         $role->save();
-
-        // Return a success response
-        return response()->json([
-            'success' => true, 
-            'message' => 'Role updated successfully'
-        ]);
+        
+        return response()->json(['success' => true, 'message' => 'Role updated successfully']);
     }
 
     public function updateRolePermission(Request $request)
@@ -105,23 +96,23 @@ class PermissionController extends Controller
         // Validate the incoming request
         $request->validate([
             'eq' => 'required', 
-            'permissions' => 'required|array', // Ensure 'permissions' is an array
+            'permissions' => 'required|array'  // Ensure 'permissions' is an array
         ]);
 
+    
         // Decrypt the 'eq' parameter
         $data = decrypturl($request->eq);
-
-        // Extract role ID from the decrypted data
         $role_id = $data['id'];
-
+    
         // Find the role by ID
         $role = Role::findOrFail($role_id);
 
         // Sync the permissions with the role
-        $role->permissions()->sync($request->permissions);
-
-        // Redirect back with a success message
-        return redirect()->back()->with('success', 'Permissions updated successfully.');
-    }   
+        // Assuming 'permissions' is the relation name in the Role model
+        $role->syncPermissions($request->permissions); // Use sync to update permissions
+    
+        // Optional: Return a response, e.g., success message or redirect
+        return redirect()->back()->with('success','Permissions updated successfully.');
+    }    
 
 }
