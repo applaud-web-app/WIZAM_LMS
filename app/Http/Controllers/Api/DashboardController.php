@@ -42,12 +42,18 @@ class DashboardController extends Controller
             $currentDate = now();
 
             // Fetch upcoming exams with schedules
-            $calldenderData = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            $calldenderData = Exam::leftJoin('exam_schedules', function ($join) {
+                $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                    ->where('exam_schedules.status', 1);
+            })
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
             ->where('exams.status', 1)
-            ->where('exam_schedules.status', 1) 
+            ->where(function ($query) {
+                $query->where('exams.is_public', 1) // Public exams
+                    ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
+            })
             ->where(function ($query) use ($assignedExams) {
                 $query->where('exams.is_public', 1)
                     ->orWhereIn('exams.id', $assignedExams);
@@ -255,65 +261,6 @@ class DashboardController extends Controller
             $passedExamCount = $examStats->passed_count;
             $failedExamCount = $examStats->failed_count;
             $averageScore = $examStats->average_score;
-    
-            // Fetch all exam results for the authenticated user where status is complete
-            // $examData = Exam::select(
-            //     'exam_types.slug as exam_type_slug', 
-            //     'exams.slug', 
-            //     'exams.title', 
-            //     'exams.duration_mode', 
-            //     'exams.exam_duration', 
-            //     'exams.point_mode',
-            //     'exams.point', 
-            //     DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-            // )
-            // ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-            // ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-            // ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-            // ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-            // ->where('exams.status', 1) // Filter by exam status
-            // ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title','exams.duration_mode', 'exams.exam_duration','exams.point_mode', 'exams.point') // Group by necessary fields
-            // ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-            // ->get();
-
-            // $quizData = Quizze::select(
-            //     'quiz_types.slug as exam_type_slug',
-            //     'quizzes.title',
-            //     'quizzes.description',
-            //     'quizzes.pass_percentage',
-            //     'sub_categories.name as sub_category_name',
-            //     'quiz_types.name as exam_type_name',
-            //     'quizzes.duration_mode', 
-            //     'quizzes.duration', 
-            //     'quizzes.point_mode',
-            //     'quizzes.point', 
-            //     DB::raw('COUNT(questions.id) as total_questions'),  // Count the total number of questions
-            //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),  // Sum the total marks
-            //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')  // Sum the total time for the quiz
-            // )
-            // ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-            // ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-            // ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')  // Join with quiz_questions
-            // ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')  // Join with questions
-            // ->where('quizzes.subcategory_id', $request->category)  // Filter by category
-            // ->where('quizzes.status', 1)  // Only active quizzes
-            // ->groupBy(
-            //     'quiz_types.slug',
-            //     'quizzes.id',
-            //     'quizzes.title',
-            //     'quizzes.description',
-            //     'quizzes.pass_percentage',
-            //     'sub_categories.name',
-            //     'quiz_types.name',
-            //     'quizzes.duration_mode', 
-            //     'quizzes.duration', 
-            //     'quizzes.point_mode',
-            //     'quizzes.point'
-            // )
-            // ->havingRaw('COUNT(questions.id) > 0')  
-            // ->get();
 
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
@@ -372,16 +319,22 @@ class DashboardController extends Controller
             $currentDate = now()->toDateString();
             $currentTime = now()->toTimeString();
 
-            $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            $upcomingExams = Exam::leftJoin('exam_schedules', function ($join) {
+                    $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                        ->where('exam_schedules.status', 1);
+                })
                 ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.status', 1)
                 ->where(function ($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1)
+                    $query->where('exams.is_public', 0)
                         ->orWhereIn('exams.id', $assignedExams);
                 })
-                ->where('exam_schedules.status', 1)
+                ->where(function ($query) {
+                    $query->where('exams.is_public', 0) // Public exams
+                        ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
+                })
                 ->where('exams.subcategory_id', $request->category)
                 ->where(function ($query) use ($currentDate, $currentTime) {
                     // For 'fixed' schedules: ensure that the start date and start time are in the future
