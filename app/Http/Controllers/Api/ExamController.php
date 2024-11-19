@@ -1326,6 +1326,7 @@ class ExamController extends Controller
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
                 ->get();
+                
             // Create a map for quick lookup
             $examResultExamScheduleMap = [];
             foreach ($examResults as $examResult) {
@@ -1336,8 +1337,16 @@ class ExamController extends Controller
             return response()->json([
                 'status' => true,
                 'data' => $upcomingExams->map(function ($exam) use ($examResultExamScheduleMap) {
-                    $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
+
+                    // Public exam logic
+                    $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
                     $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+
+                    // If the exam is public and doesn't have a schedule, check for its record in resume state
+                    if ($exam->is_public === 1 && !$exam->schedule_id) {
+                        $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
+                    }
+                    
                     $attempt = $exam->total_attempts ?? "";
                     return [
                         'id' => $exam->id,
@@ -1355,7 +1364,7 @@ class ExamController extends Controller
                         'is_resume' => $isResume,
                         'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedules' => [
-                            'schedule_id' => $exam->schedule_id,
+                            'schedule_id' =>  $exam->schedule_id ?: 0,
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
