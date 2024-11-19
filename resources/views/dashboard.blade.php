@@ -158,48 +158,70 @@
                {{-- <h4 class="mb-0 text-xl max-lg:text-[26px] max-sm:text-2xl font-semibold leading-normal text-white white:text-title-white">Quick Links</h4> --}}
                <div class="col-span-12 2xl:col-span-12 bg-primary p-5 rounded">
                   <ul class="mt-4 flex flex-wrap justify-center gap-4">
-                    <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-exams')}}">View Exam</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('create-exams')}}">Create Exam</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-quizzes')}}">View Quiz</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('create-quizzes')}}">Create Quiz</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-practice-set')}}">View Practice Set</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('create-practice-set')}}">Create Practice Set</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-question')}}">View Question</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-lesson')}}">Lesson Bank</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-video')}}">Video Bank</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-category')}}">View Category</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-sub-category')}}">Sub Category</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-sections')}}">View Section</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-skills')}}">View Skills</a>
-                     </li>
-                     <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
-                        <a href="{{route('view-topics')}}">View Topics</a>
-                     </li>
+                    @can('exams')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-exams')}}">View Exam</a>
+                        </li>
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('create-exams')}}">Create Exam</a>
+                        </li>
+                    @endcan
+                    @can('quizze')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-quizzes')}}">View Quiz</a>
+                        </li>
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('create-quizzes')}}">Create Quiz</a>
+                        </li>
+                    @endcan
+                    @can('pratice-set')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-practice-set')}}">View Practice Set</a>
+                        </li>
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('create-practice-set')}}">Create Practice Set</a>
+                        </li>
+                    @endcan
+                    @can('question')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-question')}}">View Question</a>
+                        </li>
+                    @endcan
+                    @can('lesson')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-lesson')}}">Lesson Bank</a>
+                        </li>
+                    @endcan
+                    @can('video')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-video')}}">Video Bank</a>
+                        </li>
+                    @endcan
+                    @can('category')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-category')}}">View Category</a>
+                        </li>
+                    @endcan
+                    @can('sub-category')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-sub-category')}}">Sub Category</a>
+                        </li>
+                    @endcan
+                    @can('section')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-sections')}}">View Section</a>
+                        </li>
+                    @endcan
+                    @can('skill')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-skills')}}">View Skills</a>
+                        </li>
+                    @endcan
+                    @can('topic')
+                        <li class="bg-white text-dark dark:text-title-dark rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 mb-2">
+                            <a href="{{route('view-topics')}}">View Topics</a>
+                        </li>
+                    @endcan
                   </ul>
                </div>
             </div>
