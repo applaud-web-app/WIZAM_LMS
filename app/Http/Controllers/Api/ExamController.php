@@ -1319,63 +1319,52 @@ class ExamController extends Controller
                 }
             }
 
+            
             $current_time = now();
             // Fetch ongoing exam results
             $examResults = ExamResult::where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
                 ->get();
-
             // Create a map for quick lookup
             $examResultExamScheduleMap = [];
             foreach ($examResults as $examResult) {
                 $key = $examResult->exam_id . '_' . $examResult->schedule_id;
                 $examResultExamScheduleMap[$key] = true;
             }
- 
-            foreach ($upcomingExams as $exam) {
-                // Format the total time
-                $formattedTime = $this->formatTime($exam->total_time);
-                $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
-                $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
-
-                // Group exams by exam type slug
-                if (!isset($formattedExamData[$examType->slug])) {
-                    $formattedExamData[$examType->slug] = [];
-                }
-
-                // Format time and marks based on the exam mode
-                $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-                $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-                $attempt = $exam->total_attempts ?? "";
-
-                // Add exam details to the corresponding type slug, including schedule details
-                $formattedExamData[$examType->slug][] = [
-                    'title' => $exam->title,
-                    'slug' => $exam->slug,
-                    'questions' => $exam->total_questions ?? 0,
-                    'time' => $time ?? 0,
-                    'marks' => $marks ?? 0,
-                    'is_free' => $exam->is_free,
-                    'is_resume' =>$isResume,
-                    'is_public' =>$exam->is_public,
-                    'total_attempts' => $exam->restrict_attempts == 0 ? "" : $attempt,
-                    'schedule' => [
-                        'schedule_id'=>$exam->schedule_id,
-                        'start_date' => $exam->start_date,
-                        'start_time' => $exam->start_time,
-                        'end_date' => $exam->end_date,
-                        'end_time' => $exam->end_time,
-                        'grace_period' => $exam->grace_period,
-                        'schedule_type' => $exam->schedule_type,
-                    ],
-                ];
-            }
-
-            // Return success response
+            // Return success JSON response with upcoming exams and schedules
             return response()->json([
                 'status' => true,
-                'data' => $formattedExamData,
+                'data' => $upcomingExams->map(function ($exam) use ($examResultExamScheduleMap) {
+                    $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
+                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+                    $attempt = $exam->total_attempts ?? "";
+                    return [
+                        'id' => $exam->id,
+                        'exam_type_slug' => $exam->exam_type_slug,
+                        'slug' => $exam->exam_slug,
+                        'title' => $exam->exam_name,
+                        'duration_mode' => $exam->duration_mode,
+                        'exam_duration' => $exam->exam_duration,
+                        'point_mode' => $exam->point_mode,
+                        'point' => $exam->point,
+                        'is_free' => $exam->is_free,
+                        'total_questions' => $exam->total_questions,
+                        'total_marks' => $exam->total_marks,
+                        'total_time' => $exam->total_time,
+                        'is_resume' => $isResume,
+                        'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
+                        'schedules' => [
+                            'schedule_id' => $exam->schedule_id,
+                            'schedule_type' => $exam->schedule_type,
+                            'start_date' => $exam->start_date,
+                            'start_time' => $exam->start_time,
+                            'end_date' => $exam->end_date,
+                            'end_time' => $exam->end_time,
+                            'grace_period' => $exam->grace_period,
+                        ],
+                    ];
+                })
             ], 200);
         } catch (\Throwable $th) {
             \Log::error('Error fetching exams: ' . $th->getMessage());
