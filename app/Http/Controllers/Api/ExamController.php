@@ -1349,11 +1349,6 @@ class ExamController extends Controller
                     $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
                 }
 
-                // Group exams by exam type slug
-                if (!isset($formattedExamData[$examType->slug])) {
-                    $formattedExamData[$examType->slug] = [];
-                }
-
                 // Format time and marks based on the exam mode
                 $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                 $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
