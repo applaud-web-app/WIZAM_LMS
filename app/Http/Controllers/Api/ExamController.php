@@ -1358,9 +1358,9 @@ class ExamController extends Controller
                 $userAttempt = ExamResult::where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
 
                 $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
-                // if($userAttempt >= $totalAttempts){
-                //     continue;
-                // }
+                if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
+                    continue;
+                }
 
                 // Add exam details to the corresponding type slug, including schedule details
                 $formattedExamData[] = [
