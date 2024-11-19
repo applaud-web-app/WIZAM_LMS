@@ -302,7 +302,7 @@ class DashboardController extends Controller
                         ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
                 })
                 ->whereIn('exam_schedules.id', $examResultScheduleIds)
-                ->orwhereIn('exams.id', $examResultExamIds)
+                ->whereIn('exams.id', $examResultExamIds)
                 ->groupBy(
                     'exam_schedules.id',
                     'exam_types.slug',
