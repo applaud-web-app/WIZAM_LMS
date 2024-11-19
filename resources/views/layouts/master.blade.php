@@ -823,7 +823,7 @@
                         <button type="button" id="author-dropdown" data-te-dropdown-toggle-ref aria-expanded="false" class="flex items-center me-1.5 text-body dark:text-subtitle-dark text-sm font-medium capitalize rounded-full md:me-0 group whitespace-nowrap">
                            <span class="sr-only">Open user menu</span>
                            <img class="min-w-[32px] w-8 h-8 rounded-full xl:me-2" src="{{asset('assets/images/avatars/thumbs.png')}}" alt="user photo">
-                           <span class="hidden xl:block">Admin</span>
+                           <span class="hidden xl:block">{{ Auth::user()->name ?? 'Guest' }}</span>
                            <i class="uil uil-angle-down text-light dark:text-subtitle-dark text-[18px] hidden xl:block"></i>
                         </button>
 
@@ -833,8 +833,8 @@
                               <figure class="flex items-center text-sm rounded-[8px] bg-section dark:bg-box-dark-up py-[20px] px-[25px] mb-[12px] gap-[15px]">
                                  <img class="w-8 h-8 rounded-full bg-regular" src="{{asset('assets/images/avatars/thumbs.png')}}" alt="user">
                                  <a href="{{route('profile')}}">
-                                    <div class="text-dark dark:text-title-dark mb-0.5 text-sm">Admin</div>
-                                    <div class="mb-0 text-xs text-body dark:text-subtitle-dark">Admin</div>
+                                    <div class="text-dark dark:text-title-dark mb-0.5 text-sm">{{Auth::user()->name ?? 'Guest'}}</div>
+                                    <div class="mb-0 text-xs text-body dark:text-subtitle-dark">{{Auth::user()->name ?? 'Guest'}}</div>
                                  </a>
                               </figure>
                               {{-- <ul class="m-0 pb-[10px] overflow-x-hidden overflow-y-auto scrollbar bg-transparent max-h-[230px]">
