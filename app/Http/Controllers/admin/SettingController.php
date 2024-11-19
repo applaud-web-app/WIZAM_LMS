@@ -585,7 +585,6 @@ class SettingController extends Controller
         // Validate the request input
         $request->validate([
             'title' => 'required|max:300',
-            'image'=>'required',
             'button_text' => 'required',
             'button_link' => 'required',
         ]);
@@ -601,7 +600,16 @@ class SettingController extends Controller
 
         // Update the resource record
         $resource->title = $request->input('title');
-        $resource->image = $request->input('image');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            // Generate a unique filename with the current timestamp
+            $imageName = 'image_' . time() . '.' . $image->getClientOriginalExtension();
+            // Move the image to the 'public/setting' directory
+            $image->move(public_path('setting'), $imageName);
+            // Store the complete URL in the database
+            $imagePath = env('APP_URL') . '/setting/' . $imageName;
+            $resource->image = $imagePath;
+        }
         // Update button text and link, convert to JSON
         $resource->button_text = $request->input('button_text');
         $resource->button_link = $request->input('button_link');
