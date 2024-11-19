@@ -127,7 +127,7 @@
                             <!-- Submit -->
                             <div class="mt-6">
                                 <button type="submit" 
-                                    class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700">Submit</button>
+                                    class="mt-3 bg-primary text-white py-[12px] px-[20px] rounded-4 border-none cursor-pointer hover:bg-primary-dark focus:ring-primary focus:border-primary">Submit</button>
                             </div>
                         </form>
                     </div>

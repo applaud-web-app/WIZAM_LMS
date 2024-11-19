@@ -1169,7 +1169,7 @@ class ManageTest extends Controller
                     })
                     ->addColumn('total_marks', function($row) {
                         return $row->questions->sum(function($question) {
-                            return $question->question ? $question->question->default_marks : 0; // Get default_marks from the related question
+                            return $question->question ? round($question->question->default_marks,2) : 0; // Get default_marks from the related question
                         });
                     })
                     ->addColumn('status', function($row) {
