@@ -271,7 +271,10 @@ class DashboardController extends Controller
                 ->get();
             $examResultScheduleIds = $examResult->pluck('schedule_id')->toArray();
             $examResultExamIds = $examResult->pluck('exam_id')->toArray();
-            $resumedExam = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            $resumedExam = Exam::leftJoin('exam_schedules', function ($join) {
+                    $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                        ->where('exam_schedules.status', 1);
+                })
                 ->select(
                     'exam_types.slug as exam_type_slug',
                     'exams.slug',
@@ -293,7 +296,10 @@ class DashboardController extends Controller
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
-                ->where('exam_schedules.status', 1)
+                ->where(function ($query) {
+                    $query->where('exams.is_public', 1) // Public exams
+                        ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
+                })
                 ->whereIn('exam_schedules.id', $examResultScheduleIds)
                 ->whereIn('exams.id', $examResultExamIds)
                 ->groupBy(
