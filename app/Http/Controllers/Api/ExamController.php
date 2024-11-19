@@ -1355,7 +1355,7 @@ class ExamController extends Controller
                 $attempt = $exam->total_attempts ?? "";
 
                 $scheduleId = $exam->schedule_id ?? 0;
-                $userAttempt = ExamResult::where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
+                $userAttempt = ExamResult::where('user_id',$user->id)->where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
 
                 $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
                 if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
