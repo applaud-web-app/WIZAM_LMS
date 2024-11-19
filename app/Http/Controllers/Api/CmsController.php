@@ -355,11 +355,15 @@ class CmsController extends Controller
     public function resourceDetail($slug){
         try {
             // Fetch the blog with its category and any other necessary relationships
+            $blogImage = HomeCms::select('image')->where('type', 'resource')->first();
             $blog = Blog::with('category:id,name')->select('id','category_id','user','title', 'content', 'short_description', 'image', 'slug', 'created_at','content')->where(['slug'=>$slug,'status'=>1])->first();
             // Check if the blog exists
             if (!$blog) {
                 return response()->json(['status' => false, 'error' => 'Blog not found'], 404);
             }
+
+            // Add the blog image to the $blog data
+            $blog->blog_image = $blogImage->image ?? null;
 
             $relatedBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->where('category_id', $blog->category_id)->latest()->take(3)->get();
 
