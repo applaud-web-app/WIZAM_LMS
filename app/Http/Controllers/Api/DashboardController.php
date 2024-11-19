@@ -264,14 +264,17 @@ class DashboardController extends Controller
 
             ////////// ------ RESUMED EXAM ------ //////////
             $current_time = now();
-            $examResult = ExamResult::select('schedule_id','exam_id')
+
+            // Fetch ongoing exam results
+            $examResult = ExamResult::select('schedule_id', 'exam_id')
                 ->where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
                 ->get();
+
             $examResultScheduleIds = $examResult->pluck('schedule_id')->toArray();
             $examResultExamIds = $examResult->pluck('exam_id')->toArray();
-            
+
             $resumedExam = Exam::leftJoin('exam_schedules', function ($join) {
                     $join->on('exams.id', '=', 'exam_schedules.exam_id')
                         ->where('exam_schedules.status', 1);
@@ -284,7 +287,7 @@ class DashboardController extends Controller
                     'exams.exam_duration',
                     'exams.point_mode',
                     'exams.point',
-                    'exam_schedules.id as schedule_id',
+                    DB::raw('COALESCE(exam_schedules.id, 0) as schedule_id'), // Default schedule_id to 0 if null
                     DB::raw('SUM(CASE
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1
@@ -297,14 +300,21 @@ class DashboardController extends Controller
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.subcategory_id', $request->category)
                 ->where('exams.status', 1)
-                ->where(function ($query) {
-                    $query->where('exams.is_public', 1) // Public exams
-                        ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
+                ->where(function ($query) use ($examResultScheduleIds, $examResultExamIds) {
+                    $query->where(function ($subquery) use ($examResultExamIds) {
+                        // Public exams without a schedule
+                        $subquery->where('exams.is_public', 1)
+                            ->whereIn('exams.id', $examResultExamIds); // Match using exam_id
+                    })
+                    ->orWhere(function ($subquery) use ($examResultScheduleIds, $examResultExamIds) {
+                        // Private exams with valid schedules
+                        $subquery->whereNotNull('exam_schedules.id')
+                            ->whereIn('exam_schedules.id', $examResultScheduleIds)
+                            ->whereIn('exams.id', $examResultExamIds);
+                    });
                 })
-                ->whereIn('exam_schedules.id', $examResultScheduleIds)
-                ->whereIn('exams.id', $examResultExamIds)
                 ->groupBy(
-                    'exam_schedules.id',
+                    DB::raw('COALESCE(exam_schedules.id, 0)'), // Group by schedule_id (0 for public exams without a schedule)
                     'exam_types.slug',
                     'exams.slug',
                     'exams.id',
