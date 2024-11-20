@@ -3,7 +3,11 @@
 @section('title', 'Dashboard')
 
 @section('content')
-
+<style>
+   .note-editable{
+      all: revert !important;
+   }
+</style>
 
 <section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
