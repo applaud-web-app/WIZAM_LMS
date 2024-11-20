@@ -20,6 +20,7 @@ use Stripe\StripeClient;
 use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use App\Models\Subscription;
+use Illuminate\Support\Facades\DB;
 
 class CmsController extends Controller
 {
@@ -366,9 +367,13 @@ class CmsController extends Controller
             $blog->blog_image = $blogImage->image ?? null;
             $relatedBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->where('category_id', $blog->category_id)->latest()->take(3)->get();
 
-            $recentBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
+            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
 
-            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs,'recent'=>$recentBlogs], 200);
+            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')
+            ->groupBy('year')
+            ->get();
+
+            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs,'recent'=>$recentBlogs,'archive'=>$archiveData], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
