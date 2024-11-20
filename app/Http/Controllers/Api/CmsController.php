@@ -364,10 +364,11 @@ class CmsController extends Controller
 
             // Add the blog image to the $blog data
             $blog->blog_image = $blogImage->image ?? null;
-
             $relatedBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->where('category_id', $blog->category_id)->latest()->take(3)->get();
 
-            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs], 200);
+            $recentBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
+
+            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs,'recent'=>$recentBlogs], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
