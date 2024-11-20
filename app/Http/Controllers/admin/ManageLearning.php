@@ -772,7 +772,7 @@ class ManageLearning extends Controller
         }
     
         // Find the quiz with active status
-        $practice = PracticeSet::where('status', 1)->find($id);
+        $practice = PracticeSet::whereIn('status',[1,0])->find($id);
         if ($practice) {
             // Get all results for the praticeset
             $praticesetResult = PracticeSetResult::where('practice_sets_id', $practice->id)->get();
@@ -816,7 +816,7 @@ class ManageLearning extends Controller
         }
 
         // Find the practice with active status
-        $practice = PracticeSet::where('id', $id)->where('status', 1)->first(); 
+        $practice = PracticeSet::where('id', $id)->whereIn('status',[1,0])->first(); 
         if ($practice) {
             if ($request->ajax()) {
                 $sections = PracticeSetResult::with('user')->where('practice_sets_id',$id)->latest();

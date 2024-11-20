@@ -1700,7 +1700,7 @@ class ManageTest extends Controller
         }
     
         // Find the exam with active status
-        $exam = Exam::where('status', 1)->find($id);
+        $exam = Exam::whereIn('status',[0,1])->find($id);
         if ($exam) {
             // Get all results for the exam
             $examResult = ExamResult::where('exam_id', $exam->id)->get();
@@ -1747,7 +1747,7 @@ class ManageTest extends Controller
         }
 
         // Find the exam with active status
-        $exam = Exam::where('id', $id)->where('status', 1)->first(); 
+        $exam = Exam::where('id', $id)->whereIn('status',[1,0])->first(); 
         if ($exam) {
             if ($request->ajax()) {
                 $sections = ExamResult::with('user')->where('exam_id',$id)->latest();
@@ -1840,7 +1840,7 @@ class ManageTest extends Controller
         }
     
         // Find the quiz with active status
-        $quiz = Quizze::where('status', 1)->find($id);
+        $quiz = Quizze::whereIn('status',[0,1])->find($id);
         if ($quiz) {
             // Get all results for the quiz
             $quizResult = QuizResult::where('quiz_id', $quiz->id)->get();
@@ -1885,7 +1885,7 @@ class ManageTest extends Controller
         }
 
         // Find the quiz with active status
-        $quiz = Quizze::where('id', $id)->where('status', 1)->first(); 
+        $quiz = Quizze::where('id', $id)->whereIn('status',[1,0])->first(); 
         if ($quiz) {
             if ($request->ajax()) {
                 $sections = QuizResult::with('user')->where('quiz_id',$id)->latest();
