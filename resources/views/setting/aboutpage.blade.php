@@ -5,7 +5,7 @@
 @section('content')
 
 <style>
-   .summernote *{
+   .note-editor *{
       all: revert !important;
    }
 </style>
