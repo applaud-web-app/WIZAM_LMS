@@ -1403,11 +1403,14 @@ class StudentController extends Controller
         try {
             // Validate incoming request data
             $request->validate([
-                'category' => 'required|integer',
+                'category' => 'required|integer'
             ]);
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+
+            // Get the current date and time
+            $currentDate = now();
 
             // Fetch practice sets and their related data, including skill name
             $practiceSets = PracticeSet::select(
