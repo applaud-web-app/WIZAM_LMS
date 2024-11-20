@@ -1482,6 +1482,7 @@ class QuizController extends Controller
                     ->where('quiz_schedules.status', 1);
             })
             ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
             ->where('quizzes.status', 1)
