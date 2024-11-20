@@ -4,7 +4,11 @@
 
 @section('content')
 
-
+<style>
+   .summernote{
+      all: revert !important;
+   }
+</style>
 <section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
    <div class="grid grid-cols-12 gap-5">
@@ -67,7 +71,7 @@
 
 <script>
    $(document).ready(function() {
-      $('#summernote').summernote({
+      $('.summernote').summernote({
          height: 350,
        
       });
