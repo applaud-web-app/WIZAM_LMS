@@ -215,7 +215,7 @@ class DashboardController extends Controller
                     'quiz_schedules.grace_period'
                 )
                 ->havingRaw('COUNT(questions.id) > 0')
-                ->havingRaw('COUNT(exam_schedules.id) > 0')
+                ->havingRaw('COUNT(quiz_schedules.id) > 0')
                 ->get();
             
             // Apply subscription-based conditions to make quizzes free
