@@ -1583,7 +1583,6 @@ class QuizController extends Controller
 
             $current_time = now();
             // Fetch ongoing exam results
-
             $quizResults = QuizResult::where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
@@ -1605,11 +1604,11 @@ class QuizController extends Controller
 
                     // Public exam logic
                     $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
-                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
 
                     // If the exam is public and doesn't have a schedule, check for its record in resume state
                     if ($exam->is_public === 1 && !$exam->schedule_id) {
-                        $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
+                        $isResume = isset($quizResultExamScheduleMap[$exam->id . '_0']);
                     }
 
                     // Format time and marks based on the exam mode
