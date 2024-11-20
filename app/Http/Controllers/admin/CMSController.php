@@ -287,7 +287,6 @@ class CMSController extends Controller
 
     public function storeBlog(Request $request)
     {
-        
         if (!Auth()->user()->can('blog')) { 
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
@@ -303,7 +302,7 @@ class CMSController extends Controller
         ]);
 
         // Handle the image upload
-        $imagePath = "default.png";
+        $imagePath = null;
         $baseUrl = env('APP_URL');
         if ($request->hasFile('blogImage')) {
             $image = $request->file('blogImage');
