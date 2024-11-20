@@ -353,6 +353,15 @@ class CmsController extends Controller
         }
     }
 
+    public function resourceArchive($year){
+        try {
+            $blogsForYear = Blog::whereYear('created_at', $year)->where('status',1)->get();
+            return response()->json(['status' => true, 'data'=>$blogsForYear], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
     public function resourceDetail($slug){
         try {
             // Fetch the blog with its category and any other necessary relationships
@@ -369,7 +378,7 @@ class CmsController extends Controller
 
             $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
 
-            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')
+            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')->where('status',1)
             ->groupBy('year')
             ->get();
 
