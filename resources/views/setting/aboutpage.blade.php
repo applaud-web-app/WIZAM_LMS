@@ -5,7 +5,7 @@
 @section('content')
 <style>
    .note-editable *{
-      all: revert !important;
+      all: revert;
    }
 </style>
 
