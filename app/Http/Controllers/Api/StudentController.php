@@ -1212,7 +1212,7 @@ class StudentController extends Controller
                 }
 
                 // Format quiz data for the response
-                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType){
+                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType,$user){
 
                     // Format the total time
                     $formattedTime = $this->formatTime($quiz->total_time);
