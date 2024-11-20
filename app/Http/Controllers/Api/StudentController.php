@@ -1219,11 +1219,11 @@ class StudentController extends Controller
 
                     // Public exam logic
                     $examScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
-                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
 
                     // If the exam is public and doesn't have a schedule, check for its record in resume state
                     if ($quiz->is_public === 1 && !$quiz->schedule_id) {
-                        $isResume = isset($examResultExamScheduleMap[$quiz->id . '_0']);
+                        $isResume = isset($quizResultExamScheduleMap[$quiz->id . '_0']);
                     }
     
                     // Group exams by exam type slug
