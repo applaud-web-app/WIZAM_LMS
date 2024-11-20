@@ -112,26 +112,27 @@
 
 <script>
     $(document).ready(function() {
-         $('#userTable').DataTable({
-             processing: true,
-             serverSide: true,
-             ajax: '{{ route("users") }}',
-             columns: [
-                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-                 {data: 'name', name: 'name'},
-                 {data: 'email', name: 'email'},
-                 {data: 'dob', name: 'dob'},
-                 {data: 'country', name: 'country'},
-                 {data: 'role', name: 'role'},
-                 {data: 'status', name: 'status', orderable: false},
-                 {data: 'action', name: 'action', orderable: false, searchable: false}
-             ],
-             rowCallback: function(row, data) {
-                 $(row).attr('id', 'row' + data.id);
-             }
-         });
-     });
- </script>
+        $('#userTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route("users") }}',
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'name', name: 'users.name' },
+                { data: 'email', name: 'users.email' },
+                { data: 'dob', name: 'users.dob' },
+                { data: 'country', name: 'country_name' },
+                { data: 'role', name: 'role_name' },
+                { data: 'status', name: 'users.status', orderable: false },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            rowCallback: function(row, data) {
+                $(row).attr('id', 'row' + data.id);
+            }
+        });
+    });
+</script>
+
  <script>
    $(document).ready(function(){
         // When delete item is clicked, store the URL in the confirm button
