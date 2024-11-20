@@ -1049,9 +1049,9 @@ class QuizController extends Controller
                             }
 
                             // Normalize user answer array
-                            $user_answ = array_map(function($item) {
+                            $user_answ = $user_answ != null && is_array($user_answ) ? array_map(function ($item) {
                                 return is_string($item) ? strtolower($item) : $item;
-                            }, $user_answ);
+                            }, $user_answ) : [];
 
                             // Sort and compare
                             sort($correct_answ);
