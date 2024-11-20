@@ -1407,72 +1407,149 @@ class QuizController extends Controller
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
+            // Get the current date and time
+            $currentDate = now();
+
             // Fetch quizzes with schedules based on the requested category
-            $quizData = Quizze::select(
-                    'quizzes.id',
-                    'quizzes.slug',
-                    'quizzes.title',
-                    'quizzes.description',
-                    'quizzes.pass_percentage',
-                    'sub_categories.name as sub_category_name',
-                    'quiz_types.name as exam_type_name',
-                    'quizzes.duration_mode',
-                    'quizzes.duration',
-                    'quizzes.point_mode',
-                    'quizzes.point',
-                    'quizzes.is_free',
-                    'quizzes.is_public',
-                    'quizzes.restrict_attempts',
-                    'quizzes.total_attempts',
-                    DB::raw('SUM(CASE 
-                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
-                        ELSE 1 
-                    END) as total_questions'),
-                    // DB::raw('COUNT(questions.id) as total_questions'),
-                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
-                    'quiz_schedules.id as schedule_id',
-                    'quiz_schedules.schedule_type',
-                    'quiz_schedules.start_date',
-                    'quiz_schedules.start_time',
-                    'quiz_schedules.end_date',
-                    'quiz_schedules.end_time',
-                    'quiz_schedules.grace_period'
-                )
-                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-                ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
-                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                ->where('quizzes.subcategory_id', $request->category)
-                ->where('quizzes.status', 1)
-                ->where('quiz_schedules.status', 1)
-                ->groupBy(
-                    'quizzes.id',
-                    'quizzes.slug',
-                    'quizzes.title',
-                    'quizzes.description',
-                    'quizzes.pass_percentage',
-                    'sub_categories.name',
-                    'quiz_types.name',
-                    'quizzes.duration_mode',
-                    'quizzes.duration',
-                    'quizzes.point_mode',
-                    'quizzes.point',
-                    'quizzes.is_free',
-                    'quizzes.is_public',
-                    'quizzes.restrict_attempts',
-                    'quizzes.total_attempts',
-                    'quiz_schedules.id',
-                    'quiz_schedules.schedule_type',
-                    'quiz_schedules.start_date',
-                    'quiz_schedules.start_time',
-                    'quiz_schedules.end_date',
-                    'quiz_schedules.end_time',
-                    'quiz_schedules.grace_period'
-                )
-                ->havingRaw('COUNT(questions.id) > 0')
-                ->get();
+            // $quizData = Quizze::select(
+            //         'quizzes.id',
+            //         'quizzes.slug',
+            //         'quizzes.title',
+            //         'quizzes.description',
+            //         'quizzes.pass_percentage',
+            //         'sub_categories.name as sub_category_name',
+            //         'quiz_types.name as exam_type_name',
+            //         'quizzes.duration_mode',
+            //         'quizzes.duration',
+            //         'quizzes.point_mode',
+            //         'quizzes.point',
+            //         'quizzes.is_free',
+            //         'quizzes.is_public',
+            //         'quizzes.restrict_attempts',
+            //         'quizzes.total_attempts',
+            //         DB::raw('SUM(CASE 
+            //             WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+            //             ELSE 1 
+            //         END) as total_questions'),
+            //         // DB::raw('COUNT(questions.id) as total_questions'),
+            //         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+            //         DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+            //         'quiz_schedules.id as schedule_id',
+            //         'quiz_schedules.schedule_type',
+            //         'quiz_schedules.start_date',
+            //         'quiz_schedules.start_time',
+            //         'quiz_schedules.end_date',
+            //         'quiz_schedules.end_time',
+            //         'quiz_schedules.grace_period'
+            //     )
+            //     ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+            //     ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
+            //     ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+            //     ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+            //     ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+            //     ->where('quizzes.subcategory_id', $request->category)
+            //     ->where('quizzes.status', 1)
+            //     ->where('quiz_schedules.status', 1)
+            //     ->groupBy(
+            //         'quizzes.id',
+            //         'quizzes.slug',
+            //         'quizzes.title',
+            //         'quizzes.description',
+            //         'quizzes.pass_percentage',
+            //         'sub_categories.name',
+            //         'quiz_types.name',
+            //         'quizzes.duration_mode',
+            //         'quizzes.duration',
+            //         'quizzes.point_mode',
+            //         'quizzes.point',
+            //         'quizzes.is_free',
+            //         'quizzes.is_public',
+            //         'quizzes.restrict_attempts',
+            //         'quizzes.total_attempts',
+            //         'quiz_schedules.id',
+            //         'quiz_schedules.schedule_type',
+            //         'quiz_schedules.start_date',
+            //         'quiz_schedules.start_time',
+            //         'quiz_schedules.end_date',
+            //         'quiz_schedules.end_time',
+            //         'quiz_schedules.grace_period'
+            //     )
+            //     ->havingRaw('COUNT(questions.id) > 0')
+            // ->get();
+
+            $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+                $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                    ->where('quiz_schedules.status', 1);
+            })
+            ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+            ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+            ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+            ->where('quizzes.status', 1)
+            ->where(function ($query) {
+                $query->where('quizzes.is_public', 1); // Private exams assigned to the user
+            })
+            ->where('quizzes.subcategory_id', $request->category)
+            ->where(function ($query) {
+                $query->where('quizzes.is_public', 1) // Public exams
+                    ->orWhereNotNull('quiz_schedules.id'); // Private exams must have a schedule
+            })
+            ->select(
+                'quizzes.id',
+                'quizzes.slug',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name as sub_category_name',
+                'quiz_types.name as exam_type_name',
+                'quizzes.duration_mode',
+                'quizzes.duration',
+                'quizzes.point_mode',
+                'quizzes.point',
+                'quizzes.is_free',
+                'quizzes.is_public',
+                'quizzes.restrict_attempts',
+                'quizzes.total_attempts',
+                DB::raw('SUM(CASE 
+                    WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                    ELSE 1 
+                END) as total_questions'),
+                // DB::raw('COUNT(questions.id) as total_questions'),
+                DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                'quiz_schedules.id as schedule_id',
+                'quiz_schedules.schedule_type',
+                'quiz_schedules.start_date',
+                'quiz_schedules.start_time',
+                'quiz_schedules.end_date',
+                'quiz_schedules.end_time',
+                'quiz_schedules.grace_period'
+            )
+            ->groupBy(
+                'quizzes.id',
+                'quizzes.slug',
+                'quizzes.title',
+                'quizzes.description',
+                'quizzes.pass_percentage',
+                'sub_categories.name',
+                'quiz_types.name',
+                'quizzes.duration_mode',
+                'quizzes.duration',
+                'quizzes.point_mode',
+                'quizzes.point',
+                'quizzes.is_free',
+                'quizzes.is_public',
+                'quizzes.restrict_attempts',
+                'quizzes.total_attempts',
+                'quiz_schedules.id',
+                'quiz_schedules.schedule_type',
+                'quiz_schedules.start_date',
+                'quiz_schedules.start_time',
+                'quiz_schedules.end_date',
+                'quiz_schedules.end_time',
+                'quiz_schedules.grace_period'
+            )
+            ->havingRaw('COUNT(questions.id) > 0') // Only include exams with questions
+            ->get();
 
             $type = "quizzes";
             $currentDate = now();
@@ -1511,10 +1588,12 @@ class QuizController extends Controller
 
             $current_time = now();
             // Fetch ongoing exam results
+
             $quizResults = QuizResult::where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
                 ->where('status', 'ongoing')
                 ->get();
+
             // Create a map for quick lookup
             $quizResultExamScheduleMap = [];
             foreach ($quizResults as $examResult) {
@@ -1527,9 +1606,33 @@ class QuizController extends Controller
                 'status' => true,
                 'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap) {
 
-                    $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
-                    $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
+                    $formattedTime = $this->formatTime($exam->total_time);
+
+                    // Public exam logic
+                    $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+
+                    // If the exam is public and doesn't have a schedule, check for its record in resume state
+                    if ($exam->is_public === 1 && !$exam->schedule_id) {
+                        $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
+                    }
+
+                    // Format time and marks based on the exam mode
+                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                    $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
                     $attempt = $exam->total_attempts ?? "";
+
+                    $scheduleId = $exam->schedule_id ?? 0;
+                    $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$exam->id)->where('schedule_id',$scheduleId)->count();
+
+                    $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
+                    if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
+                       return null;
+                    }
+
+                    // $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
+                    // $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
+                    // $attempt = $exam->total_attempts ?? "";
                     return [
                         'id' => $exam->id,
                         'exam_type_name' => $exam->exam_type_name,
@@ -1546,7 +1649,7 @@ class QuizController extends Controller
                         'is_resume' => $isResume,
                         'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
                         'schedules' => [
-                            'schedule_id'=> $exam->schedule_id,
+                            'schedule_id'=> $exam->schedule_id ?: 0,
                             'schedule_type' => $exam->schedule_type,
                             'start_date' => $exam->start_date,
                             'start_time' => $exam->start_time,
