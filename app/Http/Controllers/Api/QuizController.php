@@ -486,7 +486,6 @@ class QuizController extends Controller
                 $totalMarks += $question->default_marks;
             }
 
-
             // Check if the answer is empty, which means the question was left unanswered
             if (empty($answer['answer'])) {
                 $unanswered += 1;
@@ -497,11 +496,6 @@ class QuizController extends Controller
             $isCorrect = false;
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
-                // In default mode, accumulate total possible marks
-                if ($quizResult->point_type != "manual") {
-                    $totalMarks += $question->default_marks;
-                }
-        
                 // Check correctness based on question type
                 if ($question->type == 'MSA') {
                     $isCorrect = $question->answer == $userAnswer;
@@ -532,10 +526,11 @@ class QuizController extends Controller
                     // $isCorrect = $userAnswer == $correctAnswers;
 
                     $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
-                    $userAnswer = array_map('strtolower', $userAnswer);
+                    $userAnswer = $userAnswer != null ? array_map('strtolower', $userAnswer) : [];
                     sort($correctAnswers);
                     sort($userAnswer);
                     $isCorrect = ($userAnswer == $correctAnswers);
+
                 } elseif ($question->type == 'MTF') {
                     $correctAnswers = json_decode($question->answer, true);
                     $isCorrect = true; // Assume correct until proven otherwise
@@ -546,7 +541,7 @@ class QuizController extends Controller
                         }
                     }
                 } elseif ($question->type == 'ORD') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    $correctAnswers = json_decode($questquestion->optionsr, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
                     // $correctAnswers = json_decode($question->answer, true);
@@ -1091,9 +1086,7 @@ class QuizController extends Controller
                             }
                             break;
                         case 'ORD':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
+                            $correct_answ = $question->options;
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'EMQ':

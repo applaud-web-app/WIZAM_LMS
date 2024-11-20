@@ -84,54 +84,42 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/syllabus', [StudentController::class, 'syllabus']);
 
     # EXAM
+    Route::get('/exam-all',[ExamController::class, 'examAll']);
     Route::get('/exam-type', [StudentController::class, 'examType']);
     Route::get('/all-exams', [StudentController::class, 'allExams']);
     Route::get('/exam-detail/{slug}', [StudentController::class, 'examDetail']);
-    
-    ## PLAY EXAM
     Route::get('/play-exam/{slug}', [ExamController::class, 'playExam']);
     Route::post('/finish-exam/{uuid}',[ExamController::class, 'finishExam']);
     Route::get('/exam-result/{uuid}',[ExamController::class, 'examResult']);
-
-    // SAVE EXAM PROGRESS
     Route::post('/save-answer-progress/{uuid}',[ExamController::class,'saveAnswerProgress']);
-    Route::get('/get-saved-progress', [ExamController::class, 'getSavedProgress']); 
-
-
-    Route::post('/save-practice-set-answer-progress/{uuid}',[PracticeSetController::class,'savePracticeSetAnswerProgress']);
-
-    Route::post('/save-quiz-answer-progress/{uuid}',[QuizController::class,'saveQuizAnswerProgress']);
-
-    // EXAM REPORT
     Route::get('/download-exam-report/{uuid}',[ExamController::class, 'downloadExamReport']);
+    // Route::get('/get-saved-progress', [ExamController::class, 'getSavedProgress']); 
 
-    // QUIZ REPORT
-    Route::get('/download-quiz-report/{uuid}',[QuizController::class, 'downloadQuizReport']);
-
-    // PRACTICE SET REPORT
-    Route::get('/download-practice-set-report/{uuid}',[PracticeSetController::class, 'downloadPracticeSetReport']);
 
     # QUIZ
+    Route::get('/quiz-all',[QuizController::class, 'quizAll']);
     Route::get('/quiz-type', [StudentController::class, 'quizType']);
     Route::get('/all-quiz', [StudentController::class, 'allQuiz']);
     Route::get('/quiz-detail/{slug}', [StudentController::class, 'quizDetail']);
-
-    ## PLAY Quiz
     Route::get('/play-quiz/{slug}',[QuizController::class, 'playQuiz']);
-    Route::post('/save-quiz-progress/{uuid}',[QuizController::class, 'saveQuizProgress']);
     Route::post('/finish-quiz/{uuid}',[QuizController::class, 'finishQuiz']);
     Route::get('/quiz-result/{uuid}',[QuizController::class, 'quizResult']);
+    Route::post('/save-quiz-answer-progress/{uuid}',[QuizController::class,'saveQuizAnswerProgress']);
+    Route::get('/download-quiz-report/{uuid}',[QuizController::class, 'downloadQuizReport']);
+    // Route::post('/save-quiz-progress/{uuid}',[QuizController::class, 'saveQuizProgress']);
+
 
     # Practice Set
     Route::get('/practice-set', [StudentController::class, 'practiceSet']);
     Route::get('/practice-set-detail/{slug}', [StudentController::class, 'practiceSetDetail']);
     Route::get('/play-practice-set/{slug}', [PracticeSetController::class, 'playPracticeSet']);
-
     Route::post('/finish-practice-set/{uuid}',[PracticeSetController::class, 'finishPracticeSet']);
     Route::get('/practice-set-result/{uuid}',[PracticeSetController::class, 'practiceSetResult']);
+    Route::get('/download-practice-set-report/{uuid}',[PracticeSetController::class, 'downloadPracticeSetReport']);
+    Route::post('/save-practice-set-answer-progress/{uuid}',[PracticeSetController::class,'savePracticeSetAnswerProgress']);
 
+    # Question
     Route::get('/all-question', [PracticeSetController::class, 'allQuestion']);
-
 
     # Lesson
     Route::get('/all-lesson',[StudentController::class, 'allLesson']);
@@ -141,21 +129,13 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('/all-video',[StudentController::class, 'allVideo']);
     Route::get('/video-detail/{slug}',[StudentController::class, 'videoDetail']);
 
-
     // DASHBOARD
     Route::get('/student-dashboard',[DashboardController::class, 'studentDashboard']);
-
-    // ALL EXAMS (WITH ALL TYPE)
-    Route::get('/exam-all',[ExamController::class, 'examAll']);
-
-    // ALL QUIZ (WITH ALL TYPE)
-    Route::get('/quiz-all',[QuizController::class, 'quizAll']);
 
     // MY PROGRESS
     Route::get('/exam-progress',[ExamController::class, 'examProgress']);
     Route::get('/quiz-progress',[QuizController::class, 'quizProgress']);
     Route::get('/pratice-set-progress',[PracticeSetController::class, 'praticeSetProgress']);
-
     
     // PRICING PAGE
     Route::post('create-checkout-session',[CmsController::class, 'createCheckoutSession']);
