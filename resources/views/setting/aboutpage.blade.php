@@ -4,7 +4,11 @@
 
 @section('content')
 
-
+<style>
+   .summernote *{
+      all: revert !important;
+   }
+</style>
 <section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
    <div class="grid grid-cols-12 gap-5">
@@ -44,7 +48,7 @@
             <!-- Content -->
             <div class="mb-[20px]">
                <label for="content" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Page Content <span class="text-red-500">*</span></label>
-               <textarea id="summernote" name="content" rows="10" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary summernote" placeholder="Write your page content...">@isset($about->description){{$about->description}}@endisset</textarea>
+               <textarea id="summernote" name="content" rows="10" required class="w-full rounded-4 border-1 border-normal summernote" placeholder="Write your page content...">@isset($about->description){{$about->description}}@endisset</textarea>
             </div>
             
 
@@ -67,7 +71,7 @@
 
 <script>
    $(document).ready(function() {
-      $('#summernote').summernote({
+      $('.summernote').summernote({
          height: 350,
        
       });
