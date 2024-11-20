@@ -797,32 +797,44 @@ class StudentController extends Controller
                 ->where('status', 1)
                 ->withCount([
                     'quizzes as total_quizzes' => function ($query) use ($currentDate, $currentTime) {
-                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                            $query->leftJoin('quiz_schedules', function ($join) {
+                                $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                                    ->where('quiz_schedules.status', 1);
+                            })
                             ->where(function ($subQuery){
                                 $subQuery->where('quizzes.is_public', 1);
                             })
                             ->where('quizzes.status', 1)
-                            ->where('quiz_schedules.status', 1)
-                            ->distinct();  
+                            ->where(function ($query) {
+                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                            })
+                            ->distinct();
                     },
                     'quizzes as paid_quizzes' => function ($query) use ($currentDate, $currentTime) {
-                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                            ->where(function ($subQuery) {
-                                $subQuery->where('quizzes.is_public', 1);
+                        $query->leftJoin('quiz_schedules', function ($join) {
+                                $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                                    ->where('quiz_schedules.status', 1);
                             })
                             ->where('quizzes.status', 1)
-                            ->where('quiz_schedules.status', 1)
+                            ->where(function ($query) {
+                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                            })
                             ->where('quizzes.is_free', 0)
                             ->distinct();  
                     },
                     'quizzes as unpaid_quizzes' => function ($query) use ($currentDate, $currentTime) {
                         // Count active, unpaid (free) quizzes (is_free = 1) with valid schedules (including multiple schedules for one exam)
-                        $query->join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                        $query->leftJoin('quiz_schedules', function ($join) {
+                                $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                                    ->where('quiz_schedules.status', 1);
+                            })
                             ->where(function ($subQuery) {
                                 $subQuery->where('quizzes.is_public', 1);
                             })
                             ->where('quizzes.status', 1)
-                            ->where('quiz_schedules.status', 1)
+                            ->where(function ($query) {
+                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                            })
                             ->where('quizzes.is_free', 1)
                             ->distinct();  // Ensures each schedule is counted separately
                     }
