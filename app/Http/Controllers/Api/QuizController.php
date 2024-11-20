@@ -1605,7 +1605,7 @@ class QuizController extends Controller
             // Return success JSON response
             return response()->json([
                 'status' => true,
-                'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap) {
+                'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap,$user) {
 
                     $formattedTime = $this->formatTime($exam->total_time);
 
