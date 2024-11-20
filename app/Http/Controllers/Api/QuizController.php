@@ -541,7 +541,7 @@ class QuizController extends Controller
                         }
                     }
                 } elseif ($question->type == 'ORD') {
-                    $correctAnswers = json_decode($questquestion->optionsr, true);
+                    $correctAnswers = json_decode($question->options, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
                     // $correctAnswers = json_decode($question->answer, true);
