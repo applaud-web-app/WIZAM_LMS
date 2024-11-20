@@ -4,11 +4,7 @@
 
 @section('content')
 
-<style>
-   .summernote *{
-      all: revert !important;
-   }
-</style>
+
 <section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
    <div class="grid grid-cols-12 gap-5">
@@ -66,8 +62,8 @@
 @endsection
 @push('scripts')
     
-<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 
 <script>
    $(document).ready(function() {
