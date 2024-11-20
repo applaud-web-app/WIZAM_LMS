@@ -160,17 +160,20 @@ class DashboardController extends Controller
             $type = "quizzes"; 
             
             // Fetch upcoming quizzes with schedules
-            $quizData = Quizze::join('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-                ->where('quizzes.status', 1)
-                ->where('quizzes.subcategory_id', $request->category)
-                ->where('quiz_schedules.status', 1) 
-                ->where(function ($query) use ($subscription) {
-                    if (!$subscription) {
-                        // Show only public quizzes if there is no subscription
-                        $query->where('quizzes.is_public', 1);
-                    }
+            $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+                    $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')->where('quiz_schedules.status', 1);
                 })
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                ->where('quizzes.status', 1)
+                ->where(function ($query) {
+                    $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); // Private exams must have a schedule
+                })
+                ->where(function ($query) use ($assignedExams) {
+                    $query->where('quizzes.is_public', 1);
+                })
+                ->where('quizzes.subcategory_id', $request->category)
                 ->select(
                     'quizzes.id',
                     'quizzes.is_free',
@@ -181,6 +184,12 @@ class DashboardController extends Controller
                     'quizzes.duration',
                     'quizzes.point_mode',
                     'quizzes.point',
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'),
+                    DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
                     'quiz_schedules.schedule_type',
                     'quiz_schedules.start_date',
                     'quiz_schedules.start_time',
@@ -205,6 +214,8 @@ class DashboardController extends Controller
                     'quiz_schedules.end_time',
                     'quiz_schedules.grace_period'
                 )
+                ->havingRaw('COUNT(questions.id) > 0')
+                ->havingRaw('COUNT(exam_schedules.id) > 0')
                 ->get();
             
             // Apply subscription-based conditions to make quizzes free
