@@ -507,11 +507,6 @@ class PracticeSetController extends Controller
     
             if (isset($answer['answer'])) {
                 $userAnswer = $answer['answer'];
-                // In default mode, accumulate total possible marks
-                if ($practiceSetResult->point_type != "manual") {
-                    $totalMarks += $question->default_marks;
-                }
-        
                 // Check correctness based on question type
                 if ($question->type == 'MSA') {
                     $isCorrect = $question->answer == $userAnswer;
@@ -542,7 +537,7 @@ class PracticeSetController extends Controller
                     // $isCorrect = $userAnswer == $correctAnswers;
 
                     $correctAnswers = array_map('strtolower', json_decode($question->answer, true));
-                    $userAnswer = array_map('strtolower', $userAnswer);
+                    $userAnswer = $userAnswer != null ? array_map('strtolower', $userAnswer) : [];
                     sort($correctAnswers);
                     sort($userAnswer);
                     $isCorrect = ($userAnswer == $correctAnswers);
@@ -556,7 +551,7 @@ class PracticeSetController extends Controller
                         }
                     }
                 } elseif ($question->type == 'ORD') {
-                    $correctAnswers = json_decode($question->answer, true);
+                    $correctAnswers = json_decode($question->options, true);
                     $isCorrect = $userAnswer == $correctAnswers;
                 } elseif ($question->type == 'EMQ') {
                     // $correctAnswers = json_decode($question->answer, true);
@@ -898,9 +893,7 @@ class PracticeSetController extends Controller
                             }
                             break;
                         case 'ORD':
-                            if (is_string($correct_answ)) {
-                                $correct_answ = json_decode($correct_answ, true);
-                            }
+                            $correct_answ = $question->options;
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'EMQ':
