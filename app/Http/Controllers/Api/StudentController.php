@@ -1033,17 +1033,88 @@ class StudentController extends Controller
             ]);
 
             // Fetch quiz type by slug and status
-            $quizType = QuizType::select('id')
-                ->where('slug', $request->slug)
-                ->where('status', 1)
-                ->first();
+            $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
 
             if ($quizType) {
+
                 // Get the authenticated user
                 $user = $request->attributes->get('authenticatedUser');
 
                 // Fetch quiz data based on the requested category
-                $quizData = Quizze::select(
+                // $quizData = Quizze::select(
+                //         'quizzes.slug as quizSlug',
+                //         'quizzes.title',
+                //         'quizzes.duration_mode',
+                //         'quizzes.duration',
+                //         'quizzes.point_mode',
+                //         'quizzes.point',
+                //         'quizzes.is_free',
+                //         'quizzes.is_public',
+                //         'quiz_schedules.schedule_type',
+                //         'quiz_schedules.start_date',
+                //         'quiz_schedules.start_time',
+                //         'quiz_schedules.end_date',
+                //         'quiz_schedules.end_time',
+                //         'quiz_schedules.grace_period',
+                //         'quiz_schedules.id as schedule_id',
+                //         'quizzes.restrict_attempts',
+                //         'quizzes.total_attempts',
+                //         DB::raw('SUM(CASE 
+                //             WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                //             ELSE 1 
+                //         END) as total_questions'),
+                //         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
+                //         DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                //     )
+                //     ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                //     ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+                //     ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                //     ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                //     ->where('quiz_schedules.status', 1)
+                //     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
+                //     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
+                //     ->where('quizzes.status', 1) // Filter by quiz status
+                //     ->groupBy(
+                //         'quizzes.slug',
+                //         'quizzes.id',
+                //         'quizzes.title',
+                //         'quizzes.duration_mode',
+                //         'quizzes.duration',
+                //         'quizzes.point_mode',
+                //         'quizzes.point',
+                //         'quizzes.is_free',
+                //         'quizzes.is_public',
+                //         'quiz_schedules.id',
+                //         'quiz_schedules.schedule_type',
+                //         'quiz_schedules.start_date',
+                //         'quiz_schedules.start_time',
+                //         'quiz_schedules.end_date',
+                //         'quiz_schedules.end_time',
+                //         'quizzes.restrict_attempts',
+                //         'quizzes.total_attempts',
+                //         'quiz_schedules.grace_period'
+                //     )
+                //     ->havingRaw('COUNT(questions.id) > 0')
+                // ->get();
+
+                $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+                    $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                        ->where('quiz_schedules.status', 1);
+                })
+                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
+                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
+                ->where('quizzes.status', 1)
+                ->where(function ($query) {
+                    $query->where('quizzes.is_public', 1); 
+                })
+                ->where('quizzes.quiz_type_id', $quizType->id)
+                ->where('quizzes.subcategory_id', $request->category)
+                ->where(function ($query) {
+                    $query->where('quizzes.is_public', 1) 
+                        ->orWhereNotNull('quiz_schedules.id'); 
+                })
+                ->select(
                     'quizzes.slug as quizSlug',
                     'quizzes.title',
                     'quizzes.duration_mode',
@@ -1068,14 +1139,6 @@ class StudentController extends Controller
                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
                 )
-                ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-                ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-                ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-                ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                ->where('quiz_schedules.status', 1)
-                ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
-                ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-                ->where('quizzes.status', 1) // Filter by quiz status
                 ->groupBy(
                     'quizzes.slug',
                     'quizzes.id',
@@ -1096,7 +1159,7 @@ class StudentController extends Controller
                     'quizzes.total_attempts',
                     'quiz_schedules.grace_period'
                 )
-                ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
+                ->havingRaw('COUNT(questions.id) > 0') // Only include exams with questions
                 ->get();
 
                 // USER SUBSCRIPTION LOGIC
@@ -1140,6 +1203,7 @@ class StudentController extends Controller
                     ->where('user_id', $user->id)
                     ->where('status', 'ongoing')
                     ->get();
+
                 // Create a map for quick lookup
                 $quizResultExamScheduleMap = [];
                 foreach ($quizResults as $examResult) {
@@ -1150,9 +1214,36 @@ class StudentController extends Controller
                 // Format quiz data for the response
                 $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap){
 
-                    $examScheduleKey = $quiz->id . '_' . $quiz->schedule_id;
-                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
+                    // Format the total time
+                    $formattedTime = $this->formatTime($quiz->total_time);
+
+                    // Public exam logic
+                    $examScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+                    $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
+
+                    // If the exam is public and doesn't have a schedule, check for its record in resume state
+                    if ($quiz->is_public === 1 && !$quiz->schedule_id) {
+                        $isResume = isset($examResultExamScheduleMap[$quiz->id . '_0']);
+                    }
+    
+                    // Group exams by exam type slug
+                    if (!isset($formattedExamData[$quizType->slug])) {
+                        $formattedExamData[$quizType->slug] = [];
+                    }
+    
+                    // Format time and marks based on the exam mode
+                    $time = $quiz->duration_mode == "manual" ? $quiz->exam_duration : $formattedTime;
+                    $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
                     $attempt = $quiz->total_attempts ?? "";
+
+                    $scheduleId = $quiz->schedule_id ?? 0;
+                    $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
+
+                    $totalAttempts = $quiz->restrict_attempts == 0 ? "" : $attempt;
+                    if($userAttempt >= $totalAttempts  && $quiz->restrict_attempts == 1){
+                        return null; // Skip quiz if user exceeded attempts
+                    }
+
                     return [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
