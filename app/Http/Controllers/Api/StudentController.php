@@ -1097,7 +1097,7 @@ class StudentController extends Controller
                 //     ->havingRaw('COUNT(questions.id) > 0')
                 // ->get();
 
-                $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+                $quizData = Quizze::leftJoin('quiz_schedules', function ($join) use($quizType){
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                         ->where('quiz_schedules.status', 1);
                 })
@@ -1212,7 +1212,7 @@ class StudentController extends Controller
                 }
 
                 // Format quiz data for the response
-                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap){
+                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType){
 
                     // Format the total time
                     $formattedTime = $this->formatTime($quiz->total_time);
