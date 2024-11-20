@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-   .note-editable *{
+   .note-editor *{
       all: revert;
    }
 </style>
