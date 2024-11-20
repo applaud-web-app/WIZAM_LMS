@@ -614,6 +614,7 @@ class QuizController extends Controller
         return response()->json([
             'status' => true,
             'score' => $score,
+            'totalMarks'=>$totalMarks,
             'correct_answer' => $correctAnswer,
             'incorrect_answer' => $incorrect,
             'student_status' => $studentStatus,
@@ -1141,8 +1142,8 @@ class QuizController extends Controller
                 $is_type = $quizType ?? "";
 
                 $quiz = [
-                    'title' => $quizResult->quiz->title,
-                    'duration' => $quizResult->exam_duration,
+                    'title' => $quizResult->quiz->title ?? 'N/A',
+                    'duration' => $quizResult->exam_duration ?? 0, 
                     'download_report' => $quizResult->quiz->download_report ?? false, 
                     'exam_result_date' => $quizResult->updated_at ? $quizResult->updated_at->format('d-m-Y') : 'N/A',
                     'exam_result_time' => $quizResult->updated_at ? $quizResult->updated_at->format('h:i:s') : 'N/A',
