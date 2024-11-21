@@ -27,7 +27,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed', // password_confirmation
             'country' => 'required|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         // Check if validation fails
@@ -48,7 +48,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'country' => $country_id,
-                'phone_number' => $request->phone_number ?? null,
+                'phone_number' => $request->phone ?? null,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'status' => 1,
