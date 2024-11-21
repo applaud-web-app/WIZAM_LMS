@@ -53,12 +53,13 @@
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Reg. Date</th>
+                                <th>Id</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>DOB</th>
                                 <th>Country</th>
                                 <th>Role</th>
-                                <th>Registration Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -119,12 +120,13 @@
              ajax: '{{ route("student-manager") }}',
              columns: [
                  {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                 {data: 'created_date', name: 'created_date'},
+                 {data: 'id', name: 'id'},
                  {data: 'name', name: 'name'},
                  {data: 'email', name: 'email'},
                  {data: 'dob', name: 'dob'},
                  {data: 'country', name: 'country'},
                  {data: 'role', name: 'role'},
-                 {data: 'created_date', name: 'created_date'},
                  {data: 'status', name: 'status', orderable: false},
                  {data: 'action', name: 'action', orderable: false, searchable: false}
              ],

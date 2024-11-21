@@ -228,6 +228,13 @@ class UserController extends Controller
             $data = User::role('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
             return Datatables::of($data)
                 ->addIndexColumn()
+                ->addColumn('created_date', function($row) {
+                    return isset($row->created_at) ? date('d/m/Y h:i A', strtotime($row->created_at)) : 'N/A';
+                })
+                ->addColumn('id', function($row) {
+                    $num = $row->id < 10 ? "00".$row->id : ($row->id < 100 ? "0".$row->id : $row->id);
+                    return "W001001".$num;
+                })
                 ->addColumn('status', function($row) {
                     // Determine the status color and text based on `is_active`
                     $statusColor = $row->status == 1 ? 'success' : 'danger';
@@ -246,9 +253,6 @@ class UserController extends Controller
                 ->addColumn('country', function($row) {
                     return isset($row->countries) ? $row->countries->name : 'No Country';
                 })
-                ->addColumn('created_date', function($row) {
-                    return isset($row->created_at) ? date('d/m/Y', strtotime($row->created_at)) : 'N/A';
-                })
                 ->addColumn('action', function($row) {
                     $parms = "id=".$row->id;
                     $editUrl = encrypturl(route('edit-student-details'),$parms);
@@ -257,10 +261,10 @@ class UserController extends Controller
                     // Customize action buttons as needed
                     return '<div class="text-light dark:text-subtitle-dark text-[19px] flex items-center justify-start p-0 m-0 gap-[20px]">
                             <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
-                            <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
                         </div>';
+                        // <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
                 })
-                ->rawColumns(['status', 'role', 'dob','country','action','created_date'])
+                ->rawColumns(['id','status', 'role', 'dob','country','action','created_date'])
                 ->make(true);
         }
 
