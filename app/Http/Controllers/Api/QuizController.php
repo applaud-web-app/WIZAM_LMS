@@ -1621,7 +1621,7 @@ class QuizController extends Controller
 
                     $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
                     if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
-                       return null;
+                       return false;
                     }
 
                     // $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;

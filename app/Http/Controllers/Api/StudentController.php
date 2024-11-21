@@ -1241,7 +1241,7 @@ class StudentController extends Controller
 
                     $totalAttempts = $quiz->restrict_attempts == 0 ? "" : $attempt;
                     if($userAttempt >= $totalAttempts  && $quiz->restrict_attempts == 1){
-                        return null; // Skip quiz if user exceeded attempts
+                        return false; // Skip quiz if user exceeded attempts
                     }
 
                     return [
