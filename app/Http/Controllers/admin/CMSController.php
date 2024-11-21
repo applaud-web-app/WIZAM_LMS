@@ -317,7 +317,7 @@ class CMSController extends Controller
             $image->move(public_path('blogs'), $imageName);
 
             // Store the image path in the database (relative to the public directory)
-            $imagePath = $imageName;
+            $imagePath = $baseUrl."/blogs/".$imagePath;
         }
 
         // Generate a slug from the blog title
@@ -338,7 +338,7 @@ class CMSController extends Controller
             'category_id' => $request->input('blogCategory'),
             'short_description' => $request->input('shortDescription'),
             'content' => $request->input('blogContent'), // Save summernote content
-            'image' => $baseUrl."/blogs/".$imagePath, // Save the image path if exists
+            'image' => $imagePath, // Save the image path if exists
             'slug' => $slug, // Save the unique slug
         ]);
 
