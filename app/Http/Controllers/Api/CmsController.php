@@ -347,7 +347,14 @@ class CmsController extends Controller
     public function resources(){
         try {
             $resources = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status',1)->latest()->get();
-            return response()->json(['status'=> true,'data' => $resources], 201);
+
+            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
+
+            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')->where('status',1)
+            ->groupBy('year')
+            ->get();
+
+            return response()->json(['status'=> true,'data' => $resources,'recent'=>$recentBlogs,'archive'=>$archiveData], 201);
         } catch (\Throwable $th) {
             return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
@@ -376,13 +383,7 @@ class CmsController extends Controller
             $blog->blog_image = $blogImage->image ?? null;
             $relatedBlogs = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->where('category_id', $blog->category_id)->latest()->take(3)->get();
 
-            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
-
-            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')->where('status',1)
-            ->groupBy('year')
-            ->get();
-
-            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs,'recent'=>$recentBlogs,'archive'=>$archiveData], 200);
+            return response()->json(['status' => true, 'data' => $blog,'related'=>$relatedBlogs], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
