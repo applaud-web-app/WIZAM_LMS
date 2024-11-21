@@ -348,7 +348,7 @@ class CmsController extends Controller
         try {
             $resources = Blog::with('category:id,name')->select('title','category_id','short_description','image','slug','created_at')->where('status',1)->latest()->get();
 
-            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->where('id', '!=', $blog->id)->latest()->take(5)->get();
+            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->latest()->take(5)->get();
 
             $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')->where('status',1)
             ->groupBy('year')
