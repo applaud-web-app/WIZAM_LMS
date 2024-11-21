@@ -2047,6 +2047,7 @@ class StudentController extends Controller
             // Fetch the user's subscriptions with associated plan details
             $payments = Payment::select('amount', 'currency', 'status', 'created_at','stripe_payment_id')
             ->where('user_id', $user->id)
+            ->where('subscription_id','!=',null)
             ->get()
             ->map(function ($payment) {
                 return [
