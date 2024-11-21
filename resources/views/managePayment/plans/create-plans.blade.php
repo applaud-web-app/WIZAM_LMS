@@ -10,7 +10,8 @@
             <div class="col-span-12">
 
                 <!-- Breadcrumb Section -->
-                <div class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-center items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
+                <div
+                    class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-center items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
                     <!-- Title -->
                     <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">Create Plan</h4>
                     <!-- Breadcrumb Navigation -->
@@ -21,7 +22,8 @@
                                 <li class="inline-flex items-center">
                                     <a class="text-[14px] font-normal leading-[20px] text-body dark:text-neutral-200 hover:text-primary group"
                                         href="">
-                                        <i class="uil uil-estate text-light dark:text-white/50 me-[8px] text-[16px] group-hover:text-current"></i>Dashboard</a>
+                                        <i
+                                            class="uil uil-estate text-light dark:text-white/50 me-[8px] text-[16px] group-hover:text-current"></i>Dashboard</a>
                                 </li>
                                 <!-- Current Page -->
                                 <li class="inline-flex items-center before:content-[''] before:w-1 before:h-1 before:ltr:float-left rtl:float-right before:bg-light-extra before:me-[7px] before:pe-0 before:rounded-[50%]"
@@ -62,6 +64,8 @@
                                 @endisset
                             </select>
                         </div>
+
+
                         <!-- Plan Name -->
                         <div class="col-span-6">
                             <label for="plan_name"
@@ -71,19 +75,20 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter plan name" required>
                         </div>
+
                         <!-- Price Type (Fixed/Monthly) -->
                         <div class="col-span-12">
                             <label class="block text-sm font-medium text-body dark:text-title-dark mb-2">Price Type<span
                                     class="text-red-500">*</span></label>
                             <div class="flex gap-6">
                                 <!-- First Radio (Fixed) -->
-                                <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
+                                {{-- <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
                                     <input
                                         class="relative ltr:float-left rtl:float-right -ms-[1.5rem] me-1 mt-0.5 h-[18px] w-[18px] appearance-none rounded-full border-1 border-solid border-normal before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary"
                                         type="radio" name="price_type" id="price_type_fixed" value="fixed" required checked>
                                     <label class="mt-px inline-block pl-[0.15rem] hover:cursor-pointer"
                                         for="price_type_fixed">Fixed</label>
-                                </div>
+                                </div> --}}
 
                                 <!-- Second Radio (Monthly) -->
                                 <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
@@ -95,8 +100,9 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Duration (hidden)-->
-                        <div class="col-span-12"> 
+                        <div class="col-span-12 " id="durationContainer"> 
                             <label for="duration"
                                 class="block text-sm font-medium text-body dark:text-title-dark mb-2">Duration (Months) <span
                                     class="text-red-500">*</span></label>
@@ -104,6 +110,7 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter Duration" value="1" min="1" required>
                         </div>
+
                         <!-- Price -->
                         <div class="col-span-12">
                             <label for="price"
@@ -113,6 +120,7 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter price" required>
                         </div>
+
                         <!-- Discount -->
                         <div class="col-span-12">
                             <label class="block text-sm font-medium text-body dark:text-title-dark mb-2">Discount <span
@@ -137,6 +145,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Discount -->
                         <div class="col-span-12 hidden" id="discountContainer">
                             <label for="discount"
@@ -146,6 +155,7 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter Discount" required>
                         </div>
+
                         <!-- Feature Access - Unlimited Checkbox -->
                         <div class="col-span-12">
                             <label class="block text-sm font-medium text-body dark:text-title-dark mb-2">Feature Access <span
@@ -170,6 +180,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-span-12 sm:col-span-12 md:col-span-12 hidden" id="RestrictedFeatures">
                             <label for="features" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Features <span class="text-red-500">*</span></label>
                             <div class="flex flex-col flex-1">
@@ -188,6 +199,7 @@
                                 </select>
                             </div>
                         </div>
+
                         <!-- Short Description -->
                         <div class="col-span-12">
                             <label for="description"
@@ -197,6 +209,7 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter a short description"></textarea>
                         </div>
+
                         <!-- Sort Order -->
                         <div class="col-span-12">
                             <label for="order"
@@ -206,6 +219,7 @@
                                 class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
                                 placeholder="Enter sort order" required>
                         </div>
+
                         <!-- Popular - Yes Checkbox -->
                         <div class="col-span-12">
                             <label class="block text-sm font-medium text-body dark:text-title-dark mb-2">Popular</label>
@@ -231,6 +245,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Status Radio Buttons (Enable/Disable) -->
                         <div class="mb-[15px] col-span-12">
                             <label for="status"
@@ -259,6 +274,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Submit Button -->
                         <div class="col-span-12">
                             <button type="submit"
