@@ -1669,7 +1669,7 @@ class QuizController extends Controller
                         $totalAttempts = $exam->restrict_attempts == 0 ? null : $exam->total_attempts;
             
                         // Exclude exams if attempts are restricted and the user has already exceeded the limit
-                        if ($exam->restrict_attempts == 1 && $userAttempt >= $totalAttempts) {
+                        if ($exam->restrict_attempts == 1 && $totalAttempts !== null && $userAttempt >= $totalAttempts) {
                             return false; // Exclude this exam
                         }
             
