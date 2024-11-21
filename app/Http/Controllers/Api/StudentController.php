@@ -1211,56 +1211,55 @@ class StudentController extends Controller
                     $quizResultExamScheduleMap[$key] = true;
                 }
 
+                $quizData = $quizData->filter(function ($quiz) use ($user) {
+                    $scheduleId = $quiz->schedule_id ?? 0;
+                    $userAttempt = QuizResult::where('user_id', $user->id)
+                        ->where('quiz_id', $quiz->id)
+                        ->where('schedule_id', $scheduleId)
+                        ->count();
+
+                    $attempt = $quiz->total_attempts ?? "";
+                    $totalAttempts = $quiz->restrict_attempts == 0 ? null : $attempt;
+                
+                    // Exclude quizzes if attempts are restricted and user has exceeded the limit
+                    return !($quiz->restrict_attempts == 1 && $userAttempt >= $totalAttempts);
+                });
+
                 // Format quiz data for the response
-                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType,$user){
-
-                    // Format the total time
+                $formattedQuizData = $quizData->map(function ($quiz) use ($quizResultExamScheduleMap) {
                     $formattedTime = $this->formatTime($quiz->total_time);
-
+                
                     // Public exam logic
                     $examScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
                     $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
-
+                
                     // If the exam is public and doesn't have a schedule, check for its record in resume state
                     if ($quiz->is_public === 1 && !$quiz->schedule_id) {
                         $isResume = isset($quizResultExamScheduleMap[$quiz->id . '_0']);
                     }
-    
-                    // Group exams by exam type slug
-                    if (!isset($formattedExamData[$quizType->slug])) {
-                        $formattedExamData[$quizType->slug] = [];
-                    }
-    
-                    // Format time and marks based on the exam mode
-                    $time = $quiz->duration_mode == "manual" ? $quiz->exam_duration : $formattedTime;
-                    $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-                    $attempt = $quiz->total_attempts ?? "";
-
-                    $scheduleId = $quiz->schedule_id ?? 0;
-                    $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
-
-                    $totalAttempts = $quiz->restrict_attempts == 0 ? null : $attempt;
-                    if($userAttempt >= $totalAttempts && $totalAttempts !== null && $quiz->restrict_attempts == 1){
-                        return null; // Skip quiz if user exceeded attempts
-                    }
-
+                
                     return [
-                        'title' => $quiz->title,
+                        'id' => $quiz->id,
                         'slug' => $quiz->quizSlug,
-                        'questions' => $quiz->total_questions ?? 0,
-                        'time' => $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $this->formatTime($quiz->total_time),
-                        'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
+                        'title' => $quiz->title,
+                        'duration_mode' => $quiz->duration_mode,
+                        'exam_duration' => $quiz->duration,
+                        'point_mode' => $quiz->point_mode,
+                        'point' => $quiz->point,
                         'is_free' => $quiz->is_free,
-                        'is_resume' =>$isResume,
-                        'total_attempts'=>$quiz->restrict_attempts == 0 ? "" : $attempt,
-                        'schedule' => [
-                            'schedule_id'=>$quiz->schedule_id,
+                        'total_questions' => $quiz->total_questions,
+                        'total_marks' => $quiz->total_marks,
+                        'total_time' => $quiz->total_time,
+                        'is_resume' => $isResume,
+                        'total_attempts' => $quiz->restrict_attempts == 0 ? null : $quiz->total_attempts,
+                        'schedules' => [
+                            'schedule_id' => $quiz->schedule_id ?: 0,
+                            'schedule_type' => $quiz->schedule_type,
                             'start_date' => $quiz->start_date,
                             'start_time' => $quiz->start_time,
                             'end_date' => $quiz->end_date,
                             'end_time' => $quiz->end_time,
                             'grace_period' => $quiz->grace_period,
-                            'schedule_type' => $quiz->schedule_type,
                         ],
                     ];
                 });
