@@ -1596,63 +1596,132 @@ class QuizController extends Controller
             }
 
             // Return success JSON response
+            // return response()->json([
+            //     'status' => true,
+            //     'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap,$user) {
+
+            //         $formattedTime = $this->formatTime($exam->total_time);
+
+            //         // Public exam logic
+            //         $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+            //         $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
+
+            //         // If the exam is public and doesn't have a schedule, check for its record in resume state
+            //         if ($exam->is_public === 1 && !$exam->schedule_id) {
+            //             $isResume = isset($quizResultExamScheduleMap[$exam->id . '_0']);
+            //         }
+
+            //         // Format time and marks based on the exam mode
+            //         $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+            //         $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
+            //         $attempt = $exam->total_attempts ?? "";
+
+            //         $scheduleId = $exam->schedule_id ?? 0;
+            //         $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$exam->id)->where('schedule_id',$scheduleId)->count();
+
+            //         $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
+            //         if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
+            //            return false;
+            //         }
+
+            //         // $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
+            //         // $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
+            //         // $attempt = $exam->total_attempts ?? "";
+            //         return [
+            //             'id' => $exam->id,
+            //             'exam_type_name' => $exam->exam_type_name,
+            //             'slug' => $exam->slug,
+            //             'title' => $exam->title,
+            //             'duration_mode' => $exam->duration_mode,
+            //             'exam_duration' => $exam->duration,
+            //             'point_mode' => $exam->point_mode,
+            //             'point' => $exam->point,
+            //             'is_free' => $exam->is_free,
+            //             'total_questions' => $exam->total_questions,
+            //             'total_marks' => $exam->total_marks,
+            //             'total_time' => $exam->total_time,
+            //             'is_resume' => $isResume,
+            //             'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
+            //             'schedules' => [
+            //                 'schedule_id'=> $exam->schedule_id ?: 0,
+            //                 'schedule_type' => $exam->schedule_type,
+            //                 'start_date' => $exam->start_date,
+            //                 'start_time' => $exam->start_time,
+            //                 'end_date' => $exam->end_date,
+            //                 'end_time' => $exam->end_time,
+            //                 'grace_period' => $exam->grace_period,
+            //             ],
+            //         ];
+            //     })
+            // ], 200);
+
             return response()->json([
                 'status' => true,
-                'data' => $quizData->map(function ($exam) use ($quizResultExamScheduleMap,$user) {
-
-                    $formattedTime = $this->formatTime($exam->total_time);
-
-                    // Public exam logic
-                    $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
-                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
-
-                    // If the exam is public and doesn't have a schedule, check for its record in resume state
-                    if ($exam->is_public === 1 && !$exam->schedule_id) {
-                        $isResume = isset($quizResultExamScheduleMap[$exam->id . '_0']);
-                    }
-
-                    // Format time and marks based on the exam mode
-                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-                    $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-                    $attempt = $exam->total_attempts ?? "";
-
-                    $scheduleId = $exam->schedule_id ?? 0;
-                    $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$exam->id)->where('schedule_id',$scheduleId)->count();
-
-                    $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
-                    if($userAttempt >= $totalAttempts && $exam->restrict_attempts == 1){
-                       return false;
-                    }
-
-                    // $quizScheduleKey = $exam->id . '_' . $exam->schedule_id;
-                    // $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
-                    // $attempt = $exam->total_attempts ?? "";
-                    return [
-                        'id' => $exam->id,
-                        'exam_type_name' => $exam->exam_type_name,
-                        'slug' => $exam->slug,
-                        'title' => $exam->title,
-                        'duration_mode' => $exam->duration_mode,
-                        'exam_duration' => $exam->duration,
-                        'point_mode' => $exam->point_mode,
-                        'point' => $exam->point,
-                        'is_free' => $exam->is_free,
-                        'total_questions' => $exam->total_questions,
-                        'total_marks' => $exam->total_marks,
-                        'total_time' => $exam->total_time,
-                        'is_resume' => $isResume,
-                        'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
-                        'schedules' => [
-                            'schedule_id'=> $exam->schedule_id ?: 0,
-                            'schedule_type' => $exam->schedule_type,
-                            'start_date' => $exam->start_date,
-                            'start_time' => $exam->start_time,
-                            'end_date' => $exam->end_date,
-                            'end_time' => $exam->end_time,
-                            'grace_period' => $exam->grace_period,
-                        ],
-                    ];
-                })
+                'data' => $quizData
+                    ->filter(function ($exam) use ($quizResultExamScheduleMap, $user) {
+                        // Filter exams where the user exceeded attempts
+                        $scheduleId = $exam->schedule_id ?? 0;
+                        $userAttempt = QuizResult::where('user_id', $user->id)
+                            ->where('quiz_id', $exam->id)
+                            ->where('schedule_id', $scheduleId)
+                            ->count();
+            
+                        $totalAttempts = $exam->restrict_attempts == 0 ? null : $exam->total_attempts;
+            
+                        // Exclude exams if attempts are restricted and the user has already exceeded the limit
+                        if ($exam->restrict_attempts == 1 && $userAttempt >= $totalAttempts) {
+                            return false; // Exclude this exam
+                        }
+            
+                        return true; // Include this exam
+                    })
+                    ->map(function ($exam) use ($quizResultExamScheduleMap, $user) {
+                        $formattedTime = $this->formatTime($exam->total_time);
+            
+                        // Public exam logic
+                        $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+                        $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
+            
+                        // If the exam is public and doesn't have a schedule, check for its record in resume state
+                        if ($exam->is_public === 1 && !$exam->schedule_id) {
+                            $isResume = isset($quizResultExamScheduleMap[$exam->id . '_0']);
+                        }
+            
+                        // Format time and marks based on the exam mode
+                        $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                        $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
+                        $attempt = $exam->total_attempts ?? "";
+            
+                        $totalAttempts = $exam->restrict_attempts == 0 ? null : $attempt;
+            
+                        return [
+                            'id' => $exam->id,
+                            'exam_type_name' => $exam->exam_type_name,
+                            'slug' => $exam->slug,
+                            'title' => $exam->title,
+                            'duration_mode' => $exam->duration_mode,
+                            'exam_duration' => $exam->duration,
+                            'point_mode' => $exam->point_mode,
+                            'point' => $exam->point,
+                            'is_free' => $exam->is_free,
+                            'total_questions' => $exam->total_questions,
+                            'total_marks' => $exam->total_marks,
+                            'total_time' => $exam->total_time,
+                            'is_resume' => $isResume,
+                            'total_attempts' => $totalAttempts,
+                            'schedules' => [
+                                'schedule_id' => $exam->schedule_id ?: 0,
+                                'schedule_type' => $exam->schedule_type,
+                                'start_date' => $exam->start_date,
+                                'start_time' => $exam->start_time,
+                                'end_date' => $exam->end_date,
+                                'end_time' => $exam->end_time,
+                                'grace_period' => $exam->grace_period,
+                            ],
+                        ];
+                    })
+                    ->filter() // Remove any null or false values from the mapped result
+                    ->values(), // Reset the array keys for the JSON response
             ], 200);
 
         } catch (\Throwable $th) {
