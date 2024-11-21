@@ -1239,9 +1239,9 @@ class StudentController extends Controller
                     $scheduleId = $quiz->schedule_id ?? 0;
                     $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
 
-                    $totalAttempts = $quiz->restrict_attempts == 0 ? "" : $attempt;
+                    $totalAttempts = $quiz->restrict_attempts == 0 ? null : $attempt;
                     if($userAttempt >= $totalAttempts  && $quiz->restrict_attempts == 1){
-                        return false; // Skip quiz if user exceeded attempts
+                        return null; // Skip quiz if user exceeded attempts
                     }
 
                     return [
