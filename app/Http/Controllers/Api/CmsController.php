@@ -363,7 +363,13 @@ class CmsController extends Controller
     public function resourceArchive($year){
         try {
             $blogsForYear = Blog::whereYear('created_at', $year)->where('status',1)->get();
-            return response()->json(['status' => true, 'data'=>$blogsForYear], 200);
+            $recentBlogs = Blog::with('category:id,name')->select('title','image','slug','created_at')->where('status', 1)->latest()->take(10)->get();
+
+            $archiveData = Blog::selectRaw('YEAR(created_at) as year, COUNT(*) as count')->where('status',1)
+            ->groupBy('year')
+            ->get();
+
+            return response()->json(['status' => true, 'data'=>$blogsForYear,'recent'=>$recentBlogs,'archive'=>$archiveData], 200);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
