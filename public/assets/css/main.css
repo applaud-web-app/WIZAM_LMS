@@ -11441,13 +11441,13 @@
 
 /* Table header styling */
 table.dataTable thead {
-    background-color: rgb(5 150 105 / 1);
     color: white;
     font-size: 1rem;
     text-align: center;
 }
 
 table.dataTable thead th {
+    background-color: rgb(5 150 105 / 1);
     font-weight: 500 !important;
     padding: 10px 15px;
     white-space: nowrap;
