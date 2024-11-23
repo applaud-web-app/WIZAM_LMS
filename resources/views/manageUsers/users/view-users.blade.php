@@ -112,40 +112,41 @@
 
 <script>
     $(document).ready(function() {
-         $('#userTable').DataTable({
-             processing: true,
-             serverSide: true,
-             ajax: '{{ route("users") }}',
-             columns: [
-                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-                 {data: 'name', name: 'name'},
-                 {data: 'email', name: 'email'},
-                 {data: 'dob', name: 'dob'},
-                 {data: 'country', name: 'country'},
-                 {data: 'role', name: 'role'},
-                 {data: 'status', name: 'status', orderable: false},
-                 {data: 'action', name: 'action', orderable: false, searchable: false}
-             ],
-             rowCallback: function(row, data) {
-                 $(row).attr('id', 'row' + data.id);
-             }
-         });
-     });
- </script>
- <script>
-   $(document).ready(function(){
-        // When delete item is clicked, store the URL in the confirm button
-        $(document).on('click', '.deleteItem', function(){
-            const delUrl = $(this).data('url');
-            $('#confirmDelete').data('url', delUrl); // Use data method to set the URL
-        });
-
-        // When confirm delete is clicked, redirect to the URL
-        $(document).on('click', '#confirmDelete', function(){
-            const delUrl = $(this).data('url'); // Use data method to get the URL
-            window.location.href = delUrl;
-        });
-    });
-
- </script>
+      $('#userTable').DataTable({
+          processing: true,
+          serverSide: true,
+          ajax: '{{ route("users") }}',
+          columns: [
+              {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+              {data: 'name', name: 'name'},
+              {data: 'email', name: 'email'},
+              {data: 'dob', name: 'dob'},
+              {data: 'country', name: 'countries.name'}, // Updated name to match relationship
+              {data: 'role', name: 'roles.name'}, // Updated name to match relationship
+              {data: 'status', name: 'status', orderable: false, searchable: false},
+              {data: 'action', name: 'action', orderable: false, searchable: false}
+          ],
+          rowCallback: function(row, data) {
+              $(row).attr('id', 'row' + data.id);
+          },
+          // Optional: Add language or other configurations as needed
+      });
+  });
+  </script>
+  
+  <script>
+     $(document).ready(function(){
+          // When delete item is clicked, store the URL in the confirm button
+          $(document).on('click', '.deleteItem', function(){
+              const delUrl = $(this).data('url');
+              $('#confirmDelete').data('url', delUrl); // Use data method to set the URL
+          });
+  
+          // When confirm delete is clicked, redirect to the URL
+          $(document).on('click', '#confirmDelete', function(){
+              const delUrl = $(this).data('url'); // Use data method to get the URL
+              window.location.href = delUrl;
+          });
+      });
+  </script>
 @endpush

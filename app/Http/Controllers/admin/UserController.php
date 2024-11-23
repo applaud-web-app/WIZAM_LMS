@@ -536,54 +536,85 @@ class UserController extends Controller
         return redirect()->back()->with('error','Something Went Wrong');
     }
     
-    // USERS //
-    public function viewUsers(Request $request){
-
+    public function viewUsers(Request $request)
+    {
         if (!Auth()->user()->can('user')) { 
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
-
+    
         if ($request->ajax()) {
-            // Fetch data for DataTables
-            $data = User::withoutRole('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
+            // Base query with necessary relationships
+            $data = User::where('id', '!=', 1)
+                ->whereIn('status', [0,1])
+                ->whereDoesntHave('roles', function($query) {
+                    $query->where('name', 'student');
+                })
+                ->with(['countries', 'roles'])
+                ->select('users.*')
+                ->orderBy('id', 'DESC');
+    
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('status', function($row) {
-                    // Determine the status color and text based on `is_active`
                     $statusColor = $row->status == 1 ? 'success' : 'danger';
                     $statusText = $row->status == 1 ? 'Active' : 'Inactive';
-                    // Create the status badge HTML
-                    return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                    return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                 })
                 ->addColumn('role', function($row) {
-                    return isset($row->roles) && $row->roles->isNotEmpty() 
-                    ? ucfirst($row->roles->first()->name) 
-                    : 'No Role';                
+                    return $row->roles->isNotEmpty() 
+                        ? ucfirst($row->roles->first()->name) 
+                        : 'No Role';                
                 })
                 ->addColumn('dob', function($row) {
                     return $row->dob ? date('d/m/Y', strtotime($row->dob)) : 'NA';
                 })
                 ->addColumn('country', function($row) {
-                    return isset($row->countries) ? $row->countries->name : 'No Country';
+                    return $row->countries ? $row->countries->name : 'No Country';
                 })
                 ->addColumn('action', function($row) {
                     $parms = "id=".$row->id;
-                    $editUrl = encrypturl(route('edit-user-details'),$parms);
-                    $deleteUrl = encrypturl(route('delete-user-data'),$parms);
-
-                    // Customize action buttons as needed
+                    $editUrl = encrypturl(route('edit-user-details'), $parms);
+                    $deleteUrl = encrypturl(route('delete-user-data'), $parms);
                     return '<div class="text-light dark:text-subtitle-dark text-[19px] flex items-center justify-start p-0 m-0 gap-[20px]">
-                            <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
-                            <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
-                        </div>';
+                                <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
+                                <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
+                            </div>';
                 })
-                ->rawColumns(['status', 'role', 'dob','country','action'])
+                // Handle column-specific filtering for related fields
+                ->filterColumn('country', function($query, $keyword) {
+                    $query->whereHas('countries', function($q) use ($keyword) {
+                        $q->where('countries.name', 'like', "%{$keyword}%");
+                    });
+                })
+                ->filterColumn('role', function($query, $keyword) {
+                    $query->whereHas('roles', function($q) use ($keyword) {
+                        $q->where('roles.name', 'like', "%{$keyword}%");
+                    });
+                })
+                // Handle global search across multiple fields
+                ->filter(function ($query) use ($request) {
+                    if ($request->search['value']) {
+                        $search = $request->search['value'];
+                        $query->where(function ($q) use ($search) {
+                            $q->where('users.name', 'like', "%{$search}%")
+                              ->orWhere('users.email', 'like', "%{$search}%")
+                              ->orWhere('users.dob', 'like', "%{$search}%")
+                              ->orWhereHas('countries', function($q2) use ($search) {
+                                  $q2->where('countries.name', 'like', "%{$search}%");
+                              })
+                              ->orWhereHas('roles', function($q3) use ($search) {
+                                  $q3->where('roles.name', 'like', "%{$search}%");
+                              });
+                        });
+                    }
+                })
+                ->rawColumns(['status', 'action'])
                 ->make(true);
         }
-
-        // Load the view when not an AJAX request
+    
         return view('manageUsers.users.view-users');
     }
+    
 
     public function addUsers(){
         if (!Auth()->user()->can('user')) { 
