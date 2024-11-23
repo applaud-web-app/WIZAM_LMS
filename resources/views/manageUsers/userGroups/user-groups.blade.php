@@ -44,8 +44,8 @@
                 <button type="button" id="addNew"
                     class="flex items-center px-[14px] text-sm text-white rounded-md  bg-primary border-primary h-10 gap-[6px] transition-[0.3s]"
                     data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light">
-                    <i class="uil uil-plus"></i>
-                    <span class="m-0">Add Group</span>
+                   
+                    <span class="m-0">+ Add Group</span>
                 </button>
             </div>
             <div class="p-[25px] pt-[15px]">
