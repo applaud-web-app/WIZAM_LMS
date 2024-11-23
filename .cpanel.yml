@@ -1,0 +1,28 @@
+deploy:
+  - echo "Starting deployment for admin.wizam.com..."
+  
+  # Put the app in maintenance mode
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan down
+  
+  # Pull the latest changes from GitHub
+  - /usr/bin/git pull origin main
+  
+  # Install/update Composer dependencies
+  - /usr/bin/composer install --no-dev --optimize-autoloader
+  
+  # Run database migrations
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan migrate --force
+  
+  # Clear and cache configurations
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan config:cache
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan route:cache
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan view:cache
+  
+  # Set proper permissions
+  - chmod -R 775 /home/dentalnu/public_html/admin.wizam.com/storage /home/dentalnu/public_html/admin.wizam.com/bootstrap/cache
+  
+  # Bring the app out of maintenance mode
+  - /usr/bin/php /home/dentalnu/public_html/admin.wizam.com/artisan up
+
+post_deploy:
+  - echo "Deployment complete for admin.wizam.com."
