@@ -27,6 +27,7 @@ class quizscheduleStatus extends Command
      */
     public function handle()
     {
+        dd('Verma Technology');
         $examSchedules = QuizSchedule::where('status', 1)->get();
         foreach ($examSchedules as $schedule) {
             $currentTime = Carbon::now();
