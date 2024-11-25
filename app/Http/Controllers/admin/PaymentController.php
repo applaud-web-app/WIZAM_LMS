@@ -23,6 +23,7 @@ use App\Models\Quizze;
 use App\Models\Video;
 use App\Models\PracticeLesson;
 use App\Models\PracticeVideo;
+use App\Models\SubscriptionItem;
 
 class PaymentController extends Controller
 
@@ -533,239 +534,6 @@ class PaymentController extends Controller
       return redirect()->back()->with('error','Something Went Wrong');
    }
 
-   // WEBHOOK
-   public function handleWebhook(Request $request)
-   {
-       $event = null;
-   
-       // Logging for debugging
-       Log::info('Stripe Environment Variables', [
-           'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
-       ]);
-       Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
-       Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
-   
-       try {
-           // Validate the webhook signature
-           $event = \Stripe\Webhook::constructEvent(
-               $request->getContent(),
-               $request->header('Stripe-Signature'),
-               env('STRIPE_SIGNATURE_WEBHOOK')
-           );
-       } catch (\UnexpectedValueException $e) {
-           Log::error('Stripe Webhook Error: Invalid payload', [
-               'error' => $e->getMessage(),
-               'payload' => $request->getContent()
-           ]);
-           return response()->json(['error' => 'Invalid payload'], 400);
-       } catch (\Stripe\Exception\SignatureVerificationException $e) {
-           Log::error('Stripe Webhook Error: Invalid signature', [
-               'error' => $e->getMessage(),
-               'payload' => $request->getContent()
-           ]);
-           return response()->json(['error' => 'Invalid signature'], 400);
-       }
-   
-       // Handle specific event types
-       switch ($event->type) {
-           case 'payment_intent.succeeded':
-               $this->storeOneTimePaymentDetails($event->data->object);
-               break;
-           case 'invoice.payment_succeeded':
-               $this->storeSubscriptionPaymentDetails($event->data->object);
-               break;
-           case 'customer.subscription.created':
-               $this->storeSubscriptionDetails($event->data->object);
-               break;
-           // Add other relevant cases as needed
-           default:
-               Log::info('Unhandled event type: ' . $event->type);
-       }
-   
-       return response()->json(['status' => 'success']);
-   }
-   
-   protected function storeOneTimePaymentDetails($paymentIntent)
-   {
-      try {
-         // Log when the method is called
-         Log::info('Handling one-time payment for Payment Intent: ' . $paymentIntent->id);
-
-         // Check for valid payment intent object and customer ID
-         if (!isset($paymentIntent->customer)) {
-               Log::warning('Payment Intent does not contain a customer ID.');
-               return;
-         }
-
-         $customerId = $paymentIntent->customer;
-
-         // Fetch user based on Stripe customer ID
-         $user = User::where('stripe_customer_id', $customerId)->first();
-
-         if (!$user) {
-               Log::warning('User not found for Stripe customer ID: ' . $customerId);
-               return;
-         }
-
-         // Check for duplicate payment
-         $existingPayment = Payment::where('stripe_payment_id', $paymentIntent->id)->exists();
-
-         if ($existingPayment) {
-               Log::info('Duplicate Payment: ' . $paymentIntent->id);
-               return;
-         }
-
-         // Create the payment entry with subscription_id set to "one-time"
-         Payment::create([
-            'user_id' => $user->id,
-            'stripe_payment_id' => $paymentIntent->id,
-            'amount' => $paymentIntent->amount_received / 100, // Convert from cents
-            'currency' => $paymentIntent->currency,
-            'status' => $paymentIntent->status,
-            'subscription_id' => null, // Set null for one-time payments
-            'plan_id' => $paymentIntent->metadata->plan_id ?? null, // Assume plan_id is in metadata if applicable
-         ]);
-
-         Log::info('One-time payment stored successfully for Payment Intent: ' . $paymentIntent->id);
-         
-      } catch (\Exception $e) {
-         Log::error('Stripe Webhook Error: Failed to store one-time payment details', [
-               'error' => $e->getMessage(),
-               'payment_intent' => $paymentIntent
-         ]);
-      }
-   }
-
-   protected function updateSubscriptionRecord($user, $invoice)
-   {
-      try {
-         // Mark the existing subscription as expired
-         $activeSubscription = Subscription::where('user_id', $user->id)
-               ->where('stripe_status', 'active')
-               ->orWhere('stripe_status', 'trialing')
-               ->first();
-
-         if ($activeSubscription) {
-               $activeSubscription->update([
-                  'stripe_status' => 'expired',
-                  'ends_at' => now(), // Mark the current time as the end time
-               ]);
-
-               Log::info('Marked existing subscription as expired: ' . $activeSubscription->stripe_id);
-         }
-
-         // Create a new subscription record
-         $newSubscription = Subscription::create([
-               'user_id' => $user->id,
-               'stripe_id' => $invoice->subscription,
-               'stripe_status' => $invoice->status,
-               'stripe_price' => $invoice->lines->data[0]->price->id ?? null,
-               'quantity' => $invoice->lines->data[0]->quantity ?? 1,
-               'trial_ends_at' => $invoice->lines->data[0]->plan->trial_period_days
-                  ? now()->addDays($invoice->lines->data[0]->plan->trial_period_days)
-                  : null,
-               'ends_at' => \Carbon\Carbon::createFromTimestamp($invoice->lines->data[0]->period->end ?? time()),
-         ]);
-
-         Log::info('Created new subscription record: ' . $newSubscription->stripe_id);
-      } catch (\Exception $e) {
-         Log::error('Error updating subscription records', [
-               'error' => $e->getMessage(),
-               'invoice' => $invoice,
-         ]);
-      }
-   }
-
-   protected function storeSubscriptionPaymentDetails($invoice)
-   {
-      try {
-         
-         Log::info('Processing invoice.payment_succeeded event', [
-            'invoice_id' => $invoice->id,
-            'customer_id' => $invoice->customer,
-            'subscription_id' => $invoice->subscription,
-         ]);
-
-         // Retrieve customer ID from the invoice
-         $customerId = $invoice->customer;
-
-         // Find the user based on the Stripe customer ID
-         $user = User::where('stripe_customer_id', $customerId)->first();
-
-         if (!$user) {
-               Log::warning('User not found for Stripe customer ID: ' . $customerId);
-               return;
-         }
-
-         // Check for duplicate payment entries
-         $existingPayment = Payment::where('stripe_payment_id', $invoice->id)->exists();
-
-         if ($existingPayment) {
-               Log::info('Duplicate payment detected. Payment already exists for invoice: ' . $invoice->id);
-               return;
-         }
-
-         // Validate invoice amounts
-         if ($invoice->amount_paid > 0) {
-               // Insert the payment into the database
-               Payment::create([
-                  'user_id' => $user->id,
-                  'stripe_payment_id' => $invoice->id,
-                  'amount' => $invoice->amount_paid / 100, // Convert cents to dollars
-                  'currency' => $invoice->currency,
-                  'status' => $invoice->status,
-                  'subscription_id' => $invoice->subscription, // Attach subscription ID
-                  'description' => $invoice->lines->data[0]->description ?? 'Subscription Payment',
-                  'plan_id' => $invoice->lines->data[0]->price->id ?? null, // Fetch price ID if available
-               ]);
-
-               Log::info('Payment stored successfully for invoice: ' . $invoice->id);
-
-               // Handle subscription record
-               $this->updateSubscriptionRecord($user, $invoice);
-         } else {
-               Log::warning('Invoice amount_paid is zero for invoice: ' . $invoice->id);
-         }
-      } catch (\Exception $e) {
-         Log::error('Error storing subscription payment details', [
-               'error' => $e->getMessage(),
-               'invoice' => $invoice,
-         ]);
-      }
-   }
-
-   protected function storeSubscriptionDetails($subscription)
-   {
-      try {
-         $customerId = $subscription->customer;
-         $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
-         if ($user) {
-               // Prevent duplicate subscription entries
-               if (!Subscription::where('stripe_id', $subscription->id)->exists()) {
-                  // Create the subscription if it doesn't exist
-                  Subscription::create([
-                     'user_id' => $user->id,
-                     'stripe_id' => $subscription->id,
-                     'stripe_status' => $subscription->status == "incomplete" ? "complete" : $paymentIntent->status,
-                     'stripe_price' => $subscription->plan->id,
-                     'quantity' => $subscription->quantity,
-                     'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
-                     'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
-                  ]);
-               } else {
-                  Log::info('Duplicate Subscription: ' . $subscription->id);
-               }
-         } else {
-               Log::warning('User not found for Stripe customer ID: ' . $customerId);
-         }
-      } catch (\Exception $e) {
-         Log::error('Stripe Webhook Error: Failed to store subscription details', [
-               'error' => $e->getMessage(),
-               'subscription' => $subscription
-         ]);
-      }
-   }
-
    public function payment(Request $request){
       
       if (!Auth()->user()->can('payment')) { // Assuming 'file-manager' is the required permission
@@ -855,6 +623,389 @@ class PaymentController extends Controller
    }
      return view('managePayment.subscription.view-subscription');
    }
+   
+   // WEBHOOK
+   // public function handleWebhook(Request $request)
+   // {
+   //     $event = null;
+   
+   //     // Logging for debugging
+   //     Log::info('Stripe Environment Variables', [
+   //         'webhook_secret' => env('STRIPE_SIGNATURE_WEBHOOK'),
+   //     ]);
+   //     Log::info('Stripe Webhook Raw Payload', ['payload' => $request->getContent()]);
+   //     Log::info('Stripe Webhook Headers', ['headers' => $request->headers->all()]);
+   
+   //     try {
+   //         // Validate the webhook signature
+   //         $event = \Stripe\Webhook::constructEvent(
+   //             $request->getContent(),
+   //             $request->header('Stripe-Signature'),
+   //             env('STRIPE_SIGNATURE_WEBHOOK')
+   //         );
+   //     } catch (\UnexpectedValueException $e) {
+   //         Log::error('Stripe Webhook Error: Invalid payload', [
+   //             'error' => $e->getMessage(),
+   //             'payload' => $request->getContent()
+   //         ]);
+   //         return response()->json(['error' => 'Invalid payload'], 400);
+   //     } catch (\Stripe\Exception\SignatureVerificationException $e) {
+   //         Log::error('Stripe Webhook Error: Invalid signature', [
+   //             'error' => $e->getMessage(),
+   //             'payload' => $request->getContent()
+   //         ]);
+   //         return response()->json(['error' => 'Invalid signature'], 400);
+   //     }
+   
+   //     // Handle specific event types
+   //     switch ($event->type) {
+   //         case 'payment_intent.succeeded':
+   //             $this->storeOneTimePaymentDetails($event->data->object);
+   //             break;
+   //         case 'invoice.payment_succeeded':
+   //             $this->storeSubscriptionPaymentDetails($event->data->object);
+   //             break;
+   //         case 'customer.subscription.created':
+   //             $this->storeSubscriptionDetails($event->data->object);
+   //             break;
+   //         // Add other relevant cases as needed
+   //         default:
+   //             Log::info('Unhandled event type: ' . $event->type);
+   //     }
+   
+   //     return response()->json(['status' => 'success']);
+   // }
+   
+   // protected function storeOneTimePaymentDetails($paymentIntent)
+   // {
+   //    try {
+   //       // Log when the method is called
+   //       Log::info('Handling one-time payment for Payment Intent: ' . $paymentIntent->id);
+
+   //       // Check for valid payment intent object and customer ID
+   //       if (!isset($paymentIntent->customer)) {
+   //             Log::warning('Payment Intent does not contain a customer ID.');
+   //             return;
+   //       }
+
+   //       $customerId = $paymentIntent->customer;
+
+   //       // Fetch user based on Stripe customer ID
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if (!$user) {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //             return;
+   //       }
+
+   //       // Check for duplicate payment
+   //       $existingPayment = Payment::where('stripe_payment_id', $paymentIntent->id)->exists();
+
+   //       if ($existingPayment) {
+   //             Log::info('Duplicate Payment: ' . $paymentIntent->id);
+   //             return;
+   //       }
+
+   //       // Create the payment entry with subscription_id set to "one-time"
+   //       Payment::create([
+   //          'user_id' => $user->id,
+   //          'stripe_payment_id' => $paymentIntent->id,
+   //          'amount' => $paymentIntent->amount_received / 100, // Convert from cents
+   //          'currency' => $paymentIntent->currency,
+   //          'status' => $paymentIntent->status,
+   //          'subscription_id' => null, // Set null for one-time payments
+   //          'plan_id' => $paymentIntent->metadata->plan_id ?? null, // Assume plan_id is in metadata if applicable
+   //       ]);
+
+   //       Log::info('One-time payment stored successfully for Payment Intent: ' . $paymentIntent->id);
+         
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to store one-time payment details', [
+   //             'error' => $e->getMessage(),
+   //             'payment_intent' => $paymentIntent
+   //       ]);
+   //    }
+   // }
+
+   // protected function updateSubscriptionRecord($user, $invoice)
+   // {
+   //    try {
+   //       // Mark the existing subscription as expired
+   //       $activeSubscription = Subscription::where('user_id', $user->id)
+   //             ->where('stripe_status', 'active')
+   //             ->orWhere('stripe_status', 'trialing')
+   //             ->first();
+
+   //       if ($activeSubscription) {
+   //             $activeSubscription->update([
+   //                'stripe_status' => 'expired',
+   //                'ends_at' => now(), // Mark the current time as the end time
+   //             ]);
+
+   //             Log::info('Marked existing subscription as expired: ' . $activeSubscription->stripe_id);
+   //       }
+
+   //       // Create a new subscription record
+   //       $newSubscription = Subscription::create([
+   //             'user_id' => $user->id,
+   //             'stripe_id' => $invoice->subscription,
+   //             'stripe_status' => $invoice->status,
+   //             'stripe_price' => $invoice->lines->data[0]->price->id ?? null,
+   //             'quantity' => $invoice->lines->data[0]->quantity ?? 1,
+   //             'trial_ends_at' => $invoice->lines->data[0]->plan->trial_period_days
+   //                ? now()->addDays($invoice->lines->data[0]->plan->trial_period_days)
+   //                : null,
+   //             'ends_at' => \Carbon\Carbon::createFromTimestamp($invoice->lines->data[0]->period->end ?? time()),
+   //       ]);
+
+   //       Log::info('Created new subscription record: ' . $newSubscription->stripe_id);
+   //    } catch (\Exception $e) {
+   //       Log::error('Error updating subscription records', [
+   //             'error' => $e->getMessage(),
+   //             'invoice' => $invoice,
+   //       ]);
+   //    }
+   // }
+
+   // protected function storeSubscriptionPaymentDetails($invoice)
+   // {
+   //    try {
+         
+   //       Log::info('Processing invoice.payment_succeeded event', [
+   //          'invoice_id' => $invoice->id,
+   //          'customer_id' => $invoice->customer,
+   //          'subscription_id' => $invoice->subscription,
+   //       ]);
+
+   //       // Retrieve customer ID from the invoice
+   //       $customerId = $invoice->customer;
+
+   //       // Find the user based on the Stripe customer ID
+   //       $user = User::where('stripe_customer_id', $customerId)->first();
+
+   //       if (!$user) {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //             return;
+   //       }
+
+   //       // Check for duplicate payment entries
+   //       $existingPayment = Payment::where('stripe_payment_id', $invoice->id)->exists();
+
+   //       if ($existingPayment) {
+   //             Log::info('Duplicate payment detected. Payment already exists for invoice: ' . $invoice->id);
+   //             return;
+   //       }
+
+   //       // Validate invoice amounts
+   //       if ($invoice->amount_paid > 0) {
+   //             // Insert the payment into the database
+   //             Payment::create([
+   //                'user_id' => $user->id,
+   //                'stripe_payment_id' => $invoice->id,
+   //                'amount' => $invoice->amount_paid / 100, // Convert cents to dollars
+   //                'currency' => $invoice->currency,
+   //                'status' => $invoice->status,
+   //                'subscription_id' => $invoice->subscription, // Attach subscription ID
+   //                'description' => $invoice->lines->data[0]->description ?? 'Subscription Payment',
+   //                'plan_id' => $invoice->lines->data[0]->price->id ?? null, // Fetch price ID if available
+   //             ]);
+
+   //             Log::info('Payment stored successfully for invoice: ' . $invoice->id);
+
+   //             // Handle subscription record
+   //             $this->updateSubscriptionRecord($user, $invoice);
+   //       } else {
+   //             Log::warning('Invoice amount_paid is zero for invoice: ' . $invoice->id);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Error storing subscription payment details', [
+   //             'error' => $e->getMessage(),
+   //             'invoice' => $invoice,
+   //       ]);
+   //    }
+   // }
+
+   // protected function storeSubscriptionDetails($subscription)
+   // {
+   //    try {
+   //       $customerId = $subscription->customer;
+   //       $user = User::where('stripe_customer_id', $customerId)->first(); // Fetch user based on Stripe customer ID
+   //       if ($user) {
+   //             // Prevent duplicate subscription entries
+   //             if (!Subscription::where('stripe_id', $subscription->id)->exists()) {
+   //                // Create the subscription if it doesn't exist
+   //                Subscription::create([
+   //                   'user_id' => $user->id,
+   //                   'stripe_id' => $subscription->id,
+   //                   'stripe_status' => $subscription->status == "incomplete" ? "complete" : $paymentIntent->status,
+   //                   'stripe_price' => $subscription->plan->id,
+   //                   'quantity' => $subscription->quantity,
+   //                   'trial_ends_at' => $subscription->trial_end ? \Carbon\Carbon::createFromTimestamp($subscription->trial_end) : null,
+   //                   'ends_at' => $subscription->current_period_end ? \Carbon\Carbon::createFromTimestamp($subscription->current_period_end) : null,
+   //                ]);
+   //             } else {
+   //                Log::info('Duplicate Subscription: ' . $subscription->id);
+   //             }
+   //       } else {
+   //             Log::warning('User not found for Stripe customer ID: ' . $customerId);
+   //       }
+   //    } catch (\Exception $e) {
+   //       Log::error('Stripe Webhook Error: Failed to store subscription details', [
+   //             'error' => $e->getMessage(),
+   //             'subscription' => $subscription
+   //       ]);
+   //    }
+   // }
+
+   public function handleStripeWebhook(Request $request)
+   {
+      $payload = $request->getContent();
+      $sigHeader = $request->header('Stripe-Signature');
+      $endpointSecret = env('STRIPE_WEBHOOK_SECRET'); // Set your Stripe webhook secret in .env
+
+      try {
+         // Verify the webhook signature
+         $event = \Stripe\Webhook::constructEvent(
+               $payload,
+               $sigHeader,
+               $endpointSecret
+         );
+
+         // Handle specific events
+         switch ($event->type) {
+               case 'checkout.session.completed':
+                  $session = $event->data->object;
+
+                  // Handle completed checkout sessions
+                  $this->handleCheckoutSessionCompleted($session);
+                  break;
+
+               case 'invoice.payment_succeeded':
+                  $invoice = $event->data->object;
+
+                  // Handle successful subscription payments
+                  $this->handleInvoicePaymentSucceeded($invoice);
+                  break;
+
+               case 'invoice.payment_failed':
+                  $invoice = $event->data->object;
+
+                  // Handle failed subscription payments (optional)
+                  $this->handlePaymentFailed($invoice);
+                  break;
+
+               default:
+                  // Log unhandled event types for debugging
+                  \Log::info("Unhandled Stripe event type: {$event->type}");
+         }
+
+         return response()->json(['status' => 'success'], 200);
+      } catch (\Exception $e) {
+         \Log::error('Stripe webhook error: ' . $e->getMessage());
+         return response()->json(['error' => $e->getMessage()], 400);
+      }
+   }
+
+   private function handleCheckoutSessionCompleted($session)
+   {
+      $metadata = $session->metadata;
+
+      // Extract metadata
+      $userId = $metadata->user_id;
+      $planId = $metadata->plan_id;
+      $priceType = $metadata->price_type; // 'fixed' or 'monthly'
+      $duration = $metadata->duration;
+
+      // Fetch user and plan
+      $user = User::findOrFail($userId);
+      $plan = Plan::findOrFail($planId);
+
+      // Calculate subscription dates
+      $startDate = now();
+      $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
+
+      // Create subscription
+      $subscription = Subscription::create([
+         'user_id' => $user->id,
+         'plan_id' => $plan->id,
+         'type' => $priceType,
+         'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $session->id,
+         'start_date' => $startDate,
+         'end_date' => $endDate,
+         'status' => 'active', // Set active after completion
+      ]);
+
+      // Save payment details
+      Payment::create([
+         'subscription_id' => $subscription->id,
+         'payment_id' => $session->payment_intent,
+         'amount' => $session->amount_total / 100, // Convert from cents
+         'currency' => $session->currency,
+         'status' => 'successful',
+         'payment_date' => now(),
+      ]);
+
+      // Assign subscription items
+      $this->assignSubscriptionItems($subscription->id, $plan, $duration);
+   }
+
+   private function assignSubscriptionItems($subscriptionId, $plan, $duration)
+   {
+      $types = ['exams', 'quizzes', 'practice_sets', 'videos', 'lessons'];
+
+      foreach ($types as $type) {
+         $itemIds = json_decode($plan->$type); // Decode the JSON array
+
+         if ($itemIds && is_array($itemIds)) {
+               foreach ($itemIds as $itemId) {
+                  SubscriptionItem::create([
+                     'subscription_id' => $subscriptionId,
+                     'item_type' => rtrim($type, 's'), // Convert plural to singular
+                     'item_id' => $itemId,
+                     'assigned_at' => now(),
+                     'expires_at' => now()->addMonths($duration), // Match the subscription duration
+                     'status' => 'active',
+                  ]);
+               }
+         }
+      }
+   }
+
+   private function handleInvoicePaymentSucceeded($invoice)
+   {
+      $subscriptionId = $invoice->subscription;
+
+      // Find the subscription
+      $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
+
+      if ($subscription) {
+         // Save the payment
+         Payment::create([
+               'subscription_id' => $subscription->id,
+               'payment_id' => $invoice->payment_intent,
+               'amount' => $invoice->amount_paid / 100, // Convert from cents
+               'currency' => $invoice->currency,
+               'status' => 'successful',
+               'payment_date' => now(),
+         ]);
+      }
+   }
+
+   private function handlePaymentFailed($invoice)
+   {
+      $subscriptionId = $invoice->subscription;
+
+      // Log payment failure
+      \Log::error("Payment failed for subscription: $subscriptionId");
+
+      // Find the subscription and mark it as 'payment_failed' (optional)
+      $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
+
+      if ($subscription) {
+         $subscription->update(['status' => 'payment_failed']);
+      }
+   }
+
 
 
 }
