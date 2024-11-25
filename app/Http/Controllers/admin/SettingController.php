@@ -212,6 +212,36 @@ class SettingController extends Controller
         // Save the updated settings
         $settings->save();
 
+        // Update .env variables
+        $envPath = base_path('.env');
+        if (file_exists($envPath)) {
+            $envContent = file_get_contents($envPath);
+
+            $variablesToUpdate = [
+                'MAIL_HOST' => $request->input('host_name'),
+                'MAIL_PORT' => $request->input('port'),
+                'MAIL_USERNAME' => $request->input('userName'),
+                'MAIL_PASSWORD' => $request->input('password'),
+                'MAIL_ENCRYPTION' => $request->input('encryption'),
+                'MAIL_FROM_ADDRESS' => $request->input('from_mail'),
+                'MAIL_FROM_NAME' => $request->input('from_name'),
+            ];
+
+            foreach ($variablesToUpdate as $key => $value) {
+                // Replace or add the environment variable
+                if (preg_match("/^{$key}=.*$/m", $envContent)) {
+                    $envContent = preg_replace("/^{$key}=.*$/m", "{$key}={$value}", $envContent);
+                } else {
+                    $envContent .= "\n{$key}={$value}";
+                }
+            }
+
+            file_put_contents($envPath, $envContent, LOCK_EX);
+        }
+
+        // Clear and cache configuration to apply .env changes
+        \Artisan::call('config:cache');
+
         // Redirect with success message
         return redirect()->back()->with('success', 'Email settings updated successfully.');
     }
