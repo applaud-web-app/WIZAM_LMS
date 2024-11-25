@@ -1111,32 +1111,77 @@ class SettingController extends Controller
     }
 
 
-    public function enquiry(Request $request){
-        if ($request->ajax()) {
-            $sections = Enquiry::latest();
+    public function enquiry(Request $request)
+{
+    // Check if 'id' is present in the request to determine if it's a view request
+    if ($request->has('id')) {
+        $id = $request->input('id');
+        $enquiry = Enquiry::find($id);
 
-            return DataTables::of($sections)
-                ->addIndexColumn()
-                ->addColumn('action', function ($section) {
-                    $parms = "id=".$section->id;
-                    $deleteUrl = encrypturl(route('delete-enquiry'),$parms);
-                    return '<button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger"  data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>';
-                })
-                ->addColumn('created_at', function($row) {
-                    return date('d/m/Y', strtotime($row->created_at));
-                })
-                ->addColumn('course', function($row) {
-                    if(isset($row->course)){
-                        return $row->course;
-                    }
-                    return "----";
-                })
-                ->rawColumns(['course','created_at','action'])
-                ->make(true);
+        if ($enquiry) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'name' => $enquiry->name,
+                    'course' => $enquiry->course ?? '----',
+                    'email' => $enquiry->email,
+                    'phone' => $enquiry->phone,
+                    'hear_by' => $enquiry->hear_by,
+                    'study_mode' => $enquiry->study_mode,
+                    'contact_me' => $enquiry->contact_me,
+                    'message' => $enquiry->message,
+                    'created_at' => $enquiry->created_at ? $enquiry->created_at->format('d/m/Y') : '',
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Enquiry not found.'
+            ], 404);
         }
-        return view('setting.enquiry');
     }
 
+    // Handle DataTable AJAX request
+    if ($request->ajax()) {
+        $enquiries = Enquiry::select(['id', 'name', 'course', 'email', 'phone', 'hear_by', 'study_mode', 'contact_me', 'message', 'created_at'])->latest();
+
+        return DataTables::of($enquiries)
+            ->addIndexColumn()
+            ->filter(function ($query) use ($request) {
+                if ($request->has('search') && $request->search['value'] != '') {
+                    $search = $request->search['value'];
+                    $query->where(function($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('course', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%")
+                          ->orWhere('phone', 'like', "%{$search}%")
+                          ->orWhere('hear_by', 'like', "%{$search}%")
+                          ->orWhere('study_mode', 'like', "%{$search}%")
+                          ->orWhere('contact_me', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->addColumn('action', function ($enquiry) {
+                $params = "id=" . $enquiry->id;
+                $deleteUrl = encrypturl(route('delete-enquiry'), $params);
+                $viewUrl = route('enquiry', ['id' => $enquiry->id]); // Reusing the same route with 'id'
+
+                return '
+                    <button type="button" data-url="' . $viewUrl . '" class="viewItem cursor-pointer uil uil-eye hover:text-primary mr-2" data-te-toggle="modal" data-te-target="#viewModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                    <button type="button" data-url="' . $deleteUrl . '" class="deleteItem cursor-pointer uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button>
+                ';
+            })
+            ->editColumn('created_at', function ($enquiry) {
+                return $enquiry->created_at ? $enquiry->created_at->format('d/m/Y') : '';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    return view('setting.enquiry');
+}
+
+    
 
     public function deleteEnquiry(Request $request){
         $request->validate([
