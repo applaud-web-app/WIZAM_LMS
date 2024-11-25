@@ -317,7 +317,7 @@ class CMSController extends Controller
             $image->move(public_path('blogs'), $imageName);
 
             // Store the image path in the database (relative to the public directory)
-            $imagePath = $baseUrl."/blogs/".$imagePath;
+            $imagePath = $baseUrl."/blogs/".$imageName;
         }
 
         // Generate a slug from the blog title
