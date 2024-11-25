@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DashboardController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('verify-email', [AuthController::class, 'verifyEmail']);
 
 // Add the Forgot Password route
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);

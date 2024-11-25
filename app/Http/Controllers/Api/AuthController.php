@@ -73,6 +73,43 @@ class AuthController extends Controller
         }
     }
 
+    public function verifyEmail(Request $request){
+        try {
+            // Validate the email
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $email = $request->input('email');
+            $user = User::where('email',$email)->first();
+            if ($user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email already Exist'
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verified successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     public function login(Request $request)
     {
         // Validate the request
