@@ -218,37 +218,91 @@ class UserController extends Controller
 
 
     // MANAGE STUDENT
+    // public function studentManager(Request $request){
+    //     if (!Auth()->user()->can('user')) { 
+    //         return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+    //     }
+
+    //     if ($request->ajax()) {
+    //         // Fetch data for DataTables
+    //         $data = User::role('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
+    //         return Datatables::of($data)
+    //             ->addIndexColumn()
+    //             ->addColumn('created_date', function($row) {
+    //                 return isset($row->created_at) ? date('d/m/Y h:i A', strtotime($row->created_at)) : 'N/A';
+    //             })
+    //             ->addColumn('id', function($row) {
+    //                 $num = $row->id < 10 ? "00".$row->id : ($row->id < 100 ? "0".$row->id : $row->id);
+    //                 return "W001001".$num;
+    //             })
+    //             ->addColumn('status', function($row) {
+    //                 // Determine the status color and text based on `is_active`
+    //                 $statusColor = $row->status == 1 ? 'success' : 'danger';
+    //                 $statusText = $row->status == 1 ? 'Active' : 'Inactive';
+    //                 // Create the status badge HTML
+    //                 return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+    //             })
+    //             ->addColumn('role', function($row) {
+    //                 return isset($row->roles) && $row->roles->isNotEmpty() 
+    //                 ? ucfirst($row->roles->first()->name) 
+    //                 : 'No Role';                
+    //             })
+    //             ->addColumn('dob', function($row) {
+    //                 return $row->dob ? date('d/m/Y', strtotime($row->dob)) : 'NA';
+    //             })
+    //             ->addColumn('country', function($row) {
+    //                 return isset($row->countries) ? $row->countries->name : 'No Country';
+    //             })
+    //             ->addColumn('action', function($row) {
+    //                 $parms = "id=".$row->id;
+    //                 $editUrl = encrypturl(route('edit-student-details'),$parms);
+    //                 $deleteUrl = encrypturl(route('delete-student-data'),$parms);
+
+    //                 // Customize action buttons as needed
+    //                 return '<div class="text-light dark:text-subtitle-dark text-[19px] flex items-center justify-start p-0 m-0 gap-[20px]">
+    //                         <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
+    //                     </div>';
+    //                     // <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
+    //             })
+    //             ->rawColumns(['id','status', 'role', 'dob','country','action','created_date'])
+    //             ->make(true);
+    //     }
+
+    //     // Load the view when not an AJAX request
+    //     return view('manageUsers.users.view-student');
+    // }
+
     public function studentManager(Request $request){
         if (!Auth()->user()->can('user')) { 
             return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
         }
-
+    
         if ($request->ajax()) {
-            // Fetch data for DataTables
-            $data = User::role('student')->where('id','!=',1)->whereIn('status',[0,1])->with('countries')->orderBy('id','DESC'); // Specify columns you need
+            // Fetch data without executing the query immediately
+            $data = User::role('student')
+                ->where('id', '!=', 1)
+                ->whereIn('status', [0,1])
+                ->with('countries')
+                ->orderBy('id', 'DESC');
+    
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('created_date', function($row) {
-                    return isset($row->created_at) ? date('d/m/Y h:i A', strtotime($row->created_at)) : 'N/A';
+                    return isset($row->created_at) ? "<span>".date('d/m/Y', strtotime($row->created_at))."</span><br><span class='text-gray-500'>".date('h:i A', strtotime($row->created_at))."</span>"  : 'N/A';
                 })
                 ->addColumn('id', function($row) {
                     $num = $row->id < 10 ? "00".$row->id : ($row->id < 100 ? "0".$row->id : $row->id);
                     return "W001001".$num;
                 })
                 ->addColumn('status', function($row) {
-                    // Determine the status color and text based on `is_active`
                     $statusColor = $row->status == 1 ? 'success' : 'danger';
                     $statusText = $row->status == 1 ? 'Active' : 'Inactive';
-                    // Create the status badge HTML
-                    return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
+                    return "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                 })
                 ->addColumn('role', function($row) {
                     return isset($row->roles) && $row->roles->isNotEmpty() 
                     ? ucfirst($row->roles->first()->name) 
                     : 'No Role';                
-                })
-                ->addColumn('dob', function($row) {
-                    return $row->dob ? date('d/m/Y', strtotime($row->dob)) : 'NA';
                 })
                 ->addColumn('country', function($row) {
                     return isset($row->countries) ? $row->countries->name : 'No Country';
@@ -257,20 +311,77 @@ class UserController extends Controller
                     $parms = "id=".$row->id;
                     $editUrl = encrypturl(route('edit-student-details'),$parms);
                     $deleteUrl = encrypturl(route('delete-student-data'),$parms);
-
-                    // Customize action buttons as needed
+    
                     return '<div class="text-light dark:text-subtitle-dark text-[19px] flex items-center justify-start p-0 m-0 gap-[20px]">
                             <a href="'.$editUrl.'" class="editItem cursor-pointer edit-task-title uil uil-edit-alt hover:text-info"></a>
                         </div>';
-                        // <button type="button" data-url="'.$deleteUrl.'" class="deleteItem cursor-pointer remove-task-wrapper uil uil-trash-alt hover:text-danger" data-te-toggle="modal" data-te-target="#exampleModal" data-te-ripple-init data-te-ripple-color="light"></button> 
+                })
+                ->filter(function ($query) use ($request) {
+                    // Custom filtering logic
+                    $columnsSearch = $request->get('columns_search');
+    
+                    if (!empty($columnsSearch)) {
+                        // Column indexes as per DataTables configuration
+                        if (!empty($columnsSearch[1])) { // Reg. Date
+                            $query->whereDate('created_at', $columnsSearch[1]);
+                        }
+                        if (!empty($columnsSearch[2])) { // ID
+                            // $query->where('id', $columnsSearch[2]);
+                            $keyword = trim($columnsSearch[2]);
+                            // Check if the keyword starts with the static prefix
+                            if (strpos($keyword, 'W001001') === 0) {
+                                // Extract the numeric part after the prefix
+                                $numericIdStr = substr($keyword, 7);
+                                // Remove leading zeros
+                                $numericId = ltrim($numericIdStr, '0');
+            
+                                if (is_numeric($numericId)) {
+                                    $query->where('id', $numericId);
+                                } else {
+                                    // No valid numeric ID found; return no results
+                                    $query->where('id', -1);
+                                }
+                            } else {
+                                // If the keyword doesn't start with the prefix, handle as needed
+                                // For example, you might want to search by name or other fields
+                                // Or you can ignore it
+                                $query->where('id', -1);
+                            }
+                        }
+                        if (!empty($columnsSearch[3])) { // Name
+                            $query->where('name', 'like', "%{$columnsSearch[3]}%");
+                        }
+                        if (!empty($columnsSearch[4])) { // Email
+                            $query->where('email', 'like', "%{$columnsSearch[4]}%");
+                        }
+                        if (!empty($columnsSearch[5])) { // DOB
+                            $query->whereDate('dob', $columnsSearch[5]);
+                        }
+                        if (!empty($columnsSearch[6])) { // Country
+                            $query->whereHas('countries', function($q) use ($columnsSearch) {
+                                $q->where('name', 'like', "%{$columnsSearch[6]}%");
+                            });
+                        }
+                        if (!empty($columnsSearch[7])) { // Role
+                            $query->whereHas('roles', function($q) use ($columnsSearch) {
+                                $q->where('name', 'like', "%{$columnsSearch[7]}%");
+                            });
+                        }
+                        if (!empty($columnsSearch[8])) { // Status
+                            $status = strtolower($columnsSearch[8]) == 'active' ? 1 : 0;
+                            $query->where('status', $status);
+                        }
+                    }
                 })
                 ->rawColumns(['id','status', 'role', 'dob','country','action','created_date'])
                 ->make(true);
         }
-
+    
         // Load the view when not an AJAX request
         return view('manageUsers.users.view-student');
     }
+       
+    
 
     public function addStudent(){
         if (!Auth()->user()->can('user')) { 

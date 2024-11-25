@@ -439,6 +439,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/edit-plan', 'updatePlan')->name('update-plan');
         Route::get('/delete-plan', 'deletePlan')->name('delete-plan');
 
+        
+        Route::post('/get-feature-data','getFeatureData')->name('get-feature-data');
+
         // ------- PLAYMENT AND SUBSCRIPTION ------- //
         Route::get('/payment', 'payment')->name('view-payment');
         Route::get('/subscription', 'subscription')->name('view-subscription');

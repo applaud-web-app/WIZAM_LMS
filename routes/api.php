@@ -151,3 +151,7 @@ Route::middleware('checkAuthToken')->group(function () {
 });
 
 
+// ALTER TABLE `plans` CHANGE `feature_access` `exams` TEXT NULL DEFAULT NULL;
+// ALTER TABLE `plans` ADD `quizzes` TEXT NULL DEFAULT NULL AFTER `exams`;
+// ALTER TABLE `plans` ADD `practices` TEXT NULL DEFAULT NULL AFTER `quizzes`, ADD `lessons` TEXT NULL DEFAULT NULL AFTER `practices`;
+// ALTER TABLE `plans` ADD `videos` TEXT NULL DEFAULT NULL AFTER `lessons`;

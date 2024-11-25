@@ -16,6 +16,13 @@ use App\Models\Payment;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\Lesson;
+use App\Models\Exam;
+use App\Models\PracticeSet;
+use App\Models\Quizze;
+use App\Models\Video;
+use App\Models\PracticeLesson;
+use App\Models\PracticeVideo;
 
 class PaymentController extends Controller
 
@@ -67,39 +74,89 @@ class PaymentController extends Controller
       return view('managePayment.plans.create-plans',compact('subCategory'));
    }
 
+   public function getFeatureData(Request $request)
+   {
+      $categoryId = $request->input('category_id');
+      $data = [];
+
+      $data['practiceSets'] = PracticeSet::where('subCategory_id', $categoryId)
+         ->where('status', 1)
+         ->distinct()
+         ->get();
+
+      $data['quizzes'] = Quizze::where('subCategory_id', $categoryId)
+         ->where('status', 1)
+         ->where('is_public', 1)
+         ->distinct()
+         ->get();
+
+      $data['exams'] = Exam::where('subCategory_id', $categoryId)
+         ->where('status', 1)
+         ->where('is_public', 1)
+         ->distinct()
+         ->get();
+
+      $data['lessons'] = PracticeLesson::with(['lesson' => function ($query) {
+         $query->distinct();
+      }])->where('subcategory_id', $categoryId)
+         ->distinct()
+         ->get();
+
+      $data['videos'] = PracticeVideo::with(['video' => function ($query) {
+         $query->distinct();
+      }])->where('subcategory_id', $categoryId)
+         ->distinct()
+         ->get();
+
+      return response()->json($data);
+   }
+
    public function savePlan(Request $request)
    {
 
-      if (!Auth()->user()->can('plan')) { 
+      if (!Auth()->user()->can('plan')) {
          return redirect()->route('admin-dashboard')->with('error', 'You do not have permission to this page.');
+      }
+   
+      // Validate the inputs
+      $validatedData = $request->validate([
+         'plan_name' => 'required|string|min:3',
+         'price_type' => 'required|in:fixed,monthly',
+         'duration' => 'nullable|integer|min:1',
+         'price' => 'required|numeric|min:0',
+         'discount' => 'required|boolean',
+         'discount_percentage' => 'nullable|numeric|min:0|max:100',
+         'category' => 'required|integer',
+         'order' => 'required|integer|min:1',
+         'popular' => 'required|boolean',
+         'status' => 'required|boolean',
+         'exams' => 'array',
+         'exams.*' => 'integer',
+         'quizzes' => 'array',
+         'quizzes.*' => 'integer',
+         'practice_sets' => 'array',
+         'practice_sets.*' => 'integer',
+         'lessons' => 'array',
+         'lessons.*' => 'integer',
+         'videos' => 'array',
+         'videos.*' => 'integer',
+      ]);
+   
+      // Remove duplicates from feature arrays
+      $exams = array_unique($request->input('exams', []));
+      $quizzes = array_unique($request->input('quizzes', []));
+      $practice_sets = array_unique($request->input('practice_sets', []));
+      $lessons = array_unique($request->input('lessons', []));
+      $videos = array_unique($request->input('videos', []));
+   
+      if (empty($exam) && empty($quizzes) && empty($practice_sets) && empty($lessons) && empty($videos)) {
+         return redirect()->back()->withErrors([
+            'features' => 'At least one feature (exams, quizzes, practice sets, lessons, or videos) must be selected.',
+         ])->withInput();
       }
 
       // Set the Stripe API key
       \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-      // Validate incoming request data
-      $validatedData = $request->validate([
-         'category' => 'required|string',
-         'plan_name' => 'required|string',
-         'price_type' => 'required|string|in:monthly,fixed', // Ensure valid values
-         'duration' => 'nullable|integer', // This will be the count of months
-         'price' => 'required|numeric',
-         'discount' => 'required|numeric',
-         'discount_percentage' => 'nullable|integer',
-         'description' => 'nullable|string',
-         'order' => 'nullable|integer',
-         'feature_access' => 'required|boolean',
-         'features.*' => 'nullable|string',
-         'popular' => 'required|string|in:1,0',
-         'status' => 'required|string|in:1,0',
-      ]);
-
-      // Ensure features are always an array
-      if (!empty($validatedData['features'])) {
-         $validatedData['features'] = json_encode(array_slice($validatedData['features'], 1));
-      } else {
-         $validatedData['features'] = json_encode([]); // Use an empty array if no features are provided
-      }
 
       // Fetch the currency setting (assuming a single currency for now)
       $generalSetting = GeneralSetting::select('currency')->first();
@@ -108,16 +165,16 @@ class PaymentController extends Controller
       // Create a new product in Stripe
       try {
          $product = Product::create([
-               'name' => $validatedData['plan_name'],
-               'description' => $validatedData['description'] ?? '',
-               'type' => 'service', // Change to 'good' if applicable
+            'name' => $validatedData['plan_name'],
+            'description' => $validatedData['description'] ?? $validatedData['plan_name'],
+            'type' => 'service', // Change to 'good' if applicable
          ]);
 
          // Calculate the price considering any discounts
          $basePrice = $validatedData['price'] * 100; // Convert to cents
 
          // Apply percentage discount if applicable
-         if ($validatedData['discount_percentage'] > 0) {
+         if ($validatedData['discount'] == 1 &&!empty($validatedData['discount_percentage']) && $validatedData['discount_percentage'] > 0) {
                $percentageDiscount = ($basePrice * ($validatedData['discount_percentage'] / 100));
                $basePrice -= $percentageDiscount; // Subtract percentage discount
          }
@@ -127,60 +184,144 @@ class PaymentController extends Controller
 
          // Prepare the Stripe price creation data
          $stripePriceData = [
-               'unit_amount' => $finalPrice,
-               'currency' => $currency, // Use the currency from the general settings
-               'product' => $product->id,
+            'unit_amount' => $finalPrice,
+            'currency' => $currency, // Use the currency from the general settings
+            'product' => $product->id,
          ];
 
          // Set recurring interval if the plan is monthly
          if ($validatedData['price_type'] == 'monthly') {
-               if ($validatedData['duration']) {
-                  $stripePriceData['recurring'] = [
-                     'interval' => 'month', // monthly recurrence
-                     'interval_count' => $validatedData['duration'], // Pass the duration as the count of months
-                  ];
-               } else {
-                  throw new \Exception('Duration must be specified for monthly plans.');
-               }
-         } 
-         // For 'fixed' price type, it's a one-time payment so no recurring setting is required
-
+            if (!empty($validatedData['duration']) && $validatedData['duration'] >= 1) {
+               $stripePriceData['recurring'] = [
+                  'interval'       => 'month', // Monthly recurrence
+                  'interval_count' => 1,       // Charge every month
+               ];
+            } else {
+               // Duration must be specified for monthly plans
+               return redirect()->back()->withErrors([
+                  'duration' => 'Duration must be specified and at least 1 month for monthly plans.',
+               ])->withInput();
+            }
+         }
+   
          // Create a price in Stripe
          $price = Price::create($stripePriceData);
-      } catch (\Exception $e) {
+
+         // CREATE A PLAN IN DATABASE
+         $data = new Plan();
+         $data->category_id = $validatedData['category'] ?? null;
+         $data->name = $validatedData['plan_name'] ?? null;
+         $data->price_type = $validatedData['price_type'] ?? null; // monthly or fixed
+         $data->duration = $validatedData['duration'] ?? null; // Duration in months
+         $data->price = $validatedData['price'] ?? null;
+         $data->discount = $validatedData['discount'] ?? 0;
+         $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
+         $data->description = $validatedData['description'] ?? null;
+         $data->sort_order = $validatedData['order'] ?? null;
+         $data->exams = json_encode($exams,true) ?? null;
+         $data->quizzes = json_encode($quizzes,true) ?? null;
+         $data->practices = json_encode($practice_sets,true) ?? null;
+         $data->lessons = json_encode($lessons,true) ?? null;
+         $data->videos = json_encode($videos,true) ?? null;
+         $data->popular = $validatedData['popular'] ?? null;
+         $data->status = $validatedData['status'] ?? null;
+         $data->stripe_product_id = $product->id;
+         $data->stripe_price_id = $price->id;
+         $data->save();
+         // Return a success response
+         return redirect()->route('view-plans')->with('success', 'Plan Created Successfully');
+
+      } catch (\Stripe\Exception\ApiErrorException $e) {
+
          // Handle any errors from the Stripe API
-         return redirect()->route('view-plans')->with('error', 'Failed to create plan in Stripe: ' . $e->getMessage());
+         return redirect()->back()->with('error', 'Failed to create plan in Stripe: ' . $e->getMessage());
+      } catch (\Exception $e) {
+
+         // Handle any other exceptions
+         return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
       }
 
-      if($validatedData['feature_access'] == 1){
-         $validatedData['features'] = json_encode(["practice","quizzes","lessons","videos","exams"]);
-      }
+      // // Create a new instance of your model and fill it with the validated data
+      // $data = new Plan();
+      // $data->category_id = $validatedData['category'] ?? null;
+      // $data->name = $validatedData['plan_name'] ?? null;
+      // $data->price_type = $validatedData['price_type'] ?? null; // monthly or fixed
+      // $data->duration = $validatedData['duration'] ?? null;
+      // $data->price = $validatedData['price'] ?? null;
+      // $data->discount = $validatedData['discount'] ?? 0;
+      // $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
+      // $data->description = $validatedData['description'] ?? null;
+      // $data->sort_order = $validatedData['order'] ?? null;
+      // $data->feature_access = $validatedData['feature_access'] ?? null;
+      // $data->features = $validatedData['features'];
+      // $data->popular = $validatedData['popular'] ?? null;
+      // $data->status = $validatedData['status'] ?? null;
 
-      // Create a new instance of your model and fill it with the validated data
-      $data = new Plan();
-      $data->category_id = $validatedData['category'] ?? null;
-      $data->name = $validatedData['plan_name'] ?? null;
-      $data->price_type = $validatedData['price_type'] ?? null; // monthly or fixed
-      $data->duration = $validatedData['duration'] ?? null;
-      $data->price = $validatedData['price'] ?? null;
-      $data->discount = $validatedData['discount'] ?? 0;
-      $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
-      $data->description = $validatedData['description'] ?? null;
-      $data->sort_order = $validatedData['order'] ?? null;
-      $data->feature_access = $validatedData['feature_access'] ?? null;
-      $data->features = $validatedData['features'];
-      $data->popular = $validatedData['popular'] ?? null;
-      $data->status = $validatedData['status'] ?? null;
+      // // Save the Stripe IDs in your local database
+      // $data->stripe_product_id = $product->id;
+      // $data->stripe_price_id = $price->id;
 
-      // Save the Stripe IDs in your local database
-      $data->stripe_product_id = $product->id;
-      $data->stripe_price_id = $price->id;
-
-      $data->save();
+      // $data->save();
 
       // Return a success response
-      return redirect()->route('view-plans')->with('success', 'Plan Created Successfully');
+      return redirect()->back()->with('success', 'Something Went Wrong');
    }
+
+   // public function subscribeToPlan(Request $request, $planId)
+   // {
+   //    $plan = Plan::findOrFail($planId);
+   //    $user = Auth::user();
+
+   //    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+   //    try {
+   //       // Create or retrieve the Stripe customer
+   //       if (!$user->stripe_customer_id) {
+   //             $customer = \Stripe\Customer::create([
+   //                'email' => $user->email,
+   //                'name' => $user->name,
+   //             ]);
+   //             $user->stripe_customer_id = $customer->id;
+   //             $user->save();
+   //       }
+
+   //       if ($plan->price_type == 'monthly') {
+   //             // Create a subscription with a limited duration
+   //             $subscription = \Stripe\Subscription::create([
+   //                'customer' => $user->stripe_customer_id,
+   //                'items' => [
+   //                   ['price' => $plan->stripe_price_id],
+   //                ],
+   //                'cancel_at' => strtotime("+{$plan->duration} months"),
+   //             ]);
+
+   //             // Save subscription details in your database
+   //             // ...
+
+   //             return redirect()->route('dashboard')->with('success', 'Subscription started successfully.');
+   //       } elseif ($plan->price_type == 'fixed') {
+   //             // Handle fixed plan purchase (one-time payment)
+   //             $paymentIntent = \Stripe\PaymentIntent::create([
+   //                'amount' => $plan->price * 100,
+   //                'currency' => $plan->currency,
+   //                'customer' => $user->stripe_customer_id,
+   //                'description' => $plan->name,
+   //             ]);
+
+   //             // Save payment details in your database
+   //             // ...
+
+   //             return redirect()->route('dashboard')->with('success', 'Plan purchased successfully.');
+   //       } else {
+   //             return redirect()->back()->with('error', 'Invalid plan type.');
+   //       }
+   //    } catch (\Stripe\Exception\ApiErrorException $e) {
+   //       return redirect()->back()->with('error', 'Stripe error: ' . $e->getMessage());
+   //    } catch (\Exception $e) {
+   //       return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+   //    }
+   // }
+
 
    public function editPlan(Request $request){
       
