@@ -35,6 +35,9 @@
       .note-editor *{
          all: revert;
       }
+      .note-editable *{
+         all: unset;
+      }
    </style>
 </head>
 
