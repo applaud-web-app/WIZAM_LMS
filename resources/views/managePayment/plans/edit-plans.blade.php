@@ -281,7 +281,7 @@
                                 (Max
                                 200 Characters)</label>
                             <textarea name="description" id="description" maxlength="200" rows="4"
-                                class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark"
+                                class="w-full px-4 py-3 rounded-4 border-normal border-1 dark:bg-box-dark-up dark:border-box-dark-up text-body dark:text-subtitle-dark" maxlength="100"
                                 placeholder="Enter a short description">{{$plan->description}}</textarea>
                         </div>
                         <!-- Sort Order -->
