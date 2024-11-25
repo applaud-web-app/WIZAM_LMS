@@ -36,7 +36,7 @@
          all: revert;
       }
       .note-editable *{
-         all: unset;
+         all: revert-layer;
       }
    </style>
 </head>
