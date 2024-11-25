@@ -768,13 +768,6 @@ class CmsController extends Controller
                 ],
             ];
 
-            // Add cancel_at for subscriptions
-            if ($plan->price_type === 'monthly') {
-                $sessionData['subscription_data'] = [
-                    'cancel_at' => $cancelDate, // Automatically cancel after 6 months
-                ];
-            }
-
             $session = $stripe->checkout->sessions->create($sessionData);
             return response()->json(['status' => true, 'sessionId' => $session->id], 200);
         } catch (\Throwable $th) {
