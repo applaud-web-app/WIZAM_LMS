@@ -301,7 +301,7 @@ class CMSController extends Controller
             'shortDescription' => 'required|string|max:500',
             'blogContent' => 'required|string',
             'authorName' => 'required',
-            'blogImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
+            'blogImage' => 'nullable|max:2048', // Optional image validation
         ]);
 
         // Handle the image upload
@@ -376,7 +376,7 @@ class CMSController extends Controller
             'shortDescription' => 'required|string|max:500',
             'blogContent' => 'required|string',
             'authorName' => 'required',
-            'blogImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
+            'blogImage' => 'nullable|image|max:2048', // Optional image validation
             'eq' => 'required',
         ]);
     

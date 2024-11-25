@@ -925,7 +925,7 @@ class ManageTest extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate the image URL
+            'image' => 'required|image|max:2048', // Validate the image URL
         ]);
 
 
@@ -1010,7 +1010,7 @@ class ManageTest extends Controller
             'visibility' => 'required|boolean',
             'favorite' => 'required|boolean',
             'status' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         // Find the exam by ID

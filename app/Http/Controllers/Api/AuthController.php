@@ -371,7 +371,7 @@ class AuthController extends Controller
                 'phone_number' => 'required|string|max:15',
                 'email' => 'required|email',
                 'dob' => 'required|date',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+                'image' => 'nullable|image|max:2048', 
             ]);
 
             // VERIFY NEW EMAIL IS UNIQUE OR NOT

@@ -409,7 +409,7 @@ class UserController extends Controller
             'groups' => 'required|array',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|string|in:1,0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|max:2048'
         ]);
 
         // Begin transaction
@@ -531,7 +531,7 @@ class UserController extends Controller
             'status' => 'required|string|in:1,0',
             'password' => 'nullable|string|min:6|confirmed', // Validate password and confirmation
             'eq' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         // Begin transaction
@@ -755,7 +755,7 @@ class UserController extends Controller
             'groups' => 'required|array',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|string|in:1,0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|max:2048'
         ]);
 
         // Begin transaction
@@ -880,7 +880,7 @@ class UserController extends Controller
             'status' => 'required|string|in:1,0',
             'password' => 'nullable|string|min:6|confirmed', // Validate password and confirmation
             'eq' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         // Begin transaction

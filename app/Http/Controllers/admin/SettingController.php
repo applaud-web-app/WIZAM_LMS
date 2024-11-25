@@ -43,9 +43,9 @@ class SettingController extends Controller
             'tag_line' => 'required|string|max:255',
             'copyright'=> 'required|string|max:255',
             'seo_description' => 'required|string|max:1000',
-            'site_favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'light_site_logo'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'site_favicon' => 'nullable|image|max:2048',
+            'site_logo' => 'nullable|image|max:2048',
+            'light_site_logo'=> 'nullable|image|max:2048',
         ]);
 
         // Check if there is an existing GeneralSetting
@@ -724,7 +724,7 @@ class SettingController extends Controller
             'card_description' => 'required|array',
             'card_short_description' => 'required|array',
             'card_status' => 'required|array',
-            'card_image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate image files
+            'card_image.*' => 'nullable|image|max:2048', // Validate image files
         ]);
 
         // Find the existing help entry
@@ -1224,7 +1224,7 @@ class SettingController extends Controller
                 "{$page}_seo_title" => 'required|string|max:255',
                 "{$page}_seo_keyword" => 'required|string|max:255',
                 "{$page}_seo_description" => 'required|string|max:500',
-                "{$page}_og_image" => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                "{$page}_og_image" => 'nullable|image|max:2048',
             ]);
 
             // Fetch or create the SEO data for the specific page
