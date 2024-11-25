@@ -51,6 +51,7 @@
                      <th>#</th>
                      <th>Name</th>
                      <th>Category</th>
+                     <th>Type</th>
                      <th>Price</th>
                      <th>Status</th>
                      <th>Action</th>
@@ -114,6 +115,7 @@
                     {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                     { data: 'name', name: 'name' },
                     { data: 'category', name: 'category' },
+                    { data: 'type', name: 'type' },
                     { data: 'price', name: 'price' },
                     { data: 'status', name: 'status' },
                     { data: 'action', name: 'action', orderable: false, searchable: false },

@@ -52,6 +52,9 @@ class PaymentController extends Controller
                   }
                   return "----";
                })
+               ->addColumn('type', function($row) {
+                  return ucfirst($row->price_type);
+               })
                ->addColumn('status', function($row) {
                   // Determine the status color and text based on `is_active`
                   $statusColor = $row->status == 1 ? 'success' : 'danger';
@@ -59,7 +62,7 @@ class PaymentController extends Controller
                   // Create the status badge HTML
                   return $status = "<span class='bg-{$statusColor}/10 capitalize font-medium inline-flex items-center justify-center min-h-[24px] px-3 rounded-[15px] text-{$statusColor} text-xs'>{$statusText}</span>";
                })
-               ->rawColumns(['status','category','action'])
+               ->rawColumns(['status','category','action','type'])
                ->make(true);
       }
       return view('managePayment.plans.view-plans');
