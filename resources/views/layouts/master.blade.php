@@ -32,8 +32,12 @@
    @stack('style')
 
    <style>
-       .note-editor *{
+       .note-editor .note-toolbar *{
       all: revert;
+   }
+   
+   .note-editable *{
+      all: unset;   
    }
    </style>
 </head>
