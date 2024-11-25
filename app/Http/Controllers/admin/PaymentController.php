@@ -880,6 +880,13 @@ class PaymentController extends Controller
                   $this->handleCheckoutSessionCompleted($session);
                   break;
 
+               case 'subscription.created':
+                  $subscription = $event->data->object;
+
+                  // Set cancel_at for the subscription
+                  $this->handleSubscriptionCreated($subscription);
+                  break;
+
                case 'invoice.payment_succeeded':
                   $invoice = $event->data->object;
 
@@ -905,6 +912,25 @@ class PaymentController extends Controller
          return response()->json(['error' => $e->getMessage()], 400);
       }
    }
+
+   private function handleSubscriptionCreated($subscription)
+   {
+      if (isset($subscription->metadata->duration)) {
+         $cancelDate = now()->addMonths($subscription->metadata->duration)->timestamp;
+
+         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+         // Update the subscription to set cancel_at
+         \Stripe\Subscription::update($subscription->id, [
+               'cancel_at' => $cancelDate,
+         ]);
+
+         \Log::info("Set cancel_at for subscription {$subscription->id} to {$cancelDate}");
+      } else {
+         \Log::warning("Subscription metadata does not contain duration: {$subscription->id}");
+      }
+   }
+
 
    private function handleCheckoutSessionCompleted($session)
    {
