@@ -121,6 +121,7 @@ class PaymentController extends Controller
       // Validate the inputs
       $validatedData = $request->validate([
          'plan_name' => 'required|string|min:3',
+         'description' => 'nullable|string',
          'price_type' => 'required|in:fixed,monthly',
          'duration' => 'nullable|integer|min:1',
          'price' => 'required|numeric|min:0',
@@ -149,7 +150,7 @@ class PaymentController extends Controller
       $lessons = array_unique($request->input('lessons', []));
       $videos = array_unique($request->input('videos', []));
    
-      if (empty($exam) && empty($quizzes) && empty($practice_sets) && empty($lessons) && empty($videos)) {
+      if (empty($exams) && empty($quizzes) && empty($practice_sets) && empty($lessons) && empty($videos)) {
          return redirect()->back()->withErrors([
             'features' => 'At least one feature (exams, quizzes, practice sets, lessons, or videos) must be selected.',
          ])->withInput();
@@ -241,28 +242,6 @@ class PaymentController extends Controller
          return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
       }
 
-      // // Create a new instance of your model and fill it with the validated data
-      // $data = new Plan();
-      // $data->category_id = $validatedData['category'] ?? null;
-      // $data->name = $validatedData['plan_name'] ?? null;
-      // $data->price_type = $validatedData['price_type'] ?? null; // monthly or fixed
-      // $data->duration = $validatedData['duration'] ?? null;
-      // $data->price = $validatedData['price'] ?? null;
-      // $data->discount = $validatedData['discount'] ?? 0;
-      // $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
-      // $data->description = $validatedData['description'] ?? null;
-      // $data->sort_order = $validatedData['order'] ?? null;
-      // $data->feature_access = $validatedData['feature_access'] ?? null;
-      // $data->features = $validatedData['features'];
-      // $data->popular = $validatedData['popular'] ?? null;
-      // $data->status = $validatedData['status'] ?? null;
-
-      // // Save the Stripe IDs in your local database
-      // $data->stripe_product_id = $product->id;
-      // $data->stripe_price_id = $price->id;
-
-      // $data->save();
-
       // Return a success response
       return redirect()->back()->with('success', 'Something Went Wrong');
    }
@@ -338,7 +317,37 @@ class PaymentController extends Controller
       $plan = Plan::where('id',$plan_id)->first();
       if($plan){
          $subCategory = SubCategory::whereIn('status',[1,0])->get();
-         return view('managePayment.plans.edit-plans',compact('subCategory','plan'));
+
+         $practices = PracticeSet::where('subCategory_id', $plan->category_id)
+         ->where('status', 1)
+         ->distinct()
+         ->get();
+
+         $quizzes = Quizze::where('subCategory_id', $plan->category_id)
+            ->where('status', 1)
+            ->where('is_public', 1)
+            ->distinct()
+            ->get();
+
+         $exams = Exam::where('subCategory_id', $plan->category_id)
+            ->where('status', 1)
+            ->where('is_public', 1)
+            ->distinct()
+            ->get();
+
+         $lessons = PracticeLesson::with(['lesson' => function ($query) {
+            $query->distinct();
+         }])->where('subcategory_id', $plan->category_id)
+            ->distinct()
+            ->get();
+
+         $videos = PracticeVideo::with(['video' => function ($query) {
+            $query->distinct();
+         }])->where('subcategory_id', $plan->category_id)
+            ->distinct()
+            ->get();
+
+         return view('managePayment.plans.edit-plans',compact('subCategory','plan','practices','quizzes','exams','lessons','videos'));
       }
       return redirect()->back()->with('error','Invalid Plan');
    }
@@ -354,29 +363,46 @@ class PaymentController extends Controller
 
       // Validate the incoming request data
       $validatedData = $request->validate([
-         'category' => 'required|string',
-         'plan_name' => 'required|string',
-         'price_type' => 'required|string|in:monthly,fixed', // Ensure valid values
-         'duration' => 'nullable|integer', // Assuming duration is optional
-         'price' => 'required|numeric',
-         'discount' => 'required|numeric',
-         'discount_percentage' => 'nullable|integer',
+         'plan_name' => 'required|string|min:3',
          'description' => 'nullable|string',
-         'order' => 'nullable|integer',
-         'feature_access' => 'required|boolean',
-         'features.*' => 'nullable|string',
-         'popular' => 'required|string|in:1,0',
-         'status' => 'required|string|in:1,0',
+         'price_type' => 'required|in:fixed,monthly',
+         'duration' => 'nullable|integer|min:1',
+         'price' => 'required|numeric|min:0',
+         'discount' => 'required|boolean',
+         'discount_percentage' => 'nullable|numeric|min:0|max:100',
+         'category' => 'required|integer',
+         'order' => 'required|integer|min:1',
+         'popular' => 'required|boolean',
+         'status' => 'required|boolean',
+         'exams' => 'array',
+         'exams.*' => 'integer',
+         'quizzes' => 'array',
+         'quizzes.*' => 'integer',
+         'practice_sets' => 'array',
+         'practice_sets.*' => 'integer',
+         'lessons' => 'array',
+         'lessons.*' => 'integer',
+         'videos' => 'array',
+         'videos.*' => 'integer',
          'eq' => 'required'
       ]);
 
       // Ensure features is always an array
-      if (!empty($validatedData['features'])) {
-         $validatedData['features'] = json_encode(array_slice($validatedData['features'], 1));
-      } else {
-         $validatedData['features'] = json_encode([]); // Use an empty array if no features are provided
+      $exams = array_unique($request->input('exams', []));
+      $quizzes = array_unique($request->input('quizzes', []));
+      $practice_sets = array_unique($request->input('practice_sets', []));
+      $lessons = array_unique($request->input('lessons', []));
+      $videos = array_unique($request->input('videos', []));
+   
+      if (empty($exams) && empty($quizzes) && empty($practice_sets) && empty($lessons) && empty($videos)) {
+         return redirect()->back()->withErrors([
+            'features' => 'At least one feature (exams, quizzes, practice sets, lessons, or videos) must be selected.',
+         ])->withInput();
       }
 
+      // Set the Stripe API key
+      \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+      
       // Decrypt the plan ID
       $data = decrypturl($request->eq);
       $plan_id = $data['id'];
@@ -399,13 +425,13 @@ class PaymentController extends Controller
                   'name' => $validatedData['plan_name'],
                   'description' => $validatedData['description'] ?? '',
                ]);
-
+               
                // Check if the price, discount, discount_percentage, or duration has changed
                $priceChanged = $validatedData['price'] != $data->price ||
                               $validatedData['discount'] != $data->discount ||
                               $validatedData['discount_percentage'] != $data->discount_percentage ||
-                              $validatedData['price_type'] != $data->price_type ||
-                              $validatedData['duration'] != $data->duration;
+                              $validatedData['price_type'] != $data->price_type;
+                              // $validatedData['duration'] != $data->duration
 
                // If price or duration changed, update the price in Stripe
                if ($priceChanged) {
@@ -413,7 +439,7 @@ class PaymentController extends Controller
                   $basePrice = $validatedData['price'] * 100; // Convert to cents
 
                   // Apply percentage discount if applicable
-                  if ($validatedData['discount_percentage'] > 0) {
+                  if ($validatedData['discount'] == 1 &&!empty($validatedData['discount_percentage']) && $validatedData['discount_percentage'] > 0) {
                      $percentageDiscount = ($basePrice * ($validatedData['discount_percentage'] / 100));
                      $basePrice -= $percentageDiscount; // Subtract percentage discount
                   }
@@ -421,22 +447,25 @@ class PaymentController extends Controller
                   // Ensure the price is not negative
                   $finalPrice = max(0, $basePrice);
 
-                  // Prepare the Stripe price data for update
+                  // Prepare the Stripe price creation data
                   $stripePriceData = [
                      'unit_amount' => $finalPrice,
-                     'currency' => $currency,
+                     'currency' => $currency, // Use the currency from the general settings
                      'product' => $product->id,
                   ];
 
-                  // Handle recurring settings for monthly plans
+                  // Set recurring interval if the plan is monthly
                   if ($validatedData['price_type'] == 'monthly') {
-                     if ($validatedData['duration']) {
-                           $stripePriceData['recurring'] = [
-                              'interval' => 'month',
-                              'interval_count' => $validatedData['duration'], // Set the new duration in months
-                           ];
+                     if (!empty($validatedData['duration']) && $validatedData['duration'] >= 1) {
+                        $stripePriceData['recurring'] = [
+                           'interval'       => 'month', // Monthly recurrence
+                           'interval_count' => 1,       // Charge every month
+                        ];
                      } else {
-                           throw new \Exception('Duration must be specified for monthly plans.');
+                        // Duration must be specified for monthly plans
+                        return redirect()->back()->withErrors([
+                           'duration' => 'Duration must be specified and at least 1 month for monthly plans.',
+                        ])->withInput();
                      }
                   }
 
@@ -450,26 +479,23 @@ class PaymentController extends Controller
                   $data->stripe_price_id = $price->id;
                }
 
-               if($validatedData['feature_access'] == 1){
-                  $validatedData['features'] = json_encode(["practice","quizzes","lessons","videos","exams"]);
-               }
-
                // Update the plan in the database
-               $data->category_id = $validatedData['category'];
-               $data->name = $validatedData['plan_name'];
-               $data->price_type = $validatedData['price_type'];  // monthly or fixed
-               $data->duration = $validatedData['duration'];
-               $data->price = $validatedData['price'];
-               $data->discount = $validatedData['discount'];
-               $data->discount_percentage = $validatedData['discount_percentage'];
-               $data->description = $validatedData['description'];
-               $data->sort_order = $validatedData['order'];
-               $data->feature_access = $validatedData['feature_access'];
-               $data->features = $validatedData['features'];
-               $data->popular = $validatedData['popular'];
-               $data->status = $validatedData['status'];
-
-               // Save the updated plan in the database
+               $data->category_id = $validatedData['category'] ?? null;
+               $data->name = $validatedData['plan_name'] ?? null;
+               $data->price_type = $validatedData['price_type'] ?? null; // monthly or fixed
+               $data->duration = $validatedData['duration'] ?? null; // Duration in months
+               $data->price = $validatedData['price'] ?? null;
+               $data->discount = $validatedData['discount'] ?? 0;
+               $data->discount_percentage = $validatedData['discount_percentage'] ?? null;
+               $data->description = $validatedData['description'] ?? null;
+               $data->sort_order = $validatedData['order'] ?? null;
+               $data->exams = json_encode($exams,true) ?? null;
+               $data->quizzes = json_encode($quizzes,true) ?? null;
+               $data->practices = json_encode($practice_sets,true) ?? null;
+               $data->lessons = json_encode($lessons,true) ?? null;
+               $data->videos = json_encode($videos,true) ?? null;
+               $data->popular = $validatedData['popular'] ?? null;
+               $data->status = $validatedData['status'] ?? null;
                $data->save();
 
                // Return a success response
