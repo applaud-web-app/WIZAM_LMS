@@ -732,22 +732,31 @@ class CmsController extends Controller
             $paymentMode = $plan->price_type === 'monthly' ? 'subscription' : 'payment';
             $cancelDate = now()->addMonths($plan->duration)->timestamp;
 
+            $lineItem = [
+                'price_data' => [
+                    'currency' => 'usd',
+                    'product_data' => [
+                        'name' => $plan->name,
+                        'description' => $plan->description,
+                    ],
+                    'unit_amount' => $plan->price * 100, // Convert to cents
+                ],
+                'quantity' => 1,
+            ];
+            
+            // Include `recurring` only for monthly plans
+            if ($plan->price_type === 'monthly') {
+                $lineItem['price_data']['recurring'] = [
+                    'interval' => 'month',
+                    'interval_count' => $plan->duration,
+                ];
+            }
+
             // Create the checkout session
             $sessionData = [
                 'payment_method_types' => ['card'],
                 'customer' => $user->stripe_customer_id,
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => $plan->name,
-                            'description' => $plan->description,
-                        ],
-                        'unit_amount' => $plan->price * 100, // Convert to cents
-                        'recurring' => $plan->price_type === 'monthly' ? ['interval' => 'month', 'interval_count' => $plan->duration] : null,
-                    ],
-                    'quantity' => 1,
-                ]],
+                'line_items' => [$lineItem],
                 'mode' => $paymentMode,
                 'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('FRONTEND_URL') . '/cancel',
