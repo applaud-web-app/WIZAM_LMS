@@ -945,7 +945,7 @@ class PaymentController extends Controller
 
          \Log::info("Payment Intent {$paymentIntent->id} succeeded for subscription {$subscription->id}");
       } else {
-         \Log::warning("Subscription not found for payment intent: {$paymentIntent->id}");
+         \Log::warning("Subscription not found for payment intent: {$paymentIntent}");
       }
    }
 
