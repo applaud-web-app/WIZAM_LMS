@@ -878,7 +878,7 @@ class PaymentController extends Controller
          switch ($event->type) {
                case 'checkout.session.completed':
                   $session = $event->data->object;
-                  
+
                   // Handle completed checkout sessions
                   $this->handleCheckoutSessionCompleted($session);
                   break;
@@ -890,6 +890,23 @@ class PaymentController extends Controller
                   $this->handleSubscriptionCreated($subscription);
                   break;
 
+               case 'customer.subscription.updated':
+                  $subscription = $event->data->object;
+
+                  // Only proceed if the subscription was updated because of a successful payment
+                  if ($subscription->status === 'active' && isset($subscription->latest_invoice)) {
+                     $invoiceId = $subscription->latest_invoice;
+
+                     // Retrieve the invoice to check if payment was successful
+                     $invoice = \Stripe\Invoice::retrieve($invoiceId);
+
+                     if ($invoice && $invoice->status === 'paid') {
+                           // If the payment for the subscription is successful, update the start and end dates
+                           $this->handleSubscriptionUpdate($subscription);
+                     }
+                  }
+                  break;
+                  
                // case 'invoice.payment_succeeded':
                //    $invoice = $event->data->object;
 
@@ -916,6 +933,40 @@ class PaymentController extends Controller
       }
    }
 
+   private function handleSubscriptionUpdate($subscription)
+   {
+      // Fetch the subscription from your database
+      $existingSubscription = Subscription::where('stripe_subscription_id', $subscription->id)->first();
+
+      if ($existingSubscription) {
+         // Calculate new start and end dates based on the plan and duration
+         $userId = $existingSubscription->user_id;
+         $planId = $existingSubscription->plan_id;
+
+         // Fetch the user and plan
+         $user = User::findOrFail($userId);
+         $plan = Plan::findOrFail($planId);
+
+         // Get the price type and duration
+         $priceType = $plan->price_type;
+         $duration = (int) $plan->duration;  // Ensure duration is an integer
+
+         // Calculate new start and end dates
+         $startDate = now();
+         $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
+
+         // Update subscription start and end dates in the database
+         $existingSubscription->update([
+               'start_date' => $startDate,
+               'end_date' => $endDate,
+               'status' => 'active',  // Ensure subscription status is active after payment
+         ]);
+         
+         // Optional: Log for debugging
+         \Log::info("Subscription updated: Start Date: $startDate, End Date: $endDate");
+      }
+   }
+
    private function handleSubscriptionCreated($subscription)
    {
       if (isset($subscription->metadata->duration)) {
@@ -933,7 +984,6 @@ class PaymentController extends Controller
          \Log::warning("Subscription metadata does not contain duration: {$subscription->id}");
       }
    }
-
 
    private function handleCheckoutSessionCompleted($session)
    {
