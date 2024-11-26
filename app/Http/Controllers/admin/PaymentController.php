@@ -950,8 +950,8 @@ class PaymentController extends Controller
       $plan = Plan::findOrFail($planId);
 
       // Calculate subscription dates
-      $startDate = now();
-      $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
+      $startDate = date('Y-m-d');
+      $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
 
       // Create subscription
       $subscription = Subscription::create([
@@ -976,12 +976,12 @@ class PaymentController extends Controller
       ]);
 
       // Assign subscription items
-      $this->assignSubscriptionItems($subscription->id, $plan, $duration);
+      $this->assignSubscriptionItems($subscription->id, $plan, $duration,$startDate,$endDate);
    }
 
    private function assignSubscriptionItems($subscriptionId, $plan, $duration)
    {
-      $types = ['exams', 'quizzes', 'practice_sets', 'videos', 'lessons'];
+      $types = ['exams', 'quizzes', 'practices', 'videos', 'lessons'];
 
       foreach ($types as $type) {
          $itemIds = json_decode($plan->$type); // Decode the JSON array
@@ -992,8 +992,8 @@ class PaymentController extends Controller
                      'subscription_id' => $subscriptionId,
                      'item_type' => rtrim($type, 's'), // Convert plural to singular
                      'item_id' => $itemId,
-                     'assigned_at' => now(),
-                     'expires_at' => now()->addMonths($duration), // Match the subscription duration
+                     'assigned_at' => $startDate,
+                     'expires_at' => $endDate, // Match the subscription duration
                      'status' => 'active',
                   ]);
                }
