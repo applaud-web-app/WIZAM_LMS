@@ -889,12 +889,12 @@ class PaymentController extends Controller
                   $this->handleSubscriptionCreated($subscription);
                   break;
 
-               case 'invoice.payment_succeeded':
-                  $invoice = $event->data->object;
+               // case 'invoice.payment_succeeded':
+               //    $invoice = $event->data->object;
 
-                  // Handle successful subscription payments
-                  $this->handleInvoicePaymentSucceeded($invoice);
-                  break;
+               //    // Handle successful subscription payments
+               //    $this->handleInvoicePaymentSucceeded($invoice);
+               //    break;
 
                case 'invoice.payment_failed':
                   $invoice = $event->data->object;
@@ -1001,25 +1001,25 @@ class PaymentController extends Controller
       }
    }
 
-   private function handleInvoicePaymentSucceeded($invoice)
-   {
-      $subscriptionId = $invoice->subscription;
+   // private function handleInvoicePaymentSucceeded($invoice)
+   // {
+   //    $subscriptionId = $invoice->subscription;
 
-      // Find the subscription
-      $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
+   //    // Find the subscription
+   //    $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
 
-      if ($subscription) {
-         // Save the payment
-         Payment::create([
-               'subscription_id' => $subscription->id,
-               'payment_id' => $invoice->payment_intent,
-               'amount' => $invoice->amount_paid / 100, // Convert from cents
-               'currency' => $invoice->currency,
-               'status' => 'successful',
-               'payment_date' => now(),
-         ]);
-      }
-   }
+   //    if ($subscription) {
+   //       // Save the payment
+   //       Payment::create([
+   //             'subscription_id' => $subscription->id,
+   //             'payment_id' => $invoice->payment_intent,
+   //             'amount' => $invoice->amount_paid / 100, // Convert from cents
+   //             'currency' => $invoice->currency,
+   //             'status' => 'successful',
+   //             'payment_date' => now(),
+   //       ]);
+   //    }
+   // }
 
    private function handlePaymentFailed($invoice)
    {
