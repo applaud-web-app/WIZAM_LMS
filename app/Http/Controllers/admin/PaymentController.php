@@ -872,13 +872,13 @@ class PaymentController extends Controller
                $endpointSecret
          );
 
-         \Log::error('Stripe webhook error: ' . $event->type);
-
+         \Log::error('Stripe webhook type: ' . $event->type);
+         \Log::error('Stripe webhook data: ' . $event->data->object);
          // Handle specific events
          switch ($event->type) {
                case 'checkout.session.completed':
                   $session = $event->data->object;
-                  \Log::error('Stripe webhook error: ' . $session);
+                  
                   // Handle completed checkout sessions
                   $this->handleCheckoutSessionCompleted($session);
                   break;
