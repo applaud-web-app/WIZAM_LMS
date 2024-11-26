@@ -871,11 +871,13 @@ class PaymentController extends Controller
                $endpointSecret
          );
 
+         \Log::info("event type: {$event->type}");
+
          // Handle specific events
          switch ($event->type) {
                case 'checkout.session.completed':
                   $session = $event->data->object;
-
+                  \Log::info("checkout.session.completed: {$session}");
                   // Handle completed checkout sessions
                   $this->handleCheckoutSessionCompleted($session);
                   break;
