@@ -4,7 +4,7 @@
 
 @section('content')
 
-<section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
+<section class="mx-[12px] lg:mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
     <div class="flex justify-between items-center mb-[30px]">
         <h2><b>{{$examResult->exam->title}} - Score Report</b></h2>

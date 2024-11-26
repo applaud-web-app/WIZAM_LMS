@@ -458,7 +458,7 @@
          <div class="flex flex-1 nav-wrap md:ps-[20px] ps-[30px] pe-[30px] max-xs:ps-[15px] max-xs:pe-[15px] bg-white dark:bg-box-dark">
             <!-- Header left menu -->
 
-            <ul class="flex items-center mb-0 list-none nav-left ps-0 gap-x-[14px] gap-y-[9px]">
+            <ul class="flex items-center w-full justify-between mb-0 list-none nav-left ps-0 gap-x-[14px] gap-y-[9px]">
                <!-- Navigation Items -->
                <li class="xl:hidden xl:[&.flex]:flex" id="topMenu-logo">
                   <div class="flex md:w-[190px] xs:w-[170px] max-xs:w-[100px] max-md:pe-[30px] max-xs:pe-[15px] border-e border-[#edf2f9] dark:border-box-dark-up logo-wrapper items-center h-[71px] dark:bg-box-dark-up">
