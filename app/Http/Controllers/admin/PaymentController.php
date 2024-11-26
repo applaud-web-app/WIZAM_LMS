@@ -923,31 +923,36 @@ class PaymentController extends Controller
 
    private function handlePaymentIntentSucceeded($paymentIntent)
    {
-      // Retrieve the subscription ID from metadata
-      $subscriptionId = $paymentIntent->metadata->subscription_id;
+      // Extract metadata from the payment intent
+      $metadata = $paymentIntent->metadata;
+      $subscriptionId = $metadata->subscription_id;
 
-      // Check if subscription exists
-      $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
+      // Find the subscription based on the ID from metadata
+      $subscription = Subscription::where('id', $subscriptionId)->first();
 
       if ($subscription) {
          // Record the payment
          Payment::create([
                'subscription_id' => $subscription->id,
                'payment_id' => $paymentIntent->id,
-               'amount' => $paymentIntent->amount_received / 100, // Convert from cents to dollars
+               'amount' => $paymentIntent->amount_received / 100,  // Convert from cents
                'currency' => $paymentIntent->currency,
                'status' => 'successful',
                'payment_date' => now(),
          ]);
 
-         // Update subscription status if necessary
-         $subscription->update(['status' => 'active']);
+         // Now that payment is successful, update the subscription status
+         $subscription->update([
+               'status' => 'active',  // Subscription is now active after payment
+               'stripe_subscription_id' => $paymentIntent->id,  // You can store the payment intent ID here if you wish
+         ]);
 
          \Log::info("Payment Intent {$paymentIntent->id} succeeded for subscription {$subscription->id}");
       } else {
-         \Log::warning("Subscription not found for payment intent: {$paymentIntent}");
+         \Log::warning("Subscription not found for payment intent: {$paymentIntent->id}");
       }
    }
+
 
    private function handleSubscriptionCreated($subscription)
    {
