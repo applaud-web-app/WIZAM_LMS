@@ -942,7 +942,8 @@ class PaymentController extends Controller
       $userId = $metadata->user_id;
       $planId = $metadata->plan_id;
       $priceType = $metadata->price_type; // 'fixed' or 'monthly'
-      $duration = $metadata->duration;
+      $duration = (int) $metadata->duration; 
+      \Log::info('Duration: ' . $duration);  // Log duration value for debugging
 
       // Fetch user and plan
       $user = User::findOrFail($userId);
