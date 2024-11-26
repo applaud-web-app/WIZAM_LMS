@@ -952,8 +952,8 @@ class PaymentController extends Controller
          $duration = (int) $plan->duration;  // Ensure duration is an integer
 
          // Calculate new start and end dates
-         $startDate = now();
-         $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
+         $startDate = date('Y-m-d');
+         $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
 
          // Update subscription start and end dates in the database
          $existingSubscription->update([
