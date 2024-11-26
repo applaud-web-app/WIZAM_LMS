@@ -11520,6 +11520,17 @@ table.dataTable td {
     }
 }
 
+.table-responsive {
+    width: 100%; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
+}
+
+
+.table-responsive table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
 .scrollable-content{
     position: relative;

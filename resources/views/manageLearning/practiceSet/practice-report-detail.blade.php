@@ -16,7 +16,7 @@
 
     <div class="m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full mt-[30px]">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-            <div class="bg-white border-1 rounded-lg px-[30px] py-[20px]">
+            <div class="bg-white border-1 rounded-lg px-[30px] py-[20px] table-responsive">
                 <table class="w-full text-left border">
                     <tbody>
                         <tr class="border-b">

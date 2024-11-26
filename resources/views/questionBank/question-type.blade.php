@@ -36,7 +36,7 @@
    <div class="bg-white dark:bg-box-dark m-0 p-0 text-body dark:text-subtitle-dark text-[15px] rounded-10 relative h-full">
    
       <div class="p-[25px] pt-[15px]">
-         <div >
+         <div class="table-responsive" >
             <table class="min-w-full leading-normal table-auto display">
                <thead>
                   <tr>

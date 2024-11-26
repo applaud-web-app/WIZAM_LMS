@@ -41,7 +41,7 @@
             </a>
       </div>
       <div class="p-[25px] pt-[15px]">
-         <div>
+         <div class="table-responsive" >
             <table class="w-full border-collapse table-auto" id="lesson-table">
                <thead>
                   <tr>

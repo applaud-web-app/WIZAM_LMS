@@ -41,7 +41,7 @@
                 </div>
             </div>
             <!-- Table Container -->
-            <div class="overflow-x-auto">
+            <div class="table-responsive" >
                 <table id="userTable" class="w-full text-left table-auto">
                     <thead>
                         <tr>
