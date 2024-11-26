@@ -754,7 +754,7 @@ class CmsController extends Controller
             if ($plan->price_type === 'monthly') {
                 $lineItem['price_data']['recurring'] = [
                     'interval' => 'month',
-                    'interval_count' => $plan->duration,
+                    'interval_count' => 1, // EACH MONTH FOR MONTHLY
                 ];
             }
 
