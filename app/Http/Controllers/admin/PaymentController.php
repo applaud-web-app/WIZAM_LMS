@@ -915,6 +915,7 @@ class PaymentController extends Controller
          return response()->json(['status' => 'success'], 200);
       } catch (\Exception $e) {
          \Log::error('Stripe webhook error: ' . $e->getMessage());
+         \Log::error('Webhook request payload: ' . $payload);  // Log the payload for further debugging
          return response()->json(['error' => $e->getMessage()], 400);
       }
    }
@@ -922,84 +923,36 @@ class PaymentController extends Controller
 
    private function handlePaymentIntentSucceeded($paymentIntent)
    {
-      // You may want to retrieve the associated subscription
+      // Retrieve the subscription ID from metadata
       $subscriptionId = $paymentIntent->metadata->subscription_id;
 
-      // Optionally, you could use the payment intent's metadata or other fields to handle this payment
-      $paymentAmount = $paymentIntent->amount_received / 100; // Convert from cents to dollars
-      $currency = $paymentIntent->currency;
-
-      // Find the subscription by ID (or any other method based on your system)
+      // Check if subscription exists
       $subscription = Subscription::where('stripe_subscription_id', $subscriptionId)->first();
 
       if ($subscription) {
          // Record the payment
          Payment::create([
-            'subscription_id' => $subscription->id,
-            'payment_id' => $paymentIntent->id,
-            'amount' => $paymentAmount,
-            'currency' => $currency,
-            'status' => 'successful',
-            'payment_date' => now(),
+               'subscription_id' => $subscription->id,
+               'payment_id' => $paymentIntent->id,
+               'amount' => $paymentIntent->amount_received / 100, // Convert from cents to dollars
+               'currency' => $paymentIntent->currency,
+               'status' => 'successful',
+               'payment_date' => now(),
          ]);
 
-         // You may also want to update the subscription status here if needed
-         // For example, if the payment completes the subscription, set it to "active":
+         // Update subscription status if necessary
          $subscription->update(['status' => 'active']);
 
          \Log::info("Payment Intent {$paymentIntent->id} succeeded for subscription {$subscription->id}");
       } else {
-
-         $metadata = $paymentIntent->metadata;
-
-         // Extract metadata
-         $userId = $metadata->user_id;
-         $planId = $metadata->plan_id;
-         $priceType = $metadata->price_type; // 'fixed' or 'monthly'
-         $duration = $metadata->duration;
-   
-         // Fetch user and plan
-         $user = User::findOrFail($userId);
-         $plan = Plan::findOrFail($planId);
-   
-         // Calculate subscription dates
-         $startDate = now();
-         $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
-   
-         // Create subscription
-         $subscription = Subscription::create([
-            'user_id' => $user->id,
-            'plan_id' => $plan->id,
-            'type' => $priceType,
-            'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $session->id,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'status' => 'active', // Set active after completion
-         ]);
-   
-         // Save payment details
-         Payment::create([
-            'subscription_id' => $subscription->id,
-            'payment_id' => $session->payment_intent,
-            'amount' => $session->amount_total / 100, // Convert from cents
-            'currency' => $session->currency,
-            'status' => 'successful',
-            'payment_date' => now(),
-         ]);
-         
-         $this->assignSubscriptionItems($subscription->id, $plan, $duration);
-   
-         \Log::warning("Subscription not found for payment intent: {$paymentIntent->id}");
+         \Log::warning("Subscription not found for payment intent: {$paymentIntent}");
       }
    }
-
 
    private function handleSubscriptionCreated($subscription)
    {
       if (isset($subscription->metadata->duration)) {
          $cancelDate = now()->addMonths($subscription->metadata->duration)->timestamp;
-
-         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
          // Update the subscription to set cancel_at
          \Stripe\Subscription::update($subscription->id, [
@@ -1020,7 +973,7 @@ class PaymentController extends Controller
       // Extract metadata
       $userId = $metadata->user_id;
       $planId = $metadata->plan_id;
-      $priceType = $metadata->price_type; // 'fixed' or 'monthly'
+      $priceType = $metadata->price_type;
       $duration = $metadata->duration;
 
       // Fetch user and plan
@@ -1036,13 +989,13 @@ class PaymentController extends Controller
          'user_id' => $user->id,
          'plan_id' => $plan->id,
          'type' => $priceType,
-         'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $session->id,
+         'stripe_subscription_id' => $session->subscription, // Use the actual subscription ID here
          'start_date' => $startDate,
          'end_date' => $endDate,
-         'status' => 'active', // Set active after completion
+         'status' => 'active',
       ]);
 
-      // Save payment details
+      // Save payment details (using session payment_intent)
       Payment::create([
          'subscription_id' => $subscription->id,
          'payment_id' => $session->payment_intent,
@@ -1054,7 +1007,10 @@ class PaymentController extends Controller
 
       // Assign subscription items
       $this->assignSubscriptionItems($subscription->id, $plan, $duration);
+
+      \Log::info("Subscription created for user {$user->id} with plan {$plan->id}");
    }
+
 
    private function assignSubscriptionItems($subscriptionId, $plan, $duration)
    {

@@ -726,7 +726,7 @@ class CmsController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid Plan',
-                ], 401);
+                ], 404);
             }
 
             $paymentMode = $plan->price_type === 'monthly' ? 'subscription' : 'payment';
