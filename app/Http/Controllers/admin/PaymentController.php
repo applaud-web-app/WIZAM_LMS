@@ -861,7 +861,7 @@ class PaymentController extends Controller
    {
       $payload = $request->getContent();
       $sigHeader = $request->header('Stripe-Signature');
-      $endpointSecret = env('STRIPE_WEBHOOK_SECRET'); // Set your Stripe webhook secret in .env
+      $endpointSecret = env('STRIPE_SIGNATURE_WEBHOOK'); // Set your Stripe webhook secret in .env
 
       try {
          // Verify the webhook signature
