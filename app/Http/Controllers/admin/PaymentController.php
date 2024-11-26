@@ -949,6 +949,46 @@ class PaymentController extends Controller
 
          \Log::info("Payment Intent {$paymentIntent->id} succeeded for subscription {$subscription->id}");
       } else {
+
+         $metadata = $paymentIntent->metadata;
+
+         // Extract metadata
+         $userId = $metadata->user_id;
+         $planId = $metadata->plan_id;
+         $priceType = $metadata->price_type; // 'fixed' or 'monthly'
+         $duration = $metadata->duration;
+   
+         // Fetch user and plan
+         $user = User::findOrFail($userId);
+         $plan = Plan::findOrFail($planId);
+   
+         // Calculate subscription dates
+         $startDate = now();
+         $endDate = $priceType === 'fixed' ? $startDate->addMonths($duration) : $startDate->addMonths($duration);
+   
+         // Create subscription
+         $subscription = Subscription::create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'type' => $priceType,
+            'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $session->id,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'status' => 'active', // Set active after completion
+         ]);
+   
+         // Save payment details
+         Payment::create([
+            'subscription_id' => $subscription->id,
+            'payment_id' => $session->payment_intent,
+            'amount' => $session->amount_total / 100, // Convert from cents
+            'currency' => $session->currency,
+            'status' => 'successful',
+            'payment_date' => now(),
+         ]);
+         
+         $this->assignSubscriptionItems($subscription->id, $plan, $duration);
+   
          \Log::warning("Subscription not found for payment intent: {$paymentIntent->id}");
       }
    }
