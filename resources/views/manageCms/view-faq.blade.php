@@ -4,13 +4,13 @@
 
 @section('content')
 
-<section class="mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
+<section class="mx-[12px] lg:mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
 
    <div class="grid grid-cols-12 gap-5">
       <div class="col-span-12">
 
          <!-- Breadcrumb Section -->
-         <div class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-center items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
+         <div class="leading-[1.8571428571] flex flex-wrap sm:justify-between justify-start items-center ssm:mb-[24px] mb-[18px] max-sm:flex-col gap-x-[15px] gap-y-[5px]">
             <!-- Title -->
             <h4 class="capitalize text-[20px] text-dark dark:text-title-dark font-semibold">Frequently Asked Questions (FAQs)</h4>
             <!-- Breadcrumb Navigation -->
