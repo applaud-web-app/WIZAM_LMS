@@ -12,13 +12,15 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id',
+        'plan_id',
         'type',
+        'stripe_subscription_id',
         'stripe_id',
         'stripe_status',
         'stripe_price',
-        'quantity',
-        'trial_ends_at',
-        'ends_at',
+        'status',
+        'start_date',
+        'end_date',
     ];
 
     
