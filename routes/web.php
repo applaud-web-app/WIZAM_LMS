@@ -17,7 +17,7 @@ use App\Http\Controllers\admin\PaymentController;
 use App\Http\Controllers\admin\PermissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('stripe/webhook', [PaymentController::class, 'handleWebhook'])->name('stripe-webhook');
+Route::post('stripe/webhook', [PaymentController::class, 'handleStripeWebhook'])->name('stripe-webhook');
 
 // ------- PUBLIC ROUTES ------- //
 Route::get('/', [LoginController::class, 'login'])->name('admin-login');

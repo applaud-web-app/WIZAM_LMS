@@ -758,7 +758,7 @@ class CmsController extends Controller
                 'customer' => $user->stripe_customer_id,
                 'line_items' => [$lineItem],
                 'mode' => $paymentMode,
-                'success_url' => env('FRONTEND_URL') . '/success?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => env('FRONTEND_URL')."/".$request->successUrl.'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('FRONTEND_URL') . '/cancel',
                 'metadata' => [
                     'plan_id' => $plan->id,

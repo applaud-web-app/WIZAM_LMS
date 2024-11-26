@@ -150,3 +150,24 @@ Route::middleware('checkAuthToken')->group(function () {
     Route::get('cancel-subscription',[CmsController::class,'cancelSubscription']);
     Route::get('invoice-detail/{payment_id}',[StudentController::class,'invoiceDetail']);
 });
+
+
+// ALTER TABLE `subscriptions` ADD `plan_id` BIGINT NOT NULL AFTER `user_id`;
+// ALTER TABLE `subscriptions` CHANGE `stripe_id` `stripe_subscription_id` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+// ALTER TABLE `subscriptions` CHANGE `trial_ends_at` `start_date` TIMESTAMP NULL DEFAULT NULL;
+// ALTER TABLE `subscriptions` CHANGE `ends_at` `end_date` TIMESTAMP NULL DEFAULT NULL;
+// ALTER TABLE `subscriptions` ADD `status` VARCHAR(255) NOT NULL AFTER `end_date`;
+// ALTER TABLE `subscriptions` CHANGE `start_date` `start_date` DATETIME NULL DEFAULT NULL;
+// ALTER TABLE `subscriptions` CHANGE `end_date` `end_date` DATETIME NULL DEFAULT NULL;
+// REMOVE (quantity,stripe_status,stripe_status)
+
+# PAYMENT 
+// REMOVE user_id
+// ALTER TABLE `payments` CHANGE `stripe_payment_id` `payment_id` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL;
+// ALTER TABLE `payments` CHANGE `currency` `currency` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USD';
+// ALTER TABLE `payments` ADD `payment_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;
+
+
+
+
+
