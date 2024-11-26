@@ -935,37 +935,60 @@ class PaymentController extends Controller
 
    private function handleSubscriptionUpdate($subscription)
    {
-      // Fetch the subscription from your database
-      $existingSubscription = Subscription::where('stripe_subscription_id', $subscription->id)->first();
-
-      if ($existingSubscription) {
-         // Calculate new start and end dates based on the plan and duration
-         $userId = $existingSubscription->user_id;
-         $planId = $existingSubscription->plan_id;
-
-         // Fetch the user and plan
-         $user = User::findOrFail($userId);
-         $plan = Plan::findOrFail($planId);
-
-         // Get the price type and duration
-         $priceType = $plan->price_type;
-         $duration = (int) $plan->duration;  // Ensure duration is an integer
-
-         // Calculate new start and end dates
-         $startDate = date('Y-m-d');
-         $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
-
-         // Update subscription start and end dates in the database
-         $existingSubscription->update([
-               'start_date' => $startDate,
-               'end_date' => $endDate,
-               'status' => 'active',  // Ensure subscription status is active after payment
-         ]);
-         
-         // Optional: Log for debugging
-         \Log::info("Subscription updated: Start Date: $startDate, End Date: $endDate");
-      }
-   }
+       // Fetch the subscription from your database
+       $existingSubscription = Subscription::where('stripe_subscription_id', $subscription->id)->first();
+   
+       if ($existingSubscription) {
+           // Ensure payment was successful and we can update dates
+           if ($subscription->status === 'active' && isset($subscription->latest_invoice)) {
+               $invoiceId = $subscription->latest_invoice;
+   
+               // Retrieve the invoice to check if payment was successful
+               $invoice = \Stripe\Invoice::retrieve($invoiceId);
+   
+               if ($invoice && $invoice->status === 'paid') {
+                   // Fetch the user and plan details
+                   $userId = $existingSubscription->user_id;
+                   $planId = $existingSubscription->plan_id;
+   
+                   $user = User::findOrFail($userId);
+                   $plan = Plan::findOrFail($planId);
+   
+                   // Calculate the new start and end dates based on the plan's duration
+                   $priceType = $plan->price_type;
+                   $duration = (int) $plan->duration;  // Ensure duration is an integer
+   
+                   // Set start date as today and end date based on plan duration
+                  //  $startDate = date('Y-m-d');
+                   $endDate = $plan->price_type === 'monthly' ? date('Y-m-d', strtotime($startDate. ' + 1 months')) : date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
+   
+                   // Update the subscription with new start and end dates
+                   $existingSubscription->update([
+                     // 'start_date' => $startDate,
+                     'end_date' => $endDate,
+                     'status' => 'active',  // Ensure subscription status is active after payment
+                   ]);
+   
+                  // Create a new payment record for this subscription
+                  Payment::create([
+                     'user_id' => $user->id,
+                     'subscription_id' => $existingSubscription->id,
+                     'payment_id' => $invoice->payment_intent, // Stripe payment intent ID
+                     'amount' => $invoice->amount_paid / 100, // Convert from cents
+                     'currency' => $invoice->currency,
+                     'status' => 'successful',
+                     'payment_date' => now(),
+                   ]);
+   
+                   // Optional: Log the updated dates for debugging
+                   \Log::info("Subscription updated: Start Date: $startDate, End Date: $endDate");
+   
+                   // Optionally, you can also trigger other actions here, such as updating subscription items
+                   $this->assignSubscriptionItems($existingSubscription->id, $plan, $duration, $startDate, $endDate);
+               }
+           }
+       }
+   }   
 
    private function handleSubscriptionCreated($subscription)
    {
@@ -1002,7 +1025,7 @@ class PaymentController extends Controller
 
       // Calculate subscription dates
       $startDate = date('Y-m-d');
-      $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
+      $endDate = $plan->price_type === 'monthly' ? date('Y-m-d', strtotime($startDate. ' + 1 months')) : date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
 
       $payment_id = "pi_".Str::uuid()->toString();
       // Create subscription
