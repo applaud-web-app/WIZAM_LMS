@@ -675,130 +675,12 @@ class CmsController extends Controller
     //     }
     // }
 
-    // TODAY
-    // public function createCheckoutSession(Request $request)
-    // {
-    //     try {
-    //         $request->validate([
-    //             'priceId'=>'required',
-    //             'priceType'=>'required'
-    //         ]);
-
-    //         // Retrieve the authenticated user from request attributes
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         // Check if the user is authenticated
-    //         if (!$user) {
-    //             return response()->json([
-    //                 'status' => false,
-    //                 'message' => 'User not authenticated',
-    //             ], 401);
-    //         }
-
-    //         // Fetch the user from the database
-    //         $user = User::findOrFail($user->id);
-             
-    //         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-    //         $stripe = new StripeClient(env('STRIPE_SECRET'));
-    //         $customerId = $user->stripe_customer_id;
-
-    //         // Create a customer if it doesn't exist
-    //         if (!$customerId) {
-    //             $stripeCustomer = $stripe->customers->create([
-    //                 'email' => $user->email,
-    //                 'name' => $user->name,
-    //                 'metadata' => [
-    //                     'user_id' => $user->id,
-    //                 ],
-    //             ]);
-
-    //             // Update user with stripe_customer_id
-    //             $user->update([
-    //                 'stripe_customer_id' => $stripeCustomer->id,
-    //             ]);
-
-    //             $customerId = $stripeCustomer->id;
-    //         }
-
-    //         // Determine the payment mode based on the price type
-    //         $plan = Plan::where('stripe_price_id',$request->priceId)->first();
-    //         if(!$plan) {
-    //             return response()->json([
-    //                 'status' => false,
-    //                 'message' => 'Invalid Plan',
-    //             ], 404);
-    //         }
-
-    //         // First, create the subscription in your database, even if it's a fixed plan
-    //         $startDate = now();
-    //         $endDate = $plan->price_type === 'fixed' ? $startDate->addMonths($plan->duration) : $startDate->addMonths($plan->duration);
-
-    //         // Create the subscription record in your database (even for fixed plans)
-    //         $subscription = Subscription::create([
-    //             'user_id' => $user->id,
-    //             'plan_id' => $plan->id,
-    //             'type' => $plan->price_type,
-    //             'stripe_subscription_id' => null,  // It will be updated once the payment is confirmed
-    //             'start_date' => $startDate,
-    //             'end_date' => $endDate,
-    //             'status' => 'pending',  // Pending until payment succeeds
-    //         ]);
-
-    //         $paymentMode = $plan->price_type === 'monthly' ? 'subscription' : 'payment';
-    //         $cancelDate = now()->addMonths($plan->duration)->timestamp;
-
-    //         $lineItem = [
-    //             'price_data' => [
-    //                 'currency' => 'usd',
-    //                 'product_data' => [
-    //                     'name' => $plan->name,
-    //                     'description' => $plan->description,
-    //                 ],
-    //                 'unit_amount' => $plan->price * 100, // Convert to cents
-    //             ],
-    //             'quantity' => 1,
-    //         ];
-            
-    //         // Include `recurring` only for monthly plans
-    //         if ($plan->price_type === 'monthly') {
-    //             $lineItem['price_data']['recurring'] = [
-    //                 'interval' => 'month',
-    //                 'interval_count' => $plan->duration,
-    //             ];
-    //         }
-
-    //         // Create the checkout session
-    //         $sessionData = [
-    //             'payment_method_types' => ['card'],
-    //             'customer' => $user->stripe_customer_id,
-    //             'line_items' => [$lineItem],
-    //             'mode' => $paymentMode,
-    //             'success_url' => env('FRONTEND_URL')."/".$request->successUrl.'?session_id={CHECKOUT_SESSION_ID}',
-    //             'cancel_url' => env('FRONTEND_URL') . '/cancel',
-    //             'metadata' => [
-    //                 'plan_id' => $plan->id,
-    //                 'user_id' => $user->id,
-    //                 'price_type' => $plan->price_type,
-    //                 'duration' => $plan->duration,
-    //             ],
-    //         ];
-
-    //         $session = $stripe->checkout->sessions->create($sessionData);
-    //         return response()->json(['status' => true, 'sessionId' => $session->id], 200);
-    //     } catch (\Throwable $th) {
-    //         // Handle exceptions and return error response
-    //         \Log::error('Error in createCheckoutSession: ' . $th->getMessage());
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-
     public function createCheckoutSession(Request $request)
     {
         try {
             $request->validate([
-                'priceId' => 'required',
-                'priceType' => 'required'
+                'priceId'=>'required',
+                'priceType'=>'required'
             ]);
 
             // Retrieve the authenticated user from request attributes
@@ -814,7 +696,7 @@ class CmsController extends Controller
 
             // Fetch the user from the database
             $user = User::findOrFail($user->id);
-
+             
             \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
             $stripe = new StripeClient(env('STRIPE_SECRET'));
@@ -838,34 +720,18 @@ class CmsController extends Controller
                 $customerId = $stripeCustomer->id;
             }
 
-            // Fetch the plan details based on priceId
-            $plan = Plan::where('stripe_price_id', $request->priceId)->first();
-            if (!$plan) {
+            // Determine the payment mode based on the price type
+            $plan = Plan::where('stripe_price_id',$request->priceId)->first();
+            if(!$plan) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid Plan',
                 ], 404);
             }
 
-            // Calculate subscription dates
-            $startDate = now();
-            $endDate = $plan->price_type === 'fixed' ? $startDate->addMonths($plan->duration) : $startDate->addMonths($plan->duration);
-
-            // Create the subscription record in your database (even for fixed plans)
-            $subscription = Subscription::create([
-                'user_id' => $user->id,
-                'plan_id' => $plan->id,
-                'type' => $plan->price_type,
-                'stripe_subscription_id' => null,  // Will be updated once payment is confirmed
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'status' => 'pending',  // Status is pending until payment succeeds
-            ]);
-
-            // Determine the payment mode (subscription for recurring, payment for fixed)
             $paymentMode = $plan->price_type === 'monthly' ? 'subscription' : 'payment';
+            $cancelDate = now()->addMonths($plan->duration)->timestamp;
 
-            // Create line item based on the price type
             $lineItem = [
                 'price_data' => [
                     'currency' => 'usd',
@@ -877,12 +743,12 @@ class CmsController extends Controller
                 ],
                 'quantity' => 1,
             ];
-
-            // Add recurring logic for monthly plans only
+            
+            // Include `recurring` only for monthly plans
             if ($plan->price_type === 'monthly') {
                 $lineItem['price_data']['recurring'] = [
                     'interval' => 'month',
-                    'interval_count' => 1,  // Assuming the plan is monthly, adjust for other durations
+                    'interval_count' => $plan->duration,
                 ];
             }
 
@@ -899,21 +765,63 @@ class CmsController extends Controller
                     'user_id' => $user->id,
                     'price_type' => $plan->price_type,
                     'duration' => $plan->duration,
-                    'subscription_id' => $subscription->id,  // Link to the subscription
                 ],
             ];
 
-            // Create session
             $session = $stripe->checkout->sessions->create($sessionData);
-
             return response()->json(['status' => true, 'sessionId' => $session->id], 200);
-
         } catch (\Throwable $th) {
             // Handle exceptions and return error response
             \Log::error('Error in createCheckoutSession: ' . $th->getMessage());
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
+    // private function storeSubscriptionDetails($userId, $planId, $sessionId, $priceType)
+    // {
+    //     // Fetch the plan from the database
+    //     $plan = Plan::findOrFail($planId);
+
+    //     // Calculate start and end dates
+    //     $startDate = now();
+    //     $endDate = $priceType === 'fixed' ? $startDate->addDays($plan->duration) : $startDate->addMonth();
+
+    //     // Create subscription record
+    //     $subscription = Subscription::create([
+    //         'user_id' => $userId,
+    //         'plan_id' => $planId,
+    //         'type' => $priceType,
+    //         'stripe_subscription_id' => $sessionId, // Save the session ID as a placeholder
+    //         'start_date' => $startDate,
+    //         'end_date' => $endDate,
+    //         'status' => 'pending', // Update to 'active' after successful payment
+    //     ]);
+
+    //     // Assign subscription items if applicable
+    //     $this->assignSubscriptionItems($subscription->id, $plan);
+    // }
+
+    // private function assignSubscriptionItems($subscriptionId, $plan)
+    // {
+    //     $types = ['exams', 'quizzes', 'practice_sets', 'videos', 'lessons'];
+
+    //     foreach ($types as $type) {
+    //         $itemIds = json_decode($plan->$type); // Decode the JSON array
+
+    //         if ($itemIds && is_array($itemIds)) {
+    //             foreach ($itemIds as $itemId) {
+    //                 SubscriptionItem::create([
+    //                     'subscription_id' => $subscriptionId,
+    //                     'item_type' => rtrim($type, 's'), // Convert plural to singular
+    //                     'item_id' => $itemId,
+    //                     'assigned_at' => now(),
+    //                     'expires_at' => now()->addDays($plan->duration),
+    //                     'status' => 'pending', // Update to 'active' after successful payment
+    //                 ]);
+    //             }
+    //         }
+    //     }
+    // }
 
     public function cancelSubscription(Request $request)
     {
