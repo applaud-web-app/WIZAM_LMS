@@ -24,6 +24,7 @@ use App\Models\Video;
 use App\Models\PracticeLesson;
 use App\Models\PracticeVideo;
 use App\Models\SubscriptionItem;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 
@@ -953,7 +954,7 @@ class PaymentController extends Controller
       $startDate = date('Y-m-d');
       $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
 
-      $payment_id = "pi_".uuid();
+      $payment_id = "pi_".Str::uuid()->toString();
       // Create subscription
       $subscription = Subscription::create([
          'user_id' => $user->id,
