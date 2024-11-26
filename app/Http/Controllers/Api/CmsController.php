@@ -732,9 +732,14 @@ class CmsController extends Controller
             $paymentMode = $plan->price_type === 'monthly' ? 'subscription' : 'payment';
             $cancelDate = now()->addMonths($plan->duration)->timestamp;
 
+            $generalSetting = GeneralSetting::select('currency')->first();
+            $currency = 'usd';
+            if($generalSetting && isset($generalSetting->currency)){
+                $currency = $generalSetting->currency;
+            }
             $lineItem = [
                 'price_data' => [
-                    'currency' => 'usd',
+                    'currency' => $currency,
                     'product_data' => [
                         'name' => $plan->name,
                         'description' => $plan->description,

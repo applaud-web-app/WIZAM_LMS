@@ -953,12 +953,13 @@ class PaymentController extends Controller
       $startDate = date('Y-m-d');
       $endDate = date('Y-m-d', strtotime($startDate. ' + '.$duration.' months'));
 
+      $payment_id = "pi_".uuid();
       // Create subscription
       $subscription = Subscription::create([
          'user_id' => $user->id,
          'plan_id' => $plan->id,
          'type' => $priceType,
-         'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $session->id,
+         'stripe_subscription_id' => $priceType === 'monthly' ? $session->subscription : $payment_id,
          'start_date' => $startDate,
          'end_date' => $endDate,
          'status' => 'active', // Set active after completion
@@ -968,7 +969,7 @@ class PaymentController extends Controller
       Payment::create([
          'user_id' => $user->id,
          'subscription_id' => $subscription->id,
-         'payment_id' => $session->payment_intent,
+         'payment_id' => $priceType === 'monthly' ? $session->payment_intent : $payment_id,
          'amount' => $session->amount_total / 100, // Convert from cents
          'currency' => $session->currency,
          'status' => 'successful',
