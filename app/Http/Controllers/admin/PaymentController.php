@@ -979,7 +979,7 @@ class PaymentController extends Controller
       $this->assignSubscriptionItems($subscription->id, $plan, $duration,$startDate,$endDate);
    }
 
-   private function assignSubscriptionItems($subscriptionId, $plan, $duration)
+   private function assignSubscriptionItems($subscriptionId, $plan, $duration,$startDate,$endDate)
    {
       $types = ['exams', 'quizzes', 'practices', 'videos', 'lessons'];
 
