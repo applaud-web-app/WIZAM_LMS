@@ -56,7 +56,7 @@
             </div>
             <div class="p-[25px] pt-[15px]">
 
-                <div>
+                <div class="table-responsive" >
                     <table id="sub-category-table" class="min-w-full leading-normal table-auto display">
                         <thead>
                             <tr>

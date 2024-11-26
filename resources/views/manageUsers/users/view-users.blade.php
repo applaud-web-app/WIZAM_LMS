@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @section('title', 'Wizam : Users')
+
 @section('content')
     <section class=" mx-[30px] min-h-[calc(100vh-195px)] mb-[30px] ssm:mt-[30px] mt-[15px]">
         <div class="grid grid-cols-12 gap-5">
@@ -48,7 +49,7 @@
             </div>
             <div class="p-[25px] pt-[15px]">
                 
-                <div>
+                <div class="table-responsive">
                     <table id="userTable" class="min-w-full leading-normal table-auto display">
                         <thead>
                             <tr>
@@ -115,6 +116,7 @@
       $('#userTable').DataTable({
           processing: true,
           serverSide: true,
+          responsive: true,
           ajax: '{{ route("users") }}',
           columns: [
               {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},

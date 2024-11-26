@@ -43,7 +43,7 @@
             List of Enquiry</h1>
       </div>
       <div class="p-[25px] pt-[15px]">
-         <div >
+         <div class="table-responsive" >
             <table id="sections-table" class="min-w-full leading-normal table-auto display">
                <thead>
                   <tr>

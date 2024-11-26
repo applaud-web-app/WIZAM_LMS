@@ -51,7 +51,7 @@
       </div>
       <div class="p-[25px] pt-[15px]">
 
-         <div >
+         <div class="table-responsive" >
             <table class="min-w-full leading-normal table-auto display">
                <thead>
                   <tr>
@@ -97,4 +97,4 @@
 
 </section>
 
-   @endsection
+@endsection
