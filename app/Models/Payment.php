@@ -12,10 +12,11 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'subscription_id',
-        'stripe_payment_id',
+        'payment_id',
         'amount',
         'currency',
         'status',
+        'payment_date',
     ];
 
     public function user(){

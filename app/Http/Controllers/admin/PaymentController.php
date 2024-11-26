@@ -966,6 +966,7 @@ class PaymentController extends Controller
 
       // Save payment details
       Payment::create([
+         'user_id' => $user->id,
          'subscription_id' => $subscription->id,
          'payment_id' => $session->payment_intent,
          'amount' => $session->amount_total / 100, // Convert from cents
