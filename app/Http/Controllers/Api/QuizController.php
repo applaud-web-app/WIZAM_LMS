@@ -53,7 +53,7 @@ class QuizController extends Controller
             $purchaseQuiz = $this->getUserQuiz($user->id);
     
             // Fetch the quiz along with related questions in one query
-            $quiz = Quizze::leftJoin('quiz_schedules', function ($join) use($quizType){
+            $quiz = Quizze::leftJoin('quiz_schedules', function ($join) {
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                         ->where('quiz_schedules.status', 1);
                 })->with(['quizQuestions.questions' => function($query) {
