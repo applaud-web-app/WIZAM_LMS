@@ -377,7 +377,6 @@ class StudentController extends Controller
             // Validate incoming request data
             $request->validate([
                 'category' => 'required|integer',
-                'sid' => 'required'
             ]);
 
             // Fetch the current authenticated user

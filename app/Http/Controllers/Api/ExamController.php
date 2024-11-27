@@ -23,259 +23,6 @@ use App\Models\ExamType;
 
 class ExamController extends Controller
 {
-    // public function playExam(Request $request, $slug)
-    // {
-    //     try {
-    //         // Get the authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-
-            
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-
-    //         // Fetch the exam IDs assigned to the current user
-    //         $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
-            
-    //         // Fetch the exam along with related questions in one query
-    //         $exam = Exam::with([
-    //                 'examQuestions.questions' => function($query) {
-    //                     $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
-    //                 }
-    //             ])
-    //             ->select(
-    //                 'exams.id',
-    //                 'exams.title',
-    //                 'exams.description',
-    //                 'exams.pass_percentage',
-    //                 'exams.slug',
-    //                 'exams.subcategory_id',
-    //                 'exams.status',
-    //                 'exams.duration_type', // duration_type
-    //                 'exams.point_mode', 
-    //                 'exams.exam_duration', // exam_duration
-    //                 'exams.point',
-    //                 'exams.shuffle_questions',
-    //                 'exams.question_view',
-    //                 'exams.disable_finish_button',
-    //                 'exams.negative_marking',
-    //                 'exams.negative_marking_type',
-    //                 'exams.negative_marks',
-    //                 'exams.is_free',
-    //                 DB::raw('SUM(questions.default_marks) as total_marks'),
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-    //             )
-    //             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-    //             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-    //             ->where(function ($query) use ($assignedExams) {
-    //                 $query->where('exams.is_public', 1) // Public exams
-    //                     ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
-    //             })
-    //             ->where('exams.slug', $slug)
-    //             ->where('exams.subcategory_id', $request->category)
-    //             ->where('exams.status', 1)
-    //             ->where('questions.status', 1)
-    //             ->groupBy(
-    //                 'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
-    //                 'exams.slug', 'exams.subcategory_id', 'exams.status', 'exams.duration_type',
-    //                 'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
-    //                 'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
-    //                 'exams.negative_marking_type', 'exams.negative_marks','exams.is_free'
-    //             )
-    //             ->first();
-    
-    //         // If exam not found
-    //         if (!$exam) {
-    //             return response()->json(['status' => false, 'error' => 'Exam not found'], 404);
-    //         }
-
-    //         // Adjust 'is_free' for assigned exams, regardless of public or private
-    //         if (in_array($exam->id, $assignedExams)) {
-    //             $exam->is_free = 1; // Make assigned exams free
-    //         }
-
-    //         // PAID EXAM
-    //         if ($exam->is_free == 0) {
-    //             $type = "exams";
-
-    //             // Get the current date and time
-    //             $currentDate = now();
-
-    //             // Fetch the user's active subscription
-    //             $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-    //             // If no active subscription, return error
-    //             if (!$subscription) {
-    //                 return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-    //             }
-        
-    //             // Fetch the plan related to this subscription
-    //             $plan = $subscription->plans;
-        
-    //             if (!$plan) {
-    //                 return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-    //             }
-        
-    //             // Check if the plan allows unlimited access
-    //             if ($plan->feature_access == 1) {
-    //                 // return response()->json(['status' => true, 'data' => $subscription], 200);
-    //             } else {
-    //                 // Fetch the allowed features for this plan
-    //                 $allowed_features = json_decode($plan->features, true);
-        
-    //                 // Check if the requested feature type is in the allowed features
-    //                 if (in_array($type, $allowed_features)) {
-    //                     // return response()->json(['status' => true, 'data' => $subscription], 200);
-    //                 } else {
-    //                     return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-    //                 }
-    //             }
-    //         }
-    
-    //         // Get the authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-    
-    //         // Fetch all completed exam results
-    //         $checkOngoingResult = ExamResult::where('user_id', $user->id)
-    //             ->where('exam_id', $exam->id)
-    //             ->where('status', 'complete')
-    //             ->get();
-    
-    //         // Restrict exam attempts based on the configured limit
-    //         if ($exam->restrict_attempts == 1 && $exam->total_attempts <= $checkOngoingResult->count()) {
-    //             return response()->json(['status' => false, 'error' => 'Maximum Attempt Reached'], 403);
-    //         }
-    
-    //         // Check for ongoing exam
-    //         $ongoingExam = ExamResult::where('user_id', $user->id)
-    //             ->where('exam_id', $exam->id)
-    //             ->where('status', 'ongoing') // Correct the status check
-    //             ->latest('created_at')
-    //             ->first();
-    
-    //         if ($ongoingExam) {
-    //             // $remainingDuration = $ongoingExam->end_time->diffInMinutes(now());
-    //             $remainingDuration = now()->diffInMinutes($ongoingExam->end_time); // Ensure no negative duration
-
-    //             if ($ongoingExam->end_time->isPast()) {
-    //                 // If time has passed, mark the exam as complete
-    //                 $ongoingExam->update(['status' => 'complete']);
-    //                 $data = [
-    //                     'uuid'=>$ongoingExam->uuid,
-    //                 ];
-    //                 return response()->json(['status' => true, 'message' => 'Exam Timed Out','data'=>$data]);
-    //             } else {
-    //                 // Return ongoing exam details
-    //                 return response()->json([
-    //                     'status' => true,
-    //                     'data' => [
-    //                         'title' => $exam->title,
-    //                         'uuid'=>$ongoingExam->uuid,
-    //                         'questions' => json_decode($ongoingExam->questions),
-    //                         'duration' => $remainingDuration . " mins",
-    //                         'points' => $ongoingExam->point,
-    //                         'question_view' => $exam->question_view == 1 ? "enable" : "disable",
-    //                         'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
-    //                     ]
-    //                 ], 200);
-    //             }
-    //         }
-    
-    //         // Calculate exam duration and points
-    //         $duration = (int) ($exam->duration_mode == "manual" && $exam->duration > 0 ? $exam->duration : round($exam->total_time / 60, 2));
-    //         $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
-    
-    //         // Prepare structured response data for questions
-    //         $questionsData = [];
-    //         $correctAnswers = [];
-    //         foreach ($exam->examQuestions as $examQuestion) {
-    //             $question = $examQuestion->questions;
-    //             $options = $question->options ? json_decode($question->options, true) : [];
-    
-    //             if ($question->type == "MTF" && !empty($question->answer)) {
-    //                 $matchOption = json_decode($question->answer, true);
-    //                 shuffle($matchOption);
-    //                 $options = array_merge($options, $matchOption);
-    //             }
-
-    //             if ($question->type == "ORD") {
-    //                 shuffle($options);
-    //             }
-    
-    //             // Customize question display for different types
-    //             $questionText = $question->question;
-    //             if ($question->type == "FIB") {
-    //                 $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
-    //                 $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
-    //             } elseif ($question->type == "EMQ") {
-    //                 $questionText = json_decode($question->question, true);
-    //             }
-    
-    //             $questionsData[] = [
-    //                 'id' => $question->id,
-    //                 'type' => $question->type,
-    //                 'question' => $questionText,
-    //                 'options' => $options
-    //             ];
-
-    //             // Add correct answer info
-    //             $correctAnswers[] = [
-    //                 'id' => $question->id,
-    //                 'correct_answer' => $question->answer,  // Use answer field
-    //                 'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-    //             ];
-    //         }
-    
-    //         // Shuffle questions if enabled
-    //         if ($exam->shuffle_questions == 1) {
-    //             shuffle($questionsData);
-    //         }
-    
-    //         // Start exam result tracking
-    //         $startTime = now();
-    //         $endTime = $startTime->copy()->addMinutes($duration); 
-    
-    //         $examResult = ExamResult::create([
-    //             'exam_id' => $exam->id,
-    //             'uuid' => uniqid(), // Generate unique identifier
-    //             'subcategory_id' => $exam->subcategory_id,
-    //             'user_id' => $user->id,
-    //             'questions' => json_encode($questionsData,true),
-    //             'correct_answers' => json_encode($correctAnswers,true),
-    //             'start_time' => $startTime,
-    //             'end_time' => $endTime,
-    //             'exam_duration' => $duration,
-    //             'point_type' => $exam->point_mode,
-    //             'point' => $points,
-    //             'negative_marking' => $exam->negative_marking,
-    //             'negative_marking_type' => $exam->negative_marking_type,
-    //             'negative_marks' => $exam->negative_marks,
-    //             'pass_percentage' => $exam->pass_percentage,
-    //             'total_question' => count($questionsData),
-    //             'status' => 'ongoing',
-    //         ]);
-    
-    //         $remainingDuration = now()->diffInMinutes($examResult->end_time);
- 
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => [
-    //                 'title' => $exam->title,
-    //                 'uuid'=>$examResult->uuid,
-    //                 'questions' => json_decode($examResult->questions),
-    //                 'duration' => $remainingDuration . " mins",
-    //                 'points' => $examResult->point,
-    //                 'question_view' => $exam->question_view == 1 ? "enable" : "disable",
-    //                 'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
-    //             ]
-    //         ], 200);
-    
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
-
     public function playExam(Request $request, $slug)
     {
         try {
@@ -288,15 +35,23 @@ class ExamController extends Controller
                 'schedule_id'  => 'required',
             ]);
 
-            // Fetch the exam IDs assigned to the current user
-            $assignedExams = AssignedExam::select('exam_id')->where('user_id',$user->id)->get()->pluck('exam_id')->toArray();
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+
+            // Assigned and purchased exams
+            $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+            $purchaseExam = $this->getUserExam($user->id);
 
             // Fetch the exam along with related questions in one query
-            $exam = Exam::with([
-                    'examQuestions.questions' => function($query) {
+            $exam = Exam::leftJoin('exam_schedules', function ($join) use($userGroup){
+                    $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                        ->where('exam_schedules.status', 1);
+                })->with(['examQuestions.questions' => function($query) {
                         $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
-                    }
-                ])
+                    }])
                 ->select(
                     'exams.id',
                     'exams.title',
@@ -318,18 +73,28 @@ class ExamController extends Controller
                     'exams.is_free',
                     'exams.restrict_attempts',
                     'exams.total_attempts',
+                    'exam_schedules.user_groups',
                     DB::raw('SUM(questions.default_marks) as total_marks'),
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'),
                 )
+                ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-                ->where(function ($query) use ($assignedExams) {
+                ->where('exams.status', 1)
+                ->where(function ($query) { 
                     $query->where('exams.is_public', 1) 
-                        ->orWhereIn('exams.id', $assignedExams); 
+                        ->orWhereNotNull('exam_schedules.id'); 
+                })
+                ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                    $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                        ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
                 })
                 ->where('exams.slug', $slug)
                 ->where('exams.subcategory_id', $request->category)
-                ->where('exams.status', 1)
                 ->where('questions.status', 1)
                 ->groupBy(
                     'exams.id', 'exams.title', 'exams.description', 'exams.pass_percentage',
@@ -337,7 +102,7 @@ class ExamController extends Controller
                     'exams.point_mode', 'exams.exam_duration', 'exams.point', 'exams.shuffle_questions',
                     'exams.question_view', 'exams.disable_finish_button', 'exams.negative_marking',
                     'exams.negative_marking_type', 'exams.negative_marks','exams.is_free','exams.restrict_attempts',
-                    'exams.total_attempts'
+                    'exams.total_attempts','exam_schedules.user_groups'
                 )
                 ->first();
 
@@ -347,44 +112,12 @@ class ExamController extends Controller
             }
 
             // Adjust 'is_free' for assigned exams, regardless of public or private
-            if (in_array($exam->id, $assignedExams)) {
+            if (in_array($exam->id, $assignedExams) || in_array($exam->id, $purchaseExam) || in_array($exam->user_groups, $userGroup)) {
                 $exam->is_free = 1; // Make assigned exams free
             }
 
-            // PAID EXAM
-            if ($exam->is_free == 0) {
-                $type = "exams";
-
-                // Get the current date and time
-                $currentDate = now();
-
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-                // If no active subscription, return error
-                if (!$subscription) {
-                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-                }
-
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // User has unlimited access, allow the exam
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-
-                    // Check if the requested feature type is in the allowed features
-                    if (!in_array($type, $allowed_features)) {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                    }
-                }
+            if($exam->is_free == 0){
+                return response()->json(['status' => false, 'error' => 'You donot have this exam. Please purchase it continue'], 404);
             }
 
             // Fetch all completed exam results
@@ -403,7 +136,7 @@ class ExamController extends Controller
             $ongoingExam = ExamResult::where('user_id', $user->id)
                 ->where('exam_id', $exam->id)
                 ->where('schedule_id',$scheduleId)
-                ->where('status', 'ongoing') // Correct the status check
+                ->where('status', 'ongoing') 
                 ->latest('created_at')
                 ->first();
 
@@ -428,66 +161,15 @@ class ExamController extends Controller
                             'points' => $ongoingExam->point,
                             'saved_answers'=> $ongoingExam->answers == null ? [] : json_decode($ongoingExam->answers),
                             'question_view' => $exam->question_view == 1 ? "enable" : "disable",
-                            'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
+                            'finish_button' => $exam->disable_finish_button == 1 ? "disable" : "enable"
                         ]
                     ], 200);
                 }
             }
 
-            // Calculate exam duration and points
-            // $duration = (int) ($exam->duration_mode == "manual" ? $exam->duration : round($exam->total_time / 60, 2));
-            // $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
-
-            // Calculate exam duration and points
-            $duration = (int) ($exam->duration_mode == "manual" ? $exam->exam_duration  : round($exam->total_time / 60, 2));
-            $points = $exam->point_mode == "manual" ? $exam->point : $exam->total_marks;
-
-            // Prepare structured response data for questions
-            
-            // $questionsData = [];
-            // $correctAnswers = [];
-            // foreach ($exam->examQuestions as $examQuestion) {
-            //     $question = $examQuestion->questions;
-            //     $options = $question->options ? json_decode($question->options, true) : [];
-
-            //     if ($question->type == "MTF" && !empty($question->answer)) {
-            //         $matchOption = json_decode($question->answer, true);
-            //         shuffle($matchOption);
-            //         $options = array_merge($options, $matchOption);
-            //     }
-
-            //     if ($question->type == "ORD") {
-            //         shuffle($options);
-            //     }
-
-            //     // Customize question display for different types
-            //     $questionText = $question->question;
-            //     if ($question->type == "FIB") {
-            //         $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
-            //         $options = [json_decode($question->answer, true) ? count(json_decode($question->answer, true)) : 0];
-            //     } elseif ($question->type == "EMQ") {
-            //         $questionText = json_decode($question->question, true);
-            //     }
-
-
-            //     // CHANGE EMQ QUESTION TO MSA (as I SAID YOU )
-            //     if ($question->type == "EMQ") {
-            //     }
-
-            //     $questionsData[] = [
-            //         'id' => $question->id,
-            //         'type' => $question->type,
-            //         'question' => $questionText,
-            //         'options' => $options
-            //     ];
-
-            //     // Add correct answer info
-            //     $correctAnswers[] = [
-            //         'id' => $question->id,
-            //         'correct_answer' => $question->answer,  // Use answer field
-            //         'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-            //     ];
-            // }
+            // Duration / Point
+            $duration = (int) ($exam->duration_mode == "manual" ? $exam->exam_duration  : round($exam->total_time / 60)); // In Minutes
+            $points = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
 
             $questionsData = [];
             $correctAnswers = [];
@@ -501,10 +183,6 @@ class ExamController extends Controller
                     $options = array_merge($options, $matchOption);
                 }
 
-                if ($question->type == "ORD") {
-                    // shuffle($options);
-                }
-
                 // Customize question display for different types
                 $questionText = $question->question;
                 if ($question->type == "FIB") {
@@ -513,50 +191,6 @@ class ExamController extends Controller
                 }elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
-                
-                // if($question->type == "EMQ") {
-                //     // If EMQ, decode question text to access parent and child questions
-                //     $parentChildQuestions = json_decode($question->question, true);
-                    
-                //     // Loop through each child question
-                //     foreach ($parentChildQuestions as $index => $childQuestionText) {
-                //         if ($index > 0) {
-                //             // Treat the first question as the parent and others as separate child questions
-                //             $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
-                //             $childQuestionData = [
-                //                 'id' => $question->id . "-$index",  // Unique ID for each child question
-                //                 'type' => 'MSA',  // Treating as MSA as per your request
-                //                 'question' => $QUESTIONNAME,
-                //                 'options' => $options
-                //             ];
-                //             $questionsData[] = $childQuestionData;
-
-                //             $optionArray = json_decode($question->answer,true);
-                //             // Add correct answer for each child question
-                //             $correctAnswers[] = [
-                //                 'id' => $question->id . "-$index",
-                //                 'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
-                //                 'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-                //             ];
-                //         }
-                        
-                //     }
-                // } else {
-                //     // Standard question processing for non-EMQ types
-                //     $questionsData[] = [
-                //         'id' => $question->id,
-                //         'type' => $question->type,
-                //         'question' => $questionText,
-                //         'options' => $options
-                //     ];
-
-                //     // Add correct answer info
-                //     $correctAnswers[] = [
-                //         'id' => $question->id,
-                //         'correct_answer' => $question->answer,
-                //         'default_marks' => $exam->point_mode == "manual" ? $exam->point : $question->default_marks
-                //     ];
-                // }
 
                 $questionsData[] = [
                     'id' => $question->id,
@@ -599,7 +233,7 @@ class ExamController extends Controller
                 'negative_marking_type' => $exam->negative_marking_type,
                 'negative_marks' => $exam->negative_marks,
                 'pass_percentage' => $exam->pass_percentage,
-                'total_question' => count($questionsData),
+                'total_question' => count($questionsData), // CHANGE THIS FOR EMQ
                 'status' => 'ongoing',
             ]);
 
@@ -616,7 +250,7 @@ class ExamController extends Controller
                     'points' => $examResult->point,
                     'saved_answers'=> $examResult->answers == null ? [] : json_decode($examResult->answers),
                     'question_view' => $exam->question_view == 1 ? "enable" : "disable",
-                    'finish_button' => $exam->disable_finish_button == 1 ? "enable" : "disable"
+                    'finish_button' => $exam->disable_finish_button == 1 ? "disable" : "enable"
                 ]
             ], 200);
 
@@ -1002,219 +636,6 @@ class ExamController extends Controller
             ]);
         }
     }
-
-
-    // public function examAll(Request $request)
-    // {
-    //     try {
-    //         // Validate the request
-    //         $request->validate(['category' => 'required']);
-
-    //         // Fetch the current authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         // Fetch the exam IDs assigned to the current user
-    //         $assignedExams = AssignedExam::where('user_id', $user->id)
-    //             ->pluck('exam_id')
-    //             ->toArray();
-
-    //         // Get current date and time for upcoming exam logic
-    //         $currentDate = now();
-            
-    //         // Fetch upcoming exams with schedules
-    //         $upcomingExams = Exam::join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
-    //         ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-    //         ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-    //         ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-    //         ->where('exams.status', 1)
-    //         ->where('exam_schedules.status', 1)
-    //         ->where(function ($query) use ($assignedExams) {
-    //             $query->where('exams.is_public', 1)->orWhereIn('exams.id', $assignedExams);
-    //         })
-    //         ->where('exams.subcategory_id', $request->category)
-    //         ->select(
-    //             'exams.id',
-    //             'exams.is_free',
-    //             'exams.slug as exam_slug',
-    //             'exams.title as exam_name',
-    //             'exam_types.slug as exam_type_slug',
-    //             'exams.duration_mode',
-    //             'exams.exam_duration',
-    //             'exams.point_mode',
-    //             'exams.point',
-    //             'exams.restrict_attempts',
-    //             'exams.total_attempts',
-    //             DB::raw('SUM(CASE 
-    //                 WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
-    //                 ELSE 1 
-    //             END) as total_questions'),  
-    //             DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-    //             DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
-    //             'exam_schedules.id as schedule_id',
-    //             'exam_schedules.schedule_type',
-    //             'exam_schedules.start_date',
-    //             'exam_schedules.start_time',
-    //             'exam_schedules.end_date',
-    //             'exam_schedules.end_time',
-    //             'exam_schedules.grace_period'
-    //         )
-    //         ->groupBy(
-    //             'exams.id',
-    //             'exams.is_free',
-    //             'exam_types.slug',
-    //             'exams.slug',
-    //             'exams.title',
-    //             'exams.total_attempts',
-    //             'exams.duration_mode',
-    //             'exams.exam_duration',
-    //             'exams.restrict_attempts',
-    //             'exams.point_mode',
-    //             'exams.point',
-    //             'exam_schedules.id',
-    //             'exam_schedules.schedule_type',
-    //             'exam_schedules.start_date',
-    //             'exam_schedules.start_time',
-    //             'exam_schedules.end_date',
-    //             'exam_schedules.end_time',
-    //             'exam_schedules.grace_period'
-    //         )
-    //         ->havingRaw('COUNT(questions.id) > 0')
-    //         ->havingRaw('COUNT(exam_schedules.id) > 0')
-    //         ->get();
-
-    //         // Fetch the user's active subscription
-    //         $currentDate = now();
-    //         $type = "exams"; 
-    //         $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-    //         // Fetch the user's active subscription
-    //         $subscription = Subscription::with('plans')
-    //             ->where('user_id', $user->id)
-    //             ->where('stripe_status', 'complete')
-    //             ->where('ends_at', '>', $currentDate)
-    //             ->latest()
-    //             ->first();
-
-    //         // Apply subscription-based conditions to make exams free
-    //         if ($subscription) {
-    //             $plan = $subscription->plans;
-
-    //             // Check if the plan allows unlimited access
-    //             if ($plan->feature_access == 1) {
-    //                 // MAKE ALL EXAMS FREE
-    //                 $upcomingExams->transform(function ($exam) {
-    //                     $exam->is_free = 1; // Make all exams free for unlimited access
-    //                     return $exam;
-    //                 });
-    //             } else {
-    //                 // Get allowed features from the plan
-    //                 $allowed_features = json_decode($plan->features, true);
-    //                 // Check if exams are included in the allowed features
-    //                 if (in_array($type, $allowed_features)) {
-    //                     // MAKE ALL EXAMS FREE
-    //                     $upcomingExams->transform(function ($exam) {
-    //                         $exam->is_free = 1; // Make exams free as part of allowed features
-    //                         return $exam;
-    //                     });
-    //                 }
-    //             }
-    //         }
-
-    //         // $current_time = now();
-    //         // $resumedExam = ExamResult::where('end_time', '>', $current_time)->where('user_id', $user->id)
-    //         // ->where('status', 'ongoing')
-    //         // ->pluck('exam_id')
-    //         // ->toArray();
-
-    //         // // Return success JSON response with upcoming exams and schedules
-    //         // return response()->json([
-    //         //     'status' => true,
-    //         //     'data' => $upcomingExams->map(function ($exam) use($resumedExam){
-    //         //         $isResume = in_array($exam->id, $resumedExam);
-    //         //         return [
-    //         //             'id' => $exam->id,
-    //         //             'exam_type_slug' => $exam->exam_type_slug,
-    //         //             'slug' => $exam->exam_slug,
-    //         //             'title' => $exam->exam_name,
-    //         //             'duration_mode' => $exam->duration_mode,
-    //         //             'exam_duration' => $exam->exam_duration,
-    //         //             'point_mode' => $exam->point_mode,
-    //         //             'point' => $exam->point,
-    //         //             'is_free' => $exam->is_free,
-    //         //             'total_questions' => $exam->total_questions,
-    //         //             'total_marks' => $exam->total_marks,
-    //         //             'total_time' => $exam->total_time,
-    //         //             'is_resume' => $isResume,
-    //         //             'schedules' => [
-    //         //                 'schedule_id'=>$exam->schedule_id,
-    //         //                 'schedule_type' => $exam->schedule_type,
-    //         //                 'start_date' => $exam->start_date,
-    //         //                 'start_time' => $exam->start_time,
-    //         //                 'end_date' => $exam->end_date,
-    //         //                 'end_time' => $exam->end_time,
-    //         //                 'grace_period' => $exam->grace_period,
-    //         //             ],
-    //         //             'resumedExam'=>json_encode($resumedExam)
-    //         //         ];
-    //         //     })
-    //         // ], 200);
-
-    //         $current_time = now();
-    //         // Fetch ongoing exam results
-    //         $examResults = ExamResult::where('end_time', '>', $current_time)
-    //             ->where('user_id', $user->id)
-    //             ->where('status', 'ongoing')
-    //             ->get();
-    //         // Create a map for quick lookup
-    //         $examResultExamScheduleMap = [];
-    //         foreach ($examResults as $examResult) {
-    //             $key = $examResult->exam_id . '_' . $examResult->schedule_id;
-    //             $examResultExamScheduleMap[$key] = true;
-    //         }
-    //         // Return success JSON response with upcoming exams and schedules
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => $upcomingExams->map(function ($exam) use ($examResultExamScheduleMap) {
-    //                 $examScheduleKey = $exam->id . '_' . $exam->schedule_id;
-    //                 $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
-    //                 $attempt = $exam->total_attempts ?? "";
-    //                 return [
-    //                     'id' => $exam->id,
-    //                     'exam_type_slug' => $exam->exam_type_slug,
-    //                     'slug' => $exam->exam_slug,
-    //                     'title' => $exam->exam_name,
-    //                     'duration_mode' => $exam->duration_mode,
-    //                     'exam_duration' => $exam->exam_duration,
-    //                     'point_mode' => $exam->point_mode,
-    //                     'point' => $exam->point,
-    //                     'is_free' => $exam->is_free,
-    //                     'total_questions' => $exam->total_questions,
-    //                     'total_marks' => $exam->total_marks,
-    //                     'total_time' => $exam->total_time,
-    //                     'is_resume' => $isResume,
-    //                     'total_attempts'=>$exam->restrict_attempts == 0 ? "" : $attempt,
-    //                     'schedules' => [
-    //                         'schedule_id' => $exam->schedule_id,
-    //                         'schedule_type' => $exam->schedule_type,
-    //                         'start_date' => $exam->start_date,
-    //                         'start_time' => $exam->start_time,
-    //                         'end_date' => $exam->end_date,
-    //                         'end_time' => $exam->end_time,
-    //                         'grace_period' => $exam->grace_period,
-    //                     ],
-    //                 ];
-    //             })
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         // Log error and return error JSON response
-    //         \Log::error('Error fetching exam data: ' . $th->getMessage());
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while fetching the exam data.',
-    //             'error' => 'Error logged: ' . $th->getMessage()
-    //         ], 500);
-    //     }
-    // }
 
     
     private function getUserItemsByType($userId, $itemType)
