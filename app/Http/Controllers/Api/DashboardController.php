@@ -18,6 +18,7 @@ use App\Models\Question;
 use App\Models\AssignedExam;
 use App\Models\Subscription;
 use App\Models\QuizSchedule;
+use App\Models\UserGroup;
 
 class DashboardController extends Controller
 {
