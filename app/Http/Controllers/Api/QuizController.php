@@ -1317,7 +1317,7 @@ class QuizController extends Controller
 
                 // Free / Paid
                 $checkfree = $quiz->is_free;
-                if(in_array($quiz->id,$purchaseExam) || in_array($quiz->user_groups,$userGroup)){
+                if(in_array($quiz->id,$purchaseQuiz) || in_array($quiz->user_groups,$userGroup)){
                     $checkfree = 1;
                 }
 
@@ -1340,8 +1340,8 @@ class QuizController extends Controller
 
                 // Attempts Completed or not checking
                 $scheduleId = $quiz->schedule_id ?? 0;
-                $userAttempt = ExamResult::where('user_id',$user->id)->where('exam_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
-
+                $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
+                
                 if($quiz->restrict_attempts == 1 && $userAttempt >= $totalAttempt){
                     continue;
                 }
