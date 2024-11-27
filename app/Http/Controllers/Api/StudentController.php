@@ -649,8 +649,8 @@ class StudentController extends Controller
 
                 // Create a map for quick lookup
                 $quizResultScheduleMap = [];
-                foreach ($quizResults as $examResult) {
-                    $key = $examResult->quiz_id . '_' . $examResult->schedule_id;
+                foreach ($quizResults as $quizResult) {
+                    $key = $quizResult->quiz_id . '_' . $quizResult->schedule_id;
                     $quizResultScheduleMap[$key] = true;
                 }
 
