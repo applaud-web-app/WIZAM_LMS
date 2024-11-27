@@ -76,6 +76,11 @@ class StudentController extends Controller
         return $this->getUserItemsByType($userId, 'exam');
     }
 
+    private function getUserQuiz($userId)
+    {
+        return $this->getUserItemsByType($userId, 'quizze');
+    }
+
     public function examType(Request $request) {
         try {
             // Fetch the current authenticated user
@@ -346,8 +351,6 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
-    
-
 
     private function formatTime($totalTime)
     {
@@ -541,184 +544,10 @@ class StudentController extends Controller
         }
     }
     
-    
-
-    // public function allQuiz(Request $request){
-    //     try {
-    //         // Fetch quiz type by slug and status
-    //         $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-
-    //         if ($quizType) {
-    //             // Fetch quiz data grouped by type.slug
-    //             $quizData = Quizze::select(
-    //                     'quizzes.slug as quizSlug',
-    //                     'quiz_types.slug', // Fetch type slug
-    //                     'quizzes.title', // Fetch quiz title
-    //                     'quizzes.duration_mode', 
-    //                     'quizzes.duration', 
-    //                     'quizzes.point_mode',
-    //                     'quizzes.point', 
-    //                     'quizzes.is_free', 
-    //                     DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
-    //                     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
-    //                     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //                 )
-    //                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
-    //                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
-    //                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
-    //                 ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
-    //                 ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-    //                 ->where('quizzes.status', 1) // Filter by quiz status
-    //                 ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
-    //                 'quizzes.duration', 'quizzes.point_mode','quizzes.point',  'quizzes.is_free', ) // Group by type and quiz details
-    //                 ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
-    //                 ->get();
-
-    //             // Initialize array to store formatted quiz data
-    //             $formattedQuizData = [];
-
-    //             foreach ($quizData as $quiz) {
-    //                 // Format the total time using the new method
-    //                 $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-
-    //                 // Group quizs by slug (quiz type)
-    //                 if (!isset($formattedQuizData[$quiz->slug])) {
-    //                     $formattedQuizData[$quiz->slug] = [];
-    //                 }
-
-    //                 $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
-    //                 $marks = $quiz->point_mode == "manual" ? ($quiz->point*$quiz->total_questions) : $quiz->total_marks;
-
-    //                 // Add quiz details to the corresponding type slug
-    //                 $formattedQuizData[$quiz->slug][] = [
-    //                     'title' => $quiz->title,
-    //                     'slug' => $quiz->quizSlug,
-    //                     'questions' => $quiz->total_questions ?? 0,
-    //                     'time' => $time, // Use the formatted time
-    //                     'marks' => $marks ?? 0,
-    //                     'is_free'=> $quiz->is_free,
-    //                 ];
-    //             }
-
-    //             // Return the formatted data as JSON
-    //             return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
-    //         }
-
-    //         // Return error if quiz type not found
-    //         return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
-            
-    //     } catch (\Throwable $th) {
-    //         // Return error response with exception message
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-
-    // public function allQuiz(Request $request)
-    // {
-    //     try {
-    //         // Fetch quiz type by slug and status
-    //         $quizType = QuizType::select('id')->where('slug', $request->slug)->where('status', 1)->first();
-    
-    //         if ($quizType) {
-    //             // Get the authenticated user
-    //             $user = $request->attributes->get('authenticatedUser');
-    
-    //             // Check if the user has a subscription
-    //             $currentDate = now();
-    //             $subscription = Subscription::with('plans')->where('user_id', $user->id)
-    //                 ->where('stripe_status', 'complete')
-    //                 ->where('ends_at', '>', $currentDate)
-    //                 ->latest()
-    //                 ->first();
-    
-    //             // Fetch quiz data grouped by type.slug
-    //             $quizData = Quizze::select(
-    //                 'quizzes.slug as quizSlug',
-    //                 'quiz_types.slug', // Fetch type slug
-    //                 'quizzes.title', // Fetch quiz title
-    //                 'quizzes.duration_mode', 
-    //                 'quizzes.duration', 
-    //                 'quizzes.point_mode',
-    //                 'quizzes.point', 
-    //                 'quizzes.is_free', 
-    //                 'quizzes.is_public', 
-    //                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each quiz
-    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each quiz
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //             )
-    //             ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id') // Join with the quiz_types table
-    //             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id') // Join with quiz_questions
-    //             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id') // Join with questions
-    //             ->where('quizzes.quiz_type_id', $quizType->id) // Filter by the provided quiz type
-    //             ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-    //             ->where('quizzes.status', 1) // Filter by quiz status
-    //             ->groupBy('quiz_types.slug','quizzes.slug', 'quizzes.id', 'quizzes.title','quizzes.duration_mode', 
-    //                 'quizzes.duration', 'quizzes.point_mode','quizzes.point',  'quizzes.is_free', 'quizzes.is_public') 
-    //             ->havingRaw('COUNT(questions.id) > 0') // Only include quizzes with more than 0 questions
-    //             ->get();
-    
-    //             // Initialize array to store formatted quiz data
-    //             $formattedQuizData = [];
-    
-    //             foreach ($quizData as $quiz) {
-    //                 // Format the total time using the new method
-    //                 $formattedTime = $this->formatTime($quiz->total_time); // Use the total_time from questions
-    
-    //                 // Check subscription status and modify the quiz's is_free value
-    //                 if ($subscription) {
-    //                     if ($quiz->is_free == 0) { // If it's a paid quiz
-    //                         $quiz->is_free = 1; // Set it to free
-    //                     }
-    //                 } else {
-    //                     // If the user does not have a subscription, filter to only show public quizzes
-    //                     if ($quiz->is_public == 0) {
-    //                         // Log the skipped quiz
-    //                         \Log::info('Skipping non-public quiz: ', ['quiz_slug' => $quiz->quizSlug]);
-    //                         continue; // Skip non-public quizzes
-    //                     }
-    //                 }
-    
-    //                 // Group quizzes by slug (quiz type)
-    //                 if (!isset($formattedQuizData[$quiz->slug])) {
-    //                     $formattedQuizData[$quiz->slug] = [];
-    //                 }
-    
-    //                 $time = $quiz->duration_mode == "manual" ? $quiz->duration : $formattedTime;
-    //                 $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-    
-    //                 // Add quiz details to the corresponding type slug
-    //                 $formattedQuizData[$quiz->slug][] = [
-    //                     'title' => $quiz->title,
-    //                     'slug' => $quiz->quizSlug,
-    //                     'questions' => $quiz->total_questions ?? 0,
-    //                     'time' => $time, // Use the formatted time
-    //                     'marks' => $marks ?? 0,
-    //                     'is_free' => $quiz->is_free,
-    //                 ];
-    //             }
-    
-    //             // Log the final filtered quiz data for non-subscribers
-    //             \Log::info('Final formatted quiz data: ', ['data' => $formattedQuizData]);
-    
-    //             // Return the formatted data as JSON
-    //             return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
-    //         }
-    
-    //         // Return error if quiz type not found
-    //         return response()->json(['status' => false, 'error' => "Quiz Not Found"], 404);
-            
-    //     } catch (\Throwable $th) {
-    //         // Log the error
-    //         \Log::error('Error in allQuiz: ', ['error' => $th->getMessage()]);
-    
-    //         // Return error response with exception message
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-    
     public function allQuiz(Request $request)
     {
         try {
+     
             // Validate incoming request parameters
             $request->validate([
                 'category' => 'required',
@@ -733,62 +562,14 @@ class StudentController extends Controller
                 // Get the authenticated user
                 $user = $request->attributes->get('authenticatedUser');
 
-                // Fetch quiz data based on the requested category
-                // $quizData = Quizze::select(
-                //         'quizzes.slug as quizSlug',
-                //         'quizzes.title',
-                //         'quizzes.duration_mode',
-                //         'quizzes.duration',
-                //         'quizzes.point_mode',
-                //         'quizzes.point',
-                //         'quizzes.is_free',
-                //         'quizzes.is_public',
-                //         'quiz_schedules.schedule_type',
-                //         'quiz_schedules.start_date',
-                //         'quiz_schedules.start_time',
-                //         'quiz_schedules.end_date',
-                //         'quiz_schedules.end_time',
-                //         'quiz_schedules.grace_period',
-                //         'quiz_schedules.id as schedule_id',
-                //         'quizzes.restrict_attempts',
-                //         'quizzes.total_attempts',
-                //         DB::raw('SUM(CASE 
-                //             WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
-                //             ELSE 1 
-                //         END) as total_questions'),
-                //         DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                //         DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-                //     )
-                //     ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-                //     ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
-                //     ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
-                //     ->leftJoin('quiz_schedules', 'quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                //     ->where('quiz_schedules.status', 1)
-                //     ->where('quizzes.quiz_type_id', $quizType->id) // Filter by quiz type
-                //     ->where('quizzes.subcategory_id', $request->category) // Filter by subcategory_id
-                //     ->where('quizzes.status', 1) // Filter by quiz status
-                //     ->groupBy(
-                //         'quizzes.slug',
-                //         'quizzes.id',
-                //         'quizzes.title',
-                //         'quizzes.duration_mode',
-                //         'quizzes.duration',
-                //         'quizzes.point_mode',
-                //         'quizzes.point',
-                //         'quizzes.is_free',
-                //         'quizzes.is_public',
-                //         'quiz_schedules.id',
-                //         'quiz_schedules.schedule_type',
-                //         'quiz_schedules.start_date',
-                //         'quiz_schedules.start_time',
-                //         'quiz_schedules.end_date',
-                //         'quiz_schedules.end_time',
-                //         'quizzes.restrict_attempts',
-                //         'quizzes.total_attempts',
-                //         'quiz_schedules.grace_period'
-                //     )
-                //     ->havingRaw('COUNT(questions.id) > 0')
-                // ->get();
+                // User group IDs
+                $userGroup = GroupUsers::where('user_id',$user->id)
+                ->where('status',1)
+                ->pluck('group_id')
+                ->toArray();
+
+                // Purchased Quiz
+                $purchaseQuiz = $this->getUserQuiz($user->id);
 
                 $quizData = Quizze::leftJoin('quiz_schedules', function ($join) use($quizType){
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
@@ -799,14 +580,16 @@ class StudentController extends Controller
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
                 ->where('quizzes.status', 1)
                 ->where(function ($query) {
-                    $query->where('quizzes.is_public', 1); 
-                })
-                ->where('quizzes.quiz_type_id', $quizType->id)
-                ->where('quizzes.subcategory_id', $request->category)
-                ->where(function ($query) {
                     $query->where('quizzes.is_public', 1) 
                         ->orWhereNotNull('quiz_schedules.id'); 
                 })
+                ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                    $query->where('quizzes.is_public', 1)
+                    ->orWhereIn('quizzes.id', $purchaseQuiz)
+                    ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
+                })
+                ->where('quizzes.quiz_type_id', $quizType->id)
+                ->where('quizzes.subcategory_id', $request->category)
                 ->select(
                     'quizzes.slug as quizSlug',
                     'quizzes.title',
@@ -825,6 +608,7 @@ class StudentController extends Controller
                     'quiz_schedules.id as schedule_id',
                     'quizzes.restrict_attempts',
                     'quizzes.total_attempts',
+                    'quiz_schedules.user_groups',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -850,47 +634,13 @@ class StudentController extends Controller
                     'quiz_schedules.end_time',
                     'quizzes.restrict_attempts',
                     'quizzes.total_attempts',
+                    'quiz_schedules.user_groups',
                     'quiz_schedules.grace_period'
                 )
                 ->havingRaw('COUNT(questions.id) > 0') // Only include exams with questions
                 ->get();
 
-                // USER SUBSCRIPTION LOGIC
-                $type = "quizzes";
-                $currentDate = now();
-    
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')
-                    ->where('user_id', $user->id)
-                    ->where('stripe_status', 'complete')
-                    ->where('ends_at', '>', $currentDate)
-                    ->latest()
-                    ->first();
-    
-                // Adjust 'is_free' based on subscription and assigned exams
-                if ($subscription) {
-                    $plan = $subscription->plans;
-    
-                    // Check if the plan allows unlimited access
-                    if ($plan->feature_access == 1) {
-                        // MAKE ALL EXAMS FREE
-                        $quizData->transform(function ($exam) {
-                            $exam->is_free = 1; // Make all exams free for unlimited access
-                            return $exam;
-                        });
-                    } else {
-                        // Get allowed features from the plan
-                        $allowed_features = json_decode($plan->features, true);
-                        if (in_array($type, $allowed_features)) {
-                            // MAKE ALL EXAMS FREE
-                            $quizData->transform(function ($exam) {
-                                $exam->is_free = 1; // Make exams free as part of the allowed features
-                                return $exam;
-                            });
-                        }
-                    }
-                }
-
+                // Resume Quiz
                 $current_time = now();
                 $quizResults = QuizResult::where('end_time', '>', $current_time)
                     ->where('user_id', $user->id)
@@ -898,68 +648,129 @@ class StudentController extends Controller
                     ->get();
 
                 // Create a map for quick lookup
-                $quizResultExamScheduleMap = [];
+                $quizResultScheduleMap = [];
                 foreach ($quizResults as $examResult) {
-                    $key = $examResult->exam_id . '_' . $examResult->schedule_id;
-                    $quizResultExamScheduleMap[$key] = true;
+                    $key = $examResult->quiz_id . '_' . $examResult->schedule_id;
+                    $quizResultScheduleMap[$key] = true;
                 }
 
-                // Format quiz data for the response
-                $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType,$user){
+                $formattedQuizData = [];
+                foreach ($quizData as $quiz) {
 
-                    // Format the total time
+                    // Free / Paid
+                    $checkfree = $quiz->is_free;
+                    if(in_array($quiz->id,$purchaseQuiz) || in_array($quiz->user_groups,$userGroup)){
+                        $checkfree = 1;
+                    }
+
+                    // Duration / Point
                     $formattedTime = $this->formatTime($quiz->total_time);
-
-                    // Public exam logic
-                    $examScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
-                    $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
-
-                    // If the exam is public and doesn't have a schedule, check for its record in resume state
-                    if ($quiz->is_public === 1 && !$quiz->schedule_id) {
-                        $isResume = isset($quizResultExamScheduleMap[$quiz->id . '_0']);
-                    }
-    
-                    // Group exams by exam type slug
-                    if (!isset($formattedExamData[$quizType->slug])) {
-                        $formattedExamData[$quizType->slug] = [];
-                    }
-    
-                    // Format time and marks based on the exam mode
-                    $time = $quiz->duration_mode == "manual" ? $quiz->exam_duration : $formattedTime;
+                    $time = $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $formattedTime;
                     $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
-                    $attempt = $quiz->total_attempts ?? "";
 
+                    // Resume Exams
+                    $quizScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+                    $isResume = isset($quizResultScheduleMap[$quizScheduleKey]);
+
+                    if ($quiz->is_public === 1 && !$quiz->schedule_id) {
+                        $isResume = isset($quizResultScheduleMap[$quiz->id . '_0']);
+                    }
+
+                    // Attempts
+                    $totalAttempt = $quiz->total_attempts ?? 1;
+                    $totalAttempt = $quiz->restrict_attempts == 1 ? $totalAttempt : null;
+
+                    // Attempts Completed or not checking
                     $scheduleId = $quiz->schedule_id ?? 0;
                     $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
 
-                    $totalAttempts = $quiz->restrict_attempts == 0 ? null : $attempt;
-                    if($userAttempt >= $totalAttempts && $totalAttempts !== null && $quiz->restrict_attempts == 1){
-                        return null; // Skip quiz if user exceeded attempts
+                    if($quiz->restrict_attempts == 1 && $userAttempt >= $totalAttempt){
+                        continue;
                     }
 
-                    return [
+                    // Add quiz details to the corresponding type slug, including schedule details
+                    $formattedQuizData[] = [
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
-                        'time' => $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $this->formatTime($quiz->total_time),
-                        'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
-                        'is_free' => $quiz->is_free,
-                        'is_resume' =>$isResume,
-                        'total_attempts'=>$quiz->restrict_attempts == 0 ? "" : $attempt,
-                        'schedule' => [
-                            'schedule_id'=>$quiz->schedule_id,
+                        'exam_type_slug' => $quiz->exam_type_slug,
+                        'duration_mode' => $quiz->duration_mode,
+                        'exam_duration' => $quiz->duration,
+                        'point_mode' => $quiz->point_mode,
+                        'point' => $quiz->point,
+                        'is_free' => $checkfree,
+                        'marks' => $marks,
+                        'time' => $time,
+                        'is_resume' => $isResume,
+                        'total_attempts'=>$totalAttempt,
+                        'schedules' => [
+                            'schedule_id' =>  $quiz->schedule_id ?: 0,
+                            'schedule_type' => $quiz->schedule_type,
                             'start_date' => $quiz->start_date,
                             'start_time' => $quiz->start_time,
                             'end_date' => $quiz->end_date,
                             'end_time' => $quiz->end_time,
                             'grace_period' => $quiz->grace_period,
-                            'schedule_type' => $quiz->schedule_type,
                         ],
                     ];
-                });
+                }
+
+                // Format quiz data for the response
+                // $formattedQuizData = $quizData->map(function ($quiz) use($quizResultExamScheduleMap,$quizType,$user){
+
+                //     // Format the total time
+                //     $formattedTime = $this->formatTime($quiz->total_time);
+
+                //     // Public exam logic
+                //     $examScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
+                //     $isResume = isset($quizResultExamScheduleMap[$examScheduleKey]);
+
+                //     // If the exam is public and doesn't have a schedule, check for its record in resume state
+                //     if ($quiz->is_public === 1 && !$quiz->schedule_id) {
+                //         $isResume = isset($quizResultExamScheduleMap[$quiz->id . '_0']);
+                //     }
+    
+                //     // Group exams by exam type slug
+                //     if (!isset($formattedExamData[$quizType->slug])) {
+                //         $formattedExamData[$quizType->slug] = [];
+                //     }
+    
+                //     // Format time and marks based on the exam mode
+                //     $time = $quiz->duration_mode == "manual" ? $quiz->exam_duration : $formattedTime;
+                //     $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
+                //     $attempt = $quiz->total_attempts ?? "";
+
+                //     $scheduleId = $quiz->schedule_id ?? 0;
+                //     $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
+
+                //     $totalAttempts = $quiz->restrict_attempts == 0 ? null : $attempt;
+                //     if($userAttempt >= $totalAttempts && $totalAttempts !== null && $quiz->restrict_attempts == 1){
+                //         return null; // Skip quiz if user exceeded attempts
+                //     }
+
+                //     return [
+                //         'title' => $quiz->title,
+                //         'slug' => $quiz->quizSlug,
+                //         'questions' => $quiz->total_questions ?? 0,
+                //         'time' => $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $this->formatTime($quiz->total_time),
+                //         'marks' => $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks,
+                //         'is_free' => $quiz->is_free,
+                //         'is_resume' =>$isResume,
+                //         'total_attempts'=>$quiz->restrict_attempts == 0 ? "" : $attempt,
+                //         'schedule' => [
+                //             'schedule_id'=>$quiz->schedule_id,
+                //             'start_date' => $quiz->start_date,
+                //             'start_time' => $quiz->start_time,
+                //             'end_date' => $quiz->end_date,
+                //             'end_time' => $quiz->end_time,
+                //             'grace_period' => $quiz->grace_period,
+                //             'schedule_type' => $quiz->schedule_type,
+                //         ],
+                //     ];
+                // });
 
                 // Return the formatted data as JSON
-                return response()->json(['status' => true, 'data' => $formattedQuizData->values()], 200);
+                return response()->json(['status' => true, 'data' => $formattedQuizData], 200);
             }
 
             // Return error if quiz type not found
