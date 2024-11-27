@@ -22,167 +22,39 @@ use App\Models\User;
 
 class PracticeSetController extends Controller
 {
-    // public function playPracticeSet(Request $request, $slug)
-    // {
-    //     try {
-    //         // Validate incoming request data
-    //         $request->validate([
-    //             'category' => 'required|integer',
-    //         ]);
-    
-    //         // Fetch the practice along with related questions in one query
-    //         $practice = PracticeSet::with([
-    //                 'practiceQuestions.questions' => function($query) {
-    //                     $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
-    //                 }
-    //             ])
-    //             ->select(
-    //                 'practice_sets.id',
-    //                 'practice_sets.title',
-    //                 'practice_sets.description',
-    //                 'practice_sets.slug',
-    //                 'practice_sets.subcategory_id',
-    //                 'practice_sets.status',
-    //                 'practice_sets.allow_reward',
-    //                 'practice_sets.reward_popup',
-    //                 'practice_sets.point_mode',
-    //                 'practice_sets.points',
-    //                 'practice_sets.is_free',
-    //                 DB::raw('SUM(questions.default_marks) as total_marks'),
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
-    //             )
-    //             ->leftJoin('practice_set_questions', 'practice_sets.id', '=', 'practice_set_questions.practice_set_id')
-    //             ->leftJoin('questions', 'practice_set_questions.question_id', '=', 'questions.id')
-    //             ->where('practice_sets.slug', $slug)
-    //             ->where('practice_sets.subcategory_id', $request->category)
-    //             ->where('practice_sets.status', 1)
-    //             ->where('questions.status', 1)
-    //             ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.description', 'practice_sets.slug', 'practice_sets.subcategory_id', 'practice_sets.status', 'practice_sets.allow_reward', 'practice_sets.reward_popup', 'practice_sets.point_mode', 'practice_sets.points', 'practice_sets.is_free')
-    //             ->first();
-    
-    //         // If practice not found
-    //         if (!$practice) {
-    //             return response()->json(['status' => false, 'error' => 'Practice Set not found'], 404);
-    //         }
-    
-    //         // Get the authenticated user
-    //         $user = $request->attributes->get('authenticatedUser');
-    
-    //         // Fetch all completed practice results
-    //         $checkOngoingResult = PracticeSetResult::where('user_id', $user->id)->where('practice_sets_id', $practice->id)->where('status', 'complete')->get();
-    
-    //         // Check for ongoing practice set
-    //         $ongoingPractice = PracticeSetResult::where('user_id', $user->id)
-    //             ->where('practice_sets_id', $practice->id)
-    //             ->where('status', 'ongoing') // Correct the status check
-    //             ->latest('created_at')
-    //             ->first();
-    
-    //         if ($ongoingPractice) {
-    //             // $remainingDuration = $ongoingPractice->end_time->diffInMinutes(now());
-    //             $remainingDuration = max(now()->diffInMinutes($ongoingPractice->end_time), 0);
 
-    //             if ($ongoingPractice->end_time->isPast()) {
-    //                 // If time has passed, mark the practice as complete
-    //                 $ongoingPractice->update(['status' => 'complete']);
-    //                 $data = [
-    //                     'uuid'=>$ongoingPractice->uuid,
-    //                 ];
-    //                 return response()->json(['status' => true, 'message' => 'Practice Set Timed Out','data'=>$data]);
-    //             } else {
-    //                 // Return ongoing practice set details
-    //                 return response()->json([
-    //                     'status' => true,
-    //                     'data' => [
-    //                         'title' => $practice->title,
-    //                         'uuid'=>$ongoingPractice->uuid,
-    //                         'answer'=>$ongoingPractice->answer,
-    //                         'questions' => json_decode($ongoingPractice->questions),
-    //                         'duration' => $remainingDuration . " mins",
-    //                         'points' => $ongoingPractice->points,
-    //                     ]
-    //                 ], 200);
-    //             }
-    //         }
-    
-    //         // Calculate practice duration and points
-    //         $duration = (int) round($practice->total_time / 60, 2);
-    //         $points = $practice->point_mode == "manual" ? $practice->points : $practice->total_marks;
-    
-    //         // Prepare structured response data for questions
-    //         $questionsData = [];
-    //         $correctAnswers = [];
-    //         foreach ($practice->practiceQuestions as $practiceQuestion) {
-    //             $question = $practiceQuestion->questions;
-    //             $options = $question->options ? json_decode($question->options, true) : [];
-    
-    //             if ($question->type == "MTF" && !empty($question->answer)) {
-    //                 $matchOption = json_decode($question->answer, true);
-    //                 shuffle($matchOption);
-    //                 $options = array_merge($options, $matchOption);
-    //             }
-    
-    //             // Customize question display for different types
-    //             $questionText = $question->question;
-    //             if ($question->type == "FIB") {
-    //                 $questionText = preg_replace('/##(.*?)##/', '<span class="border-b border-black inline-block w-[150px] text-center" style="width:150px;"></span>', $question->question);
-    //                 $options = [is_array(json_decode($question->answer, true)) ? count(json_decode($question->answer, true)) : 0];
-    //             } elseif ($question->type == "EMQ") {
-    //                 $questionText = json_decode($question->question, true);
-    //             }
-    
-    //             $questionsData[] = [
-    //                 'id' => $question->id,
-    //                 'type' => $question->type,
-    //                 'question' => $questionText,
-    //                 'options' => $options
-    //             ];
+    private function getUserItemsByType($userId, $itemType)
+    {
+        try {
+            // Check if the user has an active subscription
+            $subscriptionIds = Subscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->whereDate('end_date', '>=', now()) // Check subscription validity
+            ->pluck('id') // Get subscription IDs
+            ->toArray();
 
-    //             // Add correct answer info
-    //             $correctAnswers[] = [
-    //                 'id' => $question->id,
-    //                 'correct_answer' => $question->answer,  // Use answer field
-    //                 'default_marks' => $practice->point_mode == "manual" ? $practice->points : $question->default_marks
-    //             ];
-    //         }
-    
-    //         // Start practice result tracking
-    //         $startTime = now();
-    //         $endTime = $startTime->copy()->addMinutes($duration); 
-    
-    //         $praticeResult = PracticeSetResult::create([
-    //             'practice_sets_id' => $practice->id,  // Update to singular form
-    //             'uuid' => (string) Str::uuid(),
-    //             'subcategory_id' => $practice->subcategory_id,
-    //             'user_id' => $user->id,
-    //             'questions' => json_encode($questionsData, true),
-    //             'correct_answers' => json_encode($correctAnswers, true),
-    //             'start_time' => $startTime,
-    //             'end_time' => $endTime,
-    //             'exam_duration' => $duration,
-    //             'point' => $points,
-    //             'total_question' => count($questionsData),
-    //             'status' => 'ongoing',
-    //         ]);
-    
-    //         $remainingDuration = now()->diffInMinutes($praticeResult->end_time);
- 
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => [
-    //                 'title' => $practice->title,
-    //                 'uuid'=>$praticeResult->uuid,
-    //                 'questions' => json_decode($praticeResult->questions),
-    //                 'duration' => $remainingDuration . " mins",
-    //                 'points' => $praticeResult->point
-    //             ]
-    //         ], 200);
-    
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
-    //     }
-    // }
+            if (!empty($subscriptionIds)) {
+                // Fetch subscription items of the specified type
+                $subscriptionItems = SubscriptionItem::whereIn('subscription_id', $subscriptionIds)
+                ->where('item_type', $itemType)
+                ->where('status', 'active')
+                ->pluck('item_id')
+                ->toArray();
 
+                return $subscriptionItems ?? [];
+            }
+
+            return [];
+        } catch (\Throwable $th) {
+            \Log::error("Dashboard Error fetching user items for type {$itemType}: " . $th->getMessage());
+            return [];
+        }
+    }
+
+    private function getUserPractice($userId)
+    {
+        return $this->getUserItemsByType($userId, 'practice');
+    }
 
     public function playPracticeSet(Request $request, $slug)
     {
@@ -195,12 +67,13 @@ class PracticeSetController extends Controller
                 'category' => 'required|integer',
             ]);
 
+            // Purchased practice
+            $purchasePractice = $this->getUserPractice($user->id);
+
             // Fetch the practice along with related questions in one query
-            $practice = PracticeSet::with([
-                    'practiceQuestions.questions' => function($query) {
+            $practice = PracticeSet::with(['practiceQuestions.questions' => function($query) {
                         $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
-                    }
-                ])
+                    }])
                 ->select(
                     'practice_sets.id',
                     'practice_sets.title',
@@ -222,6 +95,9 @@ class PracticeSetController extends Controller
                 ->where('practice_sets.subcategory_id', $request->category)
                 ->where('practice_sets.status', 1)
                 ->where('questions.status', 1)
+                ->where(function ($query) use ($purchasePractice) {
+                    $query->WhereIn('quizzes.id', $purchasePractice); 
+                })
                 ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.description', 'practice_sets.slug', 'practice_sets.subcategory_id', 'practice_sets.status', 'practice_sets.allow_reward', 'practice_sets.reward_popup', 'practice_sets.point_mode', 'practice_sets.points', 'practice_sets.is_free')
                 ->first();
 
@@ -230,53 +106,14 @@ class PracticeSetController extends Controller
                 return response()->json(['status' => false, 'error' => 'Practice Set not found'], 404);
             }
 
-            // PAID PRACTICE SET
-            if ($practice->is_free == 0) {
-                $type = "practice";
-                
-                // Get the current date and time
-                $currentDate = now();
-
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-                // If no active subscription, return error
-                if (!$subscription) {
-                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-                }
-        
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-        
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-        
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // return response()->json(['status' => true, 'data' => $subscription], 200);
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-        
-                    // Check if the requested feature type is in the allowed features
-                    if (in_array($type, $allowed_features)) {
-                        // return response()->json(['status' => true, 'data' => $subscription], 200);
-                    } else {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                    }
-                }
+            // Adjust 'is_free' for assigned quiz, regardless of public or private
+            if (in_array($practice->id, $purchasePractice)) {
+                $practice->is_free = 1; // Make assigned quizs free
             }
 
-
-            // Get the authenticated user
-            $user = $request->attributes->get('authenticatedUser');
-
-            // Fetch all completed practice results
-            $checkOngoingResult = PracticeSetResult::where('user_id', $user->id)
-                ->where('practice_sets_id', $practice->id)
-                ->where('status', 'complete')
-                ->get();
+            if($practice->is_free == 0){
+                return response()->json(['status' => false, 'error' => 'You donot have this pratice set. Please purchase it continue'], 404);
+            }
 
             // Check for ongoing practice set
             $ongoingPractice = PracticeSetResult::where('user_id', $user->id)
@@ -286,7 +123,6 @@ class PracticeSetController extends Controller
                 ->first();
 
             if ($ongoingPractice) {
-                // $remainingDuration = max(now()->diffInMinutes($ongoingPractice->end_time), 0);
 
                 // Calculate remaining duration
                 $remainingDuration = now()->diffInMinutes($ongoingPractice->end_time);
@@ -302,7 +138,7 @@ class PracticeSetController extends Controller
                             'uuid' => $ongoingPractice->uuid,
                             'questions' => json_decode($ongoingPractice->questions),
                             'total_time'=> $ongoingPractice->exam_duration,
-                            'duration' => $remainingDuration . " mins",
+                            'duration' => round($remainingDuration,2),
                             'points' => $ongoingPractice->points,
                             'saved_answers'=> $ongoingPractice->answers == null ? [] : json_decode($ongoingPractice->answers),
                         ]
@@ -311,13 +147,12 @@ class PracticeSetController extends Controller
             }
 
             // Calculate practice duration and points
-            $duration = (int) round($practice->total_time / 60, 2);
+            $duration = (int) round($practice->total_time / 60, 2); // in minute
             $points = $practice->point_mode == "manual" ? $practice->points : $practice->total_marks;
 
             // Prepare structured response data for questions and correct answers
             $questionsData = [];
             $correctAnswers = [];
-
             foreach ($practice->practiceQuestions as $practiceQuestion) {
                 $question = $practiceQuestion->questions;
                 $options = $question->options ? json_decode($question->options, true) : [];
@@ -326,10 +161,6 @@ class PracticeSetController extends Controller
                     $matchOption = json_decode($question->answer, true);
                     shuffle($matchOption);
                     $options = array_merge($options, $matchOption);
-                }
-
-                if ($question->type == "ORD") {
-                    // shuffle($options);
                 }
     
                 // Customize question display for different types
@@ -340,50 +171,6 @@ class PracticeSetController extends Controller
                 }elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
-
-                // if($question->type == "EMQ") {
-                //     // If EMQ, decode question text to access parent and child questions
-                //     $parentChildQuestions = json_decode($question->question, true);
-                    
-                //     // Loop through each child question
-                //     foreach ($parentChildQuestions as $index => $childQuestionText) {
-                //         if ($index > 0) {
-                //             // Treat the first question as the parent and others as separate child questions
-                //             $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
-                //             $childQuestionData = [
-                //                 'id' => $question->id . "-$index",  // Unique ID for each child question
-                //                 'type' => 'MSA',  // Treating as MSA as per your request
-                //                 'question' => $QUESTIONNAME,
-                //                 'options' => $options
-                //             ];
-                //             $questionsData[] = $childQuestionData;
-
-                //             $optionArray = json_decode($question->answer,true);
-                //             // Add correct answer for each child question
-                //             $correctAnswers[] = [
-                //                 'id' => $question->id . "-$index",
-                //                 'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
-                //                 'default_marks' => $practice->point_mode == "manual" ? $practice->point : $question->default_marks
-                //             ];
-                //         }
-                        
-                //     }
-                // } else {
-                //     // Standard question processing for non-EMQ types
-                //     $questionsData[] = [
-                //         'id' => $question->id,
-                //         'type' => $question->type,
-                //         'question' => $questionText,
-                //         'options' => $options
-                //     ];
-
-                //     // Add correct answer info
-                //     $correctAnswers[] = [
-                //         'id' => $question->id,
-                //         'correct_answer' => $question->answer,
-                //         'default_marks' => $practice->point_mode == "manual" ? $practice->point : $question->default_marks
-                //     ];
-                // }
 
                 $questionsData[] = [
                     'id' => $question->id,
@@ -430,7 +217,7 @@ class PracticeSetController extends Controller
                     'uuid' => $practiceResult->uuid,
                     'questions' => json_decode($practiceResult->questions),
                     'total_time'=> $practiceResult->exam_duration,
-                    'duration' => $remainingDuration . " mins",
+                    'duration' =>  round($remainingDuration,2),
                     'points' => $practiceResult->point,
                     'saved_answers'=> $practiceResult->answers == null ? [] : json_decode($practiceResult->answers),
                 ]
