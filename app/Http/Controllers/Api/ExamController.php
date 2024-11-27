@@ -1301,6 +1301,7 @@ class ExamController extends Controller
                     'exams.restrict_attempts',
                     'exams.total_attempts',
                     'exams.is_public',
+                    'exam_schedules.user_groups',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -1329,6 +1330,7 @@ class ExamController extends Controller
                     'exams.is_public',
                     'exams.point',
                     'exam_schedules.id',
+                    'exam_schedules.user_groups',
                     'exam_schedules.schedule_type',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',

@@ -154,132 +154,6 @@ class StudentController extends Controller
         }
     }
 
-    // public function allExams(Request $request)
-    // {
-    //     try {
-    //         // Fetch exam type by slug and status
-    //         $examType = ExamType::select('id', 'slug')
-    //             ->where('slug', $request->slug)
-    //             ->where('status', 1)
-    //             ->first();
-
-    //         if ($examType) {
-    //             // Fetch the current authenticated user
-    //             $user = $request->attributes->get('authenticatedUser');
-
-    //             // Fetch the exam IDs assigned to the current user
-    //             $assignedExams = AssignedExam::select('exam_id')->where('user_id', $user->id)->get()->pluck('exam_id')->toArray();
-
-    //             // Fetch exam data grouped by exam type slug
-    //             $examData = Exam::select(
-    //                 'exams.id', // Ensure exam.id is selected
-    //                 'exam_types.slug as exam_type_slug', // Fetch exam type slug
-    //                 'exams.slug', // Fetch exam slug
-    //                 'exams.title', // Fetch exam title
-    //                 'exams.duration_mode', 
-    //                 'exams.exam_duration', 
-    //                 'exams.point_mode',
-    //                 'exams.point', 
-    //                 'exams.is_free',
-    //                 DB::raw('COUNT(questions.id) as total_questions'), // Count total questions for each exam
-    //                 DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'), // Sum total marks for each exam
-    //                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time') // Sum time for each question using watch_time
-    //             )
-    //             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id') // Join with exam_types
-    //             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
-    //             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
-    //             ->where(function ($query) use ($assignedExams) {
-    //                 $query->where('exams.is_public', 1)->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
-    //             })
-    //             ->where('exams.exam_type_id', $examType->id) // Filter by exam type ID
-    //             ->where('exams.subcategory_id', $request->category) // Filter by subcategory ID
-    //             ->where('exams.status', 1) // Filter by exam status
-    //             ->groupBy('exam_types.slug', 'exams.slug', 'exams.id', 'exams.title',  'exams.duration_mode', 
-    //                     'exams.exam_duration', 'exams.point_mode', 'exams.point', 'exams.is_free') // Group by necessary fields
-    //             ->havingRaw('COUNT(questions.id) > 0') // Only include exams with more than 0 questions
-    //             ->get();
-
-    //             // Adjust 'is_free' for assigned exams, regardless of public or private
-    //             $examData->transform(function ($exam) use ($assignedExams) {
-    //                 // If the exam is assigned to the user, set it to free regardless of its original price or public status
-    //                 if (in_array($exam->id, $assignedExams)) {
-    //                     $exam->is_free = 1; // Make assigned exams free
-    //                 }
-    //                 return $exam;
-    //             });
-
-    //             // Initialize array to store formatted exam data
-    //             $formattedExamData = [];
-
-    //             // USER SUBSCRIPTION
-    //             $type = "exams";
-        
-    //             // Get the current date and time
-    //             $currentDate = now();
-    //             // Fetch the user's active subscription
-    //             $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-
-    //             // Fetch the plan related to this subscription
-    //             if ($subscription) {
-    //                 $plan = $subscription->plans;
-
-    //                 // Check if the plan allows unlimited access
-    //                 if ($plan->feature_access == 1) {
-    //                     // MAKE ALL EXAM FREE
-    //                     $examData->transform(function ($exam) {
-    //                         $exam->is_free = 1; // Make all exams free for unlimited access
-    //                         return $exam;
-    //                     });
-    //                 } else {
-    //                     // Get allowed features from the plan
-    //                     $allowed_features = json_decode($plan->features, true);
-    //                     if (in_array($type, $allowed_features)) {
-    //                         // MAKE ALL EXAM FREE if exams are part of the plan features
-    //                         $examData->transform(function ($exam) {
-    //                             $exam->is_free = 1; // Make exams free as part of the allowed features
-    //                             return $exam;
-    //                         });
-    //                     }
-    //                 }
-    //             }
-
-    //             foreach ($examData as $exam) {
-    //                 // Format the total time
-    //                 $formattedTime = $this->formatTime($exam->total_time);
-
-    //                 // Group exams by exam type slug
-    //                 if (!isset($formattedExamData[$examType->slug])) {
-    //                     $formattedExamData[$examType->slug] = [];
-    //                 }
-
-    //                 // Format time and marks based on the exam mode
-    //                 $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-    //                 $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-
-    //                 // Add exam details to the corresponding type slug
-    //                 $formattedExamData[$examType->slug][] = [
-    //                     'title' => $exam->title,
-    //                     'slug' => $exam->slug,
-    //                     'questions' => $exam->total_questions ?? 0,
-    //                     'time' => $time ?? 0,
-    //                     'marks' => $marks ?? 0,
-    //                     'is_free' => $exam->is_free,
-    //                 ];
-    //             }
-
-    //             // Return the formatted data as JSON
-    //             return response()->json(['status' => true, 'data' => $formattedExamData], 200);
-    //         }
-
-    //         // Return error if exam type not found
-    //         return response()->json(['status' => false, 'error' => "Exam Not Found"], 404);
-
-    //     } catch (\Throwable $th) {
-    //         // Return error response with exception message
-    //         return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
-    //     }
-    // }
-
     public function allExams(Request $request)
     {
         try {
@@ -292,67 +166,16 @@ class StudentController extends Controller
             if ($examType) {
                 // Fetch the current authenticated user
                 $user = $request->attributes->get('authenticatedUser');
+
+                // User group IDs
+                $userGroup = GroupUsers::where('user_id',$user->id)
+                ->where('status',1)
+                ->pluck('group_id')
+                ->toArray();
     
-                // Fetch the exam IDs assigned to the current user
-                $assignedExams = AssignedExam::select('exam_id')
-                    ->where('user_id', $user->id)
-                    ->get()
-                    ->pluck('exam_id')
-                    ->toArray();
-    
-                // Fetch exam data grouped by exam type slug
-                // $examData = Exam::select(
-                //     'exams.id',
-                //     'exam_types.slug as exam_type_slug',
-                //     'exams.slug',
-                //     'exams.title',
-                //     'exams.duration_mode',
-                //     'exams.exam_duration',
-                //     'exams.point_mode',
-                //     'exams.point',
-                //     'exams.is_free',
-                //     'exams.total_attempts',
-                //     DB::raw('SUM(CASE 
-                //         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
-                //         ELSE 1 
-                //     END) as total_questions'),
-                //     DB::raw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks'),
-                //     DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
-                //     'exam_schedules.id as schedule_id',
-                //     'exam_schedules.schedule_type',
-                //     'exam_schedules.start_date',
-                //     'exam_schedules.start_time',
-                //     'exam_schedules.end_date',
-                //     'exam_schedules.end_time',
-                //     'exams.restrict_attempts',
-                //     'exam_schedules.grace_period'
-                //     )
-                //     ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
-                //     ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
-                //     ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
-                //     ->leftJoin('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id') // Join with exam schedules
-                //     ->where(function ($query) use ($assignedExams) {
-                //         $query->where('exams.is_public', 1)
-                //             ->orWhereIn('exams.id', $assignedExams);
-                //     })
-                //     ->where('exam_schedules.status', 1)
-                //     ->where('exams.exam_type_id', $examType->id)
-                // ->where('exams.exam_type_id', $examType->id)
-                //     ->where('exams.subcategory_id', $request->category)
-                //     ->where('exams.status', 1)
-                //     ->groupBy('exams.id', 'exam_types.slug', 'exams.slug', 'exams.title', 
-                //         'exams.duration_mode', 'exams.exam_duration', 'exams.point_mode', 
-                //         'exams.point', 'exams.is_free', 'exam_schedules.schedule_type',
-                //         'exam_schedules.id',
-                //         'exam_schedules.start_date',
-                //         'exam_schedules.start_time',
-                //         'exam_schedules.end_date',
-                //         'exam_schedules.end_time',
-                //         'exam_schedules.grace_period',
-                //         'exams.total_attempts',
-                //         'exams.restrict_attempts') // Group by necessary fields
-                //     ->havingRaw('COUNT(questions.id) > 0')
-                // ->get();
+                // Assigned and purchased exams
+                $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+                $purchaseExam = $this->getUserExam($user->id);
 
                 $examData = Exam::leftJoin('exam_schedules', function ($join) {
                     $join->on('exams.id', '=', 'exam_schedules.exam_id')
@@ -362,16 +185,16 @@ class StudentController extends Controller
                 ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
                 ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
                 ->where('exams.status', 1)
-                ->where(function ($query) use ($assignedExams) {
-                    $query->where('exams.is_public', 1) // Public exams
-                        ->orWhereIn('exams.id', $assignedExams); // Private exams assigned to the user
-                })
-                ->where('exams.exam_type_id', $examType->id)
-                ->where('exams.subcategory_id', $request->category)
                 ->where(function ($query) {
                     $query->where('exams.is_public', 1) // Public exams
                         ->orWhereNotNull('exam_schedules.id'); // Private exams must have a schedule
                 })
+                ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                    $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
+                })
+                ->where('exams.exam_type_id', $examType->id)
+                ->where('exams.subcategory_id', $request->category)
                 ->select(
                     'exams.id',
                     'exams.is_free',
@@ -385,6 +208,7 @@ class StudentController extends Controller
                     'exams.restrict_attempts',
                     'exams.total_attempts',
                     'exams.is_public',
+                    'exam_schedules.user_groups',
                     DB::raw('SUM(CASE 
                         WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                         ELSE 1 
@@ -414,6 +238,7 @@ class StudentController extends Controller
                     'exams.point',
                     'exam_schedules.id',
                     'exam_schedules.schedule_type',
+                    'exam_schedules.user_groups',
                     'exam_schedules.start_date',
                     'exam_schedules.start_time',
                     'exam_schedules.end_date',
@@ -426,42 +251,6 @@ class StudentController extends Controller
                 // Initialize array to store formatted exam data
                 $formattedExamData = [];
     
-                // USER SUBSCRIPTION LOGIC
-                $type = "exams";
-                $currentDate = now();
-    
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')
-                    ->where('user_id', $user->id)
-                    ->where('stripe_status', 'complete')
-                    ->where('ends_at', '>', $currentDate)
-                    ->latest()
-                    ->first();
-    
-                // Adjust 'is_free' based on subscription and assigned exams
-                if ($subscription) {
-                    $plan = $subscription->plans;
-    
-                    // Check if the plan allows unlimited access
-                    if ($plan->feature_access == 1) {
-                        // MAKE ALL EXAMS FREE
-                        $examData->transform(function ($exam) {
-                            $exam->is_free = 1; // Make all exams free for unlimited access
-                            return $exam;
-                        });
-                    } else {
-                        // Get allowed features from the plan
-                        $allowed_features = json_decode($plan->features, true);
-                        if (in_array($type, $allowed_features)) {
-                            // MAKE ALL EXAMS FREE
-                            $examData->transform(function ($exam) {
-                                $exam->is_free = 1; // Make exams free as part of the allowed features
-                                return $exam;
-                            });
-                        }
-                    }
-                }
-    
                 // Apply free logic for assigned exams
                 $examData->transform(function ($exam) use ($assignedExams) {
                     if (in_array($exam->id, $assignedExams)) {
@@ -470,13 +259,13 @@ class StudentController extends Controller
                     return $exam;
                 });
 
+                // Resume Exam
                 $current_time = now();
-                // Fetch ongoing exam results
                 $examResults = ExamResult::where('end_time', '>', $current_time)
                     ->where('user_id', $user->id)
                     ->where('status', 'ongoing')
                     ->get();
-                // Create a map for quick lookup
+
                 $examResultExamScheduleMap = [];
                 foreach ($examResults as $examResult) {
                     $key = $examResult->exam_id . '_' . $examResult->schedule_id;
@@ -484,34 +273,43 @@ class StudentController extends Controller
                 }
     
                 foreach ($examData as $exam) {
-                    // Format the total time
-                    $formattedTime = $this->formatTime($exam->total_time);
 
-                    // Public exam logic
+                    // Free / Paid
+                    $checkfree = $exam->is_free;
+                    if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$assignedExams) || in_array($exam->user_groups,$userGroup)){
+                        $checkfree = 1;
+                    }
+
+                    // Duration / Point
+                    $formattedTime = $this->formatTime($exam->total_time);
+                    $time = $exam->duration_mode == "manual" ? $this->formatTime($exam->exam_duration*60) : $formattedTime;
+                    $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
+
+                    
+
+                    // Resume Exams
                     $examScheduleKey = $exam->id . '_' . ($exam->schedule_id ?: 0); // Use 0 if no schedule_id is provided
                     $isResume = isset($examResultExamScheduleMap[$examScheduleKey]);
 
-                    // If the exam is public and doesn't have a schedule, check for its record in resume state
                     if ($exam->is_public === 1 && !$exam->schedule_id) {
                         $isResume = isset($examResultExamScheduleMap[$exam->id . '_0']);
+                    }
+
+                    // Attempts
+                    $totalAttempt = $exam->total_attempts ?? 1;
+                    $totalAttempt = $exam->restrict_attempts == 1 ? $totalAttempt : null;
+
+                    // Attempts Completed or not checking
+                    $scheduleId = $exam->schedule_id ?? 0;
+                    $userAttempt = ExamResult::where('user_id',$user->id)->where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
+
+                    if($exam->restrict_attempts == 1 && $userAttempt >= $totalAttempt){
+                        continue;
                     }
     
                     // Group exams by exam type slug
                     if (!isset($formattedExamData[$examType->slug])) {
                         $formattedExamData[$examType->slug] = [];
-                    }
-    
-                    // Format time and marks based on the exam mode
-                    $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
-                    $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-                    $attempt = $exam->total_attempts ?? "";
-
-                    $scheduleId = $exam->schedule_id ?? 0;
-                    $userAttempt = ExamResult::where('user_id',$user->id)->where('exam_id',$exam->id)->where('schedule_id',$scheduleId)->count();
-
-                    $totalAttempts = $exam->restrict_attempts == 0 ? "" : $attempt;
-                    if($userAttempt >= $totalAttempts  && $exam->restrict_attempts == 1){
-                        continue;
                     }
 
                     // Add exam details to the corresponding type slug, including schedule details
@@ -521,10 +319,10 @@ class StudentController extends Controller
                         'questions' => $exam->total_questions ?? 0,
                         'time' => $time ?? 0,
                         'marks' => $marks ?? 0,
-                        'is_free' => $exam->is_free,
+                        'is_free' => $checkfree,
                         'is_resume' =>$isResume,
                         'is_public' =>$exam->is_public,
-                        'total_attempts' => $exam->restrict_attempts == 0 ? "" : $attempt,
+                        'total_attempts' => $totalAttempt,
                         'schedule' => [
                             'schedule_id'=>$exam->schedule_id,
                             'start_date' => $exam->start_date,
