@@ -29,7 +29,7 @@ class DashboardController extends Controller
             // Check if the user has an active subscription
             $subscription = Subscription::where('user_id', $userId)
                 ->where('status', 'active')
-                ->whereDate('end_date', '>=', now())
+                ->whereDate('end_date', '>=', now()) // eg - end_date format (2024-12-26 00:00:00)
                 ->exists(); // Use `exists()` for performance instead of fetching records
 
             if ($subscription) {
@@ -490,7 +490,8 @@ class DashboardController extends Controller
                 'resumedExam' => $resumedExam,
                 'upcomingExams'=>$upcomingExams,
                 'calenderExam'=>$data,
-                'calenderQuiz'=>$data2
+                'calenderQuiz'=>$data2,
+                'purchaseExam'=>$purchaseExam
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
