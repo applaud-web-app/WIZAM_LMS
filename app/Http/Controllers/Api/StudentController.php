@@ -1003,7 +1003,7 @@ class StudentController extends Controller
                 }
 
                 // Duration / Point
-                $marks = $practiceSet->point_mode == "manual" ? ($practiceSet->point * $practiceSet->total_questions) : $practiceSet->total_marks;
+                $marks = $practiceSet->point_mode == "manual" ? ($practiceSet->points * $practiceSet->total_questions) : $practiceSet->total_marks;
 
                 $isFree = $practiceSet->is_free;
                 if(in_array($practiceSet->id,$purchasePractice)){
