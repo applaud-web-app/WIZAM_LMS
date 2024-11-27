@@ -444,6 +444,9 @@ class DashboardController extends Controller
                 if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$assignedExams) || in_array($exam->user_groups,$userGroup)){
                     $checkfree = 1;
                 }
+                $formattedTime = $this->formatTime($exam->total_time);
+                $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
                 return [
                     'id' => $exam->id,
                     'exam_slug' => $exam->exam_slug,
@@ -452,8 +455,8 @@ class DashboardController extends Controller
                     'exam_duration' => $exam->exam_duration ?? null,
                     'total_questions' => $exam->total_questions,
                     'total_marks' => $exam->total_marks,
-                    'total_time' => $exam->total_time,
-                    'point_mode' => $exam->point_mode,
+                    'total_time' => $time,
+                    'point_mode' => $marks,
                     'total_attempts' => $exam->total_attempts ?? null,
                     'restrict_attempts' => $exam->restrict_attempts,
                     'point' => $exam->point ?? null,
@@ -491,6 +494,28 @@ class DashboardController extends Controller
                 'error' => 'Error logged. :' . $th->getMessage() // For security
             ], 500);
         }
+    }
+
+    private function formatTime($totalTime)
+    {
+        // Convert total seconds into hours, minutes, and seconds
+        $hours = floor($totalTime / 3600);
+        $minutes = floor(($totalTime % 3600) / 60);
+        $seconds = $totalTime % 60;
+
+        // Format the time string accordingly
+        $timeString = '';
+        if ($hours > 0) {
+            $timeString .= $hours . ' hr ';
+        }
+        if ($minutes > 0) {
+            $timeString .= $minutes . ' min ';
+        }
+        if ($seconds > 0) {
+            $timeString .= $seconds . ' sec';
+        }
+
+        return trim($timeString); // Trim any extra spaces
     }
     
 }
