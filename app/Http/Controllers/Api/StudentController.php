@@ -486,50 +486,68 @@ class StudentController extends Controller
             // Fetch the current authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
-            $currentDate = now()->toDateString();
-            $currentTime = now()->toTimeString();
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+
+            // Purchased Quiz
+            $purchaseQuiz = $this->getUserQuiz($user->id);
 
             $type = QuizType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
-                    'quizzes as total_quizzes' => function ($query) use ($currentDate, $currentTime) {
+                    'quizzes as total_quizzes' => function ($query) use ($purchaseQuiz, $userGroup) {
                             $query->leftJoin('quiz_schedules', function ($join) {
                                 $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                                     ->where('quiz_schedules.status', 1);
                             })
-                            ->where(function ($subQuery){
-                                $subQuery->where('quizzes.is_public', 1);
-                            })
                             ->where('quizzes.status', 1)
                             ->where(function ($query) {
-                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereNotNull('quiz_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereIn('quizzes.id', $purchaseQuiz)
+                                ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
                             })
                             ->distinct();
                     },
-                    'quizzes as paid_quizzes' => function ($query) use ($currentDate, $currentTime) {
+                    'quizzes as paid_quizzes' => function ($query) use ($purchaseQuiz, $userGroup) {
                         $query->leftJoin('quiz_schedules', function ($join) {
                                 $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                                     ->where('quiz_schedules.status', 1);
                             })
                             ->where('quizzes.status', 1)
                             ->where(function ($query) {
-                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereNotNull('quiz_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereIn('quizzes.id', $purchaseQuiz)
+                                ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
                             })
                             ->where('quizzes.is_free', 0)
                             ->distinct();  
                     },
-                    'quizzes as unpaid_quizzes' => function ($query) use ($currentDate, $currentTime) {
+                    'quizzes as unpaid_quizzes' => function ($query) use ($purchaseQuiz, $userGroup) {
                         // Count active, unpaid (free) quizzes (is_free = 1) with valid schedules (including multiple schedules for one exam)
                         $query->leftJoin('quiz_schedules', function ($join) {
                                 $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                                     ->where('quiz_schedules.status', 1);
                             })
-                            ->where(function ($subQuery) {
-                                $subQuery->where('quizzes.is_public', 1);
-                            })
                             ->where('quizzes.status', 1)
                             ->where(function ($query) {
-                                $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); 
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereNotNull('quiz_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                                $query->where('quizzes.is_public', 1)
+                                ->orWhereIn('quizzes.id', $purchaseQuiz)
+                                ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
                             })
                             ->where('quizzes.is_free', 1)
                             ->distinct();  // Ensures each schedule is counted separately

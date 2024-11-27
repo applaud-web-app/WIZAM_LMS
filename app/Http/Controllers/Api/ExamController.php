@@ -1193,4 +1193,83 @@ class ExamController extends Controller
         return response()->json(['status' => true, 'answers' => $examResult->answers]);
     }
 
+    // REMOVE
+    public function examType(Request $request) {
+        try {
+            // Fetch the current authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+    
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+            
+            // Assigned and purchased exams
+            $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
+            $purchaseExam = $this->getUserExam($user->id);
+
+            $type = ExamType::select('name', 'slug')
+                ->where('status', 1)
+                ->withCount([
+                    'exams as total_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
+                        $query->leftJoin('exam_schedules', function ($join) {
+                            $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                            ->where('exam_schedules.status', 1);
+                        })
+                        ->where('exams.status', 1)
+                        ->where(function ($query) {
+                            $query->where('exams.is_public', 1)
+                            ->orWhereNotNull('exam_schedules.id'); 
+                        })
+                        ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                            $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
+                        })
+                        ->distinct();
+                    },
+                    'exams as paid_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
+                        $query->leftJoin('exam_schedules', function ($join) {
+                                $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                                    ->where('exam_schedules.status', 1);
+                            })
+                            ->where('exams.status', 1)
+                            ->where(function ($query) {
+                                $query->where('exams.is_public', 1)
+                                ->orWhereNotNull('exam_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                                $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
+                            })
+                            ->where('exams.is_free', 0)
+                            ->distinct();
+                    },
+                    'exams as unpaid_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
+                        $query->leftJoin('exam_schedules', function ($join) {
+                                $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                                    ->where('exam_schedules.status', 1);
+                            })
+                            ->where('exams.status', 1)
+                            ->where(function ($query) {
+                                $query->where('exams.is_public', 1)
+                                ->orWhereNotNull('exam_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                                $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
+                            })
+                            ->where('exams.is_free', 1)
+                            ->distinct(); 
+                    }
+                ])
+                ->get();
+    
+            return response()->json(['status' => true, 'data' => $type], 201);
+    
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
 }
