@@ -693,7 +693,6 @@ class StudentController extends Controller
                         'title' => $quiz->title,
                         'slug' => $quiz->quizSlug,
                         'questions' => $quiz->total_questions ?? 0,
-                        'exam_type_slug' => $quiz->exam_type_slug,
                         'duration_mode' => $quiz->duration_mode,
                         'exam_duration' => $quiz->duration,
                         'point_mode' => $quiz->point_mode,
