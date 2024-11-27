@@ -26,6 +26,12 @@ class QuizController extends Controller
     public function playQuiz(Request $request, $slug)
     {
         try {
+            // Validate incoming request data
+            $request->validate([
+                'category' => 'required|integer',
+                'schedule_id'  => 'required',
+            ]);
+
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
@@ -37,18 +43,22 @@ class QuizController extends Controller
                 ], 401);
             }
 
-            // Validate incoming request data
-            $request->validate([
-                'category' => 'required|integer',
-                'schedule_id'  => 'required',
-            ]);
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+
+            // Purchased Quiz
+            $purchaseQuiz = $this->getUserQuiz($user->id);
     
             // Fetch the quiz along with related questions in one query
-            $quiz = Quizze::with([
-                    'quizQuestions.questions' => function($query) {
+            $quiz = Quizze::leftJoin('quiz_schedules', function ($join) use($quizType){
+                    $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                        ->where('quiz_schedules.status', 1);
+                })->with(['quizQuestions.questions' => function($query) {
                         $query->select('id', 'question', 'default_marks', 'watch_time', 'type', 'options', 'answer');
-                    }
-                ])
+                    }])
                 ->select(
                     'quizzes.id',
                     'quizzes.title',
@@ -70,8 +80,13 @@ class QuizController extends Controller
                     'quizzes.is_free',
                     'quizzes.restrict_attempts',
                     'quizzes.total_attempts',
+                    'quiz_schedules.user_groups',
                     DB::raw('SUM(questions.default_marks) as total_marks'),
-                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
+                    DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time'),
+                    DB::raw('SUM(CASE 
+                        WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
+                        ELSE 1 
+                    END) as total_questions'),
                 )
                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
@@ -79,12 +94,21 @@ class QuizController extends Controller
                 ->where('quizzes.subcategory_id', $request->category)
                 ->where('quizzes.status', 1)
                 ->where('questions.status', 1)
+                ->where(function ($query) {
+                    $query->where('quizzes.is_public', 1) 
+                        ->orWhereNotNull('quiz_schedules.id'); 
+                })
+                ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                    $query->where('quizzes.is_public', 1)
+                    ->orWhereIn('quizzes.id', $purchaseQuiz)
+                    ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
+                })
                 ->groupBy(
                     'quizzes.id', 'quizzes.title', 'quizzes.description', 'quizzes.pass_percentage',
                     'quizzes.slug', 'quizzes.subcategory_id', 'quizzes.status', 'quizzes.duration_mode',
                     'quizzes.point_mode', 'quizzes.duration', 'quizzes.point', 'quizzes.shuffle_questions',
                     'quizzes.question_view', 'quizzes.disable_finish_button', 'quizzes.negative_marking',
-                    'quizzes.negative_marking_type', 'quizzes.negative_marks',  'quizzes.is_free','quizzes.restrict_attempts','quizzes.total_attempts'
+                    'quizzes.negative_marking_type', 'quizzes.negative_marks',  'quizzes.is_free','quizzes.restrict_attempts','quizzes.total_attempts','quiz_schedules.user_groups',
                 )
                 ->first();
     
@@ -93,42 +117,13 @@ class QuizController extends Controller
                 return response()->json(['status' => false, 'error' => 'Quiz not found'], 404);
             }
 
-            // FOR PAID QUIZ ONLY
+             // Adjust 'is_free' for assigned quiz, regardless of public or private
+             if (in_array($quiz->id, $purchaseQuiz) || in_array($quiz->user_groups, $userGroup)) {
+                $quiz->is_free = 1; // Make assigned quizs free
+            }
+
             if($quiz->is_free == 0){
-                $type = "quizzes";
-    
-                // Get the current date and time
-                $currentDate = now();
-    
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-    
-                // If no active subscription, return error
-                if (!$subscription) {
-                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-                }
-        
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-        
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-        
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // return response()->json(['status' => true, 'data' => $subscription], 200);
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-        
-                    // Check if the requested feature type is in the allowed features
-                    if (in_array($type, $allowed_features)) {
-                        // return response()->json(['status' => true, 'data' => $subscription], 200);
-                    } else {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                    }
-                }
+                return response()->json(['status' => false, 'error' => 'You donot have this quiz. Please purchase it continue'], 404);
             }
     
             // Fetch all completed quiz results
@@ -152,15 +147,13 @@ class QuizController extends Controller
                 ->first();
     
             if ($ongoingQuiz) {
-                // $remainingDuration = $ongoingQuiz->end_time->diffInMinutes(now());
-                $remainingDuration = now()->diffInMinutes($ongoingQuiz->end_time); // Ensure no negative duration
+                // Calculate remaining duration
+                $remainingDuration = now()->diffInMinutes($ongoingQuiz->end_time);
 
                 if ($ongoingQuiz->end_time->isPast()) {
                     // If time has passed, mark the quiz as complete
                     $ongoingQuiz->update(['status' => 'complete']);
-                    $data = [
-                        'uuid'=>$ongoingQuiz->uuid,
-                    ];
+                    $data = ['uuid'=>$ongoingQuiz->uuid];
                     return response()->json(['status' => true, 'message' => 'Quiz Timed Out','data'=>$data]);
                 } else {
                     // Return ongoing quiz details
@@ -171,19 +164,19 @@ class QuizController extends Controller
                             'uuid'=>$ongoingQuiz->uuid,
                             'questions' => json_decode($ongoingQuiz->questions),
                             'total_time'=> $ongoingQuiz->exam_duration,
-                            'duration' => $remainingDuration . " mins",
+                            'duration' => round($remainingDuration,2),
                             'points' => $ongoingQuiz->point,
                             'saved_answers'=> $ongoingQuiz->answers == null ? [] : json_decode($ongoingQuiz->answers),
                             'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
-                            'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
+                            'finish_button' => $quiz->disable_finish_button == 1 ? "disable" : "enable"
                         ]
                     ], 200);
                 }
             }
     
             // Calculate quiz duration and points
-            $duration = (int) ($quiz->duration_mode == "manual"? $quiz->duration : round($quiz->total_time / 60, 2));
-            $points = $quiz->point_mode == "manual" ? $quiz->point : $quiz->total_marks;
+            $duration = (int) ($quiz->duration_mode == "manual"? $quiz->duration : round($quiz->total_time / 60));
+            $points = $quiz->point_mode == "manual" ? $quiz->point * $quiz->total_questions : $quiz->total_marks;
     
             // Prepare structured response data for questions
             $questionsData = [];
@@ -197,10 +190,6 @@ class QuizController extends Controller
                     shuffle($matchOption);
                     $options = array_merge($options, $matchOption);
                 }
-
-                if ($question->type == "ORD") {
-                    // shuffle($options);
-                }
     
                 // Customize question display for different types
                 $questionText = $question->question;
@@ -210,50 +199,6 @@ class QuizController extends Controller
                 }elseif ($question->type == "EMQ") {
                     $questionText = json_decode($question->question, true);
                 }
-
-                // if($question->type == "EMQ") {
-                //     // If EMQ, decode question text to access parent and child questions
-                //     $parentChildQuestions = json_decode($question->question, true);
-                    
-                //     // Loop through each child question
-                //     foreach ($parentChildQuestions as $index => $childQuestionText) {
-                //         if ($index > 0) {
-                //             // Treat the first question as the parent and others as separate child questions
-                //             $QUESTIONNAME = $parentChildQuestions[0]."<br>".$childQuestionText;
-                //             $childQuestionData = [
-                //                 'id' => $question->id . "-$index",  // Unique ID for each child question
-                //                 'type' => 'MSA',  // Treating as MSA as per your request
-                //                 'question' => $QUESTIONNAME,
-                //                 'options' => $options
-                //             ];
-                //             $questionsData[] = $childQuestionData;
-
-                //             $optionArray = json_decode($question->answer,true);
-                //             // Add correct answer for each child question
-                //             $correctAnswers[] = [
-                //                 'id' => $question->id . "-$index",
-                //                 'correct_answer' => $optionArray[$index-1],  // Use the same answer for each child question
-                //                 'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
-                //             ];
-                //         }
-                        
-                //     }
-                // } else {
-                //     // Standard question processing for non-EMQ types
-                //     $questionsData[] = [
-                //         'id' => $question->id,
-                //         'type' => $question->type,
-                //         'question' => $questionText,
-                //         'options' => $options
-                //     ];
-
-                //     // Add correct answer info
-                //     $correctAnswers[] = [
-                //         'id' => $question->id,
-                //         'correct_answer' => $question->answer,
-                //         'default_marks' => $quiz->point_mode == "manual" ? $quiz->point : $question->default_marks
-                //     ];
-                // }
     
                 $questionsData[] = [
                     'id' => $question->id,
@@ -296,7 +241,7 @@ class QuizController extends Controller
                 'negative_marking_type' => $quiz->negative_marking_type,
                 'negative_marks' => $quiz->negative_marks,
                 'pass_percentage' => $quiz->pass_percentage,
-                'total_question' => count($questionsData),
+                'total_question' => count($questionsData), // CHANGE THIS FOR EMQ
                 'status' => 'ongoing',
             ]);
     
@@ -309,11 +254,11 @@ class QuizController extends Controller
                     'uuid'=>$quizResult->uuid,
                     'questions' => json_decode($quizResult->questions),
                     'total_time'=> $quizResult->exam_duration,
-                    'duration' => $remainingDuration . " mins",
+                    'duration' =>  round($remainingDuration,2),
                     'points' => $quizResult->point,
                     'saved_answers'=> $quizResult->answers == null ? [] : json_decode($quizResult->answers),
                     'question_view' => $quiz->question_view == 1 ? "enable" : "disable",
-                    'finish_button' => $quiz->disable_finish_button == 1 ? "enable" : "disable"
+                    'finish_button' => $quiz->disable_finish_button == 1 ? "disable" : "enable"
                 ]
             ], 200);
     
