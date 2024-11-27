@@ -81,6 +81,21 @@ class StudentController extends Controller
         return $this->getUserItemsByType($userId, 'quizze');
     }
 
+    private function getUserPractice($userId)
+    {
+        return $this->getUserItemsByType($userId, 'practice');
+    }
+
+    private function getUserVideo($userId)
+    {
+        return $this->getUserItemsByType($userId, 'video');
+    }
+
+    private function getUserLesson($userId)
+    {
+        return $this->getUserItemsByType($userId, 'lesson');
+    }
+
     public function examType(Request $request) {
         try {
             // Fetch the current authenticated user
@@ -931,16 +946,16 @@ class StudentController extends Controller
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
-            // Get the current date and time
-            $currentDate = now();
+            // Purchased practice
+            $purchasePractice = $this->getUserPractice($user->id);
 
-            // Fetch practice sets and their related data, including skill name
+            // Fetch practice sets
             $practiceSets = PracticeSet::select(
                     'practice_sets.id',
                     'practice_sets.title',
                     'practice_sets.slug',
                     'practice_sets.subCategory_id',
-                    'skills.name as skill_name', // Select skill name
+                    'skills.name as skill_name', 
                     'practice_sets.point_mode',
                     'practice_sets.points',
                     'practice_sets.is_free',
@@ -956,54 +971,25 @@ class StudentController extends Controller
                 ->leftJoin('skills', 'practice_sets.skill_id', '=', 'skills.id') // Join with skills to get skill name
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
+                ->where(function ($query) use ($purchasePractice) {
+                    $query->WhereIn('practice_sets.id', $purchasePractice); 
+                })
                 ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug', 'practice_sets.subCategory_id', 'skills.name','practice_sets.point_mode','practice_sets.points','practice_sets.is_free',) // Group by practice set and skill name
-                ->havingRaw('COUNT(questions.id) > 0') // Only include practice sets with questions
+                ->havingRaw('COUNT(questions.id) > 0') 
                 ->get();
 
             // Check if practice sets are found
             if ($practiceSets->isEmpty()) {
                 return response()->json(['status' => false, 'message' => 'No practice sets found for this category.'], 404);
             }
-
-
-            $type = "practice";
-            $currentDate = now();
-
-            // Fetch the user's active subscription
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-
-            // Adjust 'is_free' based on subscription and assigned exams
-            if ($subscription) {
-                $plan = $subscription->plans;
-
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // MAKE ALL EXAMS FREE
-                    $practiceSets->transform(function ($exam) {
-                        $exam->is_free = 1; // Make all exams free for unlimited access
-                        return $exam;
-                    });
-                } else {
-                    // Get allowed features from the plan
-                    $allowed_features = json_decode($plan->features, true);
-                    if (in_array($type, $allowed_features)) {
-                        // MAKE ALL EXAMS FREE
-                        $practiceSets->transform(function ($exam) {
-                            $exam->is_free = 1; // Make exams free as part of the allowed features
-                            return $exam;
-                        });
-                    }
-                }
-            }
-
+            
+            // Resume Practice Set
             $current_time = now();
-            // Fetch ongoing exam results
-            $resumepracticeSet = PracticeSetResult::where('end_time', '>', $current_time)->where('user_id', $user->id)->where('status', 'ongoing')->pluck('practice_sets_id')->toArray();
+            $resumepracticeSet = PracticeSetResult::where('end_time', '>', $current_time)
+            ->where('user_id', $user->id)
+            ->where('status', 'ongoing')
+            ->pluck('practice_sets_id')
+            ->toArray();
 
 
             // Group practice sets by skill name
@@ -1016,7 +1002,13 @@ class StudentController extends Controller
                     $groupedData[$skillName] = [];
                 }
 
-                $marks = $practiceSet->point_mode == "manual" ? $practiceSet->points*$practiceSet->total_questions : $practiceSet->total_marks;
+                // Duration / Point
+                $marks = $practiceSet->point_mode == "manual" ? ($practiceSet->point * $practiceSet->total_questions) : $practiceSet->total_marks;
+
+                $isFree = $practiceSet->is_free;
+                if(in_array($practiceSet->id,$purchasePractice)){
+                    $isFree = 1;
+                }
                 
                 // Add the practice set data to the corresponding skill name group
                 $groupedData[$skillName][] = [
