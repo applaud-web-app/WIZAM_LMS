@@ -1556,5 +1556,4 @@ class QuizController extends Controller
             'message' => 'Answer progress saved successfully',
         ]);
     }
-
 }

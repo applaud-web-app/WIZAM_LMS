@@ -1041,6 +1041,9 @@ class StudentController extends Controller
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+
+            // Purchased practice
+            $purchasePractice = getUserPractice($user->id);
     
             // Fetch practice set details based on the category and slug
             $practiceSetData = PracticeSet::select(
@@ -1065,6 +1068,9 @@ class StudentController extends Controller
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.slug', $slug) // Assuming you have a slug column in the practice_sets table
                 ->where('practice_sets.status', 1)
+                ->where(function ($query) use ($purchasePractice) {
+                    $query->WhereIn('practice_sets.id', $purchasePractice); 
+                })
                 ->groupBy(
                     'practice_sets.id',
                     'practice_sets.subCategory_id',
@@ -1082,38 +1088,14 @@ class StudentController extends Controller
             if (!$practiceSetData) {
                 return response()->json(['status' => false, 'message' => 'Practice set not found'], 404);
             }
-            
-            $type = "practice";
-            $currentDate = now();
 
-            // Fetch the user's active subscription
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-
-            // Adjust 'is_free' based on subscription and assigned exams
-            if ($subscription) {
-                $plan = $subscription->plans;
-
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // MAKE ALL EXAMS FREE
-                    $practiceSetData->is_free = 1;
-                } else {
-                    // Get allowed features from the plan
-                    $allowed_features = json_decode($plan->features, true);
-                    if (in_array($type, $allowed_features)) {
-                        // MAKE ALL EXAMS FREE
-                        $practiceSetData->is_free = 1;
-                    }
-                }
+            // Adjust 'is_free' for assigned quiz, regardless of public or private
+            if (in_array($practiceSetData->id, $purchasePractice)) {
+                $practiceSetData->is_free = 1; // Make assigned quiz free
             }
 
+            // Resume Exam
             $current_time = now();
-            // Fetch ongoing exam results
             $resumepracticeSet = PracticeSetResult::where('end_time', '>', $current_time)->where('user_id', $user->id)->where('status', 'ongoing')->pluck('practice_sets_id')->toArray();
 
             // Format time and marks
