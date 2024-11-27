@@ -86,7 +86,7 @@ class DashboardController extends Controller
             // Fetch exams with schedules
             $calldenderData = Exam::leftJoin('exam_schedules', function ($join) use($userGroup){
                 $join->on('exams.id', '=', 'exam_schedules.exam_id')
-                    ->where('exam_schedules.status', 1)->whereIn('exam_schedules.user_groups',$userGroup);
+                    ->where('exam_schedules.status', 1);
             })
             ->leftJoin('exam_types', 'exams.exam_type_id', '=', 'exam_types.id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
@@ -96,9 +96,9 @@ class DashboardController extends Controller
                 $query->where('exams.is_public', 1) 
                     ->orWhereNotNull('exam_schedules.id'); 
             })
-            ->where(function ($query) use ($assignedExams,$purchaseExam) {
+            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
                 $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
-                    ->orWhereIn('exams.id', $assignedExams); 
+                    ->orWhereIn('exams.id', $assignedExams)->whereIn('exam_schedules.user_groups',$userGroup); 
             })
             ->where('exams.subcategory_id', $request->category)
             ->select(
