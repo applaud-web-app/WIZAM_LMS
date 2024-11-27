@@ -47,7 +47,7 @@ class DashboardController extends Controller
 
             return [];
         } catch (\Throwable $th) {
-            \Log::error("Error fetching user items for type {$itemType}: " . $th->getMessage());
+            \Log::error("Dashboard Error fetching user items for type {$itemType}: " . $th->getMessage());
             return [];
         }
     }
@@ -248,9 +248,6 @@ class DashboardController extends Controller
                     'grace_period' => $quiz->grace_period ?? "NA",
                 ];
             });
-
-            // Fetch all exam results for the authenticated user where status is complete
-            // $exams = ExamResult::where('user_id', $user->id)->where('status', 'complete')->get();
 
             // USER DASHBOARD ITEMS
             $examStats = ExamResult::selectRaw(
@@ -483,11 +480,6 @@ class DashboardController extends Controller
             // Convert the filtered upcoming exams into an array if needed
             $upcomingExamsArray = $upcomingExams->values()->toArray();
 
-            $subscriptionIds = Subscription::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->whereDate('end_date', '>=', now()) // Check subscription validity
-            ->pluck('id') // Get subscription IDs
-            ->toArray();
             // Return success JSON response
             return response()->json([
                 'status' => true,
@@ -499,8 +491,6 @@ class DashboardController extends Controller
                 'upcomingExams'=>$upcomingExams,
                 'calenderExam'=>$data,
                 'calenderQuiz'=>$data2,
-                'purchaseExam'=>$purchaseExam,
-                'subscriptionIds'=>$subscriptionIds
             ], 200);
         } catch (\Throwable $th) {
             // Return error JSON response
