@@ -1231,7 +1231,7 @@ class QuizController extends Controller
             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
             ->where('quizzes.status', 1)
             ->where(function ($query) {
-                $query->where('quizzes.is_public', 1) // IS THE EXAM IS PUBLIC OR HAVE A SCHEDULE (for private schedule is maindatory)
+                $query->where('quizzes.is_public', 1) // IS THE Quiz IS PUBLIC OR HAVE A SCHEDULE (for private schedule is maindatory)
                     ->orWhereNotNull('quiz_schedules.id'); 
             })
             ->where(function ($query) use ($purchaseQuiz,$userGroup) {
@@ -1295,10 +1295,10 @@ class QuizController extends Controller
                 'quiz_schedules.grace_period',
                 'quiz_schedules.user_groups'
             )
-            ->havingRaw('COUNT(questions.id) > 0') // Only include exams with questions
+            ->havingRaw('COUNT(questions.id) > 0') // Only include quiz with questions
             ->get();
 
-            // Resume Exam
+            // Resume Quiz
             $current_time = now();
             $quizResults = QuizResult::where('end_time', '>', $current_time)
                 ->where('user_id', $user->id)
@@ -1306,10 +1306,10 @@ class QuizController extends Controller
                 ->get();
 
             // Create a map for quick lookup
-            $quizResultExamScheduleMap = [];
-            foreach ($quizResults as $examResult) {
-                $key = $examResult->quiz_id . '_' . $examResult->schedule_id;
-                $quizResultExamScheduleMap[$key] = true;
+            $quizResultScheduleMap = [];
+            foreach ($quizResults as $quizResult) {
+                $key = $quizResult->quiz_id . '_' . $quizResult->schedule_id;
+                $quizResultScheduleMap[$key] = true;
             }
 
             $formattedQuizData = [];
@@ -1323,15 +1323,15 @@ class QuizController extends Controller
 
                 // Duration / Point
                 $formattedTime = $this->formatTime($quiz->total_time);
-                $time = $quiz->duration_mode == "manual" ? $this->formatTime($quiz->exam_duration*60) : $formattedTime;
+                $time = $quiz->duration_mode == "manual" ? $this->formatTime($quiz->duration*60) : $formattedTime;
                 $marks = $quiz->point_mode == "manual" ? ($quiz->point * $quiz->total_questions) : $quiz->total_marks;
 
                 // Resume Exams
                 $quizScheduleKey = $quiz->id . '_' . ($quiz->schedule_id ?: 0); // Use 0 if no schedule_id is provided
-                $isResume = isset($quizResultExamScheduleMap[$quizScheduleKey]);
+                $isResume = isset($quizResultScheduleMap[$quizScheduleKey]);
 
                 if ($quiz->is_public === 1 && !$quiz->schedule_id) {
-                    $isResume = isset($quizResultExamScheduleMap[$quiz->id . '_0']);
+                    $isResume = isset($quizResultScheduleMap[$quiz->id . '_0']);
                 }
 
                 // Attempts
@@ -1341,7 +1341,7 @@ class QuizController extends Controller
                 // Attempts Completed or not checking
                 $scheduleId = $quiz->schedule_id ?? 0;
                 $userAttempt = QuizResult::where('user_id',$user->id)->where('quiz_id',$quiz->id)->where('schedule_id',$scheduleId)->count();
-                
+
                 if($quiz->restrict_attempts == 1 && $userAttempt >= $totalAttempt){
                     continue;
                 }
@@ -1353,7 +1353,7 @@ class QuizController extends Controller
                     'slug' => $quiz->exam_slug,
                     'title' => $quiz->exam_name,
                     'duration_mode' => $quiz->duration_mode,
-                    'exam_duration' => $quiz->exam_duration,
+                    'exam_duration' => $quiz->duration,
                     'point_mode' => $quiz->point_mode,
                     'point' => $quiz->point,
                     'is_free' => $checkfree,
