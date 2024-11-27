@@ -782,7 +782,7 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => 'Internal Server Error: ' . $th->getMessage()], 500);
         }
     }
-
+    
     public function quizDetail(Request $request, $slug)
     {
         try {
@@ -793,9 +793,21 @@ class StudentController extends Controller
 
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
+            
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+
+            // Purchased Quiz
+            $purchaseQuiz = $this->getUserQuiz($user->id);
 
             // Fetch quiz details based on the category and slug
-            $quizData = Quizze::select(
+            $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+                $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
+                    ->where('quiz_schedules.status', 1);
+            })->select(
                 'quizzes.id',
                 'quizzes.slug',
                 'quizzes.title',
@@ -809,6 +821,7 @@ class StudentController extends Controller
                 'quizzes.point', 
                 'quizzes.is_free', 
                 'quizzes.is_public',
+                'quiz_schedules.user_groups',
                 DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
                     ELSE 1 
@@ -818,26 +831,36 @@ class StudentController extends Controller
                 DB::raw('SUM(COALESCE(questions.watch_time, 0)) as total_time')
             )
             ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
-            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
+            ->leftJoin('sub_categories', 'quizzes.subcategory_id', '=', 'sub_categories.id')
             ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
             ->where('quizzes.subcategory_id', $request->category)
             ->where('quizzes.slug', $slug)
             ->where('quizzes.status', 1)
+            ->where(function ($query) {
+                $query->where('quizzes.is_public', 1) // IS THE Quiz IS PUBLIC OR HAVE A SCHEDULE (for private schedule is maindatory)
+                    ->orWhereNotNull('quiz_schedules.id'); 
+            })
+            ->where(function ($query) use ($purchaseQuiz,$userGroup) {
+                $query->where('quizzes.is_public', 1)
+                ->orWhereIn('quizzes.id', $purchaseQuiz)
+                ->orwhereIn('quiz_schedules.user_groups',$userGroup); 
+            })
             ->groupBy(
                 'quizzes.id',
                 'quizzes.slug',
                 'quizzes.title',
                 'quizzes.description',
                 'quizzes.pass_percentage',
-                'sub_categories.name',
                 'quiz_types.name',
                 'quizzes.duration_mode', 
+                'sub_categories.name',
                 'quizzes.duration', 
                 'quizzes.point_mode',
                 'quizzes.point',
                 'quizzes.is_free',
-                'quizzes.is_public'
+                'quizzes.is_public',
+                'quiz_schedules.user_groups'
             )
             ->havingRaw('COUNT(questions.id) > 0')
             ->first();
@@ -847,38 +870,14 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'message' => 'Quiz not found'], 404);
             }
 
-            // USER SUBSCRIPTION LOGIC
-            $type = "quizzes";
-            $currentDate = now();
-
-            // Fetch the user's active subscription
-            $subscription = Subscription::with('plans')
-                ->where('user_id', $user->id)
-                ->where('stripe_status', 'complete')
-                ->where('ends_at', '>', $currentDate)
-                ->latest()
-                ->first();
-
-            // Adjust 'is_free' based on subscription and assigned exams
-            if ($subscription) {
-                $plan = $subscription->plans;
-
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // MAKE ALL EXAMS FREE
-                    $quizData->is_free = 1;
-                } else {
-                    // Get allowed features from the plan
-                    $allowed_features = json_decode($plan->features, true);
-                    if (in_array($type, $allowed_features)) {
-                        // MAKE ALL EXAMS FREE
-                        $quizData->is_free = 1;
-                    }
-                }
+            // Adjust 'is_free' for assigned quiz, regardless of public or private
+            if (in_array($quizData->id, $purchaseQuiz) || in_array($quizData->user_groups, $userGroup)) {
+                $quizData->is_free = 1; // Make assigned quiz free
             }
-
-            // Format the time and marks
-            $time = $quizData->duration_mode == "manual" ? $quizData->duration : $this->formatTime($quizData->total_time);
+            
+            // Format time and marks
+            $formattedTime = $this->formatTime($quizData->total_time);
+            $time = $quizData->duration_mode == "manual" ? $this->formatTime($quizData->duration*60) : $formattedTime;
             $marks = $quizData->point_mode == "manual" ? ($quizData->point * $quizData->total_questions) : $quizData->total_marks;
 
             // Return the quiz data
