@@ -1019,7 +1019,8 @@ class StudentController extends Controller
                     'practice_slug'    => $practiceSet->slug,
                     'is_free' => $practiceSet->is_free,
                     'category' => $practiceSet->subCategory_id,
-                    'is_resume'=>$isResume
+                    'is_resume'=>$isResume,
+                    'pratice_set'=>$purchasePractice
                 ];
             }
 
