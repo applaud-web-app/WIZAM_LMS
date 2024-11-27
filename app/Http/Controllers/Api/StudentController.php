@@ -1012,16 +1012,14 @@ class StudentController extends Controller
                 
                 // Add the practice set data to the corresponding skill name group
                 $groupedData[$skillName][] = [
-                    'practice_id'   => $practiceSet->id,
                     'practice_title'   => $practiceSet->title,
                     'practice_question'=> $practiceSet->total_questions, // Use data from query result
                     'practice_time'    => $practiceSet->total_time,      // Use data from query result
                     'practice_marks'   => $marks,     // Use data from query result
                     'practice_slug'    => $practiceSet->slug,
-                    'is_free' => $practiceSet->is_free,
+                    'is_free' => $isFree,
                     'category' => $practiceSet->subCategory_id,
                     'is_resume'=>$isResume,
-                    'pratice_set'=>$purchasePractice
                 ];
             }
 
