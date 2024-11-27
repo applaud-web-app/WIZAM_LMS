@@ -177,14 +177,15 @@ class DashboardController extends Controller
             // Fetch quizzes with schedules
             $quizData = Quizze::leftJoin('quiz_schedules', function ($join) use($userGroup){
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
-                    ->where('quiz_schedules.status', 1)->whereIn('quiz_schedules.user_groups', $userGroup);
+                    ->where('quiz_schedules.status', 1);
                 })
                 ->leftJoin('quiz_types', 'quizzes.quiz_type_id', '=', 'quiz_types.id')
                 ->leftJoin('quiz_questions', 'quizzes.id', '=', 'quiz_questions.quizzes_id')
                 ->leftJoin('questions', 'quiz_questions.question_id', '=', 'questions.id')
                 ->where('quizzes.status', 1)
-                ->where(function ($query) {
-                    $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); // Private exams must have a schedule
+                ->where(function ($query) {  // IS THE QUIZ IS PUBLIC OR HAVE A SCHEDULE (for private schedule is maindatory)
+                    $query->where('quizzes.is_public', 1)
+                    ->orWhereNotNull('quiz_schedules.id'); 
                 })
                 ->where(function ($query) use ($purchaseQuiz,$userGroup) {
                     $query->where('quizzes.is_public', 1)
@@ -236,10 +237,15 @@ class DashboardController extends Controller
                 ->get();
             
             // Format the data for response
-            $data2 = $quizData->map(function ($quiz) {
+            $data2 = $quizData->map(function ($quiz) use($purchaseQuiz,$userGroup){
+                $checkfree = $quiz->is_free;
+                if(in_array($quiz->id,$purchaseQuiz) || in_array($quiz->user_groups,$userGroup)){
+                    $checkfree = 1;
+                }
                 return [
                     'slug' => $quiz->quiz_slug,
                     'title' => $quiz->quiz_name,
+                    'is_free' => $checkfree,
                     'schedule_type' => $quiz->schedule_type ?? "NA",
                     'start_date' => $quiz->start_date ?? "NA",
                     'start_time' => $quiz->start_time ?? "NA",
