@@ -84,7 +84,7 @@ class DashboardController extends Controller
             $currentDate = now();
 
             // Fetch exams with schedules
-            $calldenderData = Exam::leftJoin('exam_schedules', function ($join) {
+            $calldenderData = Exam::leftJoin('exam_schedules', function ($join) use($userGroup){
                 $join->on('exams.id', '=', 'exam_schedules.exam_id')
                     ->where('exam_schedules.status', 1)->whereIn('exam_schedules.user_groups',$userGroup);
             })
@@ -96,7 +96,7 @@ class DashboardController extends Controller
                 $query->where('exams.is_public', 1) 
                     ->orWhereNotNull('exam_schedules.id'); 
             })
-            ->where(function ($query) use ($assignedExams,$purchaseExam) {
+            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
                 $query->where('exams.id', $purchaseExam)
                     ->orWhereIn('exams.id', $assignedExams)
                     ->orWhereIn('exam_schedules.user_groups', $userGroup); 
@@ -162,7 +162,7 @@ class DashboardController extends Controller
             $purchaseQuiz = $this->getUserQuiz($user->id);
 
             // Fetch quizzes with schedules
-            $quizData = Quizze::leftJoin('quiz_schedules', function ($join) {
+            $quizData = Quizze::leftJoin('quiz_schedules', function ($join) use($userGroup){
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                     ->where('quiz_schedules.status', 1)->whereIn('quiz_schedules.user_groups', $userGroup);
                 })
@@ -173,9 +173,10 @@ class DashboardController extends Controller
                 ->where(function ($query) {
                     $query->where('quizzes.is_public', 1)->orWhereNotNull('quiz_schedules.id'); // Private exams must have a schedule
                 })
-                ->where(function ($query) use ($purchaseQuiz) {
+                ->where(function ($query) use ($purchaseQuiz,$userGroup) {
                     $query->where('quizzes.is_public', 1)
-                    ->orWhereIn('quizzes.id', $purchaseQuiz);
+                    ->orWhereIn('quizzes.id', $purchaseQuiz)
+                    ->orWhereIn('quiz_schedules.user_groups', $userGroup);
                 })
                 ->where('quizzes.subcategory_id', $request->category)
                 ->select(
