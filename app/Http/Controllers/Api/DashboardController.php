@@ -98,7 +98,7 @@ class DashboardController extends Controller
             })
             ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
                 $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
-                    ->orWhereIn('exams.id', $assignedExams)->whereIn('exam_schedules.user_groups',$userGroup); 
+                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
             })
             ->where('exams.subcategory_id', $request->category)
             ->select(
