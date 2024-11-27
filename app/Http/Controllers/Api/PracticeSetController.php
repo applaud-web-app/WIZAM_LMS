@@ -95,9 +95,6 @@ class PracticeSetController extends Controller
                 ->where('practice_sets.subcategory_id', $request->category)
                 ->where('practice_sets.status', 1)
                 ->where('questions.status', 1)
-                ->where(function ($query) use ($purchasePractice) {
-                    $query->WhereIn('practice_sets.id', $purchasePractice); 
-                })
                 ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.description', 'practice_sets.slug', 'practice_sets.subcategory_id', 'practice_sets.status', 'practice_sets.allow_reward', 'practice_sets.reward_popup', 'practice_sets.point_mode', 'practice_sets.points', 'practice_sets.is_free')
                 ->first();
 
