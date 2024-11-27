@@ -445,8 +445,19 @@ class DashboardController extends Controller
                     $checkfree = 1;
                 }
                 return [
-                    'slug' => $exam->exam_slug,
-                    'title' => $exam->exam_name,
+                    'id' => $exam->id,
+                    'exam_slug' => $exam->exam_slug,
+                    'exam_name' => $exam->exam_name,
+                    'duration_mode' => $exam->duration_mode,
+                    'exam_duration' => $exam->exam_duration ?? null,
+                    'total_questions' => $exam->total_questions,
+                    'total_marks' => $exam->total_marks,
+                    'total_time' => $exam->total_time,
+                    'point_mode' => $exam->point_mode,
+                    'total_attempts' => $exam->total_attempts ?? null,
+                    'restrict_attempts' => $exam->restrict_attempts,
+                    'point' => $exam->point ?? null,
+                    'schedule_id' => $exam->schedule_id ?? null,
                     'is_free' => $checkfree,
                     'schedule_type' => $exam->schedule_type ?? "NA",
                     'start_date' => $exam->start_date ?? "NA",
