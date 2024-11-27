@@ -455,7 +455,7 @@ class DashboardController extends Controller
 
                 // Duration / Point
                 $formattedTime = $this->formatTime($exam->total_time);
-                $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
+                $time = $exam->duration_mode == "manual" ? $exam->exam_duration. ' min ' : $formattedTime;
                 $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
 
                 // Attempts
