@@ -146,9 +146,9 @@ class DashboardController extends Controller
             ->havingRaw('COUNT(questions.id) > 0')
             ->get();
 
-            $data = $calldenderData->map(function ($exam) {
+            $data = $calldenderData->map(function ($exam) use($purchaseExam,$assignedExams,$userGroup){
                 $checkfree = $exam->is_free;
-                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$purchaseExam) || in_array($exam->user_groups,$userGroup)){
+                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$assignedExams) || in_array($exam->user_groups,$userGroup)){
                     $checkfree = 1;
                 }
                 return [
@@ -438,10 +438,10 @@ class DashboardController extends Controller
                         ($exam->start_date == $currentDate && $exam->start_time > $currentTime);
                 }
                 return false; // Default case: Not an upcoming exam
-            })->map(function ($exam) {
+            })->map(function ($exam) use($purchaseExam,$assignedExams,$userGroup){
                 // Map the filtered exams into the desired structure
                 $checkfree = $exam->is_free;
-                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$purchaseExam) || in_array($exam->user_groups,$userGroup)){
+                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$assignedExams) || in_array($exam->user_groups,$userGroup)){
                     $checkfree = 1;
                 }
                 return [
