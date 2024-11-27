@@ -702,14 +702,14 @@ class StudentController extends Controller
                         'time' => $time,
                         'is_resume' => $isResume,
                         'total_attempts'=>$totalAttempt,
-                        'schedules' => [
-                            'schedule_id' =>  $quiz->schedule_id ?: 0,
-                            'schedule_type' => $quiz->schedule_type,
+                        'schedule' => [
+                            'schedule_id'=>$quiz->schedule_id,
                             'start_date' => $quiz->start_date,
                             'start_time' => $quiz->start_time,
                             'end_date' => $quiz->end_date,
                             'end_time' => $quiz->end_time,
                             'grace_period' => $quiz->grace_period,
+                            'schedule_type' => $quiz->schedule_type,
                         ],
                     ];
                 }
