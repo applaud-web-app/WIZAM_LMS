@@ -1043,7 +1043,7 @@ class StudentController extends Controller
             $user = $request->attributes->get('authenticatedUser');
 
             // Purchased practice
-            $purchasePractice = getUserPractice($user->id);
+            $purchasePractice = $this->getUserPractice($user->id);
     
             // Fetch practice set details based on the category and slug
             $practiceSetData = PracticeSet::select(
