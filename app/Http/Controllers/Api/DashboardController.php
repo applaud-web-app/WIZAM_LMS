@@ -83,10 +83,7 @@ class DashboardController extends Controller
             $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
             $purchaseExam = $this->getUserExam($user->id);
 
-            // Get current date and time for upcoming exam logic
-            $currentDate = now();
-
-            // Fetch exams with schedules
+            // Fetch exams
             $calldenderData = Exam::leftJoin('exam_schedules', function ($join) use($userGroup){
                 $join->on('exams.id', '=', 'exam_schedules.exam_id')
                     ->where('exam_schedules.status', 1);
@@ -174,7 +171,7 @@ class DashboardController extends Controller
             // Purchase Quiz
             $purchaseQuiz = $this->getUserQuiz($user->id);
 
-            // Fetch quizzes with schedules
+            // Fetch quizzes 
             $quizData = Quizze::leftJoin('quiz_schedules', function ($join) use($userGroup){
                     $join->on('quizzes.id', '=', 'quiz_schedules.quizzes_id')
                     ->where('quiz_schedules.status', 1);
@@ -449,14 +446,19 @@ class DashboardController extends Controller
                 }
                 return false; // Default case: Not an upcoming exam
             })->map(function ($exam) use($purchaseExam,$assignedExams,$userGroup){
-                // Map the filtered exams into the desired structure
+
+                // Free / Paid
                 $checkfree = $exam->is_free;
                 if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$assignedExams) || in_array($exam->user_groups,$userGroup)){
                     $checkfree = 1;
                 }
+
+                // Duration / Point
                 $formattedTime = $this->formatTime($exam->total_time);
                 $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                 $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
+
+                // Attempts
                 $totalAttempt = $exam->total_attempts ?? 1;
                 $totalAttempt = $exam->restrict_attempts == 1 ? $totalAttempt : null;
                 return [
