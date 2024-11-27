@@ -18,7 +18,7 @@ use App\Models\Question;
 use App\Models\AssignedExam;
 use App\Models\Subscription;
 use App\Models\QuizSchedule;
-use App\Models\UserGroup;
+use App\Models\GroupUsers;
 
 class DashboardController extends Controller
 {
@@ -71,7 +71,7 @@ class DashboardController extends Controller
             $user = $request->attributes->get('authenticatedUser');
             
             // User group IDs
-            $userGroup = UserGroup::where('user_id',$user->id)
+            $userGroup = GroupUsers::where('user_id',$user->id)
             ->where('status',1)
             ->pluck('group_id')
             ->toArray();
