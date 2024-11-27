@@ -643,9 +643,9 @@ class StudentController extends Controller
                 // Resume Quiz
                 $current_time = now();
                 $quizResults = QuizResult::where('end_time', '>', $current_time)
-                    ->where('user_id', $user->id)
-                    ->where('status', 'ongoing')
-                    ->get();
+                ->where('user_id', $user->id)
+                ->where('status', 'ongoing')
+                ->get();
 
                 // Create a map for quick lookup
                 $quizResultScheduleMap = [];
@@ -653,6 +653,7 @@ class StudentController extends Controller
                     $key = $quizResult->quiz_id . '_' . $quizResult->schedule_id;
                     $quizResultScheduleMap[$key] = true;
                 }
+
 
                 $formattedQuizData = [];
                 foreach ($quizData as $quiz) {
