@@ -110,6 +110,8 @@ class DashboardController extends Controller
                 'exams.duration_mode',
                 'exams.exam_duration',
                 'exams.point_mode',
+                'exams.restrict_attempts',
+                'exams.total_attempts',
                 'exams.point',
                 DB::raw('SUM(CASE 
                     WHEN questions.type = "EMQ" AND JSON_VALID(questions.question) THEN JSON_LENGTH(questions.question) - 1
@@ -135,6 +137,8 @@ class DashboardController extends Controller
                 'exams.exam_duration',
                 'exams.point_mode',
                 'exams.point',
+                'exams.restrict_attempts',
+                'exams.total_attempts',
                 'exam_schedules.schedule_type',
                 'exam_schedules.start_date',
                 'exam_schedules.start_time',
@@ -447,7 +451,8 @@ class DashboardController extends Controller
                 $formattedTime = $this->formatTime($exam->total_time);
                 $time = $exam->duration_mode == "manual" ? $exam->exam_duration : $formattedTime;
                 $marks = $exam->point_mode == "manual" ? ($exam->point * $exam->total_questions) : $exam->total_marks;
-
+                $totalAttempt = $exam->total_attempts ?? 1;
+                $totalAttempt = $exam->restrict_attempts == 1 ? $totalAttempt : null;
                 return [
                     'id' => $exam->id,
                     'exam_slug' => $exam->exam_slug,
@@ -458,8 +463,8 @@ class DashboardController extends Controller
                     'point_mode' => $exam->point_mode,
                     'total_marks' => $marks,
                     'total_time' => $time,
-                    'total_attempts' => $exam->total_attempts ?? null,
                     'restrict_attempts' => $exam->restrict_attempts,
+                    'total_attempts' => $totalAttempt ?? null,
                     'point' => $exam->point ?? null,
                     'schedule_id' => $exam->schedule_id ?? null,
                     'is_free' => $checkfree,
