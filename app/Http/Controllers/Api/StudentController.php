@@ -593,6 +593,7 @@ class StudentController extends Controller
                 ->select(
                     'quizzes.slug as quizSlug',
                     'quizzes.title',
+                    'quizzes.id',
                     'quizzes.duration_mode',
                     'quizzes.duration',
                     'quizzes.point_mode',
