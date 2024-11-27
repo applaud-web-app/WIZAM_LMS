@@ -777,6 +777,7 @@ class ExamController extends Controller
                 $examResultExamScheduleMap[$key] = true;
             }
 
+            $formattedExamData = [];
             foreach ($upcomingExams as $exam) {
 
                 // Free / Paid
