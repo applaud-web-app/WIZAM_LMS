@@ -92,14 +92,13 @@ class DashboardController extends Controller
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id')
             ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id')
             ->where('exams.status', 1)
-            ->where(function ($query) {
+            ->where(function ($query) { // IS THE EXAM IS PUBLIC OR HAVE A SCHEDULE (for private schedule is maindatory)
                 $query->where('exams.is_public', 1) 
                     ->orWhereNotNull('exam_schedules.id'); 
             })
-            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
-                $query->where('exams.id', $purchaseExam)
-                    ->orWhereIn('exams.id', $assignedExams)
-                    ->orWhereIn('exam_schedules.user_groups', $userGroup); 
+            ->where(function ($query) use ($assignedExams,$purchaseExam) {
+                $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                    ->orWhereIn('exams.id', $assignedExams); 
             })
             ->where('exams.subcategory_id', $request->category)
             ->select(
@@ -123,7 +122,8 @@ class DashboardController extends Controller
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
-                'exam_schedules.grace_period'
+                'exam_schedules.grace_period',
+                'exam_schedules.user_groups'
             )
             ->groupBy(
                 'exams.id',
@@ -140,15 +140,21 @@ class DashboardController extends Controller
                 'exam_schedules.start_time',
                 'exam_schedules.end_date',
                 'exam_schedules.end_time',
-                'exam_schedules.grace_period'
+                'exam_schedules.grace_period',
+                'exam_schedules.user_groups'
             )
             ->havingRaw('COUNT(questions.id) > 0')
             ->get();
 
             $data = $calldenderData->map(function ($exam) {
+                $checkfree = $exam->is_free;
+                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$purchaseExam) || in_array($exam->user_groups,$userGroup)){
+                    $checkfree = 1;
+                }
                 return [
                     'slug' => $exam->exam_slug,
                     'title' => $exam->exam_name,
+                    'is_free' => $checkfree,
                     'schedule_type' => $exam->schedule_type ?? "NA",
                     'start_date' => $exam->start_date ?? "NA",
                     'start_time' => $exam->start_time ?? "NA",
@@ -434,9 +440,14 @@ class DashboardController extends Controller
                 return false; // Default case: Not an upcoming exam
             })->map(function ($exam) {
                 // Map the filtered exams into the desired structure
+                $checkfree = $exam->is_free;
+                if(in_array($exam->id,$purchaseExam) || in_array($exam->id,$purchaseExam) || in_array($exam->user_groups,$userGroup)){
+                    $checkfree = 1;
+                }
                 return [
                     'slug' => $exam->exam_slug,
                     'title' => $exam->exam_name,
+                    'is_free' => $checkfree,
                     'schedule_type' => $exam->schedule_type ?? "NA",
                     'start_date' => $exam->start_date ?? "NA",
                     'start_time' => $exam->start_time ?? "NA",
