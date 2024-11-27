@@ -20,6 +20,8 @@ use App\Models\PracticeVideo;
 use App\Models\Video;
 use App\Models\Lesson;
 use App\Models\Subscription;
+use App\Models\SubscriptionItem;
+use App\Models\GroupUsers;
 use App\Models\Plan;
 use Carbon\Carbon;
 use App\Models\Payment;
@@ -40,80 +42,110 @@ class StudentController extends Controller
         }
     }
 
-    // public function examType(){
-    //     try {
-    //         $type = ExamType::select('name','slug')->where('status', 1)->get();
-    //         // ALSO COLLECT THE COUNT OF EXAM OF EACH TYPE ALSO PAID EXAM COUNT
-    //         return response()->json(['status'=> true,'data' => $type], 201);
-    //     } catch (\Throwable $th) {
-    //         return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
-    //     }
-    // }
+    private function getUserItemsByType($userId, $itemType)
+    {
+        try {
+            // Check if the user has an active subscription
+            $subscriptionIds = Subscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->whereDate('end_date', '>=', now()) // Check subscription validity
+            ->pluck('id') // Get subscription IDs
+            ->toArray();
+
+            if (!empty($subscriptionIds)) {
+                // Fetch subscription items of the specified type
+                $subscriptionItems = SubscriptionItem::whereIn('subscription_id', $subscriptionIds)
+                ->where('item_type', $itemType)
+                ->where('status', 'active')
+                ->pluck('item_id')
+                ->toArray();
+
+                return $subscriptionItems ?? [];
+            }
+
+            return [];
+        } catch (\Throwable $th) {
+            \Log::error("Dashboard Error fetching user items for type {$itemType}: " . $th->getMessage());
+            return [];
+        }
+    }
+
+    // Wrapper methods for specific item types
+    private function getUserExam($userId)
+    {
+        return $this->getUserItemsByType($userId, 'exam');
+    }
 
     public function examType(Request $request) {
         try {
             // Fetch the current authenticated user
             $user = $request->attributes->get('authenticatedUser');
     
-            // Fetch the exam IDs assigned to the current user
+            // User group IDs
+            $userGroup = GroupUsers::where('user_id',$user->id)
+            ->where('status',1)
+            ->pluck('group_id')
+            ->toArray();
+            
+            // Assigned and purchased exams
             $assignedExams = AssignedExam::where('user_id', $user->id)->pluck('exam_id')->toArray();
-
-            $currentDate = now()->toDateString();
-            $currentTime = now()->toTimeString();
+            $purchaseExam = $this->getUserExam($user->id);
 
             $type = ExamType::select('name', 'slug')
                 ->where('status', 1)
                 ->withCount([
-                    'exams as total_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                    'exams as total_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
                         $query->leftJoin('exam_schedules', function ($join) {
-                                $join->on('exams.id', '=', 'exam_schedules.exam_id')
-                                    ->where('exam_schedules.status', 1);
-                            })
-                            ->where(function ($subQuery) use ($assignedExams) {
-                                $subQuery->where('exams.is_public', 1)
-                                    ->orWhereIn('exams.id', $assignedExams);
-                            })
-                            ->where('exams.status', 1)
-                            ->where(function ($query) {
-                                $query->where('exams.is_public', 1)->orWhereNotNull('exam_schedules.id'); 
-                            })
-                            ->distinct();
+                            $join->on('exams.id', '=', 'exam_schedules.exam_id')
+                            ->where('exam_schedules.status', 1);
+                        })
+                        ->where('exams.status', 1)
+                        ->where(function ($query) {
+                            $query->where('exams.is_public', 1)
+                            ->orWhereNotNull('exam_schedules.id'); 
+                        })
+                        ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                            $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
+                        })
+                        ->distinct();
                     },
-                    'exams as paid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                    'exams as paid_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
                         $query->leftJoin('exam_schedules', function ($join) {
                                 $join->on('exams.id', '=', 'exam_schedules.exam_id')
                                     ->where('exam_schedules.status', 1);
                             })
-                            ->where(function ($subQuery) use ($assignedExams) {
-                                $subQuery->where('exams.is_public', 1)
-                                    ->orWhereIn('exams.id', $assignedExams);
-                            })
                             ->where('exams.status', 1)
                             ->where(function ($query) {
-                                $query->where('exams.is_public', 1)->orWhereNotNull('exam_schedules.id'); 
+                                $query->where('exams.is_public', 1)
+                                ->orWhereNotNull('exam_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                                $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
                             })
                             ->where('exams.is_free', 0)
                             ->distinct();
                     },
-                    'exams as unpaid_exams' => function ($query) use ($assignedExams, $currentDate, $currentTime) {
+                    'exams as unpaid_exams' => function ($query) use ($assignedExams, $purchaseExam, $userGroup) {
                         $query->leftJoin('exam_schedules', function ($join) {
                                 $join->on('exams.id', '=', 'exam_schedules.exam_id')
                                     ->where('exam_schedules.status', 1);
                             })
-                            ->where(function ($subQuery) use ($assignedExams) {
-                                $subQuery->where('exams.is_public', 1)
-                                    ->orWhereIn('exams.id', $assignedExams);
-                            })
                             ->where('exams.status', 1)
                             ->where(function ($query) {
-                                $query->where('exams.is_public', 1)->orWhereNotNull('exam_schedules.id'); 
+                                $query->where('exams.is_public', 1)
+                                ->orWhereNotNull('exam_schedules.id'); 
+                            })
+                            ->where(function ($query) use ($assignedExams,$purchaseExam,$userGroup) {
+                                $query->where('exams.is_public', 1)->orwhere('exams.id', $purchaseExam)
+                                    ->orWhereIn('exams.id', $assignedExams)->orwhereIn('exam_schedules.user_groups',$userGroup); 
                             })
                             ->where('exams.is_free', 1)
                             ->distinct(); 
                     }
                 ])
                 ->get();
-
     
             return response()->json(['status' => true, 'data' => $type], 201);
     
