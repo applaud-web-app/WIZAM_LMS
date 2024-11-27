@@ -27,17 +27,19 @@ class DashboardController extends Controller
     {
         try {
             // Check if the user has an active subscription
-            $subscription = Subscription::where('user_id', $userId)
-                ->where('status', 'active')
-                ->whereDate('end_date', '>=', now()) // eg - end_date format (2024-12-26 00:00:00)
-                ->exists(); // Use `exists()` for performance instead of fetching records
+            $subscriptionIds = Subscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->whereDate('end_date', '>=', now()) // Check subscription validity
+            ->pluck('id') // Get subscription IDs
+            ->toArray();
 
-            if ($subscription) {
+            if (!empty($subscriptionIds)) {
                 // Fetch subscription items of the specified type
-                $subscriptionItems = SubscriptionItem::where('item_type', $itemType)
-                    ->where('status', 'active')
-                    ->pluck('item_id')
-                    ->toArray();
+                $subscriptionItems = SubscriptionItem::whereIn('subscription_id', $subscriptionIds)
+                ->where('item_type', $itemType)
+                ->where('status', 'active')
+                ->pluck('item_id')
+                ->toArray();
 
                 return $subscriptionItems ?? [];
             }
@@ -57,7 +59,7 @@ class DashboardController extends Controller
 
     private function getUserQuiz($userId)
     {
-        return $this->getUserItemsByType($userId, 'quizzes');
+        return $this->getUserItemsByType($userId, 'quizze');
     }
 
 
