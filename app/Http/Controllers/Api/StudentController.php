@@ -1133,6 +1133,9 @@ class StudentController extends Controller
                 'category' => 'required|integer'
             ]);
 
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
             // Get practice videos with related skill and video data
             $practiceVideos = PracticeVideo::with('skill', 'video')
             ->where('subcategory_id', $request->category)
