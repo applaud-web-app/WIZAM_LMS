@@ -269,12 +269,12 @@
                    <div class="mb-4 optionItem" data-index="${optionCount}">
                        <div class="text-sm font-semibold mb-2">Option ${optionCount + 1}</div>
                        <textarea id="option_text_${optionCount}" name="option[]" class="summernote w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark" placeholder="Enter option ${optionCount + 1}"></textarea>
-                       <div class="flex flex-col sm:flex-row bg-gray-50 border-b border-l border-r border-gray-300 sm:justify-between sm:items-center px-4 py-2">
+                       <div class="flex flex-col sm:flex-row bg-gray-50 border-b border-l border-r border-gray-300  px-4 py-2">
                            <div class="flex gap-1 ">
                                <input type="radio" id="option-${optionCount}" name="correctOption" class="custom-control-input" value="${optionCount + 1}">
                                <label for="option-${optionCount}" class="custom-control-label">Correct Answer</label>
                            </div>
-                           <div class="flex items-center sm:justify-end gap-2">
+                           <div class="flex  sm:justify-end gap-2">
                                <button type="button" class="removeOption text-red-500 hover:text-red-700">Remove</button>
                            </div>
                        </div>
