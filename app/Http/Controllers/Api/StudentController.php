@@ -1565,34 +1565,48 @@ class StudentController extends Controller
             // Retrieve the most recent subscription for the user
             $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
             $features = [];
-            if($payment){
-                $subscriptionItems = SubscriptionItem::where('subscription_id',$payment->subscription_id)->pluck('item_type','item_id')->groupBy('item_type');
+
+            if ($payment) {
+                // Get subscription items grouped by 'item_type'
+                $subscriptionItems = SubscriptionItem::where('subscription_id', $payment->subscription_id)
+                                                    ->pluck('item_type', 'item_id')
+                                                    ->groupBy('item_type');
+                
+                // Loop through each item type and fetch corresponding titles
                 foreach ($subscriptionItems as $type => $ids) {
-                   switch ($type) {
-                    case 'exam':
-                        $features['exams'] = Exam::where('id',$ids)->pluck('title')->toArray() ?? [];
-                        break;
-
-                    case 'quizze':
-                        $features['quizzes'] = Quizze::where('id',$ids)->pluck('title')->toArray() ?? [];
-                        break;
-
-                    case 'practice':
-                        $features['practices'] = PracticeSet::where('id',$ids)->pluck('title')->toArray() ?? [];
-                        break;
-
-                    case 'lesson':
-                        $features['lessons'] = Lesson::where('id',$ids)->pluck('title')->toArray() ?? [];
-                        break;
-
-                    case 'video':
-                        $features['videos'] = Video::where('id',$ids)->pluck('title')->toArray() ?? [];
-                        break;
+                    // Flatten $ids to get a single array of item IDs (since $ids is a collection of collections)
+                    $itemIds = $ids->pluck('item_id')->toArray();  // Extract the 'item_id' from the collection
                     
-                    default:
-                        # code...
-                        break;
-                   }
+                    switch ($type) {
+                        case 'exam':
+                            // Fetch titles of all exams related to the item_ids for 'exam'
+                            $features['exams'] = Exam::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            break;
+
+                        case 'quizze':  // Make sure this matches the exact 'item_type' value in your data
+                            // Fetch titles of all quizzes related to the item_ids for 'quizze'
+                            $features['quizzes'] = Quizze::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            break;
+
+                        case 'practice':
+                            // Fetch titles of all practice sets related to the item_ids for 'practice'
+                            $features['practices'] = PracticeSet::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            break;
+
+                        case 'lesson':
+                            // Fetch titles of all lessons related to the item_ids for 'lesson'
+                            $features['lessons'] = Lesson::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            break;
+
+                        case 'video':
+                            // Fetch titles of all videos related to the item_ids for 'video'
+                            $features['videos'] = Video::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            break;
+
+                        default:
+                            // Optionally handle any other item types that aren't explicitly listed above
+                            break;
+                    }
                 }
             }
 
