@@ -1100,7 +1100,7 @@ class CmsController extends Controller
             // 'exam_schedules.end_time',
             // 'exam_schedules.grace_period'
             ->orderBy('exams.created_at', 'desc') 
-            // ->havingRaw('COUNT(exam_schedules.id) > 0')
+            ->havingRaw('COUNT(questions_count) > 0')
             ->get();
             return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
