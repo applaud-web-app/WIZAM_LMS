@@ -1069,6 +1069,10 @@ class CmsController extends Controller
                 $exams = [];
                 return response()->json(['status'=> true,'data' => $exams], 201);
             }
+            $examIds = [];
+            if($plan->exams != null){
+                $examIds = is_array($plan->exams) ? $plan->exams : json_decode($plan->exams, true);
+            }
             $exams = Exam::select(
                 'exams.img_url', 
                 'exams.title', 
@@ -1086,7 +1090,7 @@ class CmsController extends Controller
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.status' => 1,'exams.is_public' => 1])
-            ->whereIn('exam.id',$plan->exams)
+            ->whereIn('exam.id',$examIds)
             // ->where('exam_schedules.status', 1)
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id',)
             // 'exam_schedules.schedule_type',
