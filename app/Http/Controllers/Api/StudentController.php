@@ -971,7 +971,7 @@ class StudentController extends Controller
                 ->leftJoin('skills', 'practice_sets.skill_id', '=', 'skills.id') // Join with skills to get skill name
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.status', 1)
-                ->where(function ($query) use ($purchasePractice) {
+                ->orwhere(function ($query) use ($purchasePractice) {
                     $query->WhereIn('practice_sets.id', $purchasePractice); 
                 })
                 ->groupBy('practice_sets.id', 'practice_sets.title', 'practice_sets.slug', 'practice_sets.subCategory_id', 'skills.name','practice_sets.point_mode','practice_sets.points','practice_sets.is_free',) // Group by practice set and skill name
@@ -1068,7 +1068,7 @@ class StudentController extends Controller
                 ->where('practice_sets.subCategory_id', $request->category)
                 ->where('practice_sets.slug', $slug) // Assuming you have a slug column in the practice_sets table
                 ->where('practice_sets.status', 1)
-                ->where(function ($query) use ($purchasePractice) {
+                ->orwhere(function ($query) use ($purchasePractice) {
                     $query->WhereIn('practice_sets.id', $purchasePractice); 
                 })
                 ->groupBy(
@@ -1442,14 +1442,15 @@ class StudentController extends Controller
     
             // Fetch the user's subscriptions with associated plan details
             $subscriptions = Subscription::select(
-                    'subscriptions.id as subscription_id',
-                    'subscriptions.created_at as purchase_date',
-                    'subscriptions.ends_at as ends_date',
-                    'subscriptions.stripe_status as subscription_status',
+                    'subscriptions.stripe_subscription_id as subscription_id',
+                    'subscriptions.start_date as purchase_date',
+                    'subscriptions.end_date as ends_date',
+                    'subscriptions.status as subscription_status',
+                    'subscriptions.type as subscription_type',
                     'plans.name as plan_name',
                     'plans.price as plan_price'
                 )
-                ->join('plans', 'subscriptions.stripe_price', '=', 'plans.stripe_price_id')
+                ->join('plans', 'subscriptions.plan_id', '=', 'plans.id')
                 ->where('subscriptions.user_id', $user->id)
                 ->orderBy('subscriptions.created_at', 'desc') // Get latest first
                 ->get();
