@@ -523,9 +523,12 @@ class ExamController extends Controller
                             }, $user_answ) : [];
 
                             // Sort both arrays to ensure consistent comparison
-                            sort($correct_answ);
-                            sort($user_answ);
-
+                            if(is_array($correct_answ)){
+                                sort($correct_answ);
+                            }
+                            if(is_array($user_answ)){
+                                sort($user_answ);
+                            }
                             // Compare the sorted arrays
                             $isCorrect = $user_answ == $correct_answ;
                             break;
@@ -536,8 +539,12 @@ class ExamController extends Controller
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
-                            sort($user_answ);
-                            sort($correct_answ);
+                            if(is_array($correct_answ)){
+                                sort($correct_answ);
+                            }
+                            if(is_array($user_answ)){
+                                sort($user_answ);
+                            }
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'TOF':
