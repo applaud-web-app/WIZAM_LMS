@@ -477,7 +477,6 @@ class UserController extends Controller
                 ];
                 Mail::to($request->email)->send(new WelcomeEmail($data));
             } catch (\Throwable $th) {
-               dd($th->getMessage());
             }
 
             // Assign roles
