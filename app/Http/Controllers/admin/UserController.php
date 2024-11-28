@@ -18,8 +18,8 @@ use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Stripe\StripeClient;
 use App\Models\AssignedExam;
-use App\Mail\WelcomeEmail;
 use Mail;
+use App\Mail\WelcomeEmail;
 
 class UserController extends Controller
 {
@@ -467,18 +467,19 @@ class UserController extends Controller
                 }
             }
 
+            // Send welcome email (optional try/catch for non-blocking)
             try {
                 $data = [
-                    'student'=> $request->full_name,
+                    'student' => $request->full_name,
                     'email' => $request->email,
                     'phone' => $request->phone,
-                    'content'=>''
+                    'content' => ''
                 ];
                 Mail::to($request->email)->send(new WelcomeEmail($data));
             } catch (\Throwable $th) {
                 // SKIP IF MAIL NOT SEND 
             }
-            
+
             // Assign roles
             $user->assignRole("student");
 
