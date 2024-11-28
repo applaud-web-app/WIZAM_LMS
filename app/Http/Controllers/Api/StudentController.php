@@ -1562,44 +1562,56 @@ class StudentController extends Controller
             ->leftJoin('cities', 'billing_settings.city_id', '=', 'cities.id')
             ->first();
 
-            // Retrieve the most recent subscription for the user
+            // Retrieve the most recent payment
             $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
-            $features = [];
+            $features = [
+                'exams' => [],
+                'quizzes' => [],
+                'practices' => [],
+                'lessons' => [],
+                'videos' => []
+            ];
 
             if ($payment) {
                 // Get subscription items grouped by 'item_type'
-                $subscriptionItems = SubscriptionItem::select('item_type','item_id')->where('subscription_id', $payment->subscription_id)
+                $subscriptionItems = SubscriptionItem::select('item_type', 'item_id')
+                                                    ->where('subscription_id', $payment->subscription_id)
                                                     ->get();
-                
-                // Loop through each item type and fetch corresponding titles
-                foreach ($subscriptionItems as $type => $ids) {
-                    // Flatten $ids to get a single array of item IDs (since $ids is a collection of collections)
-                    $itemIds = $ids->pluck('item_id')->toArray();  // Extract the 'item_id' from the collection
-                    
-                    switch ($type) {
+
+                // Loop through each subscription item
+                foreach ($subscriptionItems as $subscriptionItem) {
+                    $itemType = $subscriptionItem->item_type;
+                    $itemId = $subscriptionItem->item_id;
+
+                    switch ($itemType) {
                         case 'exam':
-                            // Fetch titles of all exams related to the item_ids for 'exam'
-                            $features['exams'] = Exam::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            // Fetch exam titles and append them to the 'exams' array
+                            $examTitles = Exam::whereIn('id', [$itemId])->pluck('title')->toArray();
+                            $features['exams'] = array_merge($features['exams'], $examTitles);
                             break;
 
                         case 'quizze':  // Make sure this matches the exact 'item_type' value in your data
-                            // Fetch titles of all quizzes related to the item_ids for 'quizze'
-                            $features['quizzes'] = Quizze::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            // Fetch quiz titles and append them to the 'quizzes' array
+                            $quizTitles = Quizze::whereIn('id', [$itemId])->pluck('title')->toArray();
+                            $features['quizzes'] = array_merge($features['quizzes'], $quizTitles);
                             break;
 
                         case 'practice':
-                            // Fetch titles of all practice sets related to the item_ids for 'practice'
-                            $features['practices'] = PracticeSet::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            // Fetch practice titles and append them to the 'practices' array
+                            $practiceTitles = PracticeSet::whereIn('id', [$itemId])->pluck('title')->toArray();
+                            $features['practices'] = array_merge($features['practices'], $practiceTitles);
                             break;
 
                         case 'lesson':
-                            // Fetch titles of all lessons related to the item_ids for 'lesson'
-                            $features['lessons'] = Lesson::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            // Fetch lesson titles and append them to the 'lessons' array
+                            $lessonTitles = Lesson::whereIn('id', [$itemId])->pluck('title')->toArray();
+                            $features['lessons'] = array_merge($features['lessons'], $lessonTitles);
                             break;
 
                         case 'video':
-                            // Fetch titles of all videos related to the item_ids for 'video'
-                            $features['videos'] = Video::whereIn('id', $itemIds)->pluck('title')->toArray() ?? [];
+                            // Fetch video titles and append them to the 'videos' array
+                            $videoTitles = Video::whereIn('id', [$itemId])->pluck('title')->toArray();
+                            $features['videos'] = array_merge($features['videos'], $videoTitles);
                             break;
 
                         default:
@@ -1613,8 +1625,7 @@ class StudentController extends Controller
             $data = [
                 'billing' => $billing,
                 'payment' => $payment,
-                'features'=> $features,
-                'subscriptionItems'=>$subscriptionItems
+                'features' => $features,
             ];
 
             // Return the response with status 200
@@ -1625,6 +1636,7 @@ class StudentController extends Controller
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
         }
     }
+
 
     
 
