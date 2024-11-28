@@ -1054,7 +1054,7 @@ class CmsController extends Controller
 
     public function pricingCategory($id){
         try {
-            $pricing = Plan::select('name','price')->where('category_id',$id)->where('status',1)->get();
+            $pricing = Plan::select('name','price','id')->where('category_id',$id)->where('status',1)->get();
             return response()->json(['status' => true, 'data' => $pricing], 200); 
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
@@ -1090,7 +1090,7 @@ class CmsController extends Controller
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.status' => 1,'exams.is_public' => 1])
-            ->whereIn('exam.id',$examIds)
+            ->whereIn('exams.id',$examIds)
             // ->where('exam_schedules.status', 1)
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id',)
             // 'exam_schedules.schedule_type',
@@ -1100,7 +1100,7 @@ class CmsController extends Controller
             // 'exam_schedules.end_time',
             // 'exam_schedules.grace_period'
             ->orderBy('exams.created_at', 'desc') 
-            ->havingRaw('COUNT(questions_count) > 0')
+            // ->havingRaw('COUNT(exam_schedules.id) > 0')
             ->get();
             return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
