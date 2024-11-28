@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 use App\Mail\ForgotPassword;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
+use App\Mail\WelcomeEmail;
 
 class AuthController extends Controller
 {
@@ -53,6 +54,17 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'status' => 1,
             ]);
+
+            try {
+                $data = [
+                    'student' => $request->full_name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'content' => ''
+                ];
+                Mail::to($request->email)->send(new WelcomeEmail($data));
+            } catch (\Throwable $th) {
+            }
 
             // Assign role to the user
             $user->assignRole('student');

@@ -52,7 +52,7 @@
         
         <p>If you have any questions or need help getting started, feel free to reach out to us at any time. We're here to assist you!</p>
 
-        <a href="[Link to get started]" class="button">Get Started</a>
+        <a href="https://www.wizam.com/" class="button">Get Started</a>
 
         <p>We look forward to helping you achieve [desired outcome from using your service]!</p>
 
