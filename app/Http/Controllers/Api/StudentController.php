@@ -1508,11 +1508,11 @@ class StudentController extends Controller
             ->get()
             ->map(function ($payment) {
                 return [
-                    'payment_id' => $payment->stripe_payment_id,
+                    'payment_id' => $payment->subscription->stripe_subscription_id,
                     'amount' => $payment->amount,
                     'currency' => $payment->currency,
                     'status' => $payment->status,
-                    'created_at' => Carbon::parse($payment->created_at)->format('Y-m-d'), // Format created_at
+                    'created_at' => Carbon::parse($payment->payment_date)->format('Y-m-d'), // Format created_at
                 ];
             });
     
