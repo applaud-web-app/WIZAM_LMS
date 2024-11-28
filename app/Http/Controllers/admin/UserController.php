@@ -477,7 +477,7 @@ class UserController extends Controller
                 ];
                 Mail::to($request->email)->send(new WelcomeEmail($data));
             } catch (\Throwable $th) {
-                // SKIP IF MAIL NOT SEND 
+               dd($th->getMessage());
             }
 
             // Assign roles
