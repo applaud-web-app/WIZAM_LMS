@@ -1460,13 +1460,17 @@ class StudentController extends Controller
     
             // Loop through subscriptions and mark the latest active one, others as ended
             $subscriptions = $subscriptions->map(function ($subscription) {
+
+                $formattedPurchaseDate = Carbon::parse($subscription->purchase_date)->format('Y/m/d');
+                $formattedEndsDate = Carbon::parse($subscription->ends_date)->format('Y/m/d');
+
                 return [
                     'id' => $subscription->subscription_id,
                     'type' => $subscription->subscription_type,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
-                    'purchase_date' => $subscription->purchase_date->format('Y/m/d'),
-                    'ends_date' => $subscription->ends_date->format('Y/m/d'),
+                    'purchase_date' => $formattedPurchaseDate,
+                    'ends_date' => $formattedEndsDate,
                     'status' => $subscription->status,
                 ];
             });
