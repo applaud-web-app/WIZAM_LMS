@@ -1157,7 +1157,7 @@ class StudentController extends Controller
                     }
 
                     $is_free = $practiceVideo->video->is_free;
-                    if(in_array($practiceVideo->category->id,$purchaseVideo)){
+                    if(in_array($practiceVideo->video->id,$purchaseVideo)){
                         $is_free = 1;
                     }
 
