@@ -990,5 +990,22 @@ class CmsController extends Controller
         }
     }
 
+    public function pricingCategory($id){
+        try {
+            $pricing = Plan::select('name','price')->where('category_id',$id)->where('status',1)->get();
+            return response()->json(['status' => true, 'data' => $pricing], 200); 
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function filterExam(){
+        try {
+            $pricing = Plan::select('name','price')->where('category_id',$id)->where('status',1)->get();
+            return response()->json(['status' => true, 'data' => $pricing], 200); 
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
 
 }

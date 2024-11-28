@@ -36,6 +36,10 @@ Route::get('site-setting', [CmsController::class, 'siteSetting']);
 Route::get('faq', [CmsController::class, 'faq']);
 
 Route::get('course', [CmsController::class, 'course']);
+Route::get('/pricing/{category}', [CmsController::class, 'pricingCategory']);
+Route::get('/filter-exam/{plan}', [CmsController::class, 'filterExam']);
+
+
 Route::get('course-exam-type', [CmsController::class, 'courseExamType']);
 
 Route::get('popular-exams', [CmsController::class, 'popularExams']);
@@ -70,7 +74,6 @@ Route::get('pricing',[CmsController::class, 'pricing']);
 // API Route
 // Route::middleware(['checkAuthToken'])->post('/logout', [AuthController::class, 'logout']);
 // Route::middleware(['checkAuthToken'])->get('/profile', [AuthController::class, 'profile']);
-
 
 // AUTHENTICATED API
 Route::middleware('checkAuthToken')->group(function () {
