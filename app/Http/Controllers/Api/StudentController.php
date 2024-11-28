@@ -1459,30 +1459,15 @@ class StudentController extends Controller
             $hasActive = false;
     
             // Loop through subscriptions and mark the latest active one, others as ended
-            $subscriptions = $subscriptions->map(function ($subscription) use ($currentDate, &$hasActive) {
-                // Convert dates to Carbon instances if they are not already
-                $purchaseDate = Carbon::parse($subscription->purchase_date);
-                $endsDate = Carbon::parse($subscription->ends_date);
-    
-                // Check if this is the first active subscription we encounter
-                if (!$hasActive && $endsDate > $currentDate && $subscription->subscription_status == 'complete') {
-                    $status = 'Active';
-                    $hasActive = true; // Mark that we've found the active subscription
-                } else {
-                    $status = 'Ended';
-                }
-
-                $allFeatures = ["practice","quizzes","lessons","videos","exams"];
-                $features = empty($subscription->features) ? $allFeatures : $subscription->features;
-
+            $subscriptions = $subscriptions->map(function ($subscription) {
                 return [
                     'id' => $subscription->subscription_id,
-                    'features' => $features,
+                    'type' => $subscription->subscription_type,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
                     'purchase_date' => $purchaseDate->format('Y-m-d'),
                     'ends_date' => $endsDate->format('Y-m-d'),
-                    'status' => $status,
+                    'status' => $subscription->status,
                 ];
             });
     
