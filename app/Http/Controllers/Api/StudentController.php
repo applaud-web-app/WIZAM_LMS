@@ -1194,6 +1194,9 @@ class StudentController extends Controller
                 'category' => 'required|integer'
             ]);
 
+            // Purchased video
+            $purchaseVideo = $this->getUserVideo($user->id);
+
             // Retrieve the video and its related skill
             $video = Video::with('skill')->where('slug', $slug)->where('status', 1)->first();
 
@@ -1210,42 +1213,13 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'error' => 'Video not found.'], 400);
             }
 
-            if($video->is_free == 0){
+            $is_free = $video->is_free == 1 ? "Free" : "Paid";
+            if(in_array($video->id,$purchaseVideo)){
+                $is_free = "Free";
+            }
 
-                $type = "videos";
-    
-                // Get the current date and time
-                $currentDate = now();
-    
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-    
-                // If no active subscription, return error
-                if (!$subscription) {
-                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-                }
-        
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-        
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-        
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // return response()->json(['status' => true, 'data' => $subscription], 200);
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-        
-                    // Check if the requested feature type is in the allowed features
-                    if (in_array($type, $allowed_features)) {
-                        // return response()->json(['status' => true, 'data' => $subscription], 200);
-                    } else {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                    }
-                }
+            if ($is_free === "Paid") {
+                return response()->json(['status' => false, 'error' => 'Please Purchase this video.'], 400);
             }
 
             // Prepare the video data to return (custom response format)
@@ -1253,7 +1227,7 @@ class StudentController extends Controller
                 'title' => $video->title,
                 'skill' => $video->skill->name ?? 'Unknown Skill',  // Return skill name if available
                 'watch_time' => $video->watch_time,
-                'is_free' => $video->is_free == 1 ? "Free" : "Paid",
+                'is_free' => $is_free,
                 'level' => $video->level,
                 'tags' => $video->tags,
                 'thumbnail' => $video->thumbnail,
@@ -1281,6 +1255,7 @@ class StudentController extends Controller
             // Get the authenticated user
             $user = $request->attributes->get('authenticatedUser');
 
+            // Pruchase Lesson
             $purchaseLesson = $this->getUserLesson($user->id);
 
             // Get practice lesson with related skill and lesson data
@@ -1340,6 +1315,9 @@ class StudentController extends Controller
                 'category' => 'required|integer'
             ]);
 
+            // Pruchase Lesson
+            $purchaseLesson = $this->getUserLesson($user->id);
+
             // Retrieve the lesson and its related skill
             $lesson = Lesson::with('skill')->where('slug', $slug)->where('status', 1)->first();
 
@@ -1356,42 +1334,13 @@ class StudentController extends Controller
                 return response()->json(['status' => false, 'error' => 'Lesson not found.'], 400);
             }
 
-            if($lesson->is_free == 0){
+            $is_free = $lesson->is_free == 1 ? "Free" : "Paid";
+            if(in_array($lesson->id,$purchaseLesson)){
+                $is_free = "Free";
+            }
 
-                $type = "lessons";
-    
-                // Get the current date and time
-                $currentDate = now();
-    
-                // Fetch the user's active subscription
-                $subscription = Subscription::with('plans')->where('user_id', $user->id)->where('stripe_status', 'complete')->where('ends_at', '>', $currentDate)->latest()->first();
-    
-                // If no active subscription, return error
-                if (!$subscription) {
-                    return response()->json(['status' => false, 'error' => 'Please buy a subscription to access this course.'], 404);
-                }
-        
-                // Fetch the plan related to this subscription
-                $plan = $subscription->plans;
-        
-                if (!$plan) {
-                    return response()->json(['status' => false, 'error' => 'No associated plan found for this subscription.'], 404);
-                }
-        
-                // Check if the plan allows unlimited access
-                if ($plan->feature_access == 1) {
-                    // return response()->json(['status' => true, 'data' => $subscription], 200);
-                } else {
-                    // Fetch the allowed features for this plan
-                    $allowed_features = json_decode($plan->features, true);
-        
-                    // Check if the requested feature type is in the allowed features
-                    if (in_array($type, $allowed_features)) {
-                        // return response()->json(['status' => true, 'data' => $subscription], 200);
-                    } else {
-                        return response()->json(['status' => false, 'error' => 'Feature not available in your plan. Please upgrade your subscription.'], 403);
-                    }
-                }
+            if ($lesson->is_free === "Paid") {
+                return response()->json(['status' => false, 'error' => 'Please Purhcase this Lesson.'], 400);
             }
 
             // Prepare the lesson data to return (custom response format)
@@ -1399,7 +1348,7 @@ class StudentController extends Controller
                 'title' => $lesson->title,
                 'skill' => $lesson->skill->name ?? 'Unknown Skill',  // Return skill name if available
                 'read_time' => $lesson->read_time,
-                'is_free' => $lesson->is_free == 1 ? "Free" : "Paid",
+                'is_free' => $is_free,
                 'level' => $lesson->level,
                 'tags' => $lesson->tags,
                 'description' => $lesson->description,
