@@ -106,7 +106,7 @@
                <select id="difficulty" name="difficulty" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
                     <option disabled selected>Select Difficulty</option>
                      @if ($question->level == null)
-                        @php $question->level == "easy"; @endphp
+                        @php $question->level = "easy"; @endphp
                      @endif
                     <option value="very_easy" {{$question->level == "very_easy" ? 'selected' : ''}}>Very Easy</option>
                     <option value="easy" {{$question->level == "easy" ? 'selected' : ''}}>Easy</option>
