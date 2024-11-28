@@ -274,7 +274,7 @@
                                <input type="radio" id="option-${optionCount}" name="correctOption" class="custom-control-input" value="${optionCount + 1}">
                                <label for="option-${optionCount}" class="custom-control-label">Correct Answer</label>
                            </div>
-                           <div class="flex  sm:justify-end gap-2">
+                           <div class="flex gap-2">
                                <button type="button" class="removeOption text-red-500 hover:text-red-700">Remove</button>
                            </div>
                        </div>
