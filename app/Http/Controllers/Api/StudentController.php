@@ -1566,7 +1566,7 @@ class StudentController extends Controller
             $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
             $features = [];
             if($payment){
-                $subscriptionItems = SubscriptionItem::where('subscription_id',$payment->subscription_id)->get()->groupBy('item_type');
+                $subscriptionItems = SubscriptionItem::where('subscription_id',$payment->subscription_id)->pluck('item_type','item_id')->groupBy('item_type');
                 foreach ($subscriptionItems as $type => $ids) {
                    switch ($type) {
                     case 'exam':
