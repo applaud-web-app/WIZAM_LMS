@@ -37,8 +37,6 @@ Route::get('faq', [CmsController::class, 'faq']);
 
 Route::get('course', [CmsController::class, 'course']);
 Route::get('/pricing/{category}', [CmsController::class, 'pricingCategory']);
-Route::get('/filter-exam/{plan}', [CmsController::class, 'filterExam']);
-
 
 Route::get('course-exam-type', [CmsController::class, 'courseExamType']);
 
@@ -49,7 +47,7 @@ Route::get('/resource/{slug}', [CmsController::class, 'resourceDetail']);
 Route::get('/resource/archive/{slug}', [CmsController::class, 'resourceArchive']);
 
 // FOR PAGES
-Route::get('exams', [CmsController::class, 'exams']);
+Route::get('exams/{catgeory}/{plan}', [CmsController::class, 'exams']);
 Route::get('resource', [CmsController::class, 'resources']);
 
 // DYNAMIC PAGES
