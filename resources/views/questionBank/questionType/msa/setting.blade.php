@@ -105,6 +105,9 @@
                <label for="difficulty" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Difficulty Level <span class="text-red-500">*</span></label>
                <select id="difficulty" name="difficulty" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
                     <option disabled selected>Select Difficulty</option>
+                     @if ($question->level == null)
+                        @php $question->level == "easy"; @endphp
+                     @endif
                     <option value="very_easy" {{$question->level == "very_easy" ? 'selected' : ''}}>Very Easy</option>
                     <option value="easy" {{$question->level == "easy" ? 'selected' : ''}}>Easy</option>
                     <option value="medium" {{$question->level == "medium" ? 'selected' : ''}}>Medium</option>
@@ -116,13 +119,22 @@
             <!-- Default Marks/Grade Points -->
             <div class="mb-[20px]">
                <label for="marks" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Default Marks/Grade Points <span class="text-red-500">*</span></label>
-               <input id="marks" name="default_grade" type="number" value="@isset($question->default_marks){{$question->default_marks}}@endisset" step="0.01" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter default marks/points" />
+               @php $defaultMark = 1 @endphp
+               @if (isset($question->default_marks))
+                  @php $defaultMark = $question->default_marks @endphp
+               @endif
+               {{-- @isset($question->default_marks){{$question->default_marks}}@endisset --}}
+               <input id="marks" name="default_grade" type="number" value="{{$defaultMark}}" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter default marks/points" />
             </div>
 
             <!-- Default Time To Solve (Seconds) -->
             <div class="mb-[20px]">
                <label for="time_to_solve" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Default Time To Solve (Seconds) <span class="text-red-500">*</span></label>
-               <input id="time_to_solve" value="@isset($question->watch_time){{$question->watch_time}}@endisset" name="solve_time" type="number" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter default time in seconds" />
+               @php $defaultTime = 60 @endphp
+               @if (isset($question->watch_time))
+                  @php $defaultTime = $question->watch_time @endphp
+               @endif
+               <input id="time_to_solve" value="{{$defaultTime}}" name="solve_time" type="number" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none placeholder:text-[#A0A0A0] text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary" placeholder="Enter default time in seconds" />
             </div>
 
             <!-- Status (Radio buttons) -->
