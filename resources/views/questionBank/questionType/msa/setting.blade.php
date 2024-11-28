@@ -68,6 +68,19 @@
       <div class="p-[25px]">
          <form action="{{url()->full()}}" method="POST" enctype="multipart/form-data" id="addSetting">
             @csrf
+            <!-- Topic (Dropdown) -->
+            <div class="mb-[20px]">
+               <label for="topic" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Topic <span class="text-red-500">*</span></label>
+               <select id="topic" name="topic" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
+                    <option selected disabled>Select Topic</option>
+                    @isset($topic)
+                        @foreach ($topic as $item)
+                                <option value="{{$item->id}}" @isset($question->topic_id) {{$question->topic_id == $item->id ? "selected" : ""}}@endisset>{{$item->name}}</option>
+                        @endforeach
+                    @endisset
+               </select>
+            </div>
+            
             <!-- Skill (Dropdown) -->
             <div class="mb-[20px]">
                <label for="skill" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Skill <span class="text-red-500">*</span></label>
@@ -81,18 +94,6 @@
                </select>
             </div>
 
-            <!-- Topic (Dropdown) -->
-            <div class="mb-[20px]">
-               <label for="topic" class="block text-sm font-medium text-body dark:text-title-dark mb-[5px]">Topic <span class="text-red-500">*</span></label>
-               <select id="topic" name="topic" required class="w-full rounded-4 border-1 border-normal text-[15px] dark:bg-box-dark-up dark:border-box-dark-up px-[20px] py-[12px] outline-none text-body dark:text-subtitle-dark focus:ring-primary focus:border-primary">
-                    <option selected disabled>Select Topic</option>
-                    @isset($topic)
-                        @foreach ($topic as $item)
-                                <option value="{{$item->id}}" @isset($question->topic_id) {{$question->topic_id == $item->id ? "selected" : ""}}@endisset>{{$item->name}}</option>
-                        @endforeach
-                    @endisset
-               </select>
-            </div>
 
             <!-- Tags (Dropdown, multiple select) -->
             <div class="col-span-12 mb-[20px]">
