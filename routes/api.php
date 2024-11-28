@@ -47,7 +47,8 @@ Route::get('/resource/{slug}', [CmsController::class, 'resourceDetail']);
 Route::get('/resource/archive/{slug}', [CmsController::class, 'resourceArchive']);
 
 // FOR PAGES
-Route::get('exams/{catgeory}/{plan}', [CmsController::class, 'exams']);
+Route::get('exam-filter/{catgeory}/{plan}', [CmsController::class, 'exams']);
+Route::get('exams', [CmsController::class, 'exams']);
 Route::get('resource', [CmsController::class, 'resources']);
 
 // DYNAMIC PAGES

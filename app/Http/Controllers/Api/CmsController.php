@@ -249,14 +249,8 @@ class CmsController extends Controller
         }
     }
 
-    public function exams($category,$plan){
+    public function exams(){
         try {
-
-            $plan = Plan::where('id',$plan)->where('category_id',$category)->first();
-            if(!$plan){
-                $exams = [];
-                return response()->json(['status'=> true,'data' => $exams], 201);
-            }
             $exams = Exam::select(
                 'exams.img_url', 
                 'exams.title', 
@@ -267,6 +261,12 @@ class CmsController extends Controller
                 'exams.exam_duration',
                 'exams.exam_type_id',
                 'exams.subcategory_id',
+                // 'exam_schedules.schedule_type',
+                // 'exam_schedules.start_date',
+                // 'exam_schedules.start_time',
+                // 'exam_schedules.end_date',
+                // 'exam_schedules.end_time',
+                // 'exam_schedules.grace_period'
             )
             // ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
             ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
@@ -274,7 +274,6 @@ class CmsController extends Controller
             ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
             ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
             ->where(['exams.status' => 1,'exams.is_public' => 1])
-            ->whereIn('exam.id',$plan->exams)
             // ->where('exam_schedules.status', 1)
             ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id',)
             // 'exam_schedules.schedule_type',
@@ -1000,12 +999,46 @@ class CmsController extends Controller
         }
     }
 
-    public function filterExam(){
+    public function filterExam($category,$plan){
         try {
-            $pricing = Plan::select('name','price')->where('category_id',$id)->where('status',1)->get();
-            return response()->json(['status' => true, 'data' => $pricing], 200); 
+
+            $plan = Plan::where('id',$plan)->where('category_id',$category)->first();
+            if(!$plan){
+                $exams = [];
+                return response()->json(['status'=> true,'data' => $exams], 201);
+            }
+            $exams = Exam::select(
+                'exams.img_url', 
+                'exams.title', 
+                'exams.description', 
+                'exams.price', 
+                'exams.is_free', 
+                'exams.slug', 
+                'exams.exam_duration',
+                'exams.exam_type_id',
+                'exams.subcategory_id',
+            )
+            // ->join('exam_schedules', 'exams.id', '=', 'exam_schedules.exam_id')
+            ->leftJoin('exam_questions', 'exams.id', '=', 'exam_questions.exam_id') // Join with exam_questions
+            ->leftJoin('questions', 'exam_questions.question_id', '=', 'questions.id') // Join with questions
+            ->selectRaw('COUNT(questions.id) as questions_count') // Count of questions
+            ->selectRaw('SUM(CAST(questions.default_marks AS DECIMAL)) as total_marks') // Sum of default_marks
+            ->where(['exams.status' => 1,'exams.is_public' => 1])
+            ->whereIn('exam.id',$plan->exams)
+            // ->where('exam_schedules.status', 1)
+            ->groupBy('exams.id', 'exams.img_url', 'exams.title', 'exams.description', 'exams.price', 'exams.is_free', 'exams.slug', 'exams.exam_duration','exams.exam_type_id','exams.subcategory_id',)
+            // 'exam_schedules.schedule_type',
+            // 'exam_schedules.start_date',
+            // 'exam_schedules.start_time',
+            // 'exam_schedules.end_date',
+            // 'exam_schedules.end_time',
+            // 'exam_schedules.grace_period'
+            ->orderBy('exams.created_at', 'desc') 
+            // ->havingRaw('COUNT(exam_schedules.id) > 0')
+            ->get();
+            return response()->json(['status'=> true,'data' => $exams], 201);
         } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+            return response()->json(['status'=> false,'error' => $th->getMessage()], 500);
         }
     }
 
