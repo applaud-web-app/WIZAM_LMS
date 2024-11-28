@@ -1563,12 +1563,44 @@ class StudentController extends Controller
             ->first();
 
             // Retrieve the most recent subscription for the user
-            $payment = Payment::where('user_id', $user->id)->where('stripe_payment_id', $paymentId)->first();
+            $payment = Payment::where('user_id', $user->id)->where('id', $paymentId)->first();
+            $features = [];
+            if($payment){
+                $subscriptionItems = SubscriptionItem::where('subscription_id',$payment->subscription_id)->get()->groupBy('item_type');
+                foreach ($subscriptionItems as $type => $ids) {
+                   switch ($type) {
+                    case 'exam':
+                        $features['exams'] = Exam::where('id',$ids)->pluck('title')->toArray() ?? [];
+                        break;
+
+                    case 'quizze':
+                        $features['quizzes'] = Quizze::where('id',$ids)->pluck('title')->toArray() ?? [];
+                        break;
+
+                    case 'practice':
+                        $features['practices'] = PracticeSet::where('id',$ids)->pluck('title')->toArray() ?? [];
+                        break;
+
+                    case 'lesson':
+                        $features['lessons'] = Lesson::where('id',$ids)->pluck('title')->toArray() ?? [];
+                        break;
+
+                    case 'video':
+                        $features['videos'] = Video::where('id',$ids)->pluck('title')->toArray() ?? [];
+                        break;
+                    
+                    default:
+                        # code...
+                        break;
+                   }
+                }
+            }
 
             // Prepare the response data
             $data = [
                 'billing' => $billing,
-                'payment' => $payment
+                'payment' => $payment,
+                'features'=> $features
             ];
 
             // Return the response with status 200
