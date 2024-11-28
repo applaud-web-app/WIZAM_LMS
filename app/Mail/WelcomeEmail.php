@@ -28,7 +28,7 @@ class WelcomeEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: ' : Welcome '.$this->data['student'].' to '.env('APP_NAME'),
+            subject: ' : Welcome '.$this->data['student'].' to '.env('MAIL_FROM_NAME'),
         );
     }
     /**
