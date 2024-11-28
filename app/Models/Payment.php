@@ -22,4 +22,8 @@ class Payment extends Model
     public function user(){
         return $this->hasOne(User::class, 'id', 'user_id');
     }
+
+    public function subscription(){
+        return $this->hasOne(Subscription::class, 'id', 'subscription_id');
+    }
 }
