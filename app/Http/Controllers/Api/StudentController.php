@@ -1135,8 +1135,11 @@ class StudentController extends Controller
 
             // Get practice videos with related skill and video data
             $practiceVideos = PracticeVideo::with('skill', 'video')
-                ->where('subcategory_id', $request->category)
-                ->get();
+            ->where('subcategory_id', $request->category)
+            ->get();
+
+            // Purchased video
+            $purchaseVideo = $this->getUserVideo($user->id);
 
             // Initialize an empty array to hold the grouped data
             $groupedData = [];
@@ -1153,6 +1156,11 @@ class StudentController extends Controller
                         $groupedData[$skillName] = [];
                     }
 
+                    $is_free = $practiceVideo->video->is_free;
+                    if(in_array($practiceVideo->category->id,$purchaseVideo)){
+                        $is_free = 1;
+                    }
+
                     // Add the video data to the respective skill group
                     $groupedData[$skillName][] = [
                         'video_syllabus' => $practiceVideo->category->name,
@@ -1160,7 +1168,7 @@ class StudentController extends Controller
                         'video_slug' => $practiceVideo->video->slug,
                         'video_level' => $practiceVideo->video->level,
                         'video_watch_time' => $practiceVideo->video->watch_time,
-                        'is_free' => $practiceVideo->video->is_free,
+                        'is_free' => $is_free,
                     ];
                 }
             }
