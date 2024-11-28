@@ -1267,18 +1267,24 @@ class StudentController extends Controller
                 'category' => 'required|integer'
             ]);
 
+            // Get the authenticated user
+            $user = $request->attributes->get('authenticatedUser');
+
+            $purchaseLesson = $this->getUserLesson($user->id);
+
             // Get practice lesson with related skill and lesson data
             $practiceLessons = PracticeLesson::with('skill', 'lesson')
-                ->where('subcategory_id', $request->category)
-                ->get();
+            ->where('subcategory_id', $request->category)
+            ->get();
 
             // Initialize an empty array to hold the grouped data
             $groupedData = [];
-
+            
             // Iterate over each practice lesson
             foreach ($practiceLessons as $practiceLesson) {
                 // Ensure both skill and lesson exist (status is already handled in the relationship)
                 if ($practiceLesson->skill && $practiceLesson->lesson && $practiceLesson->category) {
+
                     // Get the skill name (or use an ID if there's no specific skill name)
                     $skillName = $practiceLesson->skill->name ?? 'Unknown Skill';
 
@@ -1287,9 +1293,15 @@ class StudentController extends Controller
                         $groupedData[$skillName] = [];
                     }
 
+                    $isFree = $practiceLesson->lesson->is_free;
+                    if(in_array($practiceLesson->lesson->id,$purchaseLesson)){
+                        $isFree = 1;
+                    }
+
                     // Add the lesson data to the respective skill group
                     $groupedData[$skillName][] = [
                         'lesson_syllabus' => $practiceLesson->category->name,
+                        'lesson_free' => $isFree,
                         'lesson_title' => $practiceLesson->lesson->title,
                         'lesson_slug' => $practiceLesson->lesson->slug,
                         'lesson_level' => $practiceLesson->lesson->level,
