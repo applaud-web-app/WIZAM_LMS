@@ -1465,8 +1465,8 @@ class StudentController extends Controller
                     'type' => $subscription->subscription_type,
                     'plan_name' => $subscription->plan_name,
                     'plan_price' => $subscription->plan_price,
-                    'purchase_date' => $purchaseDate->format('Y-m-d'),
-                    'ends_date' => $endsDate->format('Y-m-d'),
+                    'purchase_date' => $subscription->purchase_date->format('Y/m/d'),
+                    'ends_date' => $subscription->ends_date->format('Y/m/d'),
                     'status' => $subscription->status,
                 ];
             });
