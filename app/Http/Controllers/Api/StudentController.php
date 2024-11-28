@@ -1568,9 +1568,8 @@ class StudentController extends Controller
 
             if ($payment) {
                 // Get subscription items grouped by 'item_type'
-                $subscriptionItems = SubscriptionItem::where('subscription_id', $payment->subscription_id)
-                                                    ->pluck('item_type', 'item_id')
-                                                    ->groupBy('item_type');
+                $subscriptionItems = SubscriptionItem::select('item_type','item_id')->where('subscription_id', $payment->subscription_id)
+                                                    ->get();
                 
                 // Loop through each item type and fetch corresponding titles
                 foreach ($subscriptionItems as $type => $ids) {
