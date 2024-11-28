@@ -586,6 +586,68 @@ class CmsController extends Controller
         }
     }
 
+    public function popularPricing(){
+        try {
+            
+            $pricing = Plan::join('sub_categories', 'plans.category_id', '=', 'sub_categories.id')
+            ->select(
+                'plans.id',
+                'plans.name',
+                'plans.price_type',
+                'plans.duration',
+                'plans.price',
+                'plans.discount',
+                'plans.description',
+                'plans.sort_order',
+                'plans.exams',
+                'plans.quizzes',
+                'plans.practices',
+                'plans.videos',
+                'plans.lessons',
+                'plans.popular',
+                'sub_categories.name as category_name',
+                'plans.stripe_product_id',
+                'plans.stripe_price_id'
+            )
+            ->where('plans.status', 1) // Only fetch active plans
+            ->where('plans.popular', 1) // Only fetch active plans
+            ->get();
+
+            // Map each plan to fetch exam, quiz, lesson, and practice names
+            $pricing->map(function ($plan) {
+                // Fetch Exam Names
+                $examIds = json_decode($plan->exams); // Assuming JSON array like ["3", "4", "5"]
+                $plan->exam_names = $examIds ? Exam::whereIn('id', $examIds)->pluck('title')->toArray() : [];
+
+                // Fetch Quiz Names
+                $quizIds = json_decode($plan->quizzes); // Assuming JSON array like ["1", "2"]
+                $plan->quiz_names = $quizIds ? Quizze::whereIn('id', $quizIds)->pluck('title')->toArray() : [];
+
+                // Fetch Lesson Names
+                $lessonIds = json_decode($plan->lessons); // Assuming JSON array like ["8", "9"]
+                $plan->lesson_names = $lessonIds ? Lesson::whereIn('id', $lessonIds)->pluck('title')->toArray() : [];
+
+                // Fetch Practice Names
+                $practiceIds = json_decode($plan->practices); // Assuming JSON array like ["10", "11"]
+                $plan->practice_names = $practiceIds ? PracticeSet::whereIn('id', $practiceIds)->pluck('title')->toArray() : [];
+
+                return $plan;
+            });
+
+            // Prepare response data
+            $data = [
+                'pricing' => $pricing,
+                'customer_id' => $userID ?? null
+            ];
+    
+            // Return response with data
+            return response()->json(['status' => true, 'data' => $data], 200);
+        } catch (\Throwable $th) {
+            // Handle exceptions and return error response
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
     // WORKING
     // public function createCheckoutSession(Request $request) {
     //     try {

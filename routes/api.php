@@ -46,6 +46,9 @@ Route::get('latest-resources', [CmsController::class, 'latestResources']);
 Route::get('/resource/{slug}', [CmsController::class, 'resourceDetail']);
 Route::get('/resource/archive/{slug}', [CmsController::class, 'resourceArchive']);
 
+
+Route::get('popular-pricing', [CmsController::class, 'popularPricing']);
+
 // FOR PAGES
 Route::get('exam-filter/{catgeory}/{plan}', [CmsController::class, 'exams']);
 Route::get('exams', [CmsController::class, 'exams']);
