@@ -190,7 +190,7 @@
 
             <!-- Add More Button -->
             <div class="mb-[20px]">
-               <button type="button" id="addMoreOptions" class="px-[14px] text-sm text-white rounded-md bg-secondary border-secondary h-10 gap-[6px] transition-[0.3s]">Add More</button>
+               <button type="button" id="addMoreOptions" class="px-[14px] text-sm text-white rounded-md bg-secondary border-secondary h-10 gap-[6px] transition-[0.3s]"><i class="uil uil-plus"></i></button>
             </div>
 
             <!-- Buttons -->
