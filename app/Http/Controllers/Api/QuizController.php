@@ -570,345 +570,6 @@ class QuizController extends Controller
             'unanswered' => $unanswered
         ]);
     }
-
-
-    // public function quizResult(Request $request, $uuid)
-    // {
-    //    try {
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         $quizResult = QuizResult::with('quiz')->where('uuid',$uuid)->where('user_id',$user->id)->first();
-    //         if($quizResult){
-    //             $leaderBoard = [];
-    //             if(isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1){
-    //                 $userQuiz = QuizResult::with('user')->where('quiz_id',$quizResult->quiz_id)->orderby('student_percentage','DESC')->take(10)->get();
-
-    //                 foreach ($userQuiz as $userData) {
-    //                     if (isset($userData->user)) {
-    //                         $leaderBoard[] = [
-    //                             "username"=> $users->user->name,
-    //                             "score"=>  $userQuiz->student_percentage,
-    //                             "status"=>  $userQuiz->student_percentage >= $userQuiz->pass_percentage ? "PASS" : "FAIL"
-    //                         ];
-    //                     }
-    //                 }
-    //             }
-
-    //             $result = [
-    //                 'correct' => $quizResult->correct_answer,
-    //                 'incorrect' => $quizResult->incorrect_answer,
-    //                 'skippedr' => $quizResult->total_question - ($quizResult->correct_answer+$quizResult->incorrect_answer),
-    //                 'marks' => $quizResult->student_percentage,
-    //                 'status'=> $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-    //             ];
-
-    //             // EXAM (HERE IS THE CODE WHICH SHOW WHICH ANSWER IS CORRECT AND WHICH ANSWER IS WRONG )
-    //             $exam = [];
-
-    //             // Return results
-    //             return response()->json([
-    //                 'status' => true,
-    //                 'result' => $result,
-    //                 'exam_preview'=> $exam,
-    //                 'leaderBoard'=> $leaderBoard
-    //             ]);
-    //         }
-    //    } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Something Went Wrong'
-    //         ]);
-    //    }
-
-    // }
-
-
-    // public function quizResult(Request $request, $uuid)
-    // {
-    //     try {
-    //         $user = $request->attributes->get('authenticatedUser');
-
-    //         $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
-    //         if ($quizResult) {
-    //             // Build leaderboard
-    //             $leaderBoard = [];
-    //             if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
-    //                 $userQuiz = QuizResult::with('user')
-    //                     ->where('quiz_id', $quizResult->quiz_id)
-    //                     ->orderby('student_percentage', 'DESC')
-    //                     ->take(10)
-    //                     ->get();
-
-    //                 foreach ($userQuiz as $userData) {
-    //                     if (isset($userData->user)) {
-    //                         $leaderBoard[] = [
-    //                             "username" => $userData->user->name,
-    //                             "score" => $userData->student_percentage,
-    //                             "status" => $userData->student_percentage >= $userData->pass_percentage ? "PASS" : "FAIL",
-    //                         ];
-    //                     }
-    //                 }
-    //             }
-
-    //             // Build result
-    //             $result = [
-    //                 'correct' => $quizResult->correct_answer,
-    //                 'incorrect' => $quizResult->incorrect_answer,
-    //                 'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
-    //                 'marks' => $quizResult->student_percentage,
-    //                 'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-    //             ];
-
-    //             // Exam (Compare user answers with correct answers and create a detailed review)
-    //             // $exam = [];
-    //             // foreach ($quizResult->quiz->questions as $question) {
-    //             //     $exam[] = [
-    //             //         'question_id' => $question->id,
-    //             //         'question_text' => $question->question,
-    //             //         'correct_answer' => $question->answer,
-    //             //         'user_answer' => $quizResult->answers[$question->id] ?? null,
-    //             //         'is_correct' => ($quizResult->answers[$question->id] ?? null) == $question->answer,
-    //             //     ];
-    //             // }
-
-    //             $exam = [];
-    //             $questionBox = json_decode($quizResult->questions);
-    //             $correct_answers = json_decode($quizResult->correct_answers);
-    //             $userAnswers = json_decode($quizResult->answers);
-
-    //             return [
-    //                 'questionBox'=>$questionBox,
-    //                 'userAnswers'=>$userAnswers,
-    //                 'correct_answers'=>$correct_answers,
-    //             ];
-
-    //             foreach ($questionBox as $question) {
-    //                 $userAnswer = $userAnswers[$question->id] ?? null;
-    //                 $correctAnswer = $question['option'];
-    //                 $isCorrect = false;
-
-    //                 // Handle different question types
-    //                 switch ($question['type']) {
-    //                     case 'FIB': // Fill in the Blanks
-    //                         // Check if userAnswer is same as correct answer
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-
-    //                     case 'MSA': // Multiple Selection Answer
-    //                         // Check if userAnswer (which could be an array of selected choices) matches correctAnswer
-    //                         $isCorrect = is_array($userAnswer) && !array_diff($userAnswer, $correctAnswer);
-    //                         break;
-
-    //                     case 'MMA': // Multiple Match Answer
-    //                         // Assuming correctAnswer and userAnswer are arrays, compare them
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-
-    //                     case 'TOF': // True/False
-    //                         // Check if the true/false answer matches
-    //                         $isCorrect = $userAnswer == $correctAnswer;
-    //                         break;
-
-    //                     case 'MTF': // Match the Following
-    //                         // Compare match answers by checking each pair
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-
-    //                     case 'ORD': // Ordering
-    //                         // Check if the ordering is correct
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-
-    //                     case 'EMQ': // Extended Matching Questions
-    //                         // Compare EMQ answers
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-
-    //                     case 'SAQ': // Short Answer Question
-    //                         // Check if user's short answer matches the correct one
-    //                         $isCorrect = $userAnswer === $correctAnswer;
-    //                         break;
-    //                 }
-
-    //                 // Append the result for this question to the exam array
-    //                 $exam[] = [
-    //                     'question_id' => $question['id'],
-    //                     'question_text' => $question['question'],
-    //                     'correct_answer' => $correctAnswer,
-    //                     'user_answer' => $userAnswer,
-    //                     'is_correct' => $isCorrect,
-    //                 ];
-    //             }
-
-    //             $quiz = [
-    //                 'title'=>$quizResult->quiz->title,
-    //                 'duration'=>$quizResult->exam_duration,
-    //             ];
-
-    //             return response()->json([
-    //                 'status' => true,
-    //                 'quiz'=>$quiz,
-    //                 'result' => $result,
-    //                 'exam_preview' => $exam,
-    //                 'leaderBoard' => $leaderBoard,
-    //             ]);
-    //         }
-
-    //     } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Something went wrong :'. $th->getMessage(),
-    //         ]);
-    //     }
-    // }
-
-    // WORKING BUT REPLACE WITH NEW LOGIC
-    // public function quizResult(Request $request, $uuid)
-    // {
-    //     try {
-    //         $user = $request->attributes->get('authenticatedUser');
-    
-    //         $quizResult = QuizResult::with('quiz')->where('uuid', $uuid)->where('user_id', $user->id)->first();
-    //         if ($quizResult) {
-    //             // Build leaderboard
-    //             $leaderBoard = [];
-    //             if (isset($quizResult->quiz) && $quizResult->quiz->leaderboard == 1) {
-    //                 $userQuiz = QuizResult::with('user')
-    //                     ->where('quiz_id', $quizResult->quiz_id)
-    //                     ->orderby('student_percentage', 'DESC')
-    //                     ->take(10)
-    //                     ->get();
-    
-    //                 foreach ($userQuiz as $userData) {
-    //                     if (isset($userData->user)) {
-    //                         $leaderBoard[] = [
-    //                             "username" => $userData->user->name,
-    //                             "score" => $userData->student_percentage,
-    //                             "status" => $userData->student_percentage >= $userData->pass_percentage ? "PASS" : "FAIL",
-    //                         ];
-    //                     }
-    //                 }
-    //             }
-
-    //             $openTime = Carbon::parse($quizResult->created_at);
-    //             $closeTime = Carbon::parse($quizResult->updated_at);
-                
-    //             $timeTakenInMinutes = round($openTime->diffInMinutes($closeTime));
-
-    //             // Build result
-    //             $result = [
-    //                 'correct' => $quizResult->correct_answer,
-    //                 'incorrect' => $quizResult->incorrect_answer,
-    //                 'skipped' => $quizResult->total_question - ($quizResult->correct_answer + $quizResult->incorrect_answer),
-    //                 'marks' => $quizResult->student_percentage,
-    //                 'status' => $quizResult->student_percentage >= $quizResult->pass_percentage ? "PASS" : "FAIL",
-    //                 'timeTaken' => $timeTakenInMinutes
-    //             ];
-    
-    //             // Process exam details (Compare user answers with correct answers)
-    //             $exam = [];
-    //             $questionBox = json_decode($quizResult->questions);
-    //             $correct_answers = json_decode($quizResult->correct_answers, true);
-    //             $userAnswers = json_decode($quizResult->answers, true);
-
-    //             foreach ($questionBox as $question) {
-    //                 // Get the user answer for the current question by matching the IDs
-    //                 $userAnswer = collect($userAnswers)->firstWhere('id', $question->id);
-    //                 $correctAnswer = collect($correct_answers)->firstWhere('id', $question->id);
-    //                 $isCorrect = false;
-
-    //                 $user_answ = isset($userAnswer['answer']) ? $userAnswer['answer'] : null;
-    //                 $correct_answ = isset($correctAnswer['correct_answer']) ? $correctAnswer['correct_answer'] : null;
-                
-    //                 // Ensure correctAnswer is an array when needed
-    //                 switch ($question->type) {
-    //                     case 'FIB':
-    //                         $correct_answ = json_decode($correctAnswer['correct_answer']);
-    //                         $isCorrect = $user_answ == $correct_answ;
-    //                         break;
-    //                     case 'MSA':
-    //                         $correct_answ = $correctAnswer['correct_answer'];
-    //                         $isCorrect = $user_answ == $correct_answ;
-    //                         break;
-    //                     case 'MMA':
-    //                         $correct_answ = json_decode($correctAnswer['correct_answer']);
-    //                         sort($user_answ);
-    //                         sort($correct_answ);
-    //                         $isCorrect = $user_answ == $correct_answ;
-    //                         break;
-    //                     case 'TOF':
-    //                         $correct_answ = $correctAnswer['correct_answer'];
-    //                         $isCorrect = $user_answ == $correct_answ;
-    //                         break;
-    //                     case 'MTF':
-    //                         $isCorrect = true;
-    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
-    //                         foreach ($correct_answ as $key => $value) {
-    //                             if ($user_answ[$key] != $value) {
-    //                                 $isCorrect = false;
-    //                                 break;
-    //                             }
-    //                         }
-    //                         break;
-    //                     case 'ORD':
-    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
-    //                         $isCorrect = $user_answ === $correct_answ;
-    //                         break;
-    //                     case 'EMQ':
-    //                         $correct_answ = json_decode($correctAnswer['correct_answer'],true);
-    //                         $isCorrect = $user_answ === $correct_answ;
-    //                         break;
-    //                     case 'SAQ': 
-    //                         $correct_answ = $question->options;
-    //                         $options = $question->options; // array
-    //                         // Loop through each option and compare after sanitizing HTML
-    //                         foreach ($options as $option) {
-    //                             // Strip HTML tags and extra spaces from both user answer and the option
-    //                             $sanitizedUserAnswer = trim(strip_tags($user_answ));
-    //                             $sanitizedOption = trim(strip_tags($option));
-
-    //                             // Check if the sanitized user answer matches any sanitized option
-    //                             if ($sanitizedUserAnswer === $sanitizedOption) {
-    //                                 $isCorrect = true;
-    //                                 break;
-    //                             }
-    //                         }
-    //                         break;
-    //                 }
-                
-
-    //                 $exam[] = [
-    //                     'question_id' => $question->id,
-    //                     'question_type' => $question->type,
-    //                     'question_text' => $question->question,
-    //                     'question_option' => $question->options,
-    //                     'correct_answer' => $correct_answ ?? null,
-    //                     'user_answer' => $user_answ ?? null,  // Handle case where there's no user answer
-    //                     'is_correct' => $isCorrect,
-    //                 ];
-    //             }
-    
-    //             $quiz = [
-    //                 'title' => $quizResult->quiz->title,
-    //                 'duration' => $quizResult->exam_duration,
-    //             ];
-    
-    //             return response()->json([
-    //                 'status' => true,
-    //                 'quiz' => $quiz,
-    //                 'result' => $result,
-    //                 'exam_preview' => $exam,
-    //                 'leaderBoard' => $leaderBoard,
-    //             ]);
-    //         }
-    
-    //     } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Something went wrong: '. $th->getMessage(),
-    //         ]);
-    //     }
-    // }
     
     public function quizResult(Request $request, $uuid)
     {
@@ -978,12 +639,6 @@ class QuizController extends Controller
                     // Ensure correctAnswer is an array when needed
                     switch ($question->type) {
                         case 'FIB':
-                            // if (is_string($correct_answ)) {
-                            //     $correct_answ = json_decode($correct_answ, true);
-                            // }
-                            // $isCorrect = $user_answ == $correct_answ;
-                            // break;
-
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
@@ -1001,8 +656,12 @@ class QuizController extends Controller
                             }, $user_answ) : [];
 
                             // Sort and compare
-                            sort($correct_answ);
-                            sort($user_answ);
+                            if(is_array($correct_answ)){
+                                sort($correct_answ);
+                            }
+                            if(is_array($user_answ)){
+                                sort($user_answ);
+                            }
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'MSA':
@@ -1012,8 +671,13 @@ class QuizController extends Controller
                             if (is_string($correct_answ)) {
                                 $correct_answ = json_decode($correct_answ, true);
                             }
-                            sort($user_answ);
-                            sort($correct_answ);
+                            // Sort and compare
+                            if(is_array($correct_answ)){
+                                sort($correct_answ);
+                            }
+                            if(is_array($user_answ)){
+                                sort($user_answ);
+                            }
                             $isCorrect = $user_answ == $correct_answ;
                             break;
                         case 'TOF':
