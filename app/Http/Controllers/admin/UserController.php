@@ -468,16 +468,16 @@ class UserController extends Controller
             }
 
             // Send welcome email (optional try/catch for non-blocking)
-            // try {
-            //     $data = [
-            //         'student' => $request->full_name,
-            //         'email' => $request->email,
-            //         'phone' => $request->phone,
-            //         'content' => ''
-            //     ];
-            //     Mail::to($request->email)->send(new WelcomeEmail($data));
-            // } catch (\Throwable $th) {
-            // }
+            try {
+                $data = [
+                    'student' => $request->full_name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'content' => ''
+                ];
+                Mail::to($request->email)->send(new WelcomeEmail($data));
+            } catch (\Throwable $th) {
+            }
 
             // Assign roles
             $user->assignRole("student");
