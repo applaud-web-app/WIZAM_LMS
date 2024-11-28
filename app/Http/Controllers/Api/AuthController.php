@@ -57,7 +57,7 @@ class AuthController extends Controller
 
             try {
                 $data = [
-                    'student' => $request->full_name,
+                    'student' => $request->name,
                     'email' => $request->email,
                     'phone' => $request->phone,
                     'content' => ''
