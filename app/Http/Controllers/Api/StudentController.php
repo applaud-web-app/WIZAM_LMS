@@ -1614,7 +1614,8 @@ class StudentController extends Controller
             $data = [
                 'billing' => $billing,
                 'payment' => $payment,
-                'features'=> $features
+                'features'=> $features,
+                'subscriptionItems'=>$subscriptionItems
             ];
 
             // Return the response with status 200
