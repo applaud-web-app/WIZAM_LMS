@@ -17,7 +17,7 @@ class EnquiryMail extends Mailable
      * Create a new message instance.
      */
     public $enquiry;
-    public function __construct($enquiry)
+    public function __construct(array $enquiry)
     {
         $this->enquiry = $enquiry;
     }
