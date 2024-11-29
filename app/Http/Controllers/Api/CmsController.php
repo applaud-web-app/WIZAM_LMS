@@ -462,13 +462,10 @@ class CmsController extends Controller
                 'contact_me' => $request->contact_me, 
             ]);
 
-            try {
                 // Send the email with the enquiry data
                 Mail::to('tdevansh099@gmail.com') // The email address to send the enquiry to
                 ->send(new EnquiryMail($enquiry)); // Send the email with the mailable
-            } catch (\Throwable $th) {
-                dd($th);
-            }
+            
     
             // Return success response
             return response()->json([
