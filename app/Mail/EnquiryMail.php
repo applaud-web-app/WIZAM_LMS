@@ -17,7 +17,7 @@ class EnquiryMail extends Mailable
      * Create a new message instance.
      */
     public $enquiry;
-    public function __construct($enquiry)
+    public function __construct(array $enquiry)
     {
         $this->enquiry = $enquiry;
     }
@@ -27,7 +27,7 @@ class EnquiryMail extends Mailable
      */
     public function envelope(): Envelope
     {
-        return $this->subject('New Enquiry Submission')->view('mail.enquiry');
+        return $this->subject(env('MAIL_FROM_NAME').' New Enquiry Submission');
     }
 
     /**
@@ -36,7 +36,10 @@ class EnquiryMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'mail.enquiry',
+            with: [
+                'enquiry' => $this->enquiry, // Pass data as an associative array
+            ]
         );
     }
 

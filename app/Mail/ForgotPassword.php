@@ -26,7 +26,7 @@ class ForgotPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: env('APP_NAME').' : Forgot Password',
+            subject: env('MAIL_FROM_NAME').' : Forgot Password',
         );
     }
     
