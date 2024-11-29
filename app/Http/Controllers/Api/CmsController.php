@@ -26,6 +26,8 @@ use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionItem;
 use Illuminate\Support\Facades\DB;
+use App\Mail\EnquiryMail;
+use Illuminate\Support\Facades\Mail;
 
 class CmsController extends Controller
 {
@@ -448,7 +450,7 @@ class CmsController extends Controller
 
         try {
             // Create the enquiry with validated data
-            Enquiry::create([
+            $enquiry = Enquiry::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
@@ -459,6 +461,14 @@ class CmsController extends Controller
                 'accept_condition' => $request->accept_condition,
                 'contact_me' => $request->contact_me, 
             ]);
+
+            try {
+                // Send the email with the enquiry data
+                Mail::to('tdevansh099@gmail.com') // The email address to send the enquiry to
+                ->send(new EnquiryMail($enquiry)); // Send the email with the mailable
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
     
             // Return success response
             return response()->json([
