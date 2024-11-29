@@ -292,7 +292,7 @@ class ManageTest extends Controller
         }
 
         if ($request->ajax()) {
-            $sections = Quizze::with('type','subCategory')->whereIn('status',[0,1]);
+            $sections = Quizze::with('type','subCategory')->whereIn('status',[0,1])->latest();
 
             return DataTables::of($sections)
                 ->addIndexColumn()
@@ -851,7 +851,7 @@ class ManageTest extends Controller
         }
 
         if ($request->ajax()) {
-            $sections = Exam::with('type','subCategory')->whereIn('status',[0,1]);
+            $sections = Exam::with('type','subCategory')->whereIn('status',[0,1])->latest();
             return DataTables::of($sections)
                 ->addIndexColumn()
                 ->addColumn('action', function ($section) {
