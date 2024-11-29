@@ -48,6 +48,7 @@
                <thead>
                   <tr>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">#</th>
+                     <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Created At</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Title</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Category</th>
                      <th class="text-left px-4 py-2 border-b dark:border-box-dark-up">Type</th>
@@ -115,6 +116,7 @@
                 },
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                    {data: 'created_at', name: 'created_at'},
                     {data: 'title', name: 'title'},
                     {data: 'category', name: 'category'},
                     {data: 'type', name: 'type'}, 

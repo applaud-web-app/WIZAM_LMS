@@ -307,7 +307,7 @@ class ManageTest extends Controller
                         <a href="'.$overall.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('created_at', function($row) {
-                    return date('d/m/Y', strtotime($row->created_at));
+                    return isset($row->created_at) ? "<span>".date('d/m/Y', strtotime($row->created_at))."</span><br><span class='text-gray-500'>".date('h:i A', strtotime($row->created_at))."</span>"  : 'N/A';
                 })
                 ->addColumn('type', function($row) {
                     if(isset($row->type)){
@@ -865,7 +865,7 @@ class ManageTest extends Controller
                         <a href="'.$overall.'" class="editItem cursor-pointer edit-task-title uil uil-eye hover:text-info"></a>';
                 })
                 ->addColumn('created_at', function($row) {
-                    return date('d/m/Y', strtotime($row->created_at));
+                    return isset($row->created_at) ? "<span>".date('d/m/Y', strtotime($row->created_at))."</span><br><span class='text-gray-500'>".date('h:i A', strtotime($row->created_at))."</span>"  : 'N/A';
                 })
                 ->addColumn('type', function($row) {
                     if(isset($row->type)){

@@ -33,7 +33,7 @@ class QuestionBankController extends Controller
         }
 
         if ($request->ajax()) {
-            $sections = Question::with('skill','topic')->whereIn('status',[0,1]);
+            $sections = Question::with('skill','topic')->whereIn('status',[0,1])->latest();
             return DataTables::of($sections)
                 ->addIndexColumn()
                 ->addColumn('action', function ($section) {

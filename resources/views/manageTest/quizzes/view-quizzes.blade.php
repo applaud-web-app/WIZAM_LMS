@@ -52,6 +52,7 @@
                <thead>
                    <tr>
                        <th>#</th>
+                       <th>Created At</th>
                        <th>Title</th>
                        <th>Category</th>
                        <th>Type</th>
@@ -120,6 +121,7 @@
                 },
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                    {data: 'created_at', name: 'created_at'}, 
                     {data: 'title', name: 'title'},
                     {data: 'category', name: 'category'},
                     {data: 'type', name: 'type'}, 

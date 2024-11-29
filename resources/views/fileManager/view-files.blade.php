@@ -97,15 +97,6 @@
                 <div class="bg-white dark:bg-box-dark rounded-[10px] p-[30px]" id="fileSystem">
                     <h2><i class="uil uil-folder"></i> My Files</h2>
                     <div class="mt-4 flex items-center justify-end max-sm:flex-col sm:justify-end gap-x-[30px] gap-y-[15px]">
-                        {{-- <div class="sm:w-[211px] relative w-full">
-                            <span
-                                class="start-5 absolute -translate-y-2/4 leading-[0] top-2/4 text-light dark:text-subtitle-dark text-[14px]">
-                                <i class="uil uil-search"></i>
-                            </span>
-                            <input type="search"
-                                class="ps-[50px] h-[40px] rounded-6 border border-normal dark:border-box-dark-up bg-white dark:bg-box-dark-up font-normal shadow-none px-[15px] py-[5px] text-[15px] text-dark dark:text-title-dark outline-none placeholder:text-gray dark:placeholder:text-subtitle-dark w-full search-close-icon:appearance-none search-close-icon:w-[20px] search-close-icon:h-[23px] search-close-icon:bg-[url({{ asset('assets/images/svg/x.svg') }})] search-close-icon:cursor-pointer"
-                                placeholder="Search By name" autocomplete="off">
-                        </div> --}}
                         <div class="flex items-center gap-x-[15px] gap-y-[5px] bg-inherit">
                             @php
                                 $parms = 'id=' . 0;
@@ -200,9 +191,18 @@
                                                 $deleteUrl = encrypturl(route('delete-directory'),$parms);
                                             @endphp
                                             <div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-                                                <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-                                                    <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('assets/images/file/file.png') }}" alt="{{ $item->node_name }}">
-                                                    <h4 class="cursor-pointer text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]" >{{ $item->node_name }}</h4>
+                                                <div class="pt-[40px] pb-[30px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
+                                                    @php
+                                                        $imgFormat = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"];
+                                                        $fileExtension = strtolower(pathinfo($item->source, PATHINFO_EXTENSION));
+                                                    @endphp
+                                                    @if (in_array($fileExtension,$imgFormat))
+                                                        <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('storage/' . $item->source) }}" alt="{{ $item->node_name }}">
+                                                    @else
+                                                        <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('assets/images/file/file.png') }}" alt="{{ $item->node_name }}">
+                                                    @endif
+                                                    <h4 class="cursor-pointer text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2] capitalize">{{ $item->node_name }}</h4>
+                                                    <button data-file="{{ asset('storage/' . $item->source) }}" class="mt-3 text-white bg-primary copyUrl flex items-center gap-[10px] rounded-md px-3 py-2 mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-white text-[14px]"><i class="uil uil-copy text-white dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Copy Url</button>
                                                     {{-- Dropdown menu actions --}}
                                                     <div class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
                                                         <div class="flex items-center" data-te-dropdown-ref>
@@ -956,12 +956,31 @@
                             </div>`;
                         });
 
+                        // @php
+                        //     $imgFormat = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"];
+                        //     $fileExtension = strtolower(pathinfo($item->source, PATHINFO_EXTENSION));
+                        // @endphp
+                        // @if (in_array($fileExtension,$imgFormat))
+                        //     <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('storage/' . $item->source) }}" alt="{{ $item->node_name }}">
+                        // @else
+                        //     <img class="mb-[18px] w-[50px] h-[50px]" src="{{ asset('assets/images/file/file.png') }}" alt="{{ $item->node_name }}">
+                        // @endif
+
                         // Loop through files
+                        const imgFormats = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"];
                         response.files.forEach(fileData => {
+                            var source = fileData.source;  
+                            const fileExtension = source.split('.').pop().toLowerCase(); 
+                            // Check if the file extension is in the allowed formats array
+                            $img = `<img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/file.png')}}" alt="${fileData.node_name}">`;
+                            if ($.inArray(fileExtension, imgFormats) !== -1) {
+                                $img = `<img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('storage/${source}')}}" alt="${fileData.node_name}">`;
+                            }
                             file += `<div class="col-span-12 2xl:col-span-3 sm:col-span-6">
-                                <div class="pt-[40px] pb-[45px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
-                                    <img class="mb-[18px] w-[50px] h-[50px]" src="{{asset('assets/images/file/file.png')}}" alt="${fileData.node_name}">
-                                    <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2]">${fileData.node_name}</h4>
+                                <div class="pt-[40px] pb-[30px] px-[30px] rounded-10 bg-normalBG dark:bg-box-dark-up relative flex flex-col items-center justify-center">
+                                    ${$img}
+                                    <h4 class="text-[14px] text-dark dark:text-title-dark inline-block font-medium leading-[1.2] capitalize">${fileData.node_name}</h4>
+                                    <button data-file="{{asset('storage/')}}/${fileData.source}" class="mt-3 text-white bg-primary copyUrl flex items-center gap-[10px] rounded-md px-3 py-2 mb-[10px] capitalize text-light dark:text-subtitle-dark group hover:text-white text-[14px]"><i class="uil uil-copy text-white dark:text-subtitle-dark group-hover:text-current text-[15px]"></i>Copy Url</button>
                                     <div  class="flex items-center gap-y-[10px] gap-x-[10px] justify-between absolute top-3 end-3 z-10">
                                         <div class="flex items-center" data-te-dropdown-ref>
                                             <button class="text-[18px] text-light dark:text-subtitle-dark" type="button"
