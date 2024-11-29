@@ -769,7 +769,7 @@ class CmsController extends Controller
                 $stripeCustomer = $stripe->customers->create([
                     'email' => $user->email,
                     'name' => $user->name,
-                    'test_clock'=> 'clock_1QPKkVSALL6oCDIiIP87QbtP',
+                    // 'test_clock'=> 'clock_1QPKkVSALL6oCDIiIP87QbtP',
                     'metadata' => [
                         'user_id' => $user->id,
                     ],
